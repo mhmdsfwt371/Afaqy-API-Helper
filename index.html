@@ -284,7 +284,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <span id="unitSep" style="color:#33475C" hidden>|</span>
       <input id="unitIn" hidden placeholder="IMEI" autocomplete="off" style="width:150px"
              data-arph="IMEI أو الاسم" data-enph="IMEI or name">
-      <button class="btn sig" id="unitGo" hidden style="padding:6px 12px; font-size:13px" data-ar="حدّد العربية" data-en="Set vehicle">حدّد العربية</button>
+      <button class="btn sig" id="unitGo" hidden style="padding:6px 12px; font-size:13px" data-ar="حدّد الجهاز" data-en="Set device">حدّد الجهاز</button>
       <span id="unitState" class="pill" hidden>—</span>
       <button class="btn ghost" id="langBtn" style="padding:6px 12px; font-size:12px; color:#C7D6DF; border-color:#33475C; font-family:var(--mono)">EN</button>
       <button class="btn ghost" id="sesCopy" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="نسخ التوكن" data-en="Copy token">نسخ التوكن</button>
@@ -606,7 +606,7 @@ function setLang(l){
   // إعادة رسم كل حاجة
   const view = document.querySelector('.tab[aria-selected="true"]');
   sesPaint(SESSION.token ? t('متصل — ','Connected — ')+SESSION.user : t('غير متصل','Not connected'));
-  unitPaint(SESSION.unit ? SESSION.unit.name : t('مفيش عربية محددة','no vehicle set'));
+  unitPaint(SESSION.unit ? SESSION.unit.name : t('مفيش جهاز محدد','no device set'));
   renderRecent();
   if(!$('v-search').hidden) refreshLeft();
   if(cur) renderDetail(cur, []); else if(!lastQ) resetEmpty();
@@ -619,9 +619,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.2",
+  "version": "4.3",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.3",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اسم ملف الإكسل بقى إنجليزي بالكامل — الاسم اللي فيه عربي وإنجليزي مع بعض كان بيتعرض معكوس في ويندوز، والوقت كان بيبان 56-03 بدل 03-56",
+          "الواجهة زي ما هي بالعربي — الاسم بس هو اللي اتغيّر",
+          "اسم الملف بقى بيقول الفلتر بالظبط: Devices GPS online idling أو WASL inquiry",
+          "«حدّد العربية» بقت «حدّد الجهاز»، وخانة الإدخال بتقول IMEI الأول"
+        ],
+        "en": [
+          "The Excel filename is now fully Latin — mixing Arabic and Latin made Windows display it reversed, showing the time as 56-03 instead of 03-56",
+          "The interface stays in Arabic — only the filename changed",
+          "The filename now states the exact filter, for example Devices GPS online idling, or WASL inquiry",
+          "Set vehicle is now Set device, and the input names IMEI first"
+        ]
+      }
+    },
     {
       "v": "4.2",
       "date": "2026-08-04",
@@ -2936,7 +2954,7 @@ const RECIPES = [
   title:{ar:'آخر موقع لعربية', en:'Last location of a vehicle'},
   desc:{ar:'يجيب اللستة، يلاقي العربية بأي رقم عندك، وياخد مواقعها خلال اليوم.',
         en:'Fetches the list, finds the vehicle by any identifier you have, then pulls its locations for the day.'},
-  inputs:[{k:'unitName',t:'text',l:{ar:'الاسم أو الـ UID أو الـ IMEI', en:'Name, UID or IMEI'}},
+  inputs:[{k:'unitName',t:'text',l:{ar:'الـ IMEI أو الاسم أو الـ UID', en:'IMEI, name or UID'}},
           {k:'day',t:'date',l:{ar:'اليوم', en:'Day'}}],
   steps:[
    { t:{ar:'جلب لستة العربيات', en:'Fetch vehicle list'}, kind:'call', m:'POST', path:'/units/lists',
@@ -2954,7 +2972,7 @@ const RECIPES = [
   title:{ar:'سرعة عربية — دلوقتي وخلال فترة', en:'Vehicle speed — now and over a period'},
   desc:{ar:'آخر سرعة مسجّلة، وأعلى سرعة ومتوسطها خلال الفترة اللي تحددها.',
         en:'The last recorded speed, plus the maximum and average over the period you choose.'},
-  inputs:[{k:'unitKey',t:'text',l:{ar:'الاسم أو الـ UID أو الـ IMEI', en:'Name, UID or IMEI'}},
+  inputs:[{k:'unitKey',t:'text',l:{ar:'الـ IMEI أو الاسم أو الـ UID', en:'IMEI, name or UID'}},
           {k:'from',t:'date',l:{ar:'من يوم', en:'From'}},{k:'to',t:'date',l:{ar:'لحد يوم', en:'To'}}],
   steps:[
    { t:{ar:'جلب العربيات بآخر تحديث', en:'Fetch vehicles with their last update'}, kind:'call', m:'POST', path:'/units/lists',
@@ -2979,7 +2997,7 @@ const RECIPES = [
   title:{ar:'إشارات جهاز واحد', en:'Signals for one device'},
   desc:{ar:'رسائل الجهاز خلال فترة — ده الرد على شكوى «الجهاز مش بيرسل».',
         en:'Device messages over a period — the answer to a "device is not reporting" complaint.'},
-  inputs:[{k:'unitName',t:'text',l:{ar:'الاسم أو الـ UID أو الـ IMEI', en:'Name, UID or IMEI'}},
+  inputs:[{k:'unitName',t:'text',l:{ar:'الـ IMEI أو الاسم أو الـ UID', en:'IMEI, name or UID'}},
           {k:'from',t:'date',l:{ar:'من يوم', en:'From'}},{k:'to',t:'date',l:{ar:'لحد يوم', en:'To'}}],
   steps:[
    { t:{ar:'جلب لستة الأجهزة', en:'Fetch device list'}, kind:'call', m:'POST', path:'/units/lists',
@@ -3017,7 +3035,7 @@ const RECIPES = [
   title:{ar:'تقرير عربية عن فترة', en:'Report for a vehicle over a period'},
   desc:{ar:'السلسلة الكاملة: العربية بالاسم + قالب التقرير + الفترة → النتيجة.',
         en:'The full chain: vehicle by name + report template + period → the result.'},
-  inputs:[{k:'unitName',t:'text',l:{ar:'الاسم أو الـ UID أو الـ IMEI', en:'Name, UID or IMEI'}},
+  inputs:[{k:'unitName',t:'text',l:{ar:'الـ IMEI أو الاسم أو الـ UID', en:'IMEI, name or UID'}},
           {k:'month',t:'month',l:{ar:'الشهر', en:'Month'}}],
   steps:[
    { t:{ar:'جلب لستة العربيات', en:'Fetch vehicle list'}, kind:'call', m:'POST', path:'/units/lists',
@@ -3045,7 +3063,7 @@ const RECIPES = [
   title:{ar:'عدادات جهاز — المسافة وساعات التشغيل', en:'Device counters — distance and engine hours'},
   desc:{ar:'بيجيب الجهاز بالمعرّف ويحوّل ساعات التشغيل من ثواني لساعات — أكتر سؤال بيتكرر في الإنتجريشن.',
         en:'Fetches the device by id and converts engine hours from seconds to hours — the single most repeated integration question.'},
-  inputs:[{k:'unitKey',t:'text',l:{ar:'الاسم أو الـ UID أو الـ IMEI', en:'Name, UID or IMEI'}}],
+  inputs:[{k:'unitKey',t:'text',l:{ar:'الـ IMEI أو الاسم أو الـ UID', en:'IMEI, name or UID'}}],
   steps:[
    { t:{ar:'جلب العربيات بعدّاداتها', en:'Fetch vehicles with their counters'}, kind:'call', m:'POST', path:'/units/lists',
      body:()=>({data:{offset:0, limit:1000, simplify:0,
@@ -3627,7 +3645,7 @@ function unitPaint(msg, bad){
 /* بنجيب اللستة مرة واحدة، وبعدين أي رقم يتحوّل لـ UID فورًا */
 async function resolveUnit(key){
   key=(key||'').trim();
-  if(!key){ SESSION.unit=null; unitPaint(t('مفيش عربية محددة','no vehicle set')); refreshAfterUnit(); return; }
+  if(!key){ SESSION.unit=null; unitPaint(t('مفيش جهاز محدد','no device set')); refreshAfterUnit(); return; }
   if(!SESSION.token){ unitPaint(t('اتصل الأول','connect first'), true); return; }
   unitPaint(t('بيدوّر…','resolving…'));
   try{
@@ -3819,7 +3837,7 @@ async function connect(silent){
          من غير كده هتشوف عربيات عميل وانت متصل بعميل تاني. */
       SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null;
       Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
-      $('unitIn').value=''; unitPaint(t('مفيش عربية محددة','no vehicle set'));
+      $('unitIn').value=''; unitPaint(t('مفيش جهاز محدد','no device set'));
       TOKEN_MEM = tok;
       sesPaint(t('متصل — ','Connected — ') + u);
       if(cur) renderDetail(cur, []);
@@ -4918,12 +4936,16 @@ function stateBuckets(rows){
   return Object.assign({on, off}, stateSplit(on));
 }
 const STATE_META = {
-  driving:{ttl:{ar:'متحركة وشغّالة', en:'Moving, engine on'},  tone:'var(--signal)'},
-  idling: {ttl:{ar:'واقفة وشغّالة',  en:'Stopped, engine on'}, tone:'#B45309'},
-  parked: {ttl:{ar:'واقفة ومطفية',   en:'Stopped, engine off'},tone:null},
-  towed:  {ttl:{ar:'متحركة ومطفية',  en:'Moving, engine off'}, tone:'var(--alert)'},
-  unknown:{ttl:{ar:'حالتها مش واضحة',en:'State unclear'},      tone:'var(--muted)'}
+  driving:{ttl:{ar:'متحركة وشغّالة', en:'Moving, engine on'},  file:'driving', tone:'var(--signal)'},
+  idling: {ttl:{ar:'واقفة وشغّالة',  en:'Stopped, engine on'}, file:'idling',  tone:'#B45309'},
+  parked: {ttl:{ar:'واقفة ومطفية',   en:'Stopped, engine off'},file:'parked',  tone:null},
+  towed:  {ttl:{ar:'متحركة ومطفية',  en:'Moving, engine off'}, file:'towed',   tone:'var(--alert)'},
+  unknown:{ttl:{ar:'حالتها مش واضحة',en:'State unclear'},      file:'unclear', tone:'var(--muted)'}
 };
+/* أسماء مختصرة للبطاقات في اسم الملف */
+const FLAG_FILE = {silent7:'silent 7d', silent1:'silent 24h', notWasl:'not in WASL',
+  noImei:'no IMEI', noTime:'never reported', inactive:'deactivated',
+  mdvrOff:'MDVR not recording', mdvrFull:'MDVR storage full', mdvrNoData:'MDVR no rec data'};
 function scopeRows(){
   if(!DASH.filter) return [];
   const rows = DASH.units.filter(u=>typeOf(u)===DASH.filter);
@@ -5113,12 +5135,13 @@ function dashRender(){
 
 function dashExport(){
   const rows=dashRows(), cols=dashColumns(rows);
-  const what = t('لوحة الأجهزة','Device board') + ' '
-             + (DASH.flag ? dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl)
-              : DASH.filter ? (typeLabel(DASH.filter)
-                  + (DASH.scope ? ' ' + (DASH.scope==='on'?t('أونلاين','online'):t('أوفلاين','offline')) : '')
-                  + (DASH.state ? ' ' + dual(STATE_META[DASH.state].ttl) : ''))
-              : t('الكل','all'));
+  /* كل الأجزاء إنجليزي مهما كانت لغة الواجهة */
+  const what = 'Devices '
+             + (DASH.flag ? (FLAG_FILE[DASH.flag] || 'filtered')
+              : DASH.filter ? ((TYPE_LBL[DASH.filter] ? TYPE_LBL[DASH.filter].en : DASH.filter)
+                  + (DASH.scope ? ' ' + (DASH.scope==='on'?'online':'offline') : '')
+                  + (DASH.state ? ' ' + STATE_META[DASH.state].file : ''))
+              : 'all');
   downloadXlsx(cols, rows, exportName(what), t('العربيات','Vehicles'));
 }
 
@@ -5186,7 +5209,8 @@ function xlsxBlob(cols, rows, sheetName){
   ]);
 }
 /* اسم الملف: المستخدم - التاريخ - الموديول - الوقت
-   موحّد في كل التصديرات. الشرطات الجوانية بتتشال عشان الأربع أجزاء تفضل واضحة. */
+   إنجليزي بالكامل عن قصد: الاسم اللي فيه عربي وإنجليزي مع بعض
+   بيتعرض معكوس في ويندوز وماك — الوقت كان بيبان 56-03 بدل 03-56. */
 function exportName(what){
   const clean = v => String(v||'').replace(/[\\/:*?"<>|]/g,'').replace(/\s*[-—–]\s*/g,' ').replace(/\s+/g,' ').trim();
   const d = new Date();
@@ -5197,7 +5221,7 @@ function exportName(what){
   const ap  = h24 < 12 ? 'AM' : 'PM';
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const time = p2(h12)+'-'+p2(d.getMinutes())+' '+ap;
-  const user = clean(SESSION.user) || t('بدون حساب','no-account');
+  const user = clean(SESSION.user) || 'no-account';
   return `${user} - ${date} - ${clean(what)} - ${time}.xlsx`;
 }
 
@@ -5339,9 +5363,7 @@ function waslExport(){
     if(anyInq){ const inq=WASL.inq[String(u.id||u._id||'')]; o.wasl_status = inq?inq.txt:''; }
     return o;
   });
-  const what = t('لوحة وصل','WASL board') + ' '
-             + (anyInq ? t('استعلام','inquiry') : t('لستة','list'))
-             + (WASL.q ? ' ' + WASL.q.slice(0,20) : '');
+  const what = 'WASL ' + (anyInq ? 'inquiry' : 'list') + (WASL.q ? ' ' + WASL.q.slice(0,20) : '');
   downloadXlsx(cols, data, exportName(what), 'WASL');
 }
 
@@ -5868,7 +5890,7 @@ setInterval(checkUpdate, 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkUpdate(); });
 initPWA();
 $('q').setAttribute('title', t('اضغط / للوصول السريع','Press / to jump here'));
-unitPaint(t('مفيش عربية محددة','no vehicle set'));
+unitPaint(t('مفيش جهاز محدد','no device set'));
 $('verTag').textContent = 'v'+DOCS.version;
 (function(){ const h=(location.hash||'').slice(1);
   if(VIEWS.indexOf(h)>=0 && h!=='triage') showView(h); else VIEW_STACK=['triage']; })();

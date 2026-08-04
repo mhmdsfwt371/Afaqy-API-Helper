@@ -1,16 +1,16 @@
 {
-  "version": "4.2",
+  "version": "4.3",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الحالة بقت على طبقتين: أونلاين وأوفلاين بس في الأول، ولما تدوس على واحدة تتفتح حالاتها الأربعة تحتها",
-      "المجموع مكتوب صراحة تحت الحالات — «حالات الأونلاين: 5 من 5» — ولو في فرق بيتقال بالأحمر إن الرد ناقص حقول",
-      "الأوفلاين ليها حالاتها كمان، ومكتوب إنها آخر حالة اتسجّلت قبل ما الجهاز يسكت"
+      "اسم ملف الإكسل بقى إنجليزي بالكامل — الاسم اللي فيه عربي وإنجليزي مع بعض كان بيتعرض معكوس في ويندوز، والوقت كان بيبان 56-03 بدل 03-56",
+      "الواجهة زي ما هي بالعربي — الاسم بس هو اللي اتغيّر",
+      "اسم الملف بقى بيقول الفلتر بالظبط: Devices GPS online idling أو WASL inquiry"
     ],
     "en": [
-      "State is now two layers: online and offline first, and clicking one opens its four states underneath",
-      "The total is stated under the states — online states, 5 of 5 — and any mismatch is flagged in red as missing fields in the response",
-      "Offline units get their states too, labelled as the last state recorded before the device went quiet"
+      "The Excel filename is now fully Latin — mixing Arabic and Latin made Windows display it reversed, showing the time as 56-03 instead of 03-56",
+      "The interface stays in Arabic — only the filename changed",
+      "The filename now states the exact filter, for example Devices GPS online idling, or WASL inquiry"
     ]
   }
 }
