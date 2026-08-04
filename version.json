@@ -1,16 +1,16 @@
 {
-  "version": "5.0",
+  "version": "5.1",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "«افحص رد» بقى يفتح على «عرض للمستخدم»: كل سجل في كارت بأسماء عربية ووحدات محوّلة وحالة واضحة، بدل صف حقول خام",
-      "ساعات التشغيل بتتعرض بالساعات ومكتوب تحتها إن الرد بيرجّعها بالثواني · المسافة بالكيلومتر بفواصل · السرعة بوحدتها",
-      "شارة أونلاين أو أوفلاين، وشارة بتتحرك أو واقفة — من آخر تحديث ومن السرعة"
+      "تدقيق لغوي على كل النصوص العربية في الأداة — 716 نص",
+      "أهم اللي اتصلح: الأداة كانت بتسمّي نفسها باسمين، «الأداة» في 22 موضع و«التول» في 17. بقت اسم واحد",
+      "وتيم التطوير كان بيتقال عليه «مصر» لوحدها مرة و«تيم مصر» مرة — بقى اسم واحد كمان"
     ],
     "en": [
-      "Inspect a response now opens in a human view: each record as a card with proper labels, converted units and a clear status, instead of a row of raw fields",
-      "Engine hours are shown in hours with a note that the response returns seconds, distance in kilometres with separators, and speed with its unit",
-      "An online or offline badge, and a moving or stopped badge, derived from the last update and the speed"
+      "A language review pass over every Arabic string in the tool — 716 strings",
+      "The main fix: the tool was calling itself by two different names in Arabic. It now uses one",
+      "The development team was likewise referred to two different ways. That is now consistent too"
     ]
   }
 }

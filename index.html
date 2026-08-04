@@ -647,9 +647,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.0",
+  "version": "5.1",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "5.1",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "تدقيق لغوي على كل النصوص العربية في الأداة — 716 نص",
+          "أهم اللي اتصلح: الأداة كانت بتسمّي نفسها باسمين، «الأداة» في 22 موضع و«التول» في 17. بقت اسم واحد",
+          "وتيم التطوير كان بيتقال عليه «مصر» لوحدها مرة و«تيم مصر» مرة — بقى اسم واحد كمان",
+          "اتصلحت صياغات كانت ملخبطة، وتذكير وتأنيث في جملة، وشدّات ناقصة على أفعال",
+          "التدقيق بقى جزء من البناء: بيفحص الإملاء والترقيم وثبات المصطلحات، والبناء بيقف لو لقى ملاحظة"
+        ],
+        "en": [
+          "A language review pass over every Arabic string in the tool — 716 strings",
+          "The main fix: the tool was calling itself by two different names in Arabic. It now uses one",
+          "The development team was likewise referred to two different ways. That is now consistent too",
+          "Several awkward sentences, a gender agreement error, and missing diacritics on verbs were corrected",
+          "The review is now part of the build: it checks spelling, punctuation and terminology consistency, and the build stops on any finding"
+        ]
+      }
+    },
     {
       "v": "5.0",
       "date": "2026-08-04",
@@ -2135,7 +2155,7 @@ Source: AVL PROOOO collection \u2014 ${EPS.length} requests.`;
 سؤال العميل:
 ${lastQ || '—'}
 
-الريكوست اللي التول رشّحته:
+الريكوست اللي الأداة رشّحته:
 ${e ? `${e.m} ${e.p}  (موديول: ${e.g})` : 'مفيش ريكوست مطابق في الكولكشن'}
 
 البيئة: ${baseUrl()}
@@ -2250,7 +2270,7 @@ function _renderDetail(e, why){
               'It is tried first by auto-fix. The change applies to this session only — export the knowledge so it ships in the next release.')}</div>`;
       if(needsUnit(e) && !u) note += `<div class="note warn" style="margin-bottom:8px">
           <b>${t('الريكوست ده محتاج عربية.','This request needs a vehicle.')}</b><br>
-          ${t('الرقم اللي جواه دلوقتي عينة من الكولكشن ومش موجودة في حساب العميل — لو جرّبته هيرجع «not_found». حدّد عربية بالـ IMEI من الشريط اللي فوق الأول.',
+          ${t('الرقم اللي جواه دلوقتي عينة من الكولكشن، والعينة دي مش موجودة في حساب العميل — لو جرّبته هيرجع «not_found». حدّد عربية بالـ IMEI من الشريط اللي فوق الأول.',
               'The id inside is a sample from the collection and does not exist on the customer account — running it will return "not_found". Set a vehicle by IMEI in the top bar first.')}</div>`;
       else if(u && pr.applied) note += `<div class="note sig" style="margin-bottom:8px">
           ${t('العربية','Vehicle')}: <b>${esc(u.name)}</b> · <code>${esc(u.uid)}</code>
@@ -2266,7 +2286,7 @@ function _renderDetail(e, why){
           ${t('الكلام اللي بين الأقواس المثلثة دي علامات مكان البيانات، مش بيانات. لما تتصل من فوق، «جرّب مرة واحدة» بتستخدم بيانات الحساب الحقيقية.',
               'The angle-bracketed values are placeholders, not data. Once you connect above, "Run once" uses the real account credentials.')}</div>`;
       else if(!u) note += `<div class="note warn" style="margin-bottom:8px">
-          ${t('الأرقام اللي في البودي دي عينات من الكولكشن. حدّد عربية من فوق بالـ IMEI والتول تحطّ الـ UID الصح مكانها.',
+          ${t('الأرقام اللي في البودي دي عينات من الكولكشن. حدّد عربية من فوق بالـ IMEI والأداة تحطّ الـ UID الصح مكانها.',
               'The ids below are samples from the collection. Set a vehicle by IMEI in the top bar and the tool will insert the correct UID.')}</div>`;
       return `<div class="sec"><h3>${head}</h3>${note}<pre class="pre">${esc(pr.text)}</pre></div>`; })() : ''}
     ${(e.fd&&e.fd.length) ? `<div class="sec"><h3>form-data</h3><table class="kv">${e.fd.map(f=>`<tr><td>${esc(f.k)}</td><td>${esc(f.t)}${f.v?' — '+esc(f.v):''}</td></tr>`).join('')}</table></div>` : ''}
@@ -2522,9 +2542,9 @@ function typingState(){
 function emptyState(q){
   $('detail').innerHTML = `<div class="panel"><div class="empty">
     <b>مفيش ريكوست مطابق في الكولكشن</b>
-    ما تخمّنش وما تبعتش للعميل حاجة مش متأكد منها. صعّدها لمصر.
+    ما تخمّنش وما تبعتش للعميل حاجة مش متأكد منها. صعّدها لتيم مصر.
     <div class="row" style="justify-content:center; margin-top:14px">
-      <button class="btn warn" id="escal0">${t('تصعيد لمصر','Escalate')}</button>
+      <button class="btn warn" id="escal0">${t('تصعيد لتيم مصر','Escalate')}</button>
     </div></div></div>`;
   $('escal0').onclick = ()=>openEscalation(lastQ || t('سؤال غير معروف','unknown question'));
 }
@@ -2669,7 +2689,7 @@ http://api.stageavl.afaqy.sa</pre>
 
  {v:0, t:{ar:'حدود الاستدعاء', en:'Rate limits'},
   h:{ar:`<p>مفيش أي معلومة عن حد أقصى للريكوستات في الكولكشن.</p>
-   <div class="note warn" style="margin-top:8px">لو العميل سأل، ابعتها لمصر. ما تقولش «مفيش حد».</div>`,
+   <div class="note warn" style="margin-top:8px">لو العميل سأل، ابعتها لتيم مصر. ما تقولش «مفيش حد».</div>`,
      en:`<p>The collection says nothing about a maximum request rate.</p>
    <div class="note warn" style="margin-top:8px">If a customer asks, escalate. Do not tell them there is no limit.</div>`}}
 ];
@@ -2709,7 +2729,7 @@ const ERRORS = [
                'Is two-factor enabled? Then the login request alone is not enough.',
                'Does the password contain symbols like @? Some low-code platforms mangle them. Test it from a terminal first.',
                'Is the customer tool sending raw JSON or form-encoded? It must be raw.']},
-   note:{ar:'اتكررت مرتين في شهر واحد مع عميلين مختلفين. في الحالة التانية اتأكدنا إن البيانات شغالة عندنا فعلاً والتوكن بيتولد — يعني المشكلة كانت في أداة العميل مش في الحساب. الخطوة الصح: نجرب الدخول بنفسنا ونبعتله صورة الإثبات.',
+   note:{ar:'اتكررت مرتين في شهر واحد مع عميلين مختلفين. في الحالة التانية اتأكدنا إن البيانات شغالة عندنا فعلاً والتوكن بيتولّد — يعني المشكلة كانت في أداة العميل مش في الحساب. الخطوة الصح: نجرّب الدخول بنفسنا ونبعتله صورة الإثبات.',
          en:'Seen twice in one month with two different customers. In the second case we confirmed the credentials worked on our side and the token generated — so the fault was in the customer tool, not the account. The right move: run the login yourself and send them the proof.'}}
 ];
 function renderErrors(){
@@ -2778,7 +2798,7 @@ const LEARNED = [
      <tr><td><code>sim_serial</code></td><td><b>سيريال الشريحة.</b> بتاع شركة الاتصالات، ملهوش علاقة بالجهاز.</td></tr>
    </table>
    <p style="margin-top:8px"><b>اللخبطة اللي بتحصل:</b> العميل بيقول «الجهاز 357454075086551 مش بيرسل» — ده IMEI. والـ API عايز الـ <code>id</code>. لازم تحوّل الأول.</p>
-   <div class="note sig" style="margin-top:8px">السيناريوهات في التول بتقبل أي رقم من الأربعة وبتحوّل لوحدها، وبتقولك اتطابقت على أنهي واحد.</div>`,
+   <div class="note sig" style="margin-top:8px">السيناريوهات في الأداة بتقبل أي رقم من الأربعة وبتحوّل لوحدها، وبتقولك اتطابقت على أنهي واحد.</div>`,
      en:`<p>A single vehicle carries four completely different numbers:</p>
    <table class="kv">
      <tr><td><code>id</code> = <b>UID</b></td><td><b>The vehicle number inside Afaqy.</b> Looks like <code>5fb0e2e703ed529bb30f9af3</code>. Every API request uses it. The field is called <code>id</code> in responses; we call it the UID.</td></tr>
@@ -2895,7 +2915,7 @@ function renderLearned(){
 /* معرفة يضيفها الفريق بنفسه — من غير ما حد يفتح الكود */
 let ADDED = [];
 const GLOSSARY = [
- {w:'curl', ar:'أمر بيتكتب في الترمنال بيبعت الريكوست. لما تقول للعميل «ابعتلي الـ curl» انت طالب منه الريكوست كامل زي ما هو: اللينك والهيدرز والبودي. بيه تعيد نفس الحاجة عندك بالحرف.',
+ {w:'curl', ar:'أمر بتكتبه في الترمنال فيبعت الريكوست. لما تقول للعميل «ابعتلي الـ curl» انت طالب منه الريكوست كامل زي ما هو: اللينك والهيدرز والبودي. بيه تعيد نفس الحاجة عندك بالحرف.',
   en:'A terminal command that sends the request. Asking a customer for "the curl" means asking for the whole request as-is: URL, headers and body, so you can replay it exactly.'},
  {w:'UID', ar:'رقم العربية جوه أفاقي، شكله 5fb0e2e703ed529bb30f9af3. في الرد الحقل اسمه id. ده الرقم الوحيد اللي كل ريكوستات الـ API بتشتغل بيه — مش الـ IMEI.',
   en:'The vehicle number inside Afaqy, e.g. 5fb0e2e703ed529bb30f9af3. In responses the field is called id. This is the only number every API request works with — not the IMEI.'},
@@ -2930,7 +2950,7 @@ function renderGlossary(){
 function renderAdder(){
   return `<div class="card" style="grid-column:1/-1; border-style:dashed">
     <h3>${t('ضيف معلومة جديدة','Add a new entry')}</h3>
-    <p>${t('كل مرة تيم مصر يرد عليك بحاجة مش موجودة هنا، سجّلها فورًا. دي الحاجة الوحيدة اللي بتخلي التول تفضل نافعة بعد ٦ شهور.',
+    <p>${t('كل مرة تيم مصر يرد عليك بحاجة مش موجودة هنا، سجّلها فورًا. دي الحاجة الوحيدة اللي بتخلي الأداة تفضل نافعة بعد ٦ شهور.',
            'Every time development answers something not recorded here, add it immediately. This is the only thing that keeps the tool useful six months from now.')}</p>
     <table class="kv">
       <tr><td style="font-family:var(--ar); color:var(--ink)">${t('العنوان','Title')}</td>
@@ -2946,7 +2966,7 @@ function renderAdder(){
       <label class="btn ghost" style="cursor:pointer">${t('استيراد','Import')}
         <input type="file" id="adImp" accept="application/json" hidden></label>
     </div>
-    <div class="note" style="margin-top:10px">${t('المعلومات المضافة بتفضل في الجلسة دي بس. صدّرها وابعت الملف لمسؤول التول عشان يضمّها للنسخة اللي عند الكل.',
+    <div class="note" style="margin-top:10px">${t('المعلومات المضافة بتفضل في الجلسة دي بس. صدّرها وابعت الملف لمسؤول الأداة عشان يضمّها للنسخة اللي عند الكل.',
       'Added entries live in this session only. Export the file and send it to whoever maintains the tool so it reaches everyone.')}</div>
   </div>`;
 }
@@ -3126,7 +3146,7 @@ const RECIPES = [
   steps:[
    { t:{ar:'جلب عربيات الحساب', en:'Fetch the account vehicles'}, kind:'call', m:'POST', path:'/units/lists',
      body:()=>({data:{offset:0, limit:1000, simplify:0, projection:['basic']}}), extract:()=>({}),
-     hint:{ar:'مفيش فلترة بالـ IMEI موثّقة، فبنجيب اللستة ونطابق جوه التول.',
+     hint:{ar:'مفيش فلترة بالـ IMEI موثّقة، فبنجيب اللستة ونطابق جوه الأداة.',
            en:'No documented IMEI filter, so we fetch the list and match inside the tool.'} },
    { t:{ar:'استخراج الـ UID', en:'Resolve the UID'}, kind:'uid', pickBy:'anyKey', into:'unitId',
      hint:{ar:'الرقم اللي هيطلع ده هو اللي بيتحط في أي ريكوست تاني.',
@@ -3142,7 +3162,7 @@ const RECIPES = [
    { t:{ar:'جلب لستة العربيات', en:'Fetch vehicle list'}, kind:'call', m:'POST', path:'/units/lists',
      body:()=>({data:{offset:0,limit:1000,projection:['basic']}}), extract:()=>({}) },
    { t:{ar:'تحديد العربية', en:'Match the vehicle'}, kind:'pick', pickBy:'unitName', into:'unitId',
-     hint:{ar:'المطابقة بتتم جوه التول على الاسم والـ ID والـ IMEI وسيريال الجهاز واللوحة — وبتقولك اتطابقت على أنهي واحد.',
+     hint:{ar:'المطابقة بتتم جوه الأداة على الاسم والـ ID والـ IMEI وسيريال الجهاز واللوحة — وبتقولك اتطابقت على أنهي واحد.',
            en:'Matching happens inside the tool across name, ID, IMEI, device serial and plate — and it tells you which one matched.'} },
    { t:{ar:'مواقع الجهاز خلال اليوم', en:'Locations for the day'}, kind:'call', m:'POST', path:'/units/locations',
      body:v=>{ const r=dayRange(v.day); return {data:{unit_id:v.unitId, address:true,
@@ -3172,7 +3192,7 @@ const RECIPES = [
      hint:{ar:'رفعنا الحد لألف نقطة عشان المتوسط يبقى معبّر. عينة الكولكشن كانت بخمسين.',
            en:'The limit is raised to a thousand points so the average is meaningful. The collection sample used fifty.'} },
    { t:{ar:'تحليل السرعة', en:'Analyse the speed'}, kind:'speedstats',
-     hint:{ar:'التول بتدوّر على حقل السرعة جوه الرد مهما كان شكله وبتحسب منه.',
+     hint:{ar:'الأداة بتدوّر على حقل السرعة جوه الرد مهما كان شكله وبتحسب منه.',
            en:'The tool locates the speed field inside the response whatever its shape and computes from it.'} }]},
 
 { id:'unit-signals', icon:'\u2464',
@@ -3228,7 +3248,7 @@ const RECIPES = [
      hint:{ar:'بناخد الأعمدة والكود من قالب موجود عندكم، عشان ما نخترعش أعمدة.',
            en:'Columns and code come from one of your existing templates, so nothing is invented.'} },
    { t:{ar:'اختيار القالب', en:'Pick the template'}, kind:'choose', into:'tplId',
-     hint:{ar:'اختار القالب اللي العميل عايزه. لو اللستة فاضية، ابعتها لمصر.',
+     hint:{ar:'اختار القالب اللي العميل عايزه. لو اللستة فاضية، ابعتها لتيم مصر.',
            en:'Pick the template the customer wants. If the list is empty, escalate.'} },
    { t:{ar:'إنشاء التقرير للفترة', en:'Create the report for the period'}, kind:'call', m:'POST', path:'/user_reports/add',
      body:v=>{ const r=monthRange(v.month); const tpl=(v._tplRaw||{});
@@ -3255,7 +3275,7 @@ const RECIPES = [
            en:'Paste the ID if the customer gave you one, or just type the name — both work.'} },
    { t:{ar:'تحديد العربية', en:'Match the vehicle'}, kind:'pick', pickBy:'unitKey', into:'unitId' },
    { t:{ar:'قراءة العدادات وتحويل الوحدات', en:'Read counters and convert units'}, kind:'counters',
-     hint:{ar:'ساعات التشغيل بترجع بالثواني. التول بتقسمها على 3600 وتوريك الرقمين.',
+     hint:{ar:'ساعات التشغيل بترجع بالثواني. الأداة بتقسمها على 3600 وتوريك الرقمين.',
            en:'Engine hours come back in seconds. The tool divides by 3600 and shows you both numbers.'} }]},
 
 { id:'client-units', icon:'\u2468',
@@ -3310,14 +3330,14 @@ function renderRecipe(){
     <div class="sec"><div class="row">
       <button class="btn sig" id="rcAll">${t('شغّل كل الخطوات','Run all steps')}</button>
       <button class="btn ghost" id="rcCurl">${t('نسخ السلسلة كاملة','Copy full chain')}</button>
-      <button class="btn warn" id="rcEsc">${t('تصعيد لمصر','Escalate')}</button>
+      <button class="btn warn" id="rcEsc">${t('تصعيد لتيم مصر','Escalate')}</button>
     </div></div>
   </div>`;
   $('rcBack').onclick = backHome;
   r.inputs.forEach(f=>{ const el=$('in_'+f.k); if(RC.vars[f.k]) el.value=RC.vars[f.k];
     el.oninput=()=>{ RC.vars[f.k]=el.value; renderSteps(); }; RC.vars[f.k]=el.value; });
   $('rcCurl').onclick = ()=>openModal(t('السلسلة كاملة','Full chain'), r.steps.map((st,i)=>
-    st.kind!=='call' ? `# ${i+1}: ${dual(st.t)} (${t('بتتم داخل التول','handled inside the tool')})` :
+    st.kind!=='call' ? `# ${i+1}: ${dual(st.t)} (${t('بتتم داخل الأداة','handled inside the tool')})` :
     `# ${i+1}: ${dual(st.t)}\ncurl -X ${st.m} "${stepUrl(st)}" \\\n  -H "Content-Type: application/json" \\\n  -d '${stepBody(st)}'`).join('\n\n'), false);
   $('rcEsc').onclick = ()=>openEscalation(dual(r.title));
   $('rcAll').onclick = async ()=>{
@@ -3542,7 +3562,7 @@ function doSpeedStats(i){
   if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
   const sp = collectSpeeds(prev.json);
   if(!sp.length){
-    RC.results[i]={ok:false, msg:t('مفيش حقل سرعة في الرد. لو الرد نفسه فاضي يبقى الجهاز ما رسلش في الفترة دي — وده رد نهائي للعميل. لو الرد فيه نقط بس من غير سرعة، صعّدها.',
+    RC.results[i]={ok:false, msg:t('مفيش حقل سرعة في الرد. لو الرد نفسه فاضي يبقى الجهاز ما رسلش في الفترة دي — وده رد نهائي للعميل. لو الرد فيه نقاط موقع من غير حقل سرعة، صعّدها.',
       'No speed field in the response. If the response itself is empty then the device sent nothing in that window — a definitive answer for the customer. If there are points but no speed, escalate.')};
     return renderSteps();
   }
@@ -3571,7 +3591,7 @@ function doUid(i){
     RC.results[i]={ok:false, msg: hasImei
       ? t(`ما لقيتش الرقم ده بين ${items.length} عربية في الحساب. اتأكد إنك على حساب العميل الصح.`,
           `Not found among the ${items.length} vehicles on this account. Check you are on the right customer account.`)
-      : t('الرد ما رجعش حقل الـ IMEI، فمقدرناش نطابق عليه. جرّب بالاسم، وأكّد مع مصر إن الـ projection بترجع الـ IMEI.',
+      : t('الرد ما رجعش حقل الـ IMEI، فمقدرناش نطابق عليه. جرّب بالاسم، وأكّد مع تيم مصر إن الـ projection بترجع الـ IMEI.',
           'The response did not include the IMEI field so we could not match on it. Try the name, and confirm with development that the projection returns the IMEI.')};
     return renderSteps();
   }
@@ -3674,13 +3694,13 @@ function doPick(i){
   const st=RC.r.steps[i], prev=RC.results[i-1];
   if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
   const {items, hit, by, hasImei} = matchByName(prev.json, RC.vars[st.pickBy]||'');
-  if(!items.length){ RC.results[i]={ok:false,msg:t('ما لقيتش سجلات ليها اسم ومعرّف في الرد. ابعت الرد لمصر.','No records with a name and id found in the response. Escalate it.')}; return renderSteps(); }
+  if(!items.length){ RC.results[i]={ok:false,msg:t('ما لقيتش سجلات ليها اسم ومعرّف في الرد. ابعت الرد لتيم مصر.','No records with a name and id found in the response. Escalate it.')}; return renderSteps(); }
   if(hit){ RC.vars[st.into]=hit.id; RC.vars.unitLabel=hit.name; RC.vars._pickedRaw=hit.raw;
     RC.results[i]={ok:true,
       msg:`${t('لقيت','Found')}: <b>${esc(hit.name)}</b> — ${t('اتطابق على','matched on')} <code>${esc(by)}</code>`,
       vars:{[st.into]:hit.id}}; return renderSteps(); }
   if(!hasImei && /^\d{10,20}$/.test((RC.vars[st.pickBy]||'').trim())){
-    RC.results[i]={ok:false, msg:t('الرقم ده شكله IMEI أو سيريال، بس الرد ما رجعش الحقول دي فمقدرناش نطابق عليها. دوّر بالاسم، وأكّد مع مصر إن projection بترجع الـ IMEI.',
+    RC.results[i]={ok:false, msg:t('الرقم ده شكله IMEI أو سيريال، بس الرد ما رجعش الحقول دي فمقدرناش نطابق عليها. دوّر بالاسم، وأكّد مع تيم مصر إن projection بترجع الـ IMEI.',
       'That looks like an IMEI or serial, but the response did not include those fields so we could not match on them. Search by name instead, and confirm with development that the projection returns the IMEI.')};
     return renderSteps();
   }
@@ -3696,7 +3716,7 @@ function doChoose(i){
   const st=RC.r.steps[i], prev=RC.results[i-1];
   if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
   const items = deepItems(prev.json);
-  if(!items.length){ RC.results[i]={ok:false,msg:t('مفيش قوالب في الرد. دي أول حاجة تتصعّد لمصر: إيه أنواع التقارير المتاحة وأكوادها؟','No templates in the response. This is the first thing to escalate: which report types exist and what are their codes?')}; return renderSteps(); }
+  if(!items.length){ RC.results[i]={ok:false,msg:t('مفيش قوالب في الرد. دي أول حاجة تتصعّد لتيم مصر: إيه أنواع التقارير المتاحة وأكوادها؟','No templates in the response. This is the first thing to escalate: which report types exist and what are their codes?')}; return renderSteps(); }
   RC.results[i]={ok:false, msg:t(`اختار القالب (${items.length} متاح):`,`Choose a template (${items.length} available):`),
     picker:`<select id="ch_${i}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:3px">
       <option value="">${t('— اختار —','— choose —')}</option>${items.slice(0,300).map((x,n)=>`<option value="${n}">${esc(x.name)}</option>`).join('')}</select>`,
@@ -4074,7 +4094,7 @@ function looksAuthFail(code, txt){
          t.includes('token_expired') || (t.includes('token') && t.includes('expired'));
 }
 
-/* كل ريكوست في التول بيعدي من هنا. لو التوكن خلص، بيسجل دخول تاني ويعيد المحاولة مرة واحدة. */
+/* كل ريكوست في الأداة بيعدي من هنا. لو التوكن خلص، بيسجل دخول تاني ويعيد المحاولة مرة واحدة. */
 async function apiFetch(path, body, opts){
   opts = opts || {};
   if(!SESSION.token && SESSION.user===''){
@@ -4213,7 +4233,7 @@ async function labRunLadder(e){
     out.innerHTML = renderLadder(tried, null)
       + (last && last.sent ? echoReq(last.sent.m, last.sent.url, last.sent.h, last.sent.b) : '')
       + `<div class="note warn" style="margin-top:12px">
-      <b>${t('كل الصيغ فشلت.','Every variant failed.')}</b> ${t('يبقى المشكلة مش في شكل الريكوست. صعّدها لمصر بالجدول ده — فيه كل اللي جربناه وردّ كل واحدة.','So the request shape is not the problem. Escalate with this table — it lists every variant tried and what each returned.')}</div>
+      <b>${t('كل الصيغ فشلت.','Every variant failed.')}</b> ${t('يبقى المشكلة مش في شكل الريكوست. صعّدها لتيم مصر بالجدول ده — فيه كل اللي جربناه وردّ كل واحدة.','So the request shape is not the problem. Escalate with this table — it lists every variant tried and what each returned.')}</div>
       <div class="row"><button class="btn warn" id="labEsc">${t('نسخ رسالة التصعيد','Copy escalation')}</button></div>`;
     $('labEsc').onclick = ()=>openModal('رسالة التصعيد',
       `تصعيد لتيم التطوير — مصر\n\nالريكوست: ${e.m} ${e.p}\nالبيئة: ${baseUrl()}\n\nجربنا ${tried.length} صيغة وكلها فشلت:\n` +
@@ -4441,7 +4461,7 @@ const EXAMPLES = [
            'Login failed for me as well — so the problem is the account, not his tool.',
            'Checked: does the account exist on api.afaqy.sa? Has the password expired? Does the role have access?',
            'Copied the ready reply and sent it, including the note that the API returns 200 even on failure.']},
-  out:{ar:'اتقفلت من غير ما تروح لمصر. والمعلومة اتسجّلت في «الأخطاء المعروفة» فتاني مرة بتتحل في دقيقتين.',
+  out:{ar:'اتقفلت من غير ما تروح لتيم مصر. والمعلومة اتسجّلت في «الأخطاء المعروفة» فتاني مرة بتتحل في دقيقتين.',
        en:'Closed without escalation. The finding was recorded in "known errors", so the next occurrence takes two minutes.'}},
 
 { tag:{ar:'حالة حقيقية — عميل ج، يونيو 2026', en:'Real case — Customer C, June 2026'},
@@ -4450,7 +4470,7 @@ const EXAMPLES = [
   did:{ar:['من «ابدأ من هنا» اخترت «أرقام الـ API مختلفة عن اللي في الشاشة».',
            'الخطوة الأولى في القايمة: ما تفتحش تذكرة تطوير قبل ما تفحص الوحدات.',
            'فتحت سيناريو العدادات، لصقت رقم الشاحنة زي ما هو في الإيميل.',
-           'التول جابت العربية وحوّلت: 95761694 ثانية = 26600 ساعة.',
+           'الأداة جابت العربية وحوّلت: 95761694 ثانية = 26600 ساعة.',
            'الرقم ده هو اللي على الشاشة بالظبط. مفيش باگ.',
            'بعتّ الرد الجاهز، وفيه كمان التنبيه إن العداد محسوب من إشارة التشغيل ومش دقيق مية بالمية.'],
        en:['From "Start here" I picked "API numbers differ from the dashboard".',
@@ -4459,7 +4479,7 @@ const EXAMPLES = [
            'The tool fetched the vehicle and converted: 95761694 seconds = 26600 hours.',
            'That is exactly the dashboard figure. No bug.',
            'Sent the ready reply, including the caveat that the counter is derived from the ignition signal and is not exact.']},
-  out:{ar:'الحالة دي فعليًا أخدت تلات أسابيع واجتماعات. بالتول كانت هتاخد خمس دقايق.',
+  out:{ar:'الحالة دي فعليًا أخدت تلات أسابيع واجتماعات. بالأداة كانت هتاخد خمس دقايق.',
        en:'This case actually ran for three weeks and several meetings. With the tool it is five minutes.'}},
 
 { tag:{ar:'حالة نمطية — الجهاز مش بيرسل', en:'Typical case — device not reporting'},
@@ -4467,7 +4487,7 @@ const EXAMPLES = [
           en:'"Device 357454075086551 has not reported since yesterday"'},
   did:{ar:['الرقم ده IMEI مش UID — والـ API مش بياخد IMEI. بس السيناريو بيحوّل لوحده.',
            'فتحت سيناريو إشارات جهاز واحد، لصقت الرقم، وحددت من امبارح لحد النهارده.',
-           'التول لقيت العربية، قالتلي اتطابقت على IMEI، وطلّعت الـ UID بتاعها.',
+           'الأداة لقيت العربية، قالتلي اتطابقت على IMEI، وطلّعت الـ UID بتاعها.',
            'الرد رجع ناجح وفاضي — يعني الجهاز فعلاً ما رسلش.',
            'دي إجابة نهائية مش تخمين، فبعتّها للعميل بثقة.'],
        en:['That number is an IMEI, not a UID — and the API does not take IMEIs. The scenario converts it for you.',
@@ -4561,7 +4581,7 @@ function renderQuick(){
   box.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
     <h3>${t('من الـ IMEI للرد الجاهز','From IMEI to a ready reply')}</h3>
     <p style="margin:0 0 12px; font-size:14px; color:var(--ink-2)">
-      ${t('الصق الـ IMEI اللي العميل بعته، اختار هو عايز إيه، واضغط زرار واحد. التول تجيب الـ UID، تجرّب الإندبوينت فعلاً، وتديك الـ curl الشغّال والرد — جاهزين تبعتهم.',
+      ${t('الصق الـ IMEI اللي العميل بعته، اختار هو عايز إيه، واضغط زرار واحد. الأداة تجيب الـ UID، تجرّب الإندبوينت فعلاً، وتديك الـ curl الشغّال والرد — جاهزين تبعتهم.',
           'Paste the IMEI the customer sent, choose what they want, press one button. The tool resolves the UID, actually runs the endpoint, and hands you the working curl and the response — ready to send.')}</p>
     <table class="kv">
       <tr><td style="font-family:var(--ar); color:var(--ink); width:30%">${t('الـ IMEI أو الاسم','IMEI or name')}</td>
@@ -4645,7 +4665,7 @@ async function runQuick(){
       </div>
       ${renderLadder(r.tried, null)}
       ${okRun ? `
-      <div class="note" style="margin-top:12px">${t('البودي ده متاخد من الكولكشن حرف بحرف، واتغيّر فيه حاجتين بس: الـ UID مكان رقم العينة، والتواريخ اللي انت حددتها. والـ offset اترجّع لصفر لأن العينة كانت بـ 50 وبترجع فاضي.',
+      <div class="note" style="margin-top:12px">${t('البودي ده متاخد من الكولكشن حرف بحرف، واتغيّر فيه حاجتين بس: الـ UID مكان رقم العينة، والتواريخ اللي انت حددتها. والـ offset رجع لصفر لأن العينة كانت بـ 50 وبترجع فاضي.',
         'This body is taken verbatim from the collection with two changes: the UID replaces the sample id, and the dates are the ones you chose. The offset is reset to zero because the sample used 50, which returns empty.')}</div>
       <h3 style="margin:16px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الـ curl الشغّال','The working curl')}</h3>
       <pre class="pre">${esc(curl)}</pre>
@@ -4826,7 +4846,7 @@ What we need back:
 ${have.length?have.map(e=>'  - '+e.ar).join('\n'):'  - مفيش'}
 ${miss.length?`\nلسه ناقص:\n${miss.map(e=>'  - '+e.ar).join('\n')}`:''}
 
-اللي التول نفّذته في الجلسة دي:
+اللي الأداة نفّذته في الجلسة دي:
 ${log}
 
 المطلوب منكم:
@@ -5101,7 +5121,7 @@ function dashInsights(){
         why:{ar:'٩٠٪ أو أكتر. التسجيل هيقف أو هيمسح القديم.', en:'At 90% or more. Recording will stop or start overwriting.'}});
       if(noRec.length) out.push({k:'mdvrNoData', n:noRec.length, set:noRec, sev:'low',
         ttl:{ar:'حالة تسجيل MDVR مش راجعة', en:'MDVR recording status not returned'},
-        why:{ar:'الرد مفيهوش حقل تسجيل لأجهزة الـ MDVR دي. صدّرها وابعتها لمصر عشان يضيفوا الحقل.',
+        why:{ar:'الرد مفيهوش حقل تسجيل لأجهزة الـ MDVR دي. صدّرها وابعتها لتيم مصر عشان يضيفوا الحقل.',
              en:'The response has no recording field for these MDVR devices. Export them and send to development so the field gets added.'}});
       return out;
     })(),
@@ -5284,7 +5304,7 @@ function dashRender(){
   <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
     ${noType ? `<div class="note warn" style="margin-bottom:10px">
       <b>${t('نوع الجهاز مش راجع في الرد.','The device type is not present in the response.')}</b><br>
-      ${t('الحقل device_type مش موجود في اللي رجع، فمقدرناش نقسّم. الأرقام تحت صحيحة كإجمالي. صعّدها لمصر عشان يضيفوا الحقل في الـ projection.',
+      ${t('الحقل device_type مش موجود في اللي رجع، فمقدرناش نقسّم. الأرقام تحت صحيحة كإجمالي. صعّدها لتيم مصر عشان يضيفوا الحقل في الـ projection.',
           'The device_type field is absent from what came back, so we cannot split by type. The totals below are still correct. Escalate so the field is added to the projection.')}</div>` : ''}
     <div style="display:flex; gap:22px; align-items:center; flex-wrap:wrap">
       ${pieSVG(slices, total)}
@@ -6349,7 +6369,7 @@ function analyzeCapture(txt){
 
   const F=[];
   if(!ep){
-    F.push({k:'warn', s:t('الإندبوينت ده مش في الكولكشن أصلًا — دي حاجة تستاهل تتبعت لمصر.',
+    F.push({k:'warn', s:t('الإندبوينت ده مش في الكولكشن أصلًا — دي حاجة تستاهل تتبعت لتيم مصر.',
                           'This endpoint is not in the collection at all — worth reporting to development.')});
   } else {
     let colObj=null; try{ colObj = ep.b ? JSON.parse(ep.b) : null; }catch(_){}
@@ -6539,7 +6559,7 @@ function renderTally(){
 
 /* ---------------- views ---------------- */
 const INTROS = {
-  trIntro:{ar:`أي تذكرة تبدأ من هنا. اختار العرض اللي العميل قاله، والتول تديك: اللي ما تعملهوش، الخطوات بالترتيب، والرد الجاهز. الهدف إن الرد يبقى واحد مهما كان اللي رد.`,
+  trIntro:{ar:`أي تذكرة تبدأ من هنا. اختار العرض اللي العميل قاله، والأداة تديك: اللي ما تعملهوش، الخطوات بالترتيب، والرد الجاهز. الهدف إن الرد يبقى واحد مهما كان اللي رد.`,
     en:`Every ticket starts here. Pick the symptom the customer reported and the tool gives you what not to do, the steps in order, and a ready reply — so the answer is the same whoever handles it.`},
   rcIntro:{ar:`السيناريو بينفّذ سلسلة ريكوستات بالترتيب وبينقل النتيجة من خطوة للي بعدها لوحده. كل خطوة مش بتشتغل غير لما تضغط عليها — ومفيش حاجة بتتخزن.`,
     en:`A scenario runs a chain of requests in order and carries each result into the next step automatically. No step runs until you press it, and nothing is stored.`},
