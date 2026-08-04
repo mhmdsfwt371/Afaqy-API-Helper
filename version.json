@@ -1,16 +1,16 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "سيناريو جديد: «الجهاز مسجّل في وصل ولا لأ؟» — تلصق الـ IMEI والأداة تجاوب",
-      "أربع خطوات: تجيب عربيات وصل عند العميل، تدوّر على الـ IMEI، تستعلم من وصل نفسها، وتعرض الحالة",
-      "بيفرّق بين تلات حالات: مسجّل، ومش مسجّل، والحساب مالوش وصل أصلًا — وكل واحدة ليها رد نهائي مختلف"
+      "تبويب جديد «لوحة الأجهزة»: بيجيب عربيات الحساب ويقسّمها بنوع الجهاز — GPS ووحدة ثابتة و MDVR",
+      "رسم دائري بلون لكل نوع، ودوسة عليه أو على اسم النوع بتفلتر الجدول والأرقام مع بعض",
+      "جدول بكل الحقول اللي رجعت فعلًا — الأعمدة بتتاخد من الداتا نفسها مش من قايمة ثابتة، فلو ظهر حقل جديد بكرة هيبان"
     ],
     "en": [
-      "New scenario: is this device registered with WASL — paste the IMEI and get an answer",
-      "Four steps: fetch the customer WASL vehicles, find the IMEI, query WASL itself, and show the status",
-      "It distinguishes three outcomes: registered, not registered, and the account has no WASL setup — each with a different definitive answer"
+      "New Device dashboard tab: loads the account vehicles and splits them by device type — GPS, stationary unit and MDVR",
+      "A donut chart with a colour per type; clicking a slice or a type name filters both the table and the counts",
+      "A table with every field that actually came back — columns are derived from the data, not a fixed list, so a new field shows up on its own"
     ]
   }
 }

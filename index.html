@@ -298,6 +298,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   <button class="tab" role="tab" aria-selected="true" data-view="triage"><span data-ar="ابدأ من هنا" data-en="Start here">ابدأ من هنا</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="search"><span data-ar="الريكوستات" data-en="Requests">الريكوستات</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="recipes"><span data-ar="سيناريوهات جاهزة" data-en="Ready scenarios">سيناريوهات جاهزة</span></button>
+  <button class="tab" role="tab" aria-selected="false" data-view="dash"><span data-ar="لوحة الأجهزة" data-en="Device dashboard">لوحة الأجهزة</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="inspect"><span data-ar="افحص رد" data-en="Inspect a response">افحص رد</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="docs"><span data-ar="الدليل" data-en="Guide">الدليل</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="faq"><span data-ar="أساسيات الإنتجريشن" data-en="Integration basics">أساسيات الإنتجريشن</span></button>
@@ -358,6 +359,19 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
     <div class="cards" id="rcCards"></div>
   </div>
   <div id="rcRun" hidden></div>
+</section>
+
+<!-- ================= DASH ================= -->
+<section class="view" id="v-dash" hidden>
+  <div class="note sig" style="margin-bottom:14px" id="dashIntro"></div>
+  <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    <div class="row">
+      <button class="btn sig" id="dashLoad"></button>
+      <button class="btn ghost" id="dashCsv" hidden></button>
+      <span id="dashState" style="font-size:12.5px; color:var(--muted); align-self:center"></span>
+    </div>
+  </div></div>
+  <div id="dashOut"></div>
 </section>
 
 <!-- ================= INSPECT ================= -->
@@ -570,12 +584,33 @@ function setLang(l){
   if(!$('v-triage').hidden) renderTriage();
   if(!$('v-docs').hidden) renderDocs();
   if(!$('v-inspect').hidden){ paintInspect(); renderInspect(); }
+  if(!$('v-dash').hidden) paintDash();
 }
 
 const DOCS = {
-  "version": "3.1",
+  "version": "3.2",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.2",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "تبويب جديد «لوحة الأجهزة»: بيجيب عربيات الحساب ويقسّمها بنوع الجهاز — GPS ووحدة ثابتة و MDVR",
+          "رسم دائري بلون لكل نوع، ودوسة عليه أو على اسم النوع بتفلتر الجدول والأرقام مع بعض",
+          "جدول بكل الحقول اللي رجعت فعلًا — الأعمدة بتتاخد من الداتا نفسها مش من قايمة ثابتة، فلو ظهر حقل جديد بكرة هيبان",
+          "تصدير CSV بيصدّر المفلتر بس، وبعلامة ترميز عشان إكسل ما يكسرش العربي",
+          "لو حقل نوع الجهاز مش راجع في الرد، الأداة بتقولك صراحة بدل ما تعرض صفر أو تفضل ساكتة"
+        ],
+        "en": [
+          "New Device dashboard tab: loads the account vehicles and splits them by device type — GPS, stationary unit and MDVR",
+          "A donut chart with a colour per type; clicking a slice or a type name filters both the table and the counts",
+          "A table with every field that actually came back — columns are derived from the data, not a fixed list, so a new field shows up on its own",
+          "CSV export covers only what is filtered, with an encoding mark so Excel does not mangle Arabic",
+          "If the device type field is missing from the response, the tool says so plainly instead of showing zero or staying silent"
+        ]
+      }
+    },
     {
       "v": "3.1",
       "date": "2026-08-04",
@@ -4428,6 +4463,184 @@ function renderDocs(){
     });
 }
 
+/* ================= لوحة الأجهزة =================
+   بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
+   مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
+const DASH = { units:[], filter:null, at:null };
+const TYPE_LBL = { gps:{ar:'GPS', en:'GPS'},
+                   stationary:{ar:'وحدة ثابتة', en:'Stationary unit'},
+                   stationary_unit:{ar:'وحدة ثابتة', en:'Stationary unit'},
+                   mdvr:{ar:'MDVR', en:'MDVR'} };
+const TYPE_COLOR = ['#00707F','#C2410C','#1F6B45','#6D28D9','#B45309','#0E7490','#9D174D','#4B5563'];
+
+function typeOf(u){
+  const v = u.device_type || u.deviceType || '';
+  return String(v || '').trim().toLowerCase() || '__none__';
+}
+function typeLabel(k){
+  if(k==='__none__') return t('غير محدد','Not set');
+  return TYPE_LBL[k] ? dual(TYPE_LBL[k]) : k;
+}
+
+async function dashLoadUnits(){
+  const btn=$('dashLoad'), old=btn.textContent;
+  if(!SESSION.token){ $('dashState').textContent = t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first'); return; }
+  btn.disabled=true; btn.textContent=t('بيجيب…','Loading…');
+  try{
+    const r = await apiFetch('/units/lists',
+      {data:{offset:0, limit:5000, simplify:0, projection:['basic','last_update','counters','groups']}},
+      {method:'POST'});
+    if(!r.ok){ $('dashState').textContent=''; $('dashOut').innerHTML =
+      `<div class="panel"><div class="sec"><div class="note warn">${diagnose(r.code, r.txt)}</div></div></div>`; return; }
+    DASH.units = deepItems(r.json).map(x=>x.raw);
+    DASH.filter = null; DASH.at = new Date();
+    dashRender();
+  }catch(err){
+    $('dashState').textContent='';
+    $('dashOut').innerHTML = `<div class="panel"><div class="sec"><div class="note warn">${t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')}<br><small>${esc(String(err).slice(0,140))}</small></div></div></div>`;
+  }finally{ btn.disabled=false; btn.textContent=old; }
+}
+
+function pieSVG(slices, total){
+  const R=88, C=110, hole=48;
+  if(!total) return '';
+  let a0=-Math.PI/2, out='';
+  slices.forEach((s2,i)=>{
+    const frac=s2.n/total, a1=a0+frac*Math.PI*2;
+    const big = frac>0.5 ? 1 : 0;
+    const x0=C+R*Math.cos(a0), y0=C+R*Math.sin(a0);
+    const x1=C+R*Math.cos(a1), y1=C+R*Math.sin(a1);
+    const hx0=C+hole*Math.cos(a1), hy0=C+hole*Math.sin(a1);
+    const hx1=C+hole*Math.cos(a0), hy1=C+hole*Math.sin(a0);
+    const d = frac>=0.999
+      ? `M ${C} ${C-R} A ${R} ${R} 0 1 1 ${C-0.01} ${C-R} Z M ${C} ${C-hole} A ${hole} ${hole} 0 1 0 ${C+0.01} ${C-hole} Z`
+      : `M ${x0} ${y0} A ${R} ${R} 0 ${big} 1 ${x1} ${y1} L ${hx0} ${hy0} A ${hole} ${hole} 0 ${big} 0 ${hx1} ${hy1} Z`;
+    const on = DASH.filter===s2.k;
+    out += `<path d="${d}" fill="${s2.c}" stroke="#fff" stroke-width="2"
+      style="cursor:pointer; opacity:${DASH.filter&&!on?0.32:1}" data-slice="${esc(s2.k)}">
+      <title>${esc(typeLabel(s2.k))}: ${s2.n}</title></path>`;
+    a0=a1;
+  });
+  return `<svg viewBox="0 0 220 220" width="200" height="200" role="img" style="flex:none">${out}
+    <text x="110" y="104" text-anchor="middle" font-size="30" font-weight="700" fill="#101A24">${total}</text>
+    <text x="110" y="124" text-anchor="middle" font-size="12" fill="#64788B">${esc(t('جهاز','devices'))}</text></svg>`;
+}
+
+function dashColumns(rows){
+  const skip=/^(_|id$|__)/;
+  const seen=new Map();
+  rows.slice(0,300).forEach(u=>{
+    Object.entries(u||{}).forEach(([k,v])=>{
+      if(skip.test(k)) return;
+      if(v===null||v===undefined||v===''||typeof v==='object') return;
+      seen.set(k,(seen.get(k)||0)+1);
+    });
+  });
+  const first=['name','imei','device_serial','device','device_type','plate_number','sim_number','active'];
+  const rest=[...seen.keys()].filter(k=>!first.includes(k)).sort((a,b)=>seen.get(b)-seen.get(a));
+  return first.filter(k=>seen.has(k)).concat(rest).slice(0,14);
+}
+
+function dashRows(){
+  return DASH.filter ? DASH.units.filter(u=>typeOf(u)===DASH.filter) : DASH.units;
+}
+
+function dashRender(){
+  const out=$('dashOut');
+  if(!DASH.units.length){
+    out.innerHTML = `<div class="panel"><div class="empty"><b>${t('مفيش عربيات','No vehicles')}</b>
+      ${t('الحساب ده ما رجّعش أي عربية.','This account returned no vehicles.')}</div></div>`;
+    $('dashCsv').hidden = true; return; }
+
+  const counts=new Map();
+  DASH.units.forEach(u=>{ const k=typeOf(u); counts.set(k,(counts.get(k)||0)+1); });
+  const slices=[...counts.entries()].sort((a,b)=>b[1]-a[1])
+    .map(([k,n],i)=>({k, n, c:TYPE_COLOR[i%TYPE_COLOR.length]}));
+  const total=DASH.units.length;
+  const noType = counts.size===1 && counts.has('__none__');
+
+  const rows=dashRows(), cols=dashColumns(rows);
+  const cell=(u,c)=>{ const v=u[c];
+    if(v===null||v===undefined||v==='') return '—';
+    if(typeof v==='boolean') return v?t('أيوه','yes'):t('لأ','no');
+    const s2=String(v);
+    return /^(imei|device_serial|sim_number|id)$/.test(c) ? `<code style="font-size:11.5px">${esc(s2)}</code>` : esc(s2.slice(0,40));
+  };
+
+  out.innerHTML = `
+  <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    ${noType ? `<div class="note warn" style="margin-bottom:10px">
+      <b>${t('نوع الجهاز مش راجع في الرد.','The device type is not present in the response.')}</b><br>
+      ${t('الحقل device_type مش موجود في اللي رجع، فمقدرناش نقسّم. الأرقام تحت صحيحة كإجمالي. صعّدها لمصر عشان يضيفوا الحقل في الـ projection.',
+          'The device_type field is absent from what came back, so we cannot split by type. The totals below are still correct. Escalate so the field is added to the projection.')}</div>` : ''}
+    <div style="display:flex; gap:22px; align-items:center; flex-wrap:wrap">
+      ${pieSVG(slices, total)}
+      <div style="flex:1; min-width:220px">
+        <table class="kv">
+          ${slices.map(s2=>`<tr data-slice="${esc(s2.k)}" style="cursor:pointer; ${DASH.filter===s2.k?'background:var(--signal-soft)':''}">
+            <td style="width:26px"><span style="display:inline-block; width:13px; height:13px; border-radius:2px; background:${s2.c}"></span></td>
+            <td style="font-family:var(--ar); color:var(--ink)">${esc(typeLabel(s2.k))}</td>
+            <td style="text-align:end"><b>${s2.n}</b> <span style="color:var(--muted); font-size:12px">${Math.round(s2.n/total*100)}%</span></td>
+          </tr>`).join('')}
+        </table>
+        <div class="row">
+          ${DASH.filter?`<button class="btn ghost" id="dashAll">${t('شيل الفلتر','Clear filter')}</button>`:''}
+          <span style="font-size:12.5px; color:var(--muted); align-self:center">
+            ${DASH.filter ? t('مفلتر على','Filtered by')+' '+esc(typeLabel(DASH.filter)) : t('دوس على أي نوع عشان تفلتر','Click a type to filter')}</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="panel"><div class="sec" style="border-top:0">
+    <h3>${t('البيانات','The data')} — ${rows.length} ${t('من','of')} ${total}</h3>
+    <div style="overflow-x:auto; margin-top:8px">
+      <table class="kv" style="min-width:100%">
+        <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(c)}</td>`).join('')}</tr>
+        ${rows.slice(0,300).map(u=>`<tr>${cols.map(c=>`<td style="white-space:nowrap">${cell(u,c)}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>
+    ${rows.length>300?`<div class="note" style="margin-top:8px">${t('بنعرض أول 300. التصدير بينزّل الكل.','Showing the first 300. Export downloads all of them.')}</div>`:''}
+  </div></div>`;
+
+  $('dashCsv').hidden = false;
+  $('dashState').textContent = t('اتجابت','Loaded')+' '+DASH.at.toTimeString().slice(0,5);
+  out.querySelectorAll('[data-slice]').forEach(el2=>el2.onclick=()=>{
+    const k=el2.dataset.slice;
+    DASH.filter = (DASH.filter===k) ? null : k;
+    dashRender();
+  });
+  const ab=$('dashAll'); if(ab) ab.onclick=()=>{ DASH.filter=null; dashRender(); };
+}
+
+function dashExport(){
+  const rows=dashRows(), cols=dashColumns(rows);
+  const NL=String.fromCharCode(10);
+  const q=v=>{ const s2=(v===null||v===undefined)?'':String(v);
+    return /[",\n]/.test(s2) ? '"'+s2.replace(/"/g,'""')+'"' : s2; };
+  const csv=[cols.join(',')].concat(rows.map(u=>cols.map(c=>q(u[c])).join(','))).join(NL);
+  const name='units-'+(DASH.filter||'all')+'-'+new Date().toISOString().slice(0,10)+'.csv';
+  try{
+    const blob=new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(t('اتنزّل '+rows.length+' سطر','Exported '+rows.length+' rows'));
+  }catch(_){ copy(csv, t('اتنسخ الجدول','Table copied')); }
+}
+
+function paintDash(){
+  $('dashLoad').textContent = t('جيب العربيات','Load vehicles');
+  $('dashCsv').textContent  = t('تصدير CSV','Export CSV');
+  $('dashIntro').innerHTML = t(
+    'بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. دوس على أي شريحة أو نوع عشان تفلتر الجدول، والتصدير بينزّل المفلتر بس.',
+    'Loads the account vehicles and splits them by device type. Click a slice or a type to filter the table; the export downloads only what is filtered.');
+  if(DASH.units.length) dashRender();
+  else $('dashOut').innerHTML = `<div class="panel"><div class="empty">
+    <b>${t('اضغط «جيب العربيات»','Press Load vehicles')}</b>
+    ${t('لازم تكون متصل بحساب العميل الأول.','You need to be connected to the customer account first.')}</div></div>`;
+}
+
 /* ================= فحص رد ================= 
    العميل بيبعت رده، أو انت بتلزق ردك — والأداة بتحوّله لجدول مقروء.
    الفايدة الأكبر: إن العميل يقول «الرد ده غلط» وانت تشوفه بعينك في ثانية. */
@@ -4596,7 +4809,7 @@ const INTROS = {
 };
 function paintIntros(){ Object.entries(INTROS).forEach(([id,v])=>{ const el=$(id); if(el) el.innerHTML = dual(v); }); }
 
-const VIEWS = ['triage','search','recipes','docs','faq'];
+const VIEWS = ['triage','search','recipes','docs','faq','inspect','dash'];
 let VIEW_STACK = [];
 function goBack(){
   if(VIEW_STACK.length>1){ VIEW_STACK.pop(); showView(VIEW_STACK[VIEW_STACK.length-1], true); }
@@ -4609,7 +4822,8 @@ function showView(v, noPush){
     try{ history.pushState({v}, '', '#'+v); }catch(_){}
   }
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
-  ['search','faq','recipes','triage','docs','inspect'].forEach(x=>$('v-'+x).hidden = x!==v);
+  ['search','faq','recipes','triage','docs','inspect','dash'].forEach(x=>$('v-'+x).hidden = x!==v);
+  if(v==='dash') paintDash();
   if(v==='inspect'){ paintInspect(); renderInspect(); }
   if(v==='docs') renderDocs();
   paintIntros();
@@ -4663,6 +4877,8 @@ $('baseUrl').addEventListener('change', ev=>{
 $('sesGo').onclick  = ()=>connect(false);
 $('sesOut').onclick = disconnect;
 $('sesCopy').onclick= ()=>copy(SESSION.token, t('اتنسخ التوكن','Token copied'));
+$('dashLoad').onclick = dashLoadUnits;
+$('dashCsv').onclick  = dashExport;
 $('inGo').onclick = renderInspect;
 $('inClear').onclick = ()=>{ $('inText').value=''; renderInspect(); };
 $('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f) return;
