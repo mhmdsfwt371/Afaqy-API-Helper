@@ -619,9 +619,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.9",
+  "version": "4.0",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.0",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "ترتيب اسم ملف الإكسل اتغيّر: اسم المستخدم - التاريخ - الموديول - الوقت",
+          "اسم الموديول بقى واضح في الاسم: «لوحة الأجهزة GPS» أو «لوحة وصل استعلام»",
+          "الشرطات الجوانية بتتشال من اسم الموديول عشان الأربع أجزاء تفضل واضحة ومقروءة"
+        ],
+        "en": [
+          "The Excel filename order changed to: username, date, module, time",
+          "The module name is now explicit in the filename, naming the board and the filter",
+          "Internal dashes are stripped from the module name so the four parts stay readable"
+        ]
+      }
+    },
     {
       "v": "3.9",
       "date": "2026-08-04",
@@ -5048,9 +5064,10 @@ function dashRender(){
 
 function dashExport(){
   const rows=dashRows(), cols=dashColumns(rows);
-  const what = DASH.flag ? dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl)
-             : DASH.filter ? typeLabel(DASH.filter)
-             : t('كل العربيات','all vehicles');
+  const what = t('لوحة الأجهزة','Device board') + ' '
+             + (DASH.flag ? dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl)
+              : DASH.filter ? typeLabel(DASH.filter)
+              : t('الكل','all'));
   downloadXlsx(cols, rows, exportName(what), t('العربيات','Vehicles'));
 }
 
@@ -5117,16 +5134,16 @@ function xlsxBlob(cols, rows, sheetName){
     {name:'xl/worksheets/sheet1.xml', data:sheet}
   ]);
 }
-/* اسم الملف: المستخدم - الحاجة - التاريخ - الوقت
-   موحّد في كل التصديرات عشان الملفات تترتب لوحدها في مجلد التنزيلات. */
+/* اسم الملف: المستخدم - التاريخ - الموديول - الوقت
+   موحّد في كل التصديرات. الشرطات الجوانية بتتشال عشان الأربع أجزاء تفضل واضحة. */
 function exportName(what){
-  const clean = v => String(v||'').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim();
+  const clean = v => String(v||'').replace(/[\\/:*?"<>|]/g,'').replace(/\s*[-—–]\s*/g,' ').replace(/\s+/g,' ').trim();
   const d = new Date();
   const p2 = n => String(n).padStart(2,'0');
   const date = d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
   const time = p2(d.getHours())+'-'+p2(d.getMinutes());
   const user = clean(SESSION.user) || t('بدون حساب','no-account');
-  return `${user} - ${clean(what)} - ${date} - ${time}.xlsx`;
+  return `${user} - ${date} - ${clean(what)} - ${time}.xlsx`;
 }
 
 function downloadXlsx(cols, rows, name, sheetName){
@@ -5267,8 +5284,9 @@ function waslExport(){
     if(anyInq){ const inq=WASL.inq[String(u.id||u._id||'')]; o.wasl_status = inq?inq.txt:''; }
     return o;
   });
-  const what = (anyInq ? t('وصل - استعلام','WASL - inquiry') : t('وصل - لستة','WASL - list'))
-             + (WASL.q ? ' - ' + WASL.q.slice(0,20) : '');
+  const what = t('لوحة وصل','WASL board') + ' '
+             + (anyInq ? t('استعلام','inquiry') : t('لستة','list'))
+             + (WASL.q ? ' ' + WASL.q.slice(0,20) : '');
   downloadXlsx(cols, data, exportName(what), 'WASL');
 }
 

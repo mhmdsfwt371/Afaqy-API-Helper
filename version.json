@@ -1,16 +1,16 @@
 {
-  "version": "3.9",
+  "version": "4.0",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "المؤشرات بقت تظهر في المساحة الفاضية جنب الرسم الدائري كمان، مش تحت بس",
-      "بطاقات جديدة لأجهزة الـ MDVR، بتظهر بس لو الحساب فيه MDVR فعلًا",
-      "«مش بتسجّل» — الجهاز شغال والتسجيل واقف، يعني الكاميرا مش بتحفظ حاجة"
+      "ترتيب اسم ملف الإكسل اتغيّر: اسم المستخدم - التاريخ - الموديول - الوقت",
+      "اسم الموديول بقى واضح في الاسم: «لوحة الأجهزة GPS» أو «لوحة وصل استعلام»",
+      "الشرطات الجوانية بتتشال من اسم الموديول عشان الأربع أجزاء تفضل واضحة ومقروءة"
     ],
     "en": [
-      "Indicators now also appear in the empty space beside the donut chart, not only below it",
-      "New cards for MDVR devices, shown only when the account actually has MDVR units",
-      "Not recording — the device is up but recording is off, so the camera is saving nothing"
+      "The Excel filename order changed to: username, date, module, time",
+      "The module name is now explicit in the filename, naming the board and the filter",
+      "Internal dashes are stripped from the module name so the four parts stay readable"
     ]
   }
 }
