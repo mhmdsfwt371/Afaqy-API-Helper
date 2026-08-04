@@ -1,16 +1,16 @@
 {
-  "version": "3.3",
+  "version": "3.4",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "لوحة وصل جوه تبويب اللوحات: مفتاح فوق بين «الأجهزة» و«وصل»",
-      "دوسة واحدة بتجيب كل العربيات المسجّلة في وصل عند الحساب المتصل",
-      "بحث فوري في اللستة بالـ IMEI أو الاسم أو اللوحة — للو اللستة كبيرة وانت عايز جهاز أو اتنين"
+      "رصد من منصة أفاقي نفسها: بعض الإندبوينتس بتاخد data كنص JSON مش ككائن، والريكوست form-encoded مش application/json",
+      "سلّم التصحيح بقى يجرّب الصيغتين دول لوحده لما الشكل العادي يفشل",
+      "الملاحظة اتسجّلت في المعرفة مع الفرق بين اللي في الكولكشن واللي المنصة بتبعته فعلًا"
     ],
     "en": [
-      "A WASL board inside the dashboards tab, with a switch between Devices and WASL",
-      "One click loads every vehicle registered with WASL on the connected account",
-      "Instant search across IMEI, name and plate — for when the list is long and you want one or two devices"
+      "Observed on the Afaqy platform itself: some endpoints take data as a JSON string rather than an object, and the request is form-encoded rather than application/json",
+      "The auto-fix ladder now tries both of these forms on its own when the normal shape fails",
+      "The finding is recorded in the knowledge base, with the difference between what the collection documents and what the platform actually sends"
     ]
   }
 }

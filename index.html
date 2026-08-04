@@ -605,9 +605,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.3",
+  "version": "3.4",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.4",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "رصد من منصة أفاقي نفسها: بعض الإندبوينتس بتاخد data كنص JSON مش ككائن، والريكوست form-encoded مش application/json",
+          "سلّم التصحيح بقى يجرّب الصيغتين دول لوحده لما الشكل العادي يفشل",
+          "الملاحظة اتسجّلت في المعرفة مع الفرق بين اللي في الكولكشن واللي المنصة بتبعته فعلًا"
+        ],
+        "en": [
+          "Observed on the Afaqy platform itself: some endpoints take data as a JSON string rather than an object, and the request is form-encoded rather than application/json",
+          "The auto-fix ladder now tries both of these forms on its own when the normal shape fails",
+          "The finding is recorded in the knowledge base, with the difference between what the collection documents and what the platform actually sends"
+        ]
+      }
+    },
     {
       "v": "3.3",
       "date": "2026-08-04",
@@ -2357,6 +2373,23 @@ const LEARNED = [
    <pre class="pre">95761694 ÷ 3600 = 26600 hours</pre>
    <p>Distance comes back in kilometres and matches the dashboard directly — only engine hours need converting.</p>`}},
 
+ { sev:'mid', src:{ar:'مرصود من منصة أفاقي نفسها — أغسطس 2026', en:'Observed on the Afaqy platform itself — August 2026'},
+   t:{ar:'بعض الإندبوينتس بتاخد data كنص مش ككائن', en:'Some endpoints take data as a string, not an object'},
+   body:{ar:`<p>القاعدة العامة إن البودي متغلّف في <code>data</code> ككائن:</p>
+   <pre class="pre">{"data":{"lat":"26.37","lng":"50.12"}}</pre>
+   <p>بس لما رصدنا المنصة وهي بتضيف وحدة ثابتة، لقيناها بتبعت كده:</p>
+   <pre class="pre">data={"lat":"21.503312857817008","lng":"39.183279590869745"}</pre>
+   <p>يعني <code>data</code> قيمتها <b>نص</b> فيه JSON، والريكوست <code>form-encoded</code> مش <code>application/json</code>.</p>
+   <p><b>يعني إيه للدعم:</b> لو عميل قال إن <code>/units/getAddress</code> راجعله خطأ وهو مكتوب صح زي الكولكشن، دي أول حاجة يجرّبها.</p>
+   <div class="note sig" style="margin-top:8px">سلّم التصحيح في الأداة بيجرّب الصيغتين دول لوحده دلوقتي.</div>`,
+     en:`<p>The general rule is that the body is wrapped in <code>data</code> as an object:</p>
+   <pre class="pre">{"data":{"lat":"26.37","lng":"50.12"}}</pre>
+   <p>But watching the platform add a stationary unit, it actually sends:</p>
+   <pre class="pre">data={"lat":"21.503312857817008","lng":"39.183279590869745"}</pre>
+   <p>So <code>data</code> holds a <b>string</b> of JSON, and the request is <code>form-encoded</code> rather than <code>application/json</code>.</p>
+   <p><b>What this means for support:</b> if a customer says <code>/units/getAddress</code> returns an error while their body matches the collection, this is the first thing to try.</p>
+   <div class="note sig" style="margin-top:8px">The auto-fix ladder in this tool now tries both of these forms on its own.</div>`}},
+
  { sev:'high', src:{ar:'من الكولكشن — units/add و units/edit', en:'From the collection — units/add and units/edit'},
    t:{ar:'أربع أرقام للعربية الواحدة — وكلهم بيتلخبطوا', en:'Four different numbers per vehicle — and they get mixed up'},
    body:{ar:`<p>العربية الواحدة في النظام ليها أربع أرقام مختلفة تمامًا:</p>
@@ -3705,6 +3738,13 @@ function labVariants(e, override){
     if(Object.keys(keep).length && Object.keys(keep).length < Object.keys(d).length)
       out.push({n:'أقل بودي ممكن', url, body:{data:keep}, h:H});
   }
+  /* المنصة نفسها بتبعت data كنص JSON مش ككائن على بعض الإندبوينتس
+     (اترصدت على /units/getAddress). لو الشكل العادي فشل، دي بتنقذ. */
+  if(obj && obj.data && typeof obj.data==='object'){
+    out.push({n:'data كنص JSON', url, body:{data: JSON.stringify(obj.data)}, h:H});
+    out.push({n:'form-encoded زي المنصة', url, h:{'Content-Type':'application/x-www-form-urlencoded'},
+              raw:'data=' + encodeURIComponent(JSON.stringify(obj.data))});
+  }
   if(!obj) out.push({n:'بودي فاضي', url, body:{data:{}}, h:H});
   return out;
 }
@@ -3720,7 +3760,8 @@ async function ladderCore(e, override, onStep){
     let res, txt;
     try{
       res = await fetch(v.url, {method:e.m||'POST', headers:v.h,
-                                body: v.body ? JSON.stringify(v.body) : undefined});
+                                body: v.raw !== undefined ? v.raw
+                                    : (v.body ? JSON.stringify(v.body) : undefined)});
       txt = await res.text();
     }catch(err){ return {net:false, tried, win:null}; }
     let json=null, pretty=txt;
