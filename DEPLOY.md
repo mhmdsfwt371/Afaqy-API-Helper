@@ -72,7 +72,7 @@ git push -u origin main
 
 بعدين من صفحة المستودع: **Settings** ← **Pages** ← Source: `Deploy from a branch` ← Branch: `main` / `root` ← Save.
 
-اللينك بيطلع خلال دقيقتين على `https://<الحساب>.github.io/<المستودع>/`
+اللينك بيطلع خلال دقيقتين. بتاعنا: `https://mhmdsfwt371.github.io/Afaqy-API-Helper/`
 
 ### ب) إنشاء المشروع على فايربيز
 

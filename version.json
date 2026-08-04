@@ -1,16 +1,16 @@
 {
-  "version": "2.8",
+  "version": "2.9",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "باگ مكسور اتكشف واتصلح: «من الـ IMEI للرد الجاهز» — أول حاجة في الشاشة — كانت بتقع تمامًا. دالة اتشالت وفضل اللي بينده عليها موجود",
-      "الباگ ده كان صامت: مفيش رسالة خطأ، الشاشة بتقف وخلاص. اتكشف بأداة مراجعة بتمشي على الكود كله مش بالتجربة",
-      "المراجعة الساكنة بقت جزء من البناء: بتدوّر على نداءات لدوال مش موجودة، وتعريفات مكررة، وكود ميت — والبناء بيقف لو لقت حاجة"
+      "الريدمي وسجل التغييرات بقوا بيتولّدوا من نفس المصدر — كانوا يدويين ووقفوا عند v1.8 والأداة على v2.8",
+      "اللينكات المؤقتة اللي فضلت من أول يوم اتصلحت — الريدمي وملف النشر كانوا لسه بيقولوا اسم مستودع مش موجود",
+      "حارس جديد في البناء: أي ملف بيقول رقم نسخة لازم يقول نفس الرقم، وأي لينك مؤقت بيوقّف النشر"
     ],
     "en": [
-      "A broken feature was found and fixed: the IMEI-to-ready-reply flow — the first thing on the screen — was crashing completely. A function had been removed while its caller remained",
-      "The bug was silent: no error message, the screen simply stopped. It was found by a code analysis tool, not by using the app",
-      "Static review is now part of the build: it looks for calls to missing functions, duplicate definitions, and dead code, and stops the build if it finds any"
+      "The readme and changelog are now generated from the same source — they were manual and had drifted to v1.8 while the tool was on v2.8",
+      "Placeholder links left over from day one were fixed — the readme and deploy guide still pointed at a repository name that does not exist",
+      "A new build guard: every file that states a version must state the same one, and any placeholder link stops the release"
     ]
   }
 }
