@@ -1,16 +1,16 @@
 {
-  "version": "5.5",
+  "version": "5.6",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "ريكوست الكتابة بقى محتاج تأكيد مكتوب («نفّذ») قبل ما يتبعت — الضغطة الغلط ما تعدّلش ولا تمسح من حساب العميل",
-      "الريكوستات الحساسة على حساب العميل (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة — للتوثيق بس",
-      "كل ريكوست عليه تصنيفه: قراءة أو كتابة أو حساس — في نتايج البحث وجنب المسار، و«جرّب وصحّح» بقى للقراءة بس"
+      "كارت العربية بقى بيعرض الشريحة — من السجل مباشرة أو من الحقول المخصصة لو متسجلة هناك",
+      "«آخر تحديث» بقى يظهر حتى لو صيغة التاريخ غريبة، ومكتوب جنبه إنه آخر إشارة من الجهاز ومنها بيتحسب أونلاين/أوفلاين",
+      "تاريخ إضافة الجهاز على الحساب اتضاف للكارت، وريكوست اللستة بقى يطلبه من السيستم"
     ],
     "en": [
-      "Write requests now need a typed confirmation (نفّذ) before they are sent — a stray click cannot edit or delete on the customer account",
-      "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only",
-      "Every request carries its label: read, write, or sensitive — in search results and beside the path, and try-and-auto-fix is read-only now"
+      "The vehicle card now shows the SIM — straight from the record, or from custom fields when it is stored there",
+      "Last update now shows even when the date format is odd, labelled as the last device signal that online/offline is computed from",
+      "The date the device was added to the account joined the card, and the list request now asks the system for it"
     ]
   }
 }
