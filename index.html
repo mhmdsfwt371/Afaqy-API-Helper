@@ -647,9 +647,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.1",
+  "version": "5.2",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "5.2",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "«افحص رد» بقى يفتح على الرد نفسه — كان بيفتح على العرض المقروء ويخبّي اللي انت لزقته، وده كان غلط",
+          "تلات أوضاع تختار بينها: الرد زي ما هو، وعرض مقروء بالكروت، وجدول الحقول",
+          "التحليل اللي فوق — النجاح ولا الخطأ وعدد السجلات — بيفضل ظاهر في كل الأوضاع",
+          "أي قيمة اسمها توكن أو كلمة سر بتتخبّى حتى في العرض الخام، مع زرار إظهار — الرد ممكن يكون بتاع العميل وفيه توكنه، والشاشة بتتصوّر وتتبعت"
+        ],
+        "en": [
+          "Inspect a response now opens on the response itself — it used to open on the readable view and hide what you pasted, which was wrong",
+          "Three modes to choose from: the response as it is, a readable card view, and the field table",
+          "The analysis at the top — success or error and the record count — stays visible in every mode",
+          "Any value named token or password is masked even in the raw view, with a reveal button — the response may be the customer's own and this screen gets screenshotted"
+        ]
+      }
+    },
     {
       "v": "5.1",
       "date": "2026-08-04",
@@ -4944,7 +4962,9 @@ function renderDocs(){
    بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
    مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
 const DASH = { units:[], filter:null, flag:null, scope:null, state:null, at:null };
-let INSP_MODE = 'user';        // العرض للمستخدم هو الافتراضي — ده اللي الدعم محتاجه
+/* الافتراضي هو الرد نفسه. حطيت العرض المقروء مكانه في الأول وده كان غلط —
+   الواحد بيلزق حاجة، ما ينفعش الأداة تخبّيها وتحط غيرها. */
+let INSP_MODE = 'raw';
 const TYPE_LBL = { gps:{ar:'GPS', en:'GPS'},
                    stationary:{ar:'وحدة ثابتة', en:'Stationary unit'},
                    stationary_unit:{ar:'وحدة ثابتة', en:'Stationary unit'},
@@ -5779,6 +5799,14 @@ function pickRows(json){
 /* ============ تصليح الـ JSON المكسور ============
    الموظف بينسخ الرد من إيميل أو واتساب أو الكونسول، فبيجي معاه زبالة.
    بنصلّح المعروف ونقول صلّحنا إيه — عشان يتعلّم، ومايبقاش سحر. */
+/* أي قيمة اسمها توكن أو باسورد بتتخبّى في العرض — الرد ممكن يكون
+   بتاع العميل وفيه توكنه، والموظف بيصوّر الشاشة ويبعتها. */
+function maskSecrets(txt){
+  return redactToken(String(txt||''))
+    .replace(/("(?:token|access_token|refresh_token|password|secret|api_?key|authorization)"\s*:\s*")([^"]{6,})(")/gi,
+             (m,a,v,z)=>a + v.slice(0,6) + '…<hidden>' + z);
+}
+
 function repairJson(raw){
   const fixes = [];
   let x = String(raw||'');
@@ -6207,14 +6235,17 @@ function renderInspect(){
   const {rows, path, total} = pickRows(j);
   if(!rows.length){
     out.innerHTML = `<div class="panel"><div class="sec">${fixNote}${head}
-      <div class="note" style="margin-top:8px">${t('الرد ده مش لستة سجلات — دي قراءة مباشرة لمحتواه.','This response is not a list of records — here is a direct reading of its contents.')}</div>
-      ${userPlain(j)}
-      <div class="row"><button class="btn ghost" id="inRaw2">${t('اعرض الرد الخام','Show raw response')}</button></div>
-      <div id="inRawBox2"></div></div></div>`;
-    const rb=$('inRaw2'); if(rb) rb.onclick=()=>{
-      const b=$('inRawBox2');
-      b.innerHTML = b.innerHTML ? '' : `<pre class="pre" style="margin-top:10px">${esc(redactToken(JSON.stringify(j,null,2)).slice(0,8000))}</pre>`;
-      if(b.innerHTML) clipBlocks(b); };
+      <div class="note" style="margin-top:8px">${t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="ct" id="imRaw2" aria-selected="${INSP_MODE!=='user'}">${t('الرد زي ما هو','The response as it is')}</button>
+        <button class="ct" id="imUser2" aria-selected="${INSP_MODE==='user'}">${t('قراءة الحقول','Read the fields')}</button>
+      </div>
+      ${INSP_MODE==='user'
+        ? userPlain(j)
+        : `<pre class="pre" style="margin-top:10px">${esc(maskSecrets(JSON.stringify(j,null,2)).slice(0,20000))}</pre>`}
+      </div></div>`;
+    $('imRaw2').onclick  = ()=>{ INSP_MODE='raw';  renderInspect(); };
+    $('imUser2').onclick = ()=>{ INSP_MODE='user'; renderInspect(); };
     clipBlocks(out); return;
   }
 
@@ -6250,10 +6281,18 @@ function renderInspect(){
     ${fixNote}${head}
     <div class="note sig" style="margin-top:8px">${sumLine}</div>
     <div class="row" style="margin-top:10px">
-      <button class="ct" id="imUser" aria-selected="${INSP_MODE==='user'}">${t('عرض للمستخدم','As the user sees it')}</button>
+      <button class="ct" id="imRaw" aria-selected="${INSP_MODE==='raw'}">${t('الرد زي ما هو','The response as it is')}</button>
+      <button class="ct" id="imUser" aria-selected="${INSP_MODE==='user'}">${t('عرض مقروء','Readable view')}</button>
       <button class="ct" id="imTable" aria-selected="${INSP_MODE==='table'}">${t('جدول الحقول','Field table')}</button>
     </div>
-    ${INSP_MODE==='user'
+    ${INSP_MODE==='raw'
+      ? (()=>{ const full=JSON.stringify(j,null,2), safe=maskSecrets(full);
+          return (safe!==full ? `<div class="note" style="margin-top:10px">
+              ${t('في قيم حساسة اتخبت (توكن أو كلمة سر) — الشاشة دي ممكن تتصوّر وتتبعت.',
+                  'Sensitive values are hidden (a token or password) — this screen might be screenshotted and shared.')}
+              <button class="chip" id="inShow" style="margin-inline-start:6px">${t('أظهرها','Reveal')}</button></div>` : '')
+            + `<pre class="pre" id="inRawPre" style="margin-top:10px">${esc(safe.slice(0,20000))}</pre>`; })()
+      : INSP_MODE==='user'
       ? `<div class="cards" style="margin-top:10px">${rows.slice(0,60).map(r=>userCard(r._raw||r)).join('')}</div>
          ${rows.length>60?`<div class="note" style="margin-top:8px">${t('بنعرض أول 60 — بدّل لجدول الحقول لو عايز الكل.','Showing the first 60 — switch to the field table for all of them.')}</div>`:''}`
       : `<div style="overflow-x:auto; margin-top:10px">
@@ -6265,9 +6304,7 @@ function renderInspect(){
     <div class="row">
       <button class="btn sig" id="inGuide">${t('اعمل دليل استخدام للعميل','Build a usage guide for the customer')}</button>
       <button class="btn ghost" id="inCopy">${t('نسخ ملخص للعميل','Copy summary for the customer')}</button>
-      <button class="btn ghost" id="inRaw">${t('اعرض الرد الخام','Show raw response')}</button>
     </div>
-    <div id="inRawBox"></div>
   </div></div>`;
 
   $('inCopy').onclick = ()=>{
@@ -6288,14 +6325,17 @@ function renderInspect(){
     parts.push('Note: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the body.');
     copy(parts.join(NL), t('اتنسخ الملخص','Summary copied'));
   };
+  $('imRaw').onclick   = ()=>{ INSP_MODE='raw';   renderInspect(); };
+  const shw=$('inShow'); if(shw) shw.onclick = ()=>{
+    const pre=$('inRawPre'), full=JSON.stringify(j,null,2);
+    const on = shw.dataset.on==='1';
+    pre.textContent = on ? maskSecrets(full).slice(0,20000) : full.slice(0,20000);
+    shw.dataset.on = on ? '' : '1';
+    shw.textContent = on ? t('أظهرها','Reveal') : t('اخفيها','Hide');
+  };
   $('imUser').onclick  = ()=>{ INSP_MODE='user';  renderInspect(); };
   $('imTable').onclick = ()=>{ INSP_MODE='table'; renderInspect(); };
   $('inGuide').onclick = ()=>showUsageGuide(j, null);
-  $('inRaw').onclick = ()=>{
-    const b=$('inRawBox');
-    b.innerHTML = b.innerHTML ? '' : `<pre class="pre" style="margin-top:10px">${esc(redactToken(JSON.stringify(j,null,2)).slice(0,20000))}</pre>`;
-    if(b.innerHTML) clipBlocks(b);
-  };
   clipBlocks(out);
 }
 

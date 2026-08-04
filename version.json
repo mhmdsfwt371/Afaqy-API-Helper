@@ -1,16 +1,16 @@
 {
-  "version": "5.1",
+  "version": "5.2",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "تدقيق لغوي على كل النصوص العربية في الأداة — 716 نص",
-      "أهم اللي اتصلح: الأداة كانت بتسمّي نفسها باسمين، «الأداة» في 22 موضع و«التول» في 17. بقت اسم واحد",
-      "وتيم التطوير كان بيتقال عليه «مصر» لوحدها مرة و«تيم مصر» مرة — بقى اسم واحد كمان"
+      "«افحص رد» بقى يفتح على الرد نفسه — كان بيفتح على العرض المقروء ويخبّي اللي انت لزقته، وده كان غلط",
+      "تلات أوضاع تختار بينها: الرد زي ما هو، وعرض مقروء بالكروت، وجدول الحقول",
+      "التحليل اللي فوق — النجاح ولا الخطأ وعدد السجلات — بيفضل ظاهر في كل الأوضاع"
     ],
     "en": [
-      "A language review pass over every Arabic string in the tool — 716 strings",
-      "The main fix: the tool was calling itself by two different names in Arabic. It now uses one",
-      "The development team was likewise referred to two different ways. That is now consistent too"
+      "Inspect a response now opens on the response itself — it used to open on the readable view and hide what you pasted, which was wrong",
+      "Three modes to choose from: the response as it is, a readable card view, and the field table",
+      "The analysis at the top — success or error and the record count — stays visible in every mode"
     ]
   }
 }
