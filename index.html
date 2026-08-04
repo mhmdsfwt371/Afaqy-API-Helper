@@ -574,9 +574,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.7",
+  "version": "2.8",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.8",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "باگ مكسور اتكشف واتصلح: «من الـ IMEI للرد الجاهز» — أول حاجة في الشاشة — كانت بتقع تمامًا. دالة اتشالت وفضل اللي بينده عليها موجود",
+          "الباگ ده كان صامت: مفيش رسالة خطأ، الشاشة بتقف وخلاص. اتكشف بأداة مراجعة بتمشي على الكود كله مش بالتجربة",
+          "المراجعة الساكنة بقت جزء من البناء: بتدوّر على نداءات لدوال مش موجودة، وتعريفات مكررة، وكود ميت — والبناء بيقف لو لقت حاجة",
+          "اتشال كود ميت: دالتين متعرّفتين ومحدش بيستخدمهم",
+          "اختبار جديد بيمشي التدفق السريع كامل: IMEI ← UID ← تجربة ← curl"
+        ],
+        "en": [
+          "A broken feature was found and fixed: the IMEI-to-ready-reply flow — the first thing on the screen — was crashing completely. A function had been removed while its caller remained",
+          "The bug was silent: no error message, the screen simply stopped. It was found by a code analysis tool, not by using the app",
+          "Static review is now part of the build: it looks for calls to missing functions, duplicate definitions, and dead code, and stops the build if it finds any",
+          "Removed dead code: two functions that were defined and never used",
+          "A new test walks the whole quick flow: IMEI to UID to run to curl"
+        ]
+      }
+    },
     {
       "v": "2.7",
       "date": "2026-08-04",
@@ -1583,25 +1603,6 @@ NOTES
 Best regards,`;
 }
 
-function customerReply(e){
-  const url = baseUrl() + e.p + (e.t ? '?token=<YOUR_TOKEN>' : '');
-  const b = bodyOf(e);
-  return `Hi,
-
-To do this, use the following endpoint:
-
-${e.m} ${url}
-Content-Type: application/json
-${e.t ? '\nAuthentication: pass the token you receive from POST /auth/login as a "token" query parameter.\n' : ''}${b ? `\nRequest body:\n${b}\n` : ''}
-Notes:
-- Almost all endpoints in this API use POST.
-- The request body is always wrapped in a "data" object.
-- List endpoints accept "limit" and "offset" inside "data" for paging, and a "filters" object for filtering.
-
-Let me know if you need a sample response for this call.
-
-Best regards,`;
-}
 
 function escalation(e){
   if(LANG==='en') return `Escalation to the development team
@@ -3143,30 +3144,6 @@ function doChoose(i){
       renderSteps(); }; }};
   renderSteps();
 }
-function recipeEscalation(){
-  const r=RC.r, en = LANG==='en';
-  const lines = r.steps.map((st,i)=>{ const x=RC.results[i];
-    const st8 = x ? (x.ok ? (en?'OK':'تمام') : (en?'FAILED':'فشل')) : (en?'not run':'ما اتنفذتش');
-    return `${i+1}) ${dual(st.t)} — ${st8}${x&&!x.ok&&x.text?'\n   '+(en?'response: ':'الرد: ')+String(x.text).slice(0,400):''}`; }).join('\n');
-  if(en) return `Escalation to the development team
-
-Scenario: ${dual(r.title)}
-Environment: ${baseUrl()}
-
-Steps and outcome:
-${lines}
-
-Needed: confirmation of these requests, a sample successful response, and the meaning of the returned codes.`;
-  return `تصعيد لتيم التطوير — مصر
-
-السيناريو: ${dual(r.title)}
-البيئة: ${baseUrl()}
-
-الخطوات ونتيجتها:
-${lines}
-
-المطلوب: تأكيد الريكوستات دي وشكل الرد الناجح وأكواد الأخطاء.`;
-}
 
 let TOKEN_MEM = '';
 
@@ -3595,6 +3572,31 @@ function labVariants(e, override){
   }
   if(!obj) out.push({n:'بودي فاضي', url, body:{data:{}}, h:H});
   return out;
+}
+
+/* نواة سلّم التصحيح: بتجرّب الصيغ واحدة ورا التانية وبترجّع النتيجة.
+   بتستخدمها labRunLadder (بترسم) و runQuick (بتبني رد للعميل).
+   اتشالت مرة بالغلط وفضلت runQuick بتنده عليها — والتدفق السريع كان بيقع. */
+async function ladderCore(e, override, onStep){
+  const vs = labVariants(e, override), tried = [];
+  for(let n=0; n<vs.length; n++){
+    const v = vs[n];
+    if(onStep) { try{ onStep(tried, v, n, vs.length); }catch(_){} }
+    let res, txt;
+    try{
+      res = await fetch(v.url, {method:e.m||'POST', headers:v.h,
+                                body: v.body ? JSON.stringify(v.body) : undefined});
+      txt = await res.text();
+    }catch(err){ return {net:false, tried, win:null}; }
+    let json=null, pretty=txt;
+    try{ json=JSON.parse(txt); pretty=JSON.stringify(json,null,2); }catch(_){}
+    const inner = json && (json.status_code || (json.data && json.data.status_code));
+    const code = inner ? Number(inner) : res.status;
+    const ok = res.ok && !(inner && Number(inner)>=400);
+    tried.push({name:v.n, code, ok, why: ok?'':diagnose(code, txt)});
+    if(ok) return {net:true, tried, win:{v, code, pretty, json}};
+  }
+  return {net:true, tried, win:null};
 }
 
 async function labRunLadder(e){

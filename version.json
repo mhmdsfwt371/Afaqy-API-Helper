@@ -1,16 +1,16 @@
 {
-  "version": "2.7",
+  "version": "2.8",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "تبويب جديد «افحص رد»: الصق أي رد JSON — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء بأسماء وأرقام وعدادات محوّلة",
-      "ساعات التشغيل بتتحوّل من ثواني لساعات في الجدول أوتوماتيك، والملخص بيقول إن التحويل حصل",
-      "لو الرد فيه خطأ، بيتعرض السبب والحقل المرفوض بالاسم — نفس تشخيص التجربة الحية"
+      "باگ مكسور اتكشف واتصلح: «من الـ IMEI للرد الجاهز» — أول حاجة في الشاشة — كانت بتقع تمامًا. دالة اتشالت وفضل اللي بينده عليها موجود",
+      "الباگ ده كان صامت: مفيش رسالة خطأ، الشاشة بتقف وخلاص. اتكشف بأداة مراجعة بتمشي على الكود كله مش بالتجربة",
+      "المراجعة الساكنة بقت جزء من البناء: بتدوّر على نداءات لدوال مش موجودة، وتعريفات مكررة، وكود ميت — والبناء بيقف لو لقت حاجة"
     ],
     "en": [
-      "New Inspect tab: paste any JSON response — yours or one a customer sent — and it becomes a readable table with names, ids and converted counters",
-      "Engine hours are converted from seconds to hours in the table automatically, and the summary says so",
-      "If the response carries an error, the cause and the rejected field are named — the same diagnosis as a live run"
+      "A broken feature was found and fixed: the IMEI-to-ready-reply flow — the first thing on the screen — was crashing completely. A function had been removed while its caller remained",
+      "The bug was silent: no error message, the screen simply stopped. It was found by a code analysis tool, not by using the app",
+      "Static review is now part of the build: it looks for calls to missing functions, duplicate definitions, and dead code, and stops the build if it finds any"
     ]
   }
 }
