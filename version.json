@@ -1,16 +1,16 @@
 {
-  "version": "5.4",
-  "date": "2026-08-04",
+  "version": "5.5",
+  "date": "2026-08-05",
   "notes": {
     "ar": [
-      "اللينك الكامل والأمثلة بقوا بيعرضوا <YOUR_TOKEN> بدل توكنك الحقيقي — دول أكتر حاجة بتتنسخ وتتبعت للعملاء",
-      "زرار «أظهر توكني» جنب اللينك لو عايز تشغّل المثال في الترمنال بنفسك، ولما يظهر بيتكتب تحذير إنك ما تنسخش منه للعميل وهو ظاهر",
-      "التنفيذ الفعلي مش متأثر — «جرّب مرة واحدة» و«جرّب وصحّح» بيبعتوا بالتوكن الحقيقي في كل الحالات"
+      "ريكوست الكتابة بقى محتاج تأكيد مكتوب («نفّذ») قبل ما يتبعت — الضغطة الغلط ما تعدّلش ولا تمسح من حساب العميل",
+      "الريكوستات الحساسة على حساب العميل (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة — للتوثيق بس",
+      "كل ريكوست عليه تصنيفه: قراءة أو كتابة أو حساس — في نتايج البحث وجنب المسار، و«جرّب وصحّح» بقى للقراءة بس"
     ],
     "en": [
-      "The full URL and the code examples now show a placeholder instead of your real token — these are the things most often copied and sent to customers",
-      "A Reveal my token button sits beside the link for when you want to run the example in your own terminal, with a warning while it is showing",
-      "Actual execution is unaffected — running a request still sends the real token in every case"
+      "Write requests now need a typed confirmation (نفّذ) before they are sent — a stray click cannot edit or delete on the customer account",
+      "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only",
+      "Every request carries its label: read, write, or sensitive — in search results and beside the path, and try-and-auto-fix is read-only now"
     ]
   }
 }

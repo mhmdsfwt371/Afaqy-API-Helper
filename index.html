@@ -295,6 +295,8 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <input id="sesP" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px; font-family:var(--ar); text-align:right; direction:rtl">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
       <span id="sesState" class="pill">غير متصل</span>
+      <input id="tickCust" autocomplete="off" style="width:150px; font-family:var(--ar); text-align:right; direction:rtl" data-arph="عميل التذكرة (اختياري)" data-enph="Ticket customer (optional)" placeholder="عميل التذكرة (اختياري)">
+      <span id="tickWarn" class="pill" style="background:#F6D9DC; color:#8E2430; border:1px solid #E5B4BA" hidden data-ar="⚠ حساب مختلف عن عميل التذكرة" data-en="⚠ Different account from the ticket customer">⚠ حساب مختلف عن عميل التذكرة</span>
       <span id="unitSep" style="color:#33475C" hidden>|</span>
       <input id="unitIn" hidden placeholder="IMEI" autocomplete="off" style="width:150px"
              data-arph="IMEI أو الاسم" data-enph="IMEI or name">
@@ -647,9 +649,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.4",
-  "date": "2026-08-04",
+  "version": "5.5",
+  "date": "2026-08-05",
   "history": [
+    {
+      "v": "5.5",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "ريكوست الكتابة بقى محتاج تأكيد مكتوب («نفّذ») قبل ما يتبعت — الضغطة الغلط ما تعدّلش ولا تمسح من حساب العميل",
+          "الريكوستات الحساسة على حساب العميل (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة — للتوثيق بس",
+          "كل ريكوست عليه تصنيفه: قراءة أو كتابة أو حساس — في نتايج البحث وجنب المسار، و«جرّب وصحّح» بقى للقراءة بس",
+          "خانة «عميل التذكرة» بتحذّرك لو متوصل بحساب مختلف عن اللي بترد عليه — عشان رد عميل ما يروحش لعميل تاني",
+          "سقف ٤ ريكوستات متزامنة، وأسماء العملاء اتشالت من مصدر الزيب العام لملف خاص والزيب بقى يتبني طازة مع كل نشر"
+        ],
+        "en": [
+          "Write requests now need a typed confirmation (نفّذ) before they are sent — a stray click cannot edit or delete on the customer account",
+          "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only",
+          "Every request carries its label: read, write, or sensitive — in search results and beside the path, and try-and-auto-fix is read-only now",
+          "The ticket-customer box warns you when the connected account differs from the customer you are answering",
+          "At most 4 concurrent requests, customer names moved out of the public zip source into a private file, and the zip is rebuilt fresh on every release"
+        ]
+      }
+    },
     {
       "v": "5.4",
       "date": "2026-08-04",
@@ -1717,6 +1739,32 @@ const DOCS = {
       }
     },
     {
+      "id": "exec",
+      "t": {
+        "ar": "أمان التنفيذ — القراءة غير الكتابة",
+        "en": "Execution safety — reads are not writes"
+      },
+      "since": "5.5",
+      "b": {
+        "ar": [
+          "كل ريكوست في الأداة متصنّف: قراءة، أو كتابة، أو حساس — والتصنيف ظاهر جنب المسار وفي نتايج البحث.",
+          "ريكوست الكتابة (إضافة / تعديل / مسح / تعيين / استيراد) مش بيتنفذ غير لما تكتب «نفّذ» بإيدك — الضغطة الغلط ما تلمسش داتا العميل.",
+          "«جرّب وصحّح» بقى للقراءة بس، لأنه بيرمي أكتر من محاولة — وده على الكتابة خطر.",
+          "الريكوستات الحساسة على حساب العميل نفسه (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة خالص — للتوثيق بس.",
+          "خانة «عميل التذكرة» جنب الاتصال: لو الحساب المتصل مختلف عن العميل اللي بترد عليه، تحذير بيظهر قبل ما تخلط بين عميلين.",
+          "حد أقصى ٤ ريكوستات في نفس اللحظة — الداشبوردات ما تضربش حساب العميل دفعة واحدة."
+        ],
+        "en": [
+          "Every request in the tool is classified: read, write, or sensitive — the label shows next to the path and in search results.",
+          "A write request (add / edit / delete / assign / import) only runs after you type نفّذ yourself — a stray click cannot touch customer data.",
+          "Try-and-auto-fix is now read-only, because it fires several attempts — dangerous on writes.",
+          "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only.",
+          "The ticket-customer box beside the connection warns you when the connected account differs from the customer you are answering.",
+          "At most 4 requests run at the same moment — dashboards no longer hammer the customer account in one burst."
+        ]
+      }
+    },
+    {
       "id": "fail",
       "since": "1.2",
       "t": {
@@ -2290,7 +2338,7 @@ function renderResults(list){
   box.innerHTML = list.map((r,i)=>`
     <button class="res" data-i="${r.e.i}" aria-current="${cur && cur.i===r.e.i}">
       <span class="m m-${esc(r.e.m||'POST')}">${esc(r.e.m||'POST')}</span>
-      <span class="rp">${esc(r.e.p)}</span>
+      <span class="rp">${esc(r.e.p)}</span> ${kindChip(r.e)}
       <div class="rn">${esc(r.e.n)}</div>
       <div class="rg">${esc(r.e.g)}${r.e.s ? ' › ' + esc(r.e.s) : ''}</div>
     </button>`).join('');
@@ -2312,26 +2360,29 @@ function _renderDetail(e, why){
   RUN_SEQ++;                               // فتحت ريكوست تاني: أي رد قديم يتجاهل
   const dangerous = SAFE.test(e.n);
   const isLogin = NO_RETRY.test(e.p||'');
-  const noFix = isLogin || DESTRUCTIVE.test(e.n) || DESTRUCTIVE.test(e.p);
+  const KIND = epKind(e);
+  const noFix = isLogin || KIND !== 'read' || DESTRUCTIVE.test(e.n) || DESTRUCTIVE.test(e.p);
   const b = bodyOf(e);
   $('detail').innerHTML = `
   <div class="panel">
     <div class="p-head">
       <div class="crumb">${esc(e.g)}${e.s?' › '+esc(e.s):''} › <b>${esc(e.n)}</b></div>
-      <div class="path"><span class="m m-${esc(e.m||'POST')}">${esc(e.m||'POST')}</span> ${esc(e.p)}</div>
+      <div class="path"><span class="m m-${esc(e.m||'POST')}">${esc(e.m||'POST')}</span> ${esc(e.p)} ${kindChip(e)}</div>
       ${why && why.length ? `<div class="why"><b>${t('ظهر لأن سؤالك فيه:','Matched because your question contains:')}</b>${why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>` : ''}
       ${(()=>{ const d=dupOf(e); if(!d) return '';
         const others=d.filter(x=>x.i!==e.i).map(x=>esc(x.g+' › '+x.n)).join('، ');
         return `<div class="note warn" style="margin-top:10px"><b>نفس الإندبوينت موجود في فولدر تاني:</b> ${others}.<br>الفولدر هنا اتنسخ وما اتعدّلش، فاعتمد على الإندبوينت نفسه مش على اسم الفولدر.</div>`; })()}
       <div class="row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft)">
-        <button class="btn sig" id="topTry">${t('جرّب دلوقتي','Run it now')}</button>
+        <button class="btn sig" id="topTry" ${KIND==='danger'?'disabled':''}>${t('جرّب دلوقتي','Run it now')}</button>
         <button class="btn sig" id="topCopy" style="background:var(--ink); border-color:var(--ink)">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>
         <span style="font-size:12.5px; color:var(--muted); align-self:center">
           ${SESSION.token ? t('متصل — النتيجة الحقيقية هتتحط في الرد','Connected — the live result goes into the reply')
                           : t('اتصل من فوق عشان الرد يبقى فيه النتيجة الحقيقية','Connect above so the reply carries the live result')}
         </span>
       </div>
-      ${dangerous ? `<div class="note warn" style="margin-top:10px">ريكوست خطر — ما يتبعتش للعميل كمثال إلا بموافقة. جرّبه على البيئة التجريبية بس.</div>` : ''}
+      ${KIND==='danger' ? `<div class="note warn" style="margin-top:10px"><b>${t('ريكوست حساس على حساب العميل — التنفيذ من هنا مقفول.','Sensitive account request — running it from here is locked.')}</b><br>${t('الدخول بحساب العميل أو تصفير الباسورد أو مسح الحساب بيتعمل من المنصة وبإجراء رسمي، مش من أداة الدعم.','Impersonation, password resets and account deletion go through the platform with a formal procedure, not the support tool.')}</div>`
+         : KIND==='write' ? `<div class="note warn" style="margin-top:10px"><b>${t('ريكوست كتابة — بيغيّر داتا العميل فعليًا.','A write request — it changes real customer data.')}</b> ${t('التجربة هتطلب تأكيد مكتوب قبل الإرسال.','Running it asks for a typed confirmation first.')}</div>`
+         : dangerous ? `<div class="note warn" style="margin-top:10px">${t('ريكوست خطر — ما يتبعتش للعميل كمثال إلا بموافقة. جرّبه على البيئة التجريبية بس.','A risky request — do not send it to a customer as an example without approval. Try it on staging only.')}</div>` : ''}
     </div>
 
     <div class="sec">
@@ -2398,10 +2449,11 @@ function _renderDetail(e, why){
         <button class="btn warn" id="escal">${t('تصعيد','Escalate')}</button>
       </div>
       <div class="row" style="margin-top:2px; padding-top:10px; border-top:1px dashed var(--line-soft)">
-        <button class="btn ghost" id="tryIt">${t('جرّب مرة واحدة','Run once')}</button>
+        <button class="btn ghost" id="tryIt" ${KIND==='danger'?'disabled':''}>${t('جرّب مرة واحدة','Run once')}</button>
         <button class="btn sig" id="tryFix" ${noFix?'disabled':''}>${t('جرّب وصحّح لوحدك','Try &amp; auto-fix')}</button>
         <span style="font-size:12.5px; color:var(--muted); align-self:center">
-          ${isLogin ? t('التصحيح التلقائي مقفول هنا — إعادة محاولات الدخول بتقفل حسابات العملاء. استخدم شريط الاتصال فوق.',
+          ${KIND==='danger' ? t('التنفيذ مقفول على الريكوست ده — حساس على حساب العميل نفسه.','Running this request is locked — it touches the customer account itself.')
+             : isLogin ? t('التصحيح التلقائي مقفول هنا — إعادة محاولات الدخول بتقفل حسابات العملاء. استخدم شريط الاتصال فوق.',
                         'Auto-fix is disabled here — repeated login attempts lock customer accounts. Use the connection bar above.')
             : noFix ? t('التصحيح التلقائي مقفول على الريكوستات اللي بتعدّل أو بتمسح','Auto-fix is disabled for requests that modify or delete')
                       : (SESSION.token ? t('متصل — جاهز للتجربة','Connected — ready to run')
@@ -2513,7 +2565,34 @@ function liveBody(e){
   return raw;
 }
 
-async function tryItRun(e, out){
+async function tryItRun(e, out, armed){
+  const k = epKind(e);
+  if(k === 'danger'){
+    out.innerHTML = `<div class="note warn" style="margin-top:12px"><b>${t('مقفول.','Locked.')}</b> ${t('الريكوست ده بيلمس حساب العميل نفسه (دخول بحسابه / باسورد / مسح) — ما يتنفذش من أداة الدعم.','This request touches the customer account itself — impersonation / password / deletion — and it does not run from the support tool.')}</div>`;
+    return;
+  }
+  if(k === 'write' && !armed){
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">
+      <b>${t('ريكوست كتابة — هيغيّر داتا العميل فعليًا.','A write request — it changes real customer data.')}</b><br>
+      ${t('لو قاصدها فعلًا: اكتب','If you really mean it: type')} <b>نفّذ</b> ${t('في الخانة ودوس تأكيد.','in the box, then press confirm.')}
+      <div class="row" style="margin-top:8px">
+        <input class="wgIn" style="width:110px" autocomplete="off">
+        <button class="btn warn wgGo">${t('تأكيد التنفيذ','Confirm the run')}</button>
+        <button class="btn ghost wgNo">${t('إلغاء','Cancel')}</button>
+      </div>
+    </div>`;
+    const gi = out.querySelector('.wgIn'), gg = out.querySelector('.wgGo'), gn = out.querySelector('.wgNo');
+    if(gg) gg.onclick = ()=>{
+      const v = ((gi && gi.value) || '').trim();
+      if(v === 'نفّذ' || v === 'نفذ') tryItRun(e, out, true);
+      else if(gi) gi.style.borderColor = '#B4232F';
+    };
+    if(gn) gn.onclick = ()=>{ out.innerHTML = ''; };
+    return;
+  }
+  return tryItSend(e, out);
+}
+async function tryItSend(e, out){
   if(e.t && !SESSION.token){
     out.innerHTML = `<div class="note warn" style="margin-top:12px">${t('مش متصل. اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال، والأداة هتجيب التوكن لوحدها.','Not connected. Enter the username and password above and press Connect — the tool fetches the token for you.')}</div>`;
     return;
@@ -4169,7 +4248,7 @@ async function connect(silent){
     const inner = json && (json.status_code || (json.data && json.data.status_code));
     const tok = (res.ok && !(inner && Number(inner)>=400)) ? deepFindKey(json,'token') : null;
     if(tok){
-      SESSION.user=u; SESSION.pass=pw; SESSION.token=tok; SESSION.at=Date.now();
+      SESSION.user=u; SESSION.pass=pw; SESSION.token=tok; SESSION.at=Date.now(); checkTick();
       /* حساب جديد = كل اللي اتخزّن عن الحساب القديم يروح.
          من غير كده هتشوف عربيات عميل وانت متصل بعميل تاني. */
       SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
@@ -4193,7 +4272,7 @@ async function connect(silent){
 let LAST_LOGIN_FAIL = null;
 
 function disconnect(){
-  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null;
+  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null; checkTick();
   SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
   Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
   $('sesU').value=''; $('sesP').value=''; $('unitIn').value=''; unitPaint(t('—','—'));
@@ -4208,6 +4287,15 @@ function looksAuthFail(code, txt){
 }
 
 /* كل ريكوست في الأداة بيعدي من هنا. لو التوكن خلص، بيسجل دخول تاني ويعيد المحاولة مرة واحدة. */
+/* v5.5 — سقف تزامن: أربع ريكوستات في نفس اللحظة كحد أقصى.
+   الداشبوردات بتضرب عشرات النداءات — من غير سقف بنداهم كلهم على حساب العميل مرة واحدة. */
+let POLITE_N = 0; const POLITE_Q = [];
+async function polite(fn){
+  if(POLITE_N >= 4) await new Promise(res => POLITE_Q.push(res));
+  POLITE_N++;
+  try{ return await fn(); }
+  finally{ POLITE_N--; const nx = POLITE_Q.shift(); if(nx) nx(); }
+}
 async function apiFetch(path, body, opts){
   opts = opts || {};
   if(!SESSION.token && SESSION.user===''){
@@ -4231,11 +4319,11 @@ async function apiFetch(path, body, opts){
     return { ok: res.ok && !(inner && Number(inner)>=400), code, txt, json, pretty };
     } finally { if(timer) clearTimeout(timer); }
   };
-  let r = await send();
+  let r = await polite(send);
   logCall((opts.method||'POST')+' '+path, r.code, r.ok);
   if(!r.ok && looksAuthFail(r.code, r.txt) && SESSION.user && !opts.noRetry){
     const re = await connect(true);
-    if(re){ r = await send(); r.relogged = true; }
+    if(re){ r = await polite(send); r.relogged = true; }
   }
   return r;
 }
@@ -4245,6 +4333,30 @@ async function apiFetch(path, body, opts){
 const DESTRUCTIVE = /(delete|forever|bulk[-_]delete|reset|logout|restore|unassign|un-assign|import|set_status|edit|add|send)/i;
 /* ريكوستات الدخول: إعادة المحاولة عليها بتقفل حسابات العملاء */
 const NO_RETRY = /^\/auth\/(login|send_login_otp|verify_login_otp|login_as|forgot|reset)/i;
+
+/* ============ v5.5 — تصنيف التنفيذ ============
+   كل ريكوست: قراءة، أو كتابة (بيغيّر داتا العميل)، أو حساس (بيلمس حساب العميل نفسه).
+   الكتابة محتاجة تأكيد مكتوب، والحساس مقفول من الأداة خالص.
+   القايمة القديمة DESTRUCTIVE كانت سايبة التعيين والتحديث والحفظ — دي بتغطّيهم. */
+const FORBIDDEN = /^\/auth\/(login_as|forgot|reset_expired_password|reset|delete|send_login_otp)(\/|\?|$)/i;
+const WRITE_WORDS = new Set('add,create,store,save,edit,update,modify,delete,destroy,remove,erase,assign,unassign,attach,detach,unlink,import,upload,activate,deactivate,enable,disable,suspend,resume,change,cancel,approve,reject,copy,duplicate,clone,restore,clear,reset,merge,move,transfer,sync,send,register,renew,extend,reorder,mark,close,reopen,toggle,logout,revoke,terminate,restart,bulk,forever'.split(','));
+const READ_TAIL = new Set('list,lists,view,search,get,show,count,export,history,details,detail,signals,report,reports,log,logs,status,check,inquire,find,filter,summary,info,stats,last,download,print,types,options'.split(','));
+function epKind(e){
+  const p = String((e && e.p) || e || '').toLowerCase();
+  if(FORBIDDEN.test(p)) return 'danger';
+  const segs = p.split(/[^a-z]+/).filter(Boolean);
+  if(segs.length && READ_TAIL.has(segs[segs.length-1])) return 'read';
+  if(segs.some(w => WRITE_WORDS.has(w))) return 'write';
+  const name = String((e && e.n) || '').toLowerCase().split(/[^a-z]+/).filter(Boolean);
+  if(name.some(w => WRITE_WORDS.has(w))) return 'write';
+  return 'read';
+}
+function kindChip(e){
+  const k = epKind(e);
+  if(k === 'danger') return `<span class="pill" style="background:#F6D9DC; color:#8E2430; border:1px solid #E5B4BA">${t('حساس — مقفول','Sensitive — locked')}</span>`;
+  if(k === 'write')  return `<span class="pill" style="background:#F9E9D2; color:#8A5A16; border:1px solid #EAD2A8">${t('كتابة','Writes')}</span>`;
+  return '';
+}
 
 
 /* الصيغ البديلة — كلها مبنية على أنماط موجودة فعلًا في الكولكشن، مش تخمين */
@@ -4735,6 +4847,7 @@ function renderQuick(){
 async function runQuick(){
   const out=$('qkOut'), btn=$('qkGo'), old=btn.textContent;
   const imei=($('qkImei').value||'').trim(), e=QUICK.ep;
+  if(e && epKind(e)!=='read'){ out.innerHTML=`<div class="note warn" style="margin-top:12px">${t('المسار السريع للقراءة بس — الريكوست ده بيكتب في داتا العميل. افتحه من تبويب الريكوستات وجرّبه بالتأكيد المكتوب.','The quick path is read-only — this request writes customer data. Open it in the requests tab and run it with the typed confirmation.')}</div>`; return; }
   if(!SESSION.token){ out.innerHTML=`<div class="note warn" style="margin-top:12px">${t('اتصل بحساب العميل من الشريط اللي فوق الأول.','Connect to the customer account from the top bar first.')}</div>`; return; }
   if(!imei){ out.innerHTML=`<div class="note warn" style="margin-top:12px">${t('الصق الـ IMEI أو اسم العربية.','Paste the IMEI or the vehicle name.')}</div>`; return; }
   btn.disabled=true;
@@ -6784,6 +6897,15 @@ $('baseUrl').addEventListener('change', ev=>{
   if(cur) renderDetail(cur, []);
   if(!$('v-faq').hidden) renderFaq();
 });
+/* v5.5 — خانة عميل التذكرة: تحذير لو الحساب المتصل مختلف عن العميل اللي بترد عليه */
+function checkTick(){
+  const w = $('tickWarn'); if(!w) return;
+  const c = (($('tickCust') && $('tickCust').value) || '').trim().toLowerCase();
+  const u = String(SESSION.user || '').toLowerCase();
+  w.hidden = !(c && u && c !== u && u.indexOf(c) < 0 && c.indexOf(u) < 0);
+}
+try{ $('tickCust').value = sessionStorage.getItem('tickCust') || ''; }catch(_){}
+$('tickCust').oninput = ()=>{ try{ sessionStorage.setItem('tickCust', $('tickCust').value); }catch(_){} checkTick(); };
 $('sesGo').onclick  = ()=>connect(false);
 $('sesOut').onclick = disconnect;
 $('sesCopy').onclick= ()=>copy(SESSION.token, t('اتنسخ التوكن','Token copied'));
