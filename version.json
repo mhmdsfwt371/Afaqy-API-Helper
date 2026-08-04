@@ -1,16 +1,16 @@
 {
-  "version": "5.6",
+  "version": "5.7",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "كارت العربية بقى بيعرض الشريحة — من السجل مباشرة أو من الحقول المخصصة لو متسجلة هناك",
-      "«آخر تحديث» بقى يظهر حتى لو صيغة التاريخ غريبة، ومكتوب جنبه إنه آخر إشارة من الجهاز ومنها بيتحسب أونلاين/أوفلاين",
-      "تاريخ إضافة الجهاز على الحساب اتضاف للكارت، وريكوست اللستة بقى يطلبه من السيستم"
+      "الرد الفاضي بقى صريح: «سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر» بدل ما يتقال عليه مش لستة — عشان محدش يقول للعميل في عطل وهو الفلتر ضيّق",
+      "التصعيد بقى بياخد معاه الحساب المتصل وعميل التذكرة أوتوماتيك، جنب سجل اللي اتنفذ اللي كان موجود — من غير توكن ولا باسورد",
+      "كارت العربية بقى يعرض المجموعات اللي العربية فيها"
     ],
     "en": [
-      "The vehicle card now shows the SIM — straight from the record, or from custom fields when it is stored there",
-      "Last update now shows even when the date format is odd, labelled as the last device signal that online/offline is computed from",
-      "The date the device was added to the account joined the card, and the list request now asks the system for it"
+      "An empty result is now stated plainly: valid response, working connection, zero records matching the filter — so nobody tells the customer it is broken when the filter is just narrow",
+      "Escalations now carry the connected account and the ticket customer automatically, beside the session log that was already there — never the token or the password",
+      "The vehicle card now shows the groups the vehicle belongs to"
     ]
   }
 }

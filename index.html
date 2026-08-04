@@ -649,9 +649,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.6",
+  "version": "5.7",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "5.7",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "الرد الفاضي بقى صريح: «سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر» بدل ما يتقال عليه مش لستة — عشان محدش يقول للعميل في عطل وهو الفلتر ضيّق",
+          "التصعيد بقى بياخد معاه الحساب المتصل وعميل التذكرة أوتوماتيك، جنب سجل اللي اتنفذ اللي كان موجود — من غير توكن ولا باسورد",
+          "كارت العربية بقى يعرض المجموعات اللي العربية فيها",
+          "الكلام العريض في الدليل بقى يظهر عريض فعلًا — على الشاشة وفي الملف المطبوع، بدل نجمتين حواليه",
+          "اسأل «رقم الشريحة» أو «امتى اتضاف الجهاز» وهتوصل للريكوست الصح على طول"
+        ],
+        "en": [
+          "An empty result is now stated plainly: valid response, working connection, zero records matching the filter — so nobody tells the customer it is broken when the filter is just narrow",
+          "Escalations now carry the connected account and the ticket customer automatically, beside the session log that was already there — never the token or the password",
+          "The vehicle card now shows the groups the vehicle belongs to",
+          "Bold words in the guide now render bold — on screen and in the printed file — instead of stars around them",
+          "Ask for the SIM number or when the device was added and you land on the right request straight away"
+        ]
+      }
+    },
     {
       "v": "5.6",
       "date": "2026-08-05",
@@ -1990,6 +2010,8 @@ const INTENT = [
  { re:/سرعه|سرعة|كام كيلو في الساعه|speed/,                               p:/^\/units\/signals$/,     s:10 },
  { re:/اشار|سيجنال|رسايل الجهاز|رسائل الجهاز|signal/,                      p:/^\/units\/signals$/,     s:10 },
  { re:/عداد|ساعات ?التشغيل|ساعات تشغيل|كيلومتر|المسافه|odometer|engine.?hours|counters/, p:/^\/units\/lists$/, s:10 },
+ { re:/شريح[هة]|رقم الشريح[هة]|سيم كارت|sim/,                                p:/^\/units\/lists$/,     s:10 },
+ { re:/امتي اتضاف|امتى اتضاف|تاريخ الاضاف|اتضافت عل[يى] الحساب|تاريخ اضاف[هة] الجهاز/, p:/^\/units\/lists$/,   s:14 },
  { re:/موقع|مواقع|لوكيشن|فين العربيه|location/,                            p:/^\/units\/locations$/,   s:10 },
  { re:/عنوان|address/,                                                     p:/^\/units\/address/,      s:8  },
  { re:/لسته العربيات|قائمه العربيات|كل العربيات|list vehicles|units list/,  p:/^\/units\/lists$/,       s:10 },
@@ -2220,9 +2242,9 @@ let RUN_PAINT = null;          // إعادة الرسم من نفس الرد —
 function runView(r){
   if(RUN_VIEW==='raw')
     return `<pre class="pre" id="respBox">${esc(maskSecrets(r.pretty).slice(0,20000))}</pre>`;
-  const {rows, total} = pickRows(r.json);
+  const PK = pickRows(r.json), {rows, total} = PK;
   if(!rows.length)
-    return `<div class="note" style="margin-bottom:8px">${t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>`
+    return `<div class="note" style="margin-bottom:8px">${PK.empty ? t('الرد سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر. وسّع التواريخ أو شيل الفلاتر وجرّب تاني.','The response is valid and the connection works — zero records matched the filter. Widen the dates or drop the filters and retry.') : t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>`
          + userPlain(r.json);
   if(RUN_VIEW==='user')
     return `<div class="cards">${rows.slice(0,60).map(x=>userCard(x._raw||x)).join('')}</div>`
@@ -5045,6 +5067,13 @@ const EVIDENCE = [
  {k:'one', ar:'UID عربية واحدة نجرّب عليها', en:'The UID of one vehicle to reproduce with'},
  {k:'try', ar:'اللي جربناه إحنا قبل التصعيد', en:'What we tried before escalating'}
 ];
+/* v5.7 — سطور سياق بتتزود على نص التصعيد */
+function escCtxLines(en){
+  const acc = SESSION.user || (en ? '(not connected)' : '(مش متصل)');
+  const tc = (($('tickCust') && $('tickCust').value) || '').trim();
+  return (en ? `\nConnected account: ${acc}` : `\nالحساب المتصل: ${acc}`)
+       + (tc ? (en ? `\nTicket customer: ${tc}` : `\nعميل التذكرة: ${tc}`) : '');
+}
 function openEscalation(subject){
   const en = LANG==='en';
   $('mtitle').textContent = t('تصعيد لتيم التطوير','Escalation to development');
@@ -5066,7 +5095,7 @@ function openEscalation(subject){
       ? `Escalation to the development team
 
 Subject: ${subject}
-Environment: ${baseUrl()}
+Environment: ${baseUrl()}${escCtxLines(true)}
 
 Attached evidence:
 ${have.length?have.map(e=>'  - '+e.en).join('\n'):'  - none'}
@@ -5082,7 +5111,7 @@ What we need back:
       : `تصعيد لتيم التطوير — مصر
 
 الموضوع: ${subject}
-البيئة: ${baseUrl()}
+البيئة: ${baseUrl()}${escCtxLines(false)}
 
 الأدلة المرفقة:
 ${have.length?have.map(e=>'  - '+e.ar).join('\n'):'  - مفيش'}
@@ -5102,12 +5131,14 @@ ${log}
   $('mask').hidden = false;
 }
 
+/* v5.7 — **كلمة** في بنود الدليل بتظهر عريضة فعلًا بدل النجمتين */
+function mdBold(h){ return h.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }
 /* ================= الدليل ================= */
 function renderDocs(){
   const cur = DOCS.version;
   const newest = DOCS.history[0];
   const secNew = DOCS.sections.filter(x=>x.since===cur);
-  const line = x => `<li style="margin-bottom:5px">${esc(x)}</li>`;
+  const line = x => `<li style="margin-bottom:5px">${mdBold(esc(x))}</li>`;
   $('docsBox').innerHTML = `
    <div class="row" style="margin-bottom:10px"><button class="btn ghost" id="docBack">${t('‹ رجوع','‹ Back')}</button></div>
    <div class="panel" style="margin-bottom:14px">
@@ -6006,14 +6037,15 @@ const FIELD_LBL = {
 
 function pickRows(json){
   /* بندوّر على أكبر مصفوفة سجلات في الرد */
-  let best=null, path='';
+  let best=null, path='', emptyPath=null;
   const walk=(o,p2,d)=>{ if(d>7||o==null) return;
-    if(Array.isArray(o)){ if(o.length && typeof o[0]==='object' && (!best||o.length>best.length)){best=o;path=p2;}
+    if(Array.isArray(o)){ if(!o.length && emptyPath===null) emptyPath=p2||'.';
+      if(o.length && typeof o[0]==='object' && (!best||o.length>best.length)){best=o;path=p2;}
       o.slice(0,2).forEach(x=>walk(x,p2,d+1)); return; }
     if(typeof o==='object') Object.entries(o).forEach(([k,v])=>walk(v, p2?p2+'.'+k:k, d+1));
   };
   walk(json,'',0);
-  if(!best) return {rows:[], path:''};
+  if(!best) return {rows:[], path:'', total:0, empty: emptyPath!==null};
   const rows = best.slice(0,500).map(o=>{
     const c = (o && o.counters) || {};
     const lu = (o && o.last_update) || {};
@@ -6034,7 +6066,7 @@ function pickRows(json){
       _raw: o
     };
   });
-  return {rows, path, total:best.length};
+  return {rows, path, total:best.length, empty:false};
 }
 
 /* ============ تصليح الـ JSON المكسور ============
@@ -6371,6 +6403,8 @@ function userCard(u){
   add(t('رقم السجل','Record id'), u.id || u._id, t('ده اللي بيتبعت للإندبوينتس التانية','this is what other endpoints take'));
   add(t('سيريال الجهاز','Device serial'), u.device_serial);
   add(t('الشريحة','SIM'), simOf(u), t('رقم شريحة الاتصال جوه الجهاز — مالوش علاقة بتعريف العربية','the SIM inside the device — unrelated to identifying the vehicle'));
+  const grp = (Array.isArray(u.groups)?u.groups:[]).map(g=>typeof g==='string'?g:(g&&(g.name||g.title))||'').filter(Boolean);
+  if(grp.length) add(t('المجموعات','Groups'), grp.slice(0,4).join('، ') + (grp.length>4?` +${grp.length-4}`:''));
   const luRaw = lu.time || lu.datetime || u.last_time || '';
   if(luRaw || seen) add(t('آخر تحديث','Last update'), luRaw,
                (seen ? timeAgo(seen) + ' — ' : '') + t('آخر إشارة من الجهاز، ومنها بيتحسب أونلاين/أوفلاين','the last signal from the device — online/offline is computed from it'));
@@ -6481,10 +6515,10 @@ function renderInspect(){
       <br>${t('خد بالك: السيستم بيرجع 200 حتى مع الأخطاء، فالحكم من هنا مش من كود الـ HTTP.','Note: the platform returns 200 even on failure, so this is what to read — not the HTTP status.')}</div>`;
   }
 
-  const {rows, path, total} = pickRows(j);
+  const PK2 = pickRows(j), {rows, path, total} = PK2;
   if(!rows.length){
     out.innerHTML = `<div class="panel"><div class="sec">${fixNote}${head}
-      <div class="note" style="margin-top:8px">${t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>
+      <div class="note" style="margin-top:8px">${PK2.empty ? t('الرد سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر. وسّع التواريخ أو شيل الفلاتر وجرّب تاني.','The response is valid and the connection works — zero records matched the filter. Widen the dates or drop the filters and retry.') : t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>
       <div class="row" style="margin-top:10px">
         <button class="ct" id="imRaw2" aria-selected="${INSP_MODE!=='user'}">${t('الرد زي ما هو','The response as it is')}</button>
         <button class="ct" id="imUser2" aria-selected="${INSP_MODE==='user'}">${t('قراءة الحقول','Read the fields')}</button>
