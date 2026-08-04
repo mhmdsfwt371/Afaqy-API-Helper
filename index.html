@@ -502,9 +502,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.0",
+  "version": "2.1",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.1",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اتصلح إن «انسخ رد كامل للعميل» كان بيقول «الرد الحقيقي مش موجود» حتى بعد ما الريكوست ينجح",
+          "السبب: تعديلات على دالة التشغيل ما اتطبقتش أصلاً — الاستبدال ما لقاش النص وعدّى من غير ما يقول، والنشر عدّى",
+          "دالة التشغيل اتكتبت من جديد: بتسجّل النتيجة، وبتعرض الريكوست اللي اتبعت، وزرار النسخ بيطلع بعد النجاح",
+          "حارس جديد في البناء: عشر علامات لازم تكون في الملف النهائي، ولو واحدة ناقصة البناء بيقف",
+          "اختبار جديد بيمشي التدفق كامل: تشغيل ناجح ← الرد الحقيقي جوه الرد الجاهز ← التوكن متشال"
+        ],
+        "en": [
+          "Fixed \"Copy full reply\" saying no live response even after a successful run",
+          "The cause: edits to the run function never applied — the text replacement did not match and passed silently, and the release shipped",
+          "The run function was rewritten: it records the result, shows what was actually sent, and the copy button appears on success",
+          "A new build guard: ten markers must exist in the final file, and the build stops if any is missing",
+          "A new end-to-end test: successful run, live response inside the ready reply, token stripped"
+        ]
+      }
+    },
     {
       "v": "2.0",
       "date": "2026-08-04",
@@ -1637,24 +1657,45 @@ function liveBody(e){
 
 async function tryItRun(e, out){
   if(e.t && !SESSION.token){
-    out.innerHTML = `<div class="note warn" style="margin-top:12px">مش متصل. اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال، والتول هتجيب التوكن لوحدها.</div>`;
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">${t('مش متصل. اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال، والأداة هتجيب التوكن لوحدها.','Not connected. Enter the username and password above and press Connect — the tool fetches the token for you.')}</div>`;
+    return;
+  }
+  const b = liveBody(e);
+  if(NO_RETRY.test(e.p||'') && !SESSION.user){
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">${t('البودي ده فيه علامات مكان البيانات مش بيانات حقيقية. اتصل من الشريط اللي فوق الأول.','This body carries placeholders, not real credentials. Connect from the top bar first.')}</div>`;
     return;
   }
   out.innerHTML = `<div class="note" style="margin-top:12px">${t('جاري الإرسال…','Sending…')}</div>`;
-  const b = liveBody(e);
-  if(NO_RETRY.test(e.p||'') && !SESSION.user){
-    out.innerHTML = `<div class="note warn" style="margin-top:12px">${t('البودي ده فيه علامات مكان البيانات مش بيانات حقيقية. اتصل من الشريط اللي فوق الأول، وساعتها التجربة هتستخدم بيانات الحساب فعلاً.','This body carries placeholders, not real credentials. Connect from the top bar first and the run will use the actual account.')}</div>`;
-    return;
-  }
+  const sentUrl = baseUrl() + e.p + (e.t ? ('?token=' + (SESSION.token||'')) : '');
+  const sentHdr = {'Content-Type':'application/json','Accept':'application/json'};
   try{
-    const r = await apiFetch(e.p, (b && e.m!=='GET') ? b : null, {method:e.m||'POST', noToken:!e.t, noRetry:NO_RETRY.test(e.p||'')});
-    out.innerHTML = `<div class="note ${r.ok?'sig':'warn'}" style="margin-top:12px">الرد: <b>${r.code}</b>${r.relogged?' — التوكن كان خلص واتجدّد لوحده':''}${r.ok?'':'<br>'+diagnose(r.code, r.txt)}</div>
-      <pre class="pre" style="margin-top:8px">${esc(r.pretty.slice(0,4000))}</pre>`;
+    const r = await apiFetch(e.p, (b && e.m!=='GET') ? b : null,
+                             {method:e.m||'POST', noToken:!e.t, noRetry:NO_RETRY.test(e.p||'')});
+    rememberRun(e, b, r);
+    out.innerHTML =
+      `<div class="note ${r.ok?'sig':'warn'}" style="margin-top:12px">${t('الرد','Response')}: <b>${r.code}</b>`
+      + `${r.relogged?t(' — التوكن كان خلص واتجدّد لوحده',' — the token had expired and was refreshed'):''}`
+      + `${r.ok?'':'<br>'+diagnose(r.code, r.txt)}</div>`
+      + echoReq(e.m||'POST', sentUrl, sentHdr, b)
+      + `<h3 style="margin:14px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الرد كامل','Full response')}</h3>`
+      + `<pre class="pre">${esc(redactToken(r.pretty).slice(0,4000))}</pre>`
+      + `<div class="row">`
+      +   (r.ok ? `<button class="btn sig" id="cpPacket">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>` : '')
+      +   `<button class="btn ghost" id="cpSent">${t('نسخ اللي اتبعت كـ curl','Copy what was sent as curl')}</button>`
+      +   (r.ok ? '' : `<button class="btn warn" id="cpEsc">${t('تصعيد','Escalate')}</button>`)
+      + `</div>`;
+    if(r.ok && $('cpPacket')) $('cpPacket').onclick = ()=>{
+      const pk = packetFor(e);
+      copy(pk.text, t('اتنسخ الرد الكامل','Full reply copied'));
+    };
+    if($('cpSent')) $('cpSent').onclick = ()=>copy(
+      `curl -X ${e.m||'POST'} "${sentUrl.split(SESSION.token||'\u0000').join('<YOUR_TOKEN>')}" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '${redactToken(b||'')}'`,
+      t('اتنسخ','Copied'));
+    if(!r.ok && $('cpEsc')) $('cpEsc').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
   }catch(err){
     out.innerHTML = `<div class="note warn" style="margin-top:12px">
-      <b>الطلب ما وصلش من المتصفح.</b><br>
-      ده غالبًا حظر <span class="lat">CORS</span> — يعني السيرفر مش سامح لصفحة على دومين تاني تناديه. مش معناه إن الريكوست غلط.<br>
-      الحل: استضيف الصفحة دي على نفس دومين الـ API، أو انسخ مثال <span class="lat">cURL</span> وشغّله من الترمنال.<br>
+      <b>${t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')}</b><br>
+      ${t('اتأكد من النت ومن عنوان البيئة، أو انسخ مثال cURL وشغّله من الترمنال.','Check the connection and the environment URL, or copy the cURL example and run it from a terminal.')}<br>
       <small>${esc(String(err).slice(0,180))}</small></div>`;
   }
 }

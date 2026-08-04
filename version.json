@@ -1,16 +1,16 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "اتصلحت مشكلة إن شريط «في نسخة أحدث» كان بيفضل يطلع مهما تعمل تحديث",
-      "السبب كان تلات طبقات كاش فوق بعض: كاش المتصفح، وخدنة الخلفية، وكاش الأداة — والتحديث كان بيفك واحدة بس",
-      "زرار «تحديث» بقى يمسح كل الكاشات ويلغي خدمة الخلفية ويعيد التحميل من الشبكة"
+      "اتصلح إن «انسخ رد كامل للعميل» كان بيقول «الرد الحقيقي مش موجود» حتى بعد ما الريكوست ينجح",
+      "السبب: تعديلات على دالة التشغيل ما اتطبقتش أصلاً — الاستبدال ما لقاش النص وعدّى من غير ما يقول، والنشر عدّى",
+      "دالة التشغيل اتكتبت من جديد: بتسجّل النتيجة، وبتعرض الريكوست اللي اتبعت، وزرار النسخ بيطلع بعد النجاح"
     ],
     "en": [
-      "Fixed the \"newer version\" bar reappearing no matter how many times you refreshed",
-      "The cause was three cache layers stacked: the browser cache, the service worker, and the app cache — the update button only cleared one",
-      "The Update button now clears every cache, unregisters the service worker, and reloads from the network"
+      "Fixed \"Copy full reply\" saying no live response even after a successful run",
+      "The cause: edits to the run function never applied — the text replacement did not match and passed silently, and the release shipped",
+      "The run function was rewritten: it records the result, shows what was actually sent, and the copy button appears on success"
     ]
   }
 }
