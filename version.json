@@ -1,16 +1,16 @@
 {
-  "version": "3.8",
+  "version": "3.9",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "اسم ملف الإكسل بقى موحّد في كل التصديرات: اسم المستخدم - الحاجة اللي اتجابت - التاريخ - الوقت",
-      "الاسم بيقول المفلتر إيه: «GPS» أو «ساكتة أكتر من أسبوع» أو «وصل - استعلام» — الملفات بترتب نفسها في مجلد التنزيلات",
-      "اتصلح سبب توقّف التحديث التلقائي: خدمة الخلفية كانت ممكن تتقدّم من كاش المتصفح، فالنسخة القديمة تفضل شغالة"
+      "المؤشرات بقت تظهر في المساحة الفاضية جنب الرسم الدائري كمان، مش تحت بس",
+      "بطاقات جديدة لأجهزة الـ MDVR، بتظهر بس لو الحساب فيه MDVR فعلًا",
+      "«مش بتسجّل» — الجهاز شغال والتسجيل واقف، يعني الكاميرا مش بتحفظ حاجة"
     ],
     "en": [
-      "The Excel filename is now uniform across every export: username, what was exported, date, time",
-      "The name states what was filtered — a device type, a Needs-attention card, or a WASL list or inquiry — so files sort themselves in the downloads folder",
-      "Fixed the cause of the auto-update going quiet: the service worker could be served from the browser cache, keeping an old build alive"
+      "Indicators now also appear in the empty space beside the donut chart, not only below it",
+      "New cards for MDVR devices, shown only when the account actually has MDVR units",
+      "Not recording — the device is up but recording is off, so the camera is saving nothing"
     ]
   }
 }

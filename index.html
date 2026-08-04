@@ -619,9 +619,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.8",
+  "version": "3.9",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.9",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "المؤشرات بقت تظهر في المساحة الفاضية جنب الرسم الدائري كمان، مش تحت بس",
+          "بطاقات جديدة لأجهزة الـ MDVR، بتظهر بس لو الحساب فيه MDVR فعلًا",
+          "«مش بتسجّل» — الجهاز شغال والتسجيل واقف، يعني الكاميرا مش بتحفظ حاجة",
+          "«تخزين شبه ممتلئ» — تسعين بالمية أو أكتر، التسجيل هيقف أو هيمسح القديم",
+          "«حالة التسجيل مش راجعة» — الرد مفيهوش الحقل أصلًا. دي بتتفلتر وتتصدّر برضه عشان تبعتها لمصر",
+          "التفرقة بين «مش بتسجّل» و«مش راجعة في الرد» مقصودة — الأولى مشكلة عند العميل والتانية نقص في الـ API"
+        ],
+        "en": [
+          "Indicators now also appear in the empty space beside the donut chart, not only below it",
+          "New cards for MDVR devices, shown only when the account actually has MDVR units",
+          "Not recording — the device is up but recording is off, so the camera is saving nothing",
+          "Storage nearly full — at ninety percent or more, recording will stop or start overwriting",
+          "Recording status not returned — the field is absent from the response. This is filterable and exportable too, so you can send it to development",
+          "Separating not recording from not returned is deliberate — the first is a customer problem, the second is a gap in the API"
+        ]
+      }
+    },
     {
       "v": "3.8",
       "date": "2026-08-04",
@@ -4763,6 +4785,25 @@ function dashInsights(){
     {k:'noTime',   n:noTime.length,   set:noTime,   sev:'low',
      ttl:{ar:'ما رسلتش ولا مرة', en:'Never reported'},
      why:{ar:'اتضافت في النظام ومحصلش تركيب أو تفعيل.', en:'Added to the platform but never installed or activated.'}},
+    ...(()=>{  /* بتظهر بس لو في أجهزة MDVR فعلًا */
+      const mdvr = U.filter(u=>/mdvr/i.test(typeOf(u)));
+      if(!mdvr.length) return [];
+      const noRec  = mdvr.filter(u=>recOf(u).rec===null);
+      const offRec = mdvr.filter(u=>recOf(u).rec===false);
+      const full   = mdvr.filter(u=>{ const st=recOf(u).store; return st!==null && st>=90; });
+      const out=[];
+      if(offRec.length) out.push({k:'mdvrOff', n:offRec.length, set:offRec, sev:'high',
+        ttl:{ar:'MDVR مش بتسجّل', en:'MDVR not recording'},
+        why:{ar:'الجهاز شغال بس التسجيل واقف — الكاميرا مش بتحفظ حاجة.', en:'The device is up but recording is off — nothing is being saved.'}});
+      if(full.length) out.push({k:'mdvrFull', n:full.length, set:full, sev:'high',
+        ttl:{ar:'تخزين MDVR شبه ممتلئ', en:'MDVR storage nearly full'},
+        why:{ar:'٩٠٪ أو أكتر. التسجيل هيقف أو هيمسح القديم.', en:'At 90% or more. Recording will stop or start overwriting.'}});
+      if(noRec.length) out.push({k:'mdvrNoData', n:noRec.length, set:noRec, sev:'low',
+        ttl:{ar:'حالة تسجيل MDVR مش راجعة', en:'MDVR recording status not returned'},
+        why:{ar:'الرد مفيهوش حقل تسجيل لأجهزة الـ MDVR دي. صدّرها وابعتها لمصر عشان يضيفوا الحقل.',
+             en:'The response has no recording field for these MDVR devices. Export them and send to development so the field gets added.'}});
+      return out;
+    })(),
     {k:'inactive', n:inactive.length, set:inactive, sev:'low',
      ttl:{ar:'موقوفة', en:'Deactivated'},
      why:{ar:'متوقفة عن قصد. تأكد إن العميل عارف.', en:'Deliberately switched off. Confirm the customer knows.'}}
@@ -4775,6 +4816,27 @@ function dashRows(){
     if(f) return f.set;
   }
   return DASH.filter ? DASH.units.filter(u=>typeOf(u)===DASH.filter) : DASH.units;
+}
+
+/* التسجيل والتخزين للـ MDVR.
+   بندوّر في الحساسات على أي اسم فيه record/storage. لو مفيش، بنرجّع null
+   ومعناها «مش راجع في الرد» — مش «مش بتسجّل». الفرق ده مهم. */
+function recOf(u){
+  let rec=null, store=null;
+  sensorsOf(u).forEach(s2=>{
+    const n = String(s2.name||'');
+    if(rec===null && /record|تسجيل/i.test(n)){
+      const v=String(s2.value).toLowerCase();
+      rec = /^(1|true|on|yes|rec|recording|شغال)$/.test(v) ? true
+          : /^(0|false|off|no|stopped|واقف)$/.test(v) ? false : null;
+      if(rec===null) rec = v ? true : null;
+    }
+    if(store===null && /storage|disk|hdd|sd|تخزين/i.test(n)){
+      const m = String(s2.value).match(/(\d+(?:\.\d+)?)/);
+      store = m ? Number(m[1]) : null;
+    }
+  });
+  return {rec, store};
 }
 
 /* ============ مؤشرات لكل نوع جهاز ============
@@ -4844,6 +4906,38 @@ function sensorPanel(rows){
   return `<h3 style="margin-top:16px">${t('الحساسات','Sensors')}</h3>` + body;
 }
 
+/* المساحة الفاضية جنب الرسم: ملخص سريع لحالة النوع المفلتر */
+function miniState(){
+  if(DASH.flag || !DASH.filter) return '';
+  const rows = DASH.units.filter(u=>typeOf(u)===DASH.filter);
+  if(!rows.length) return '';
+  const chip=(n,lbl,tone)=>`<div style="flex:1 1 88px; min-width:88px; padding:8px 10px; border:1px solid var(--line-soft);
+      border-radius:3px; border-inline-start:3px solid ${tone||'var(--line)'}; background:var(--panel-2)">
+      <div style="font-size:19px; font-weight:700; line-height:1.1; color:${tone||'var(--ink)'}">${n}</div>
+      <div style="font-size:11.5px; color:var(--ink-2); margin-top:2px">${esc(lbl)}</div></div>`;
+  const b = stateBuckets(rows);
+  let chips = chip(b.on.length, t('أونلاين','Online'), 'var(--ok)') +
+              chip(b.off.length, t('أوفلاين','Offline'), b.off.length?'var(--alert)':null);
+  if(/stationary|lora/i.test(DASH.filter)){
+    const kinds = SENSOR_KIND.map(k=>({k, n: rows.filter(u=>sensorsOf(u).some(s2=>k.re.test(s2.name))).length}))
+                             .filter(x=>x.n);
+    chips += kinds.map(x=>chip(x.n, dual(x.k.ttl), 'var(--signal)')).join('');
+  } else if(b.unknown.length !== b.on.length || !b.on.length){
+    chips += chip(b.driving.length, t('متحركة شغّالة','Moving'), 'var(--signal)') +
+             chip(b.idling.length,  t('واقفة شغّالة','Idling'), b.idling.length?'#B45309':null) +
+             chip(b.parked.length,  t('واقفة مطفية','Parked'), null) +
+             chip(b.towed.length,   t('متحركة مطفية','Towed?'), b.towed.length?'var(--alert)':null);
+  }
+  if(/mdvr/i.test(DASH.filter)){
+    const r = rows.map(recOf);
+    const noRec = r.filter(x=>x.rec===null).length;
+    const offRec = r.filter(x=>x.rec===false).length;
+    chips += noRec ? chip(noRec, t('التسجيل مش راجع','No recording data'), 'var(--muted)')
+                   : chip(offRec, t('مش بتسجّل','Not recording'), offRec?'var(--alert)':'var(--ok)');
+  }
+  return `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">${chips}</div>`;
+}
+
 function typePanel(){
   if(DASH.flag) return '';
   const k = DASH.filter;
@@ -4905,6 +4999,7 @@ function dashRender(){
           <span style="font-size:12.5px; color:var(--muted); align-self:center">
             ${DASH.filter ? t('مفلتر على','Filtered by')+' '+esc(typeLabel(DASH.filter)) : t('دوس على أي نوع عشان تفلتر','Click a type to filter')}</span>
         </div>
+        ${miniState()}
       </div>
     </div>
   </div></div>
