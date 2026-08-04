@@ -393,8 +393,13 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 
 <!-- ================= INSPECT ================= -->
 <section class="view" id="v-inspect" hidden>
+  <div class="row" style="margin-bottom:12px">
+    <button class="ct" id="ivResp" aria-selected="true"></button>
+    <button class="ct" id="ivReq" aria-selected="false"></button>
+  </div>
   <div class="note sig" style="margin-bottom:14px" id="inIntro"></div>
-  <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+  <div id="capBox" hidden></div>
+  <div class="panel" style="margin-bottom:14px" id="inPanel"><div class="sec" style="border-top:0">
     <h3 id="inH1"></h3>
     <textarea id="inText" style="width:100%; min-height:150px; font-family:var(--mono); font-size:12.5px;
       direction:ltr; text-align:left; border:1px solid var(--line); border-radius:3px; padding:12px;
@@ -605,9 +610,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.4",
+  "version": "3.5",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.5",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "موديول «ارصد ريكوست من المنصة» جوه تبويب الفحص، بخطوات مكتوبة: افتح أدوات المطوّر، Network، Fetch/XHR، كليك يمين، Copy as cURL",
+          "تلزق الأمر والأداة تحلّله: الإندبوينت، وشكل البودي، ونوع المحتوى، ووجود التوكن",
+          "بتقارنه بالكولكشن وتقولك الفرق بالظبط — شكل بودي مختلف، أو ميثود، أو توكن، أو إندبوينت مش موجود أصلًا",
+          "زرار «طبّق التصحيح»: الشكل المرصود بيبقى أول صيغة يجرّبها التصحيح التلقائي، وبيتسجّل في المعرفة تلقائي عشان تصدّره وتبعته",
+          "التوكن اللي جوه أمر الـ cURL بيتشطب من العرض ومن اللي بيتسجّل في المعرفة"
+        ],
+        "en": [
+          "A Capture a request module inside the Inspect tab, with written steps: open developer tools, Network, Fetch/XHR, right-click, Copy as cURL",
+          "Paste the command and the tool parses it: endpoint, body shape, content type, and whether a token is present",
+          "It compares against the collection and names the differences exactly — a different body shape, method, token, or an endpoint not in the collection at all",
+          "An Apply button: the captured shape becomes the first variant auto-fix tries, and it is recorded in the knowledge base automatically so you can export and send it",
+          "The token inside the cURL command is stripped from the display and from what gets recorded"
+        ]
+      }
+    },
     {
       "v": "3.4",
       "date": "2026-08-04",
@@ -3721,6 +3746,14 @@ function labVariants(e, override){
   let obj=override||null;
   if(!obj){ try{ const t2=bodyOf(e); obj = t2 ? JSON.parse(t2) : null; }catch(_){ obj=null; } }
   const H={'Content-Type':'application/json','Accept':'application/json'};
+  const ov = OVERRIDES[e.i];
+  if(ov){
+    if(ov.form && ov.body && ov.body.data!==undefined)
+      out.push({n:'الشكل المرصود من المنصة', url, h:{'Content-Type':'application/x-www-form-urlencoded'},
+                raw:'data=' + encodeURIComponent(JSON.stringify(ov.body.data))});
+    else if(ov.body)
+      out.push({n:'الشكل المرصود من المنصة', url, body:ov.body, h:H});
+  }
   out.push({n:'زي ما هو في الكولكشن', url, body:obj, h:{'Content-Type':'application/json'}});
   out.push({n:'مع هيدر القبول', url, body:obj, h:H});
   if(obj && !('data' in obj)) out.push({n:'تغليف البودي في data', url, body:{data:obj}, h:H});
@@ -4958,7 +4991,188 @@ function renderInspect(){
   clipBlocks(out);
 }
 
+/* ================= رصد المنصة =================
+   الفريق بيفتح أدوات المطوّر، بينسخ الريكوست كـ cURL، ويلزقه هنا.
+   الأداة بتقارنه باللي في الكولكشن وبتقول الفرق، وبضغطة بتطبّقه. */
+const OVERRIDES = {};          // فهرس الإندبوينت -> الشكل المرصود
+const CAP = { parsed:null, ep:null, findings:[] };
+
+function parseCurl(txt){
+  const t2 = String(txt||'').replace(/\\\r?\n/g, ' ').trim();
+  if(!/curl/i.test(t2)) return null;
+  const out = {method:null, url:null, headers:{}, body:null, form:false};
+  const mu = t2.match(/curl\s+(?:-[A-Za-z-]+\s+(?:'[^']*'|"[^"]*"|\S+)\s+)*?['"]?(https?:\/\/[^'"\s]+)/i);
+  if(mu) out.url = mu[1];
+  const mm = t2.match(/-X\s+([A-Z]+)/); if(mm) out.method = mm[1];
+  for(const m of t2.matchAll(/-H\s+'([^']+)'|-H\s+"([^"]+)"/g)){
+    const h = m[1]||m[2]; const i = h.indexOf(':');
+    if(i>0) out.headers[h.slice(0,i).trim()] = h.slice(i+1).trim();
+  }
+  const mb = t2.match(/--data-raw\s+'([\s\S]*?)'(?:\s|$)/) || t2.match(/--data-raw\s+"([\s\S]*?)"(?:\s|$)/)
+          || t2.match(/--data(?:-binary)?\s+'([\s\S]*?)'(?:\s|$)/) || t2.match(/-d\s+'([\s\S]*?)'(?:\s|$)/)
+          || t2.match(/-d\s+"([\s\S]*?)"(?:\s|$)/);
+  if(mb) out.body = mb[1];
+  const ct = out.headers['Content-Type'] || out.headers['content-type'] || '';
+  out.form = /x-www-form-urlencoded/i.test(ct) || (!!out.body && /^[\w%\[\]]+=/.test(out.body) && !/^[{\[]/.test(out.body.trim()));
+  if(!out.method) out.method = out.body ? 'POST' : 'GET';
+  return out.url ? out : null;
+}
+
+/* البودي المرصود -> كائن، مهما كان شكله */
+function capBody(p2){
+  if(!p2.body) return {obj:null, shape:'مفيش بودي'};
+  if(p2.form){
+    const params = {};
+    p2.body.split('&').forEach(kv=>{ const i=kv.indexOf('=');
+      if(i>0) params[decodeURIComponent(kv.slice(0,i))] = decodeURIComponent(kv.slice(i+1).replace(/\+/g,' ')); });
+    if('data' in params){
+      try{ return {obj:{data:JSON.parse(params.data)}, shape:'form-encoded و data نص JSON', raw:p2.body}; }
+      catch(_){ return {obj:{data:params.data}, shape:'form-encoded و data نص', raw:p2.body}; }
+    }
+    return {obj:params, shape:'form-encoded', raw:p2.body};
+  }
+  try{
+    const j = JSON.parse(p2.body);
+    if(j && typeof j.data === 'string'){
+      try{ return {obj:{data:JSON.parse(j.data)}, shape:'JSON و data نص JSON'}; }
+      catch(_){ return {obj:j, shape:'JSON و data نص'}; }
+    }
+    return {obj:j, shape:'JSON عادي'};
+  }catch(_){ return {obj:null, shape:'بودي مش JSON'}; }
+}
+
+function analyzeCapture(txt){
+  const box=$('capOut');
+  const p2 = parseCurl(txt);
+  if(!p2){
+    box.innerHTML = `<div class="panel"><div class="sec"><div class="note warn">
+      <b>${t('ده مش أمر cURL.','That is not a cURL command.')}</b><br>
+      ${t('في المتصفح: كليك يمين على الريكوست ← Copy ← Copy as cURL، وبعدين الصقه هنا.',
+          'In the browser: right-click the request, then Copy, then Copy as cURL, and paste it here.')}</div></div></div>`;
+    return;
+  }
+  let path='';
+  try{ path = new URL(p2.url).pathname; }catch(_){ path = p2.url; }
+  /* في إندبوينت مساره فاضي في الكولكشن — كان بيطابق أي لينك. */
+  const ep = EPS.find(e=>e.p===path) ||
+             EPS.find(e=>e.p && e.p.length>4 && path.endsWith(e.p));
+  const b = capBody(p2);
+  CAP.parsed = p2; CAP.ep = ep; CAP.body = b;
+
+  const F=[];
+  if(!ep){
+    F.push({k:'warn', s:t('الإندبوينت ده مش في الكولكشن أصلًا — دي حاجة تستاهل تتبعت لمصر.',
+                          'This endpoint is not in the collection at all — worth reporting to development.')});
+  } else {
+    let colObj=null; try{ colObj = ep.b ? JSON.parse(ep.b) : null; }catch(_){}
+    const colShape = colObj && typeof colObj.data === 'object' ? 'JSON عادي' : (colObj ? 'JSON' : 'مفيش بودي');
+    if(b.shape !== colShape && b.obj)
+      F.push({k:'diff', s:t(`شكل البودي مختلف: الكولكشن «${colShape}» والمرصود «${b.shape}».`,
+                            `Body shape differs: the collection uses "${colShape}", the capture uses "${b.shape}".`), apply:true});
+    const hasTok = /[?&]token=/.test(p2.url);
+    if(hasTok !== !!ep.t)
+      F.push({k:'diff', s:t(hasTok ? 'الريكوست فيه توكن والكولكشن بيقول إنه مش محتاج.' : 'الكولكشن بيقول محتاج توكن والريكوست المرصود من غيره.',
+                            hasTok ? 'The captured request carries a token while the collection says none is needed.' : 'The collection says a token is required but the capture has none.')});
+    if((p2.method||'POST') !== (ep.m||'POST'))
+      F.push({k:'diff', s:t(`الميثود مختلف: الكولكشن ${ep.m} والمرصود ${p2.method}.`,
+                            `Method differs: collection ${ep.m}, capture ${p2.method}.`)});
+    const ctCap = (p2.headers['Content-Type']||p2.headers['content-type']||'—').split(';')[0];
+    if(ctCap !== 'application/json' && ctCap !== '—')
+      F.push({k:'diff', s:t(`نوع المحتوى «${ctCap}» مش application/json.`,`Content type is "${ctCap}", not application/json.`), apply:true});
+    if(!F.length) F.push({k:'ok', s:t('مفيش فرق — الريكوست المرصود مطابق للكولكشن.','No differences — the captured request matches the collection.')});
+  }
+  CAP.findings = F;
+
+  const safeUrl = p2.url.replace(/([?&]token=)[^&]*/,'$1<YOUR_TOKEN>');
+  const safeBody = redactToken(p2.body||'');
+  const canApply = ep && F.some(x=>x.apply);
+  box.innerHTML = `<div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    <h3>${t('اللي رصدناه','What we captured')}</h3>
+    <table class="kv">
+      <tr><td style="width:26%; font-family:var(--ar); color:var(--ink)">${t('الإندبوينت','Endpoint')}</td>
+          <td><code>${esc((p2.method||'POST')+' '+path)}</code>
+              ${ep?`<span class="tagv">${t('موجود في الكولكشن','in the collection')}</span>`:`<span class="tagv" style="background:var(--alert-soft); color:var(--alert)">${t('مش موجود','not in the collection')}</span>`}</td></tr>
+      <tr><td style="font-family:var(--ar); color:var(--ink)">${t('شكل البودي','Body shape')}</td><td><b>${esc(b.shape)}</b></td></tr>
+      <tr><td style="font-family:var(--ar); color:var(--ink)">${t('نوع المحتوى','Content type')}</td><td><code>${esc((p2.headers['Content-Type']||p2.headers['content-type']||'—').split(';')[0])}</code></td></tr>
+    </table>
+    <h3 style="margin-top:14px">${t('الفروق','Differences')}</h3>
+    <ul style="margin:6px 0 0; padding-inline-start:20px; font-size:14px; line-height:1.9">
+      ${F.map(x=>`<li style="color:${x.k==='ok'?'var(--ok)':(x.k==='warn'?'var(--alert)':'var(--ink-2)')}">${esc(x.s)}</li>`).join('')}
+    </ul>
+    ${canApply?`<div class="row"><button class="btn sig" id="capApply">${t('طبّق التصحيح على الأداة','Apply this to the tool')}</button>
+      <span style="font-size:12.5px; color:var(--muted); align-self:center">${t('هيتجرّب الشكل المرصود الأول في التصحيح التلقائي، وهيتسجّل في المعرفة.','The captured shape will be tried first by auto-fix, and recorded in the knowledge base.')}</span></div>`:''}
+    <div id="capApplied"></div>
+    <h3 style="margin-top:14px">${t('الريكوست بعد شطب التوكن','The request with the token removed')}</h3>
+    <pre class="pre">${esc((p2.method||'POST')+' '+safeUrl+'\n\n'+safeBody)}</pre>
+  </div></div>`;
+  clipBlocks(box);
+
+  const ab=$('capApply');
+  if(ab) ab.onclick = ()=>{
+    OVERRIDES[ep.i] = {body:b.obj, shape:b.shape, form:!!p2.form, raw:b.raw||null, at:new Date().toISOString().slice(0,10)};
+    const entry = {
+      sev:'mid',
+      src:{ar:'رصد من المنصة — '+new Date().toISOString().slice(0,10), en:'Captured from the platform — '+new Date().toISOString().slice(0,10)},
+      t:{ar:`${ep.p}: شكل البودي المرصود «${b.shape}»`, en:`${ep.p}: captured body shape "${b.shape}"`},
+      body:{ar:`<p>الكولكشن بيوصف شكل تاني. اللي المنصة بتبعته فعلًا:</p><pre class="pre">${esc(safeBody.slice(0,600))}</pre>`,
+            en:`<p>The collection describes a different shape. What the platform actually sends:</p><pre class="pre">${esc(safeBody.slice(0,600))}</pre>`}
+    };
+    LEARNED.unshift(entry); ADDED.push(entry);
+    $('capApplied').innerHTML = `<div class="note sig" style="margin-top:10px">
+      <b>${t('اتطبّق.','Applied.')}</b> ${t('الشكل المرصود بقى أول صيغة في التصحيح التلقائي لـ','The captured shape is now the first variant auto-fix tries for')} <code>${esc(ep.p)}</code>.<br>
+      ${t('واتسجّل في المعرفة — صدّرها من تبويب الأساسيات وابعتها لمسؤول الأداة عشان تدخل النسخة الجاية.',
+          'It was also recorded in the knowledge base — export it from the basics tab and send it to the maintainer so it ships in the next release.')}</div>`;
+    ab.disabled = true;
+    toast(t('اتطبّق واتسجّل','Applied and recorded'));
+  };
+}
+
+function paintCapture(){
+  $('capBox').innerHTML = `
+  <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    <h3>${t('إزاي ترصد ريكوست من المنصة','How to capture a request from the platform')}</h3>
+    <ol style="margin:8px 0 0; padding-inline-start:20px; font-size:14px; line-height:2">
+      <li>${t('افتح منصة أفاقي واعمل الشاشة اللي العميل بيشتكي منها.','Open the Afaqy platform and go to the screen the customer is complaining about.')}</li>
+      <li>${t('اضغط F12 ← تبويب Network ← اختار Fetch/XHR.','Press F12, open the Network tab, and pick Fetch/XHR.')}</li>
+      <li>${t('اعمل العملية تاني وانت فاتح الأدوات — الريكوستات هتظهر.','Repeat the action with the tools open — the requests will appear.')}</li>
+      <li>${t('كليك يمين على الريكوست ← Copy ← Copy as cURL.','Right-click the request, then Copy, then Copy as cURL.')}</li>
+      <li>${t('الصقه تحت واضغط حلّل.','Paste it below and press Analyse.')}</li>
+    </ol>
+    <div class="note warn" style="margin-top:10px">${t('الأمر ده فيه توكن الحساب. الأداة بتشطبه من العرض، بس ما تلزقهوش في إيميل قبل ما تتأكد.',
+      'That command contains the account token. The tool removes it from the display, but do not paste it into an email before checking.')}</div>
+    <textarea id="capText" style="width:100%; min-height:130px; margin-top:10px; font-family:var(--mono); font-size:12px;
+      direction:ltr; text-align:left; border:1px solid var(--line); border-radius:3px; padding:12px;
+      background:var(--panel-2); color:var(--ink)" placeholder="curl 'https://api.afaqy.sa/...' -H '...' --data-raw '...'"></textarea>
+    <div class="row">
+      <button class="btn sig" id="capGo">${t('حلّل','Analyse')}</button>
+      <button class="btn ghost" id="capClear">${t('مسح','Clear')}</button>
+    </div>
+  </div></div>
+  <div id="capOut"></div>`;
+  $('capGo').onclick   = ()=>analyzeCapture($('capText').value);
+  $('capClear').onclick= ()=>{ $('capText').value=''; $('capOut').innerHTML=''; };
+}
+
+let INSPVIEW = 'resp';
+function paintInspSwitch(){
+  $('ivResp').textContent = t('افحص رد','Inspect a response');
+  $('ivReq').textContent  = t('ارصد ريكوست من المنصة','Capture a request');
+  $('ivResp').setAttribute('aria-selected', INSPVIEW==='resp');
+  $('ivReq').setAttribute('aria-selected', INSPVIEW==='req');
+  $('inPanel').hidden = INSPVIEW!=='resp';
+  $('inOut').hidden   = INSPVIEW!=='resp';
+  $('capBox').hidden  = INSPVIEW!=='req';
+  if(INSPVIEW==='req'){
+    $('inIntro').innerHTML = t(
+      'لما المنصة بتعمل حاجة والكولكشن بيقول غيرها، الرصد بيكشف الفرق. الصق الريكوست كـ cURL والأداة تقارنه وتقولك الفرق — وبضغطة تطبّقه.',
+      'When the platform does something the collection does not describe, capturing reveals the difference. Paste the request as cURL and the tool compares it and tells you what differs — and applies it with one click.');
+    if(!$('capBox').innerHTML) paintCapture();
+  }
+}
+
 function paintInspect(){
+  paintInspSwitch();
+  if(INSPVIEW==='req') return;
   $('inH1').textContent = t('الصق الرد هنا','Paste the response here');
   $('inGo').textContent = t('افحص','Inspect');
   $('inFileLbl').textContent = t('أو ارفع ملف','or upload a file');
@@ -5057,6 +5271,8 @@ let wsDeb; $('wsQ').addEventListener('input', ev=>{ clearTimeout(wsDeb);
   wsDeb=setTimeout(()=>{ WASL.q=ev.target.value; waslRender(); }, 140); });
 $('dashLoad').onclick = dashLoadUnits;
 $('dashCsv').onclick  = dashExport;
+$('ivResp').onclick = ()=>{ INSPVIEW='resp'; paintInspect(); };
+$('ivReq').onclick  = ()=>{ INSPVIEW='req';  paintInspect(); };
 $('inGo').onclick = renderInspect;
 $('inClear').onclick = ()=>{ $('inText').value=''; renderInspect(); };
 $('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f) return;
