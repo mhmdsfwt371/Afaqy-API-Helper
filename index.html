@@ -248,11 +248,11 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <input id="sesP" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px; font-family:var(--ar); text-align:right; direction:rtl">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
       <span id="sesState" class="pill">غير متصل</span>
-      <span style="color:#33475C">|</span>
-      <input id="unitIn" placeholder="IMEI" autocomplete="off" style="width:150px"
+      <span id="unitSep" style="color:#33475C" hidden>|</span>
+      <input id="unitIn" hidden placeholder="IMEI" autocomplete="off" style="width:150px"
              data-arph="IMEI أو الاسم" data-enph="IMEI or name">
-      <button class="btn sig" id="unitGo" style="padding:6px 12px; font-size:13px" data-ar="حدّد العربية" data-en="Set vehicle">حدّد العربية</button>
-      <span id="unitState" class="pill">—</span>
+      <button class="btn sig" id="unitGo" hidden style="padding:6px 12px; font-size:13px" data-ar="حدّد العربية" data-en="Set vehicle">حدّد العربية</button>
+      <span id="unitState" class="pill" hidden>—</span>
       <button class="btn ghost" id="langBtn" style="padding:6px 12px; font-size:12px; color:#C7D6DF; border-color:#33475C; font-family:var(--mono)">EN</button>
       <button class="btn ghost" id="sesCopy" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="نسخ التوكن" data-en="Copy token">نسخ التوكن</button>
       <button class="btn ghost" id="sesOut" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="قطع" data-en="Disconnect">قطع</button>
@@ -342,8 +342,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 <div class="mask" id="mask" hidden><div class="modal">
   <div class="mh">
     <h3 id="mtitle" style="flex:1; min-width:0"></h3>
-    <button class="btn ghost" id="mclose" data-ar="إغلاق" data-en="Close">إغلاق</button>
-    <button class="mx" id="mx" title="إغلاق" aria-label="إغلاق">×</button>
+    <button class="mx" id="mclose" title="إغلاق" aria-label="إغلاق">×</button>
   </div>
   <div class="mb" id="mbody"></div>
 </div></div>
@@ -522,9 +521,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.2",
+  "version": "2.3",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.3",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "زرار إغلاق واحد (×) بدل اتنين بنفس المعنى",
+          "خانة العربية بتظهر بعد الاتصال بس — الشريط العلوي كان مزدحم من غير لزوم",
+          "باگ خصوصية: لما تتصل بعميل تاني، بيانات العميل الأول كانت بتفضل متخزنة — أسماء عربياته وأرقامه. دلوقتي كل حاجة بتتمسح مع كل اتصال",
+          "مهلة 45 ثانية لأي ريكوست — كان ممكن يفضل «جاري الإرسال» للأبد",
+          "شبكة أمان: أي خطأ في الأداة بيظهر بسبب واضح وزرار تحديث، بدل شاشة فاضية"
+        ],
+        "en": [
+          "One close button (×) instead of two with the same meaning",
+          "The vehicle field only appears once connected — the top bar was needlessly crowded",
+          "Privacy bug: connecting to a second customer left the first customer's data cached — vehicle names and ids. Everything now clears on each connect",
+          "A 45-second timeout on every request — it could previously hang on \"Sending…\" forever",
+          "A safety net: any error now shows a clear cause and a reload button instead of a blank screen"
+        ]
+      }
+    },
     {
       "v": "2.2",
       "date": "2026-08-04",
@@ -1510,7 +1529,8 @@ function select(e, why){
   renderDetail(e, why||[]);
 }
 
-function renderDetail(e, why){
+function renderDetail(e, why){ return _renderDetail(e, why); }
+function _renderDetail(e, why){
   const dangerous = SAFE.test(e.n);
   const isLogin = NO_RETRY.test(e.p||'');
   const noFix = isLogin || DESTRUCTIVE.test(e.n) || DESTRUCTIVE.test(e.p);
@@ -1760,7 +1780,6 @@ function openModal(title, text, arabic){
   $('mtext').focus();
 }
 $('mclose').onclick = ()=> $('mask').hidden = true;
-$('mx').onclick = ()=> $('mask').hidden = true;
 $('mask').onclick = ev => { if(ev.target === $('mask')) $('mask').hidden = true; };
 document.addEventListener('keydown', ev=>{
   if(ev.key==='Escape'){ $('mask').hidden = true; return; }
@@ -3087,6 +3106,9 @@ const SESSION = { user:'', pass:'', token:'', at:null, unit:null };
 let UNITS_CACHE = null;          // لستة العربيات بتتجاب مرة واحدة في الجلسة
 
 function unitPaint(msg, bad){
+  /* خانة العربية مالهاش لازمة قبل الاتصال — بنخفيها عشان الشريط ما يبقاش مزدحم */
+  const on = !!SESSION.token;
+  ['unitSep','unitIn','unitGo','unitState'].forEach(id=>{ const x=$(id); if(x) x.hidden = !on; });
   const el=$('unitState'); if(!el) return;
   el.textContent = msg;
   el.className = 'pill' + (SESSION.unit ? ' on' : (bad ? ' bad' : ''));
@@ -3283,7 +3305,11 @@ async function connect(silent){
     const tok = (res.ok && !(inner && Number(inner)>=400)) ? deepFindKey(json,'token') : null;
     if(tok){
       SESSION.user=u; SESSION.pass=pw; SESSION.token=tok; SESSION.at=Date.now();
-      SESSION.unit=null; UNITS_CACHE=null; unitPaint(t('مفيش عربية محددة','no vehicle set'));
+      /* حساب جديد = كل اللي اتخزّن عن الحساب القديم يروح.
+         من غير كده هتشوف عربيات عميل وانت متصل بعميل تاني. */
+      SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null;
+      Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
+      $('unitIn').value=''; unitPaint(t('مفيش عربية محددة','no vehicle set'));
       TOKEN_MEM = tok;
       sesPaint(t('متصل — ','Connected — ') + u);
       if(cur) renderDetail(cur, []);
@@ -3302,7 +3328,9 @@ async function connect(silent){
 let LAST_LOGIN_FAIL = null;
 
 function disconnect(){
-  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null; TOKEN_MEM=''; UNITS_CACHE=null;
+  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null;
+  SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null;
+  Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
   $('sesU').value=''; $('sesP').value=''; $('unitIn').value=''; unitPaint(t('—','—'));
   sesPaint(t('غير متصل','Not connected'));
   toast(t('اتقطع الاتصال واتمسحت البيانات','Disconnected, credentials cleared'));
@@ -3324,7 +3352,11 @@ async function apiFetch(path, body, opts){
   const build = () => (opts.absolute ? path : baseUrl()+path) +
     (opts.noToken ? '' : (path.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(SESSION.token||''));
   const send = async () => {
-    const res = await fetch(build(), {method:opts.method||'POST',
+    /* من غير مهلة، ريكوست معلّق بيسيب «جاري الإرسال…» على الشاشة للأبد */
+    const ctl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+    const timer = ctl ? setTimeout(()=>ctl.abort(), 45000) : null;
+    try{
+    const res = await fetch(build(), {signal: ctl?ctl.signal:undefined, method:opts.method||'POST',
       headers: opts.headers || {'Content-Type':'application/json','Accept':'application/json'},
       body: body!=null ? (typeof body==='string'?body:JSON.stringify(body)) : undefined});
     const txt = await res.text(); let json=null, pretty=txt;
@@ -3332,6 +3364,7 @@ async function apiFetch(path, body, opts){
     const inner = json && (json.status_code || (json.data && json.data.status_code));
     const code = inner ? Number(inner) : res.status;
     return { ok: res.ok && !(inner && Number(inner)>=400), code, txt, json, pretty };
+    } finally { if(timer) clearTimeout(timer); }
   };
   let r = await send();
   logCall((opts.method||'POST')+' '+path, r.code, r.ok);
@@ -4152,6 +4185,27 @@ function resetEmpty(){
         'Want to run it against a customer account? Enter the username and password above and press Connect — the token is fetched for you.')}
   </div></div>`;
 }
+/* شبكة أمان: أي خطأ في الرسم كان بيسيب الشاشة فاضية والموظف مش عارف حصل إيه.
+   دلوقتي بيظهر سبب واضح وزرار إعادة تحميل. */
+function crashScreen(err, where){
+  try{
+    const box = document.getElementById('detail') || document.body;
+    box.innerHTML = `<div class="panel"><div class="sec">
+      <div class="note warn">
+        <b>${t('حصل خطأ في الأداة','Something broke in the tool')}</b><br>
+        ${t('المكان','Where')}: <code>${String(where||'—').slice(0,60)}</code><br>
+        <code style="white-space:pre-wrap">${String(err && err.message || err).slice(0,200)}</code><br><br>
+        ${t('اضغط تحديث. لو تكررت، ابعت اللقطة دي لمسؤول الأداة.','Press reload. If it repeats, send this screenshot to whoever maintains the tool.')}
+      </div>
+      <div class="row"><button class="btn sig" onclick="location.reload()">${t('تحديث','Reload')}</button></div>
+    </div></div>`;
+  }catch(_){}
+}
+function guard(fn, where){
+  return function(){ try{ return fn.apply(this, arguments); }
+                     catch(err){ console.error(where, err); crashScreen(err, where); }; };
+}
+
 function boot(){
 resetEmpty();
 paintIntros();
@@ -4170,6 +4224,14 @@ $('verTag').textContent = 'v'+DOCS.version;
   if(VIEWS.indexOf(h)>=0 && h!=='triage') showView(h); else VIEW_STACK=['triage']; })();
 $('q').focus();
 }
+renderDetail = guard(_renderDetail, 'renderDetail');
+renderTriage = guard(renderTriage, 'renderTriage');
+renderFaq    = guard(renderFaq,    'renderFaq');
+renderDocs   = guard(renderDocs,   'renderDocs');
+renderRecipe = guard(renderRecipe, 'renderRecipe');
+showView     = guard(showView,     'showView');
+window.addEventListener('error', ev=>{ if(ev && ev.error) console.error('uncaught', ev.error); });
+
 authGate(boot);
 </script>
 </body>
