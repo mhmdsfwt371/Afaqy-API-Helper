@@ -485,9 +485,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "1.8",
+  "version": "1.9",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "1.9",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "زرار «انسخ رد كامل للعميل» اتنقل فوق خالص — كان مدفون تحت البودي والأمثلة ومحدش لاقيه",
+          "معاه زرار «جرّب دلوقتي» في نفس الشريط، تحت اسم الإندبوينت مباشرة",
+          "الشريط بيقولك لو انت متصل ولا لأ، عشان تعرف الرد هيبقى فيه النتيجة الحقيقية ولا لأ"
+        ],
+        "en": [
+          "The \"Copy full reply for the customer\" button moved to the very top — it was buried under the body and examples where nobody found it",
+          "A \"Run it now\" button sits beside it, directly under the endpoint name",
+          "The bar tells you whether you are connected, so you know if the reply will carry the live result"
+        ]
+      }
+    },
     {
       "v": "1.8",
       "date": "2026-08-04",
@@ -1477,18 +1493,24 @@ function renderDetail(e, why){
     $('detail').querySelectorAll('.ct').forEach(x=>x.setAttribute('aria-selected', x.dataset.m===codeMode));
     $('codeout').textContent = gen(e, codeMode);
   });
-  $('cpCode').onclick = ()=>copy(gen(e, codeMode), t('اتنسخ المثال','Example copied'));
-  $('cpReply').onclick = ()=>{
+  const openPacket = ()=>{
     const pk = packetFor(e);
     $('mtitle').textContent = t('رد كامل للعميل','Full reply for the customer');
     $('mbody').innerHTML =
       (pk.live ? `<div class="note sig" style="margin-bottom:10px">${t('فيه الرد الحقيقي اللي رجع من السيرفر.','Includes the live response returned by the server.')}</div>`
-               : `<div class="note warn" style="margin-bottom:10px"><b>${t('الرد الحقيقي مش موجود.','No live response yet.')}</b><br>${t('اضغط «جرّب مرة واحدة» تحت الأول، وبعدين انسخ — ساعتها الرد الحقيقي هيبقى جوه.','Press "Run once" below first, then copy — the real response will be included.')}</div>`)
+               : `<div class="note warn" style="margin-bottom:10px"><b>${t('الرد الحقيقي مش موجود.','No live response yet.')}</b><br>${t('اضغط «جرّب دلوقتي» الأول، وبعدين انسخ — ساعتها الرد الحقيقي هيبقى جوه.','Press "Run it now" first, then copy — the real response will be included.')}</div>`)
       + `<pre class="pre" style="max-height:none; white-space:pre-wrap">${esc(pk.text)}</pre>
          <div class="row"><button class="btn sig" id="pkCopy">${t('نسخ','Copy')}</button></div>`;
     $('pkCopy').onclick = ()=>copy(pk.text, t('اتنسخ الرد الكامل','Full reply copied'));
     $('mask').hidden = false;
   };
+  $('topCopy').onclick = openPacket;
+  $('topTry').onclick = ()=>{
+    document.getElementById('tryout').scrollIntoView({block:'center', behavior:'smooth'});
+    if(ensureDeps(e, ()=>tryIt(e))) tryIt(e);
+  };
+  $('cpCode').onclick = ()=>copy(gen(e, codeMode), t('اتنسخ المثال','Example copied'));
+  $('cpReply').onclick = openPacket;
   $('escal').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };

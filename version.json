@@ -1,16 +1,16 @@
 {
-  "version": "1.8",
+  "version": "1.9",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الأداة بقت تتثبّت على الجهاز زي أي تطبيق — أندرويد وآيفون وويندوز وماك",
-      "بتفتح بأيقونتها من غير شريط متصفح، وليها اختصارات للتبويبات",
-      "بتشتغل من غير نت في البحث والشروحات والأمثلة — التنفيذ الحي بس هو اللي محتاج نت"
+      "زرار «انسخ رد كامل للعميل» اتنقل فوق خالص — كان مدفون تحت البودي والأمثلة ومحدش لاقيه",
+      "معاه زرار «جرّب دلوقتي» في نفس الشريط، تحت اسم الإندبوينت مباشرة",
+      "الشريط بيقولك لو انت متصل ولا لأ، عشان تعرف الرد هيبقى فيه النتيجة الحقيقية ولا لأ"
     ],
     "en": [
-      "The tool now installs on a device like any app — Android, iPhone, Windows, and Mac",
-      "It opens with its own icon and no browser bar, with shortcuts to the tabs",
-      "Search, explanations, and examples work offline — only live execution needs a connection"
+      "The \"Copy full reply for the customer\" button moved to the very top — it was buried under the body and examples where nobody found it",
+      "A \"Run it now\" button sits beside it, directly under the endpoint name",
+      "The bar tells you whether you are connected, so you know if the reply will carry the live result"
     ]
   }
 }
