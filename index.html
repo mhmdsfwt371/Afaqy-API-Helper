@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>مساعد الإنتجريشن — دعم أفاقي</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101A24">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مساعد الإنتجريشن">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{
   --ink:#101A24; --ink-2:#33475C; --muted:#64788B;
@@ -79,6 +87,22 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 
 .grid{display:grid; grid-template-columns:minmax(280px,1fr) minmax(0,1.65fr); gap:14px; align-items:start}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .top-in{flex-direction:column; align-items:stretch; gap:8px}
+  .brand{justify-content:space-between}
+  .conn{display:grid; grid-template-columns:1fr 1fr; gap:6px; padding-bottom:10px}
+  .conn select,.conn input{width:100% !important}
+  .conn .btn{width:100%}
+  .conn #sesState,.conn #unitState{grid-column:1/-1; text-align:center}
+  .tabs-in{overflow-x:auto; -webkit-overflow-scrolling:touch; padding:0 8px}
+  .tab{white-space:nowrap; padding:12px 12px; font-size:14px}
+  .searchbar input{font-size:16px}          /* أقل من 16 بيخلي آيفون يزوّم لوحده */
+  .results{max-height:none}
+  .pre{font-size:11.5px}
+  .btn{padding:10px 14px}                   /* هدف لمس أكبر */
+  .chip{padding:7px 12px}
+}
+@media(display-mode:standalone){ .instBar{display:none !important} }
 
 .col-h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
 .col-h h2{margin:0; font-size:13px; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:600}
@@ -189,6 +213,13 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 </head>
 <body>
 
+<div id="instBar" class="instBar" hidden style="background:#1C2A36; color:#E8EFF3; padding:10px 18px; font-size:14px">
+  <div style="max-width:1320px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+    <span id="instMsg" style="flex:1"></span>
+    <button class="btn" id="instGo" style="background:#00707F; border-color:#00707F; padding:6px 16px">تثبيت</button>
+    <button class="btn ghost" id="instSkip" style="color:#8FA6B4; border-color:#33475C; padding:6px 12px">لأ شكرًا</button>
+  </div>
+</div>
 <div id="updBar" hidden style="background:#00707F; color:#fff; padding:10px 18px; font-size:14px">
   <div style="max-width:1320px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
     <span id="updMsg" style="flex:1"></span>
@@ -367,6 +398,41 @@ function authGate(done){
   });
 }
 
+/* ============ التثبيت على الجهاز ============
+   الخدمة بتشتغل على الاستضافة بس. لو الملف مفتوح من الجهاز بتتخطى من غير خطأ. */
+function initPWA(){
+  if(typeof navigator!=='undefined' && 'serviceWorker' in navigator &&
+     String(location.protocol||'').indexOf('http')===0){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+  let deferred=null;
+  if(typeof window==='undefined' || !window.addEventListener) return;
+  window.addEventListener('beforeinstallprompt', ev=>{
+    ev.preventDefault(); deferred=ev;
+    const bar=$('instBar'); if(!bar) return;
+    $('instMsg').textContent = t('تقدر تثبّت الأداة على الجهاز وتفتحها زي أي تطبيق.',
+                                 'You can install this on your device and open it like any app.');
+    bar.hidden=false;
+    $('instGo').onclick = async ()=>{ bar.hidden=true; deferred.prompt();
+      try{ await deferred.userChoice; }catch(_){ } deferred=null; };
+    $('instSkip').onclick = ()=>{ bar.hidden=true; };
+  });
+  /* آيفون مالوش دعوة تلقائية — بنشرحها بنفسنا */
+  const ua = (typeof navigator!=='undefined' && navigator.userAgent) || '';
+  const iOS = /iphone|ipad|ipod/i.test(ua);
+  const standalone = (typeof navigator!=='undefined' && navigator.standalone===true) ||
+                     (typeof window!=='undefined' && window.matchMedia &&
+                      window.matchMedia('(display-mode: standalone)').matches);
+  if(iOS && !standalone){
+    const bar=$('instBar'); if(!bar) return;
+    $('instMsg').innerHTML = t('عايز تثبتها على الآيفون؟ اضغط زرار المشاركة تحت، وبعدين «إضافة إلى الشاشة الرئيسية».',
+                               'To install on iPhone: tap the Share button below, then "Add to Home Screen".');
+    $('instGo').hidden = true;
+    bar.hidden = false;
+    $('instSkip').onclick = ()=>{ bar.hidden=true; };
+  }
+}
+
 /* ============ التحديث الذاتي ============
    الأداة بتسأل السيرفر كل شوية: في نسخة أحدث؟ لو أيوه بتقولك وبتحدّث نفسها.
    من غير كده الفريق هيفضل شغال على نسخة قديمة مخزّنة في المتصفح من غير ما يعرف. */
@@ -419,9 +485,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "1.7",
+  "version": "1.8",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "1.8",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "الأداة بقت تتثبّت على الجهاز زي أي تطبيق — أندرويد وآيفون وويندوز وماك",
+          "بتفتح بأيقونتها من غير شريط متصفح، وليها اختصارات للتبويبات",
+          "بتشتغل من غير نت في البحث والشروحات والأمثلة — التنفيذ الحي بس هو اللي محتاج نت",
+          "التنسيق اتظبط للشاشات الصغيرة: الشريط العلوي والتبويبات والأزرار"
+        ],
+        "en": [
+          "The tool now installs on a device like any app — Android, iPhone, Windows, and Mac",
+          "It opens with its own icon and no browser bar, with shortcuts to the tabs",
+          "Search, explanations, and examples work offline — only live execution needs a connection",
+          "The layout is tuned for small screens: top bar, tabs, and buttons"
+        ]
+      }
+    },
     {
       "v": "1.7",
       "date": "2026-08-04",
@@ -657,6 +741,30 @@ const DOCS = {
           "Type the name and press \"Fetch it for me\" — the tool pulls the list, matches, and fills the id in.",
           "If you would rather do it yourself, press \"Show me the steps\" for the endpoint to call and the field to copy.",
           "A resolved id stays with you for the whole session, so you are not asked again."
+        ]
+      }
+    },
+    {
+      "id": "install",
+      "since": "1.8",
+      "t": {
+        "ar": "تثبيت الأداة على الجهاز",
+        "en": "Installing the tool on a device"
+      },
+      "b": {
+        "ar": [
+          "**أندرويد وويندوز وماك:** افتح اللينك، هيطلعلك شريط «تثبيت» فوق. اضغطه. ولو ما طلعش، من قايمة المتصفح اختار «تثبيت التطبيق».",
+          "**آيفون وآيباد:** افتح اللينك في سفاري، اضغط زرار المشاركة تحت، وبعدين «إضافة إلى الشاشة الرئيسية».",
+          "بعد التثبيت بتفتح بأيقونتها من غير شريط متصفح، وتقدر تضغط عليها ضغطة طويلة وتروح لتبويب معيّن على طول.",
+          "**من غير نت:** البحث وكل الشروحات والأمثلة والدليل شغالين. اللي محتاج نت هو تنفيذ الريكوستات على حساب العميل.",
+          "التحديثات بتيجي لوحدها — الأداة بتقولك أول ما تنزل نسخة جديدة حتى وهي متثبّتة."
+        ],
+        "en": [
+          "**Android, Windows, Mac:** open the link and an Install bar appears at the top. Press it. If it does not appear, choose \"Install app\" from the browser menu.",
+          "**iPhone and iPad:** open the link in Safari, tap the Share button, then \"Add to Home Screen\".",
+          "Once installed it opens with its own icon and no browser bar, and a long press jumps straight to a specific tab.",
+          "**Offline:** search, all explanations, examples, and the guide keep working. Only running requests against a customer account needs a connection.",
+          "Updates still arrive on their own — the tool announces a new version even when installed."
         ]
       }
     },
@@ -3865,6 +3973,7 @@ $('updGo').onclick = applyUpdate;
 $('updSkip').onclick = ()=>{ $('updBar').hidden = true; };
 checkUpdate();
 setInterval(checkUpdate, 10*60*1000);
+initPWA();
 $('q').setAttribute('title', t('اضغط / للوصول السريع','Press / to jump here'));
 unitPaint(t('مفيش عربية محددة','no vehicle set'));
 $('verTag').textContent = 'v'+DOCS.version;

@@ -1,0 +1,24 @@
+{
+  "name": "مساعد الإنتجريشن — دعم أفاقي",
+  "short_name": "مساعد الإنتجريشن",
+  "description": "أداة داخلية لفريق الدعم الفني للرد على أسئلة العملاء الخاصة بالـ API",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#E7ECF1",
+  "theme_color": "#101A24",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "ابدأ من هنا", "url": "./#triage" },
+    { "name": "الريكوستات", "url": "./#search" },
+    { "name": "السيناريوهات", "url": "./#recipes" }
+  ]
+}

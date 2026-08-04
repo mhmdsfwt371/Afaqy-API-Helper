@@ -1,16 +1,16 @@
 {
-  "version": "1.7",
+  "version": "1.8",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الأداة بقت تعرف لوحدها لما تنزل نسخة أحدث وبتقولك — من غير كده الفريق يفضل شغال على نسخة قديمة مخزّنة في المتصفح",
-      "شريط فوق بيقول رقم النسخة الجديدة وإيه فيها، وزرار بيحدّث وبيرجعك لنفس التبويب",
-      "البناء بقى يشغّل كل الاختبارات وبيقف لو واحد فشل — مستحيل ينشر حاجة كسرت حاجة قديمة"
+      "الأداة بقت تتثبّت على الجهاز زي أي تطبيق — أندرويد وآيفون وويندوز وماك",
+      "بتفتح بأيقونتها من غير شريط متصفح، وليها اختصارات للتبويبات",
+      "بتشتغل من غير نت في البحث والشروحات والأمثلة — التنفيذ الحي بس هو اللي محتاج نت"
     ],
     "en": [
-      "The tool now detects when a newer version is published and tells you — otherwise the team keeps running an old copy cached in the browser",
-      "A bar at the top shows the new version and what changed, with a button that updates and returns you to the same tab",
-      "The build now runs every test and stops if any fails — it cannot publish something that broke an older feature"
+      "The tool now installs on a device like any app — Android, iPhone, Windows, and Mac",
+      "It opens with its own icon and no browser bar, with shortcuts to the tabs",
+      "Search, explanations, and examples work offline — only live execution needs a connection"
     ]
   }
 }
