@@ -498,7 +498,11 @@ function authGate(done){
 function initPWA(){
   if(typeof navigator!=='undefined' && 'serviceWorker' in navigator &&
      String(location.protocol||'').indexOf('http')===0){
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    /* updateViaCache:'none' بتمنع المتصفح إنه يقدّم sw.js من كاشه —
+       من غيرها ممكن الخدمة القديمة تفضل شغالة وتقدّم صفحة قديمة. */
+    navigator.serviceWorker.register('sw.js', {updateViaCache:'none'})
+      .then(reg=>{ try{ reg.update(); }catch(_){} })
+      .catch(()=>{});
   }
   let deferred=null;
   if(typeof window==='undefined' || !window.addEventListener) return;
@@ -534,11 +538,15 @@ function initPWA(){
    الأداة بتسأل السيرفر كل شوية: في نسخة أحدث؟ لو أيوه بتقولك وبتحدّث نفسها.
    من غير كده الفريق هيفضل شغال على نسخة قديمة مخزّنة في المتصفح من غير ما يعرف. */
 let UPD_SEEN = null;
+const UPD = { at:null, server:null, err:null };
 async function checkUpdate(silent){
   try{
     const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'});
-    if(!r.ok) return;
+    UPD.at = new Date(); UPD.err = null;
+    if(!r.ok){ UPD.err = 'HTTP ' + r.status; if(!$('v-docs').hidden) renderDocs(); return; }
     const v = await r.json();
+    UPD.server = v && v.version;
+    if(!$('v-docs').hidden) renderDocs();
     if(!v || !v.version) return;
     /* أحدث فعلًا، مش مجرد مختلفة. ملف النسخة ممكن يتأخر في الكاش
        ويقول رقم أقدم — وساعتها الشريط كان هيقول «في نسخة أحدث» وهي أقدم. */
@@ -558,7 +566,8 @@ async function checkUpdate(silent){
       + (items.length ? ` — ${esc(items.slice(0,2).join('، '))}` : '')
       + `<br><span style="opacity:.85; font-size:12.5px">${t('اللي عندك دلوقتي','You are on')} v${esc(DOCS.version)}</span>`;
     $('updBar').hidden = false;
-  }catch(_){ /* شغال من الجهاز أو مفيش نت — عادي */ }
+  }catch(err){ UPD.at = new Date(); UPD.err = String(err && err.message || err).slice(0,60);
+               if(!$('v-docs').hidden) renderDocs(); }
 }
 /* التحديث لازم يفك كل طبقات الكاش: كاش الأداة، وخدمة الخلفية، وكاش المتصفح.
    من غير كده الشريط بيفضل يطلع مهما عملت تحديث. */
@@ -610,9 +619,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.7",
+  "version": "3.8",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.8",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اسم ملف الإكسل بقى موحّد في كل التصديرات: اسم المستخدم - الحاجة اللي اتجابت - التاريخ - الوقت",
+          "الاسم بيقول المفلتر إيه: «GPS» أو «ساكتة أكتر من أسبوع» أو «وصل - استعلام» — الملفات بترتب نفسها في مجلد التنزيلات",
+          "اتصلح سبب توقّف التحديث التلقائي: خدمة الخلفية كانت ممكن تتقدّم من كاش المتصفح، فالنسخة القديمة تفضل شغالة",
+          "الفحص بقى يشتغل كمان أول ما ترجع للتبويب، مش كل عشر دقايق بس",
+          "في تبويب الدليل بقى مكتوب: اللي شغال عندك، واللي على السيرفر، وآخر مرة اتفحص فيها — وزرار فحص فوري",
+          "الزرار بيقولك النتيجة صراحة: «انت على أحدث نسخة» أو سبب فشل الوصول للسيرفر"
+        ],
+        "en": [
+          "The Excel filename is now uniform across every export: username, what was exported, date, time",
+          "The name states what was filtered — a device type, a Needs-attention card, or a WASL list or inquiry — so files sort themselves in the downloads folder",
+          "Fixed the cause of the auto-update going quiet: the service worker could be served from the browser cache, keeping an old build alive",
+          "The check now also runs the moment you return to the tab, not only every ten minutes",
+          "The Guide tab now states what you are running, what is on the server, and when it last checked — with a check-now button",
+          "The button reports the outcome plainly: either you are on the latest version, or why the server could not be reached"
+        ]
+      }
+    },
     {
       "v": "3.7",
       "date": "2026-08-04",
@@ -4508,7 +4539,16 @@ function renderDocs(){
          <ul style="margin:8px 0 0; padding-inline-start:20px; font-size:13.5px">
            ${dual(newest.items).map(line).join('')}</ul>
        </div>
+       <table class="kv" style="margin:10px 0">
+         <tr><td style="width:34%; font-family:var(--ar); color:var(--ink)">${t('اللي شغال عندك','What you are running')}</td>
+             <td><b>v${esc(cur)}</b></td></tr>
+         <tr><td style="font-family:var(--ar); color:var(--ink)">${t('اللي على السيرفر','What is on the server')}</td>
+             <td>${UPD.server ? `<b>v${esc(UPD.server)}</b>` : (UPD.err ? `<span style="color:var(--alert)">${esc(UPD.err)}</span>` : '—')}</td></tr>
+         <tr><td style="font-family:var(--ar); color:var(--ink)">${t('آخر فحص','Last checked')}</td>
+             <td>${UPD.at ? esc(UPD.at.toTimeString().slice(0,8)) : '—'}</td></tr>
+       </table>
        <div class="row">
+         <button class="btn sig" id="docCheck">${t('افحص التحديث دلوقتي','Check for updates now')}</button>
          <a class="btn sig" id="docPdf" href="docs.pdf" download="afaqy-support-guide-v${esc(cur)}.pdf"
             target="_blank" rel="noopener" style="text-decoration:none; display:inline-block">${t('نزّل الدليل','Download the guide')}</a>
          <button class="btn ghost" id="docPrint" hidden>${t('اطبع الصفحة','Print this page')}</button>
@@ -4531,6 +4571,14 @@ function renderDocs(){
        </div></div>`;
    }).join('')}`;
   $('docBack').onclick = ()=>goBack();
+  $('docCheck').onclick = async ()=>{
+    const b=$('docCheck'), old=b.textContent; b.disabled=true; b.textContent=t('بيفحص…','Checking…');
+    UPD_SEEN = null;
+    await checkUpdate();
+    b.disabled=false; b.textContent=old;
+    if(UPD.err) toast(t('ما قدرناش نوصل للسيرفر: '+UPD.err, 'Could not reach the server: '+UPD.err));
+    else if(UPD.server === DOCS.version) toast(t('انت على أحدث نسخة','You are on the latest version'));
+  };
   $('docHist').onclick = ()=>{
     const b=$('docHistBox');
     b.innerHTML = b.innerHTML ? '' : `<table class="kv" style="margin-top:10px">${DOCS.history.map(h=>
@@ -4905,9 +4953,10 @@ function dashRender(){
 
 function dashExport(){
   const rows=dashRows(), cols=dashColumns(rows);
-  downloadXlsx(cols, rows,
-    'units-'+(DASH.filter||'all')+'-'+new Date().toISOString().slice(0,10)+'.xlsx',
-    t('العربيات','Vehicles'));
+  const what = DASH.flag ? dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl)
+             : DASH.filter ? typeLabel(DASH.filter)
+             : t('كل العربيات','all vehicles');
+  downloadXlsx(cols, rows, exportName(what), t('العربيات','Vehicles'));
 }
 
 /* ---------------- تصدير إكسل ----------------
@@ -4973,6 +5022,18 @@ function xlsxBlob(cols, rows, sheetName){
     {name:'xl/worksheets/sheet1.xml', data:sheet}
   ]);
 }
+/* اسم الملف: المستخدم - الحاجة - التاريخ - الوقت
+   موحّد في كل التصديرات عشان الملفات تترتب لوحدها في مجلد التنزيلات. */
+function exportName(what){
+  const clean = v => String(v||'').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim();
+  const d = new Date();
+  const p2 = n => String(n).padStart(2,'0');
+  const date = d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+  const time = p2(d.getHours())+'-'+p2(d.getMinutes());
+  const user = clean(SESSION.user) || t('بدون حساب','no-account');
+  return `${user} - ${clean(what)} - ${date} - ${time}.xlsx`;
+}
+
 function downloadXlsx(cols, rows, name, sheetName){
   try{
     const blob = xlsxBlob(cols, rows, sheetName);
@@ -5111,9 +5172,9 @@ function waslExport(){
     if(anyInq){ const inq=WASL.inq[String(u.id||u._id||'')]; o.wasl_status = inq?inq.txt:''; }
     return o;
   });
-  downloadXlsx(cols, data,
-    'wasl-'+(anyInq?'inquiry':'list')+'-'+new Date().toISOString().slice(0,10)+'.xlsx',
-    'WASL');
+  const what = (anyInq ? t('وصل - استعلام','WASL - inquiry') : t('وصل - لستة','WASL - list'))
+             + (WASL.q ? ' - ' + WASL.q.slice(0,20) : '');
+  downloadXlsx(cols, data, exportName(what), 'WASL');
 }
 
 let DASHVIEW = 'devices';
@@ -5635,6 +5696,8 @@ $('updGo').onclick = applyUpdate;
 $('updSkip').onclick = ()=>{ $('updBar').hidden = true; };
 checkUpdate();
 setInterval(checkUpdate, 10*60*1000);
+/* الفحص لما ترجع للتبويب — أسرع من انتظار العشر دقايق */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkUpdate(); });
 initPWA();
 $('q').setAttribute('title', t('اضغط / للوصول السريع','Press / to jump here'));
 unitPaint(t('مفيش عربية محددة','no vehicle set'));
