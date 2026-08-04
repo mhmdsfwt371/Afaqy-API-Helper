@@ -1,16 +1,16 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الاسم الصح «وصل» مش «واصل» — اتصلح في كل مكان في الأداة",
-      "البحث بيلاقيها بالاتنين، لأن ناس هتكتب «واصل» بحكم العادة",
-      "اتشال اقتراح «واصل» من صف الأمثلة تحت خانة البحث"
+      "سيناريو جديد: «الجهاز مسجّل في وصل ولا لأ؟» — تلصق الـ IMEI والأداة تجاوب",
+      "أربع خطوات: تجيب عربيات وصل عند العميل، تدوّر على الـ IMEI، تستعلم من وصل نفسها، وتعرض الحالة",
+      "بيفرّق بين تلات حالات: مسجّل، ومش مسجّل، والحساب مالوش وصل أصلًا — وكل واحدة ليها رد نهائي مختلف"
     ],
     "en": [
-      "The correct name is WASL spelled the short way in Arabic — corrected everywhere in the tool",
-      "Search matches both spellings, since people will type the common misspelling out of habit",
-      "Removed the WASL chip from the example row under the search box"
+      "New scenario: is this device registered with WASL — paste the IMEI and get an answer",
+      "Four steps: fetch the customer WASL vehicles, find the IMEI, query WASL itself, and show the status",
+      "It distinguishes three outcomes: registered, not registered, and the account has no WASL setup — each with a different definitive answer"
     ]
   }
 }

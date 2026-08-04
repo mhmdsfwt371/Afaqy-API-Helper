@@ -573,9 +573,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.0",
+  "version": "3.1",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.1",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "سيناريو جديد: «الجهاز مسجّل في وصل ولا لأ؟» — تلصق الـ IMEI والأداة تجاوب",
+          "أربع خطوات: تجيب عربيات وصل عند العميل، تدوّر على الـ IMEI، تستعلم من وصل نفسها، وتعرض الحالة",
+          "بيفرّق بين تلات حالات: مسجّل، ومش مسجّل، والحساب مالوش وصل أصلًا — وكل واحدة ليها رد نهائي مختلف",
+          "لو مش مسجّل، بينبّه إنه ممكن يكون مسجّل في وصل من برة أفاقي — الاستعلام بيشوف تسجيل الحساب ده بس",
+          "الاستعلام بيسأل وصل نفسها مش نسختنا، وبيعرض الحقول اللي رجعت زي ما هي من غير تفسير"
+        ],
+        "en": [
+          "New scenario: is this device registered with WASL — paste the IMEI and get an answer",
+          "Four steps: fetch the customer WASL vehicles, find the IMEI, query WASL itself, and show the status",
+          "It distinguishes three outcomes: registered, not registered, and the account has no WASL setup — each with a different definitive answer",
+          "If not found, it warns the device may still be registered with WASL outside Afaqy — this check only sees registrations made through this account",
+          "The inquiry asks WASL directly rather than reading our copy, and shows the returned fields unchanged without interpreting them"
+        ]
+      }
+    },
     {
       "v": "3.0",
       "date": "2026-08-04",
@@ -1385,6 +1405,7 @@ const INTENT = [
  { re:/مين عدل|مين غير|سجل التدقيق|audit/,                                 p:/^\/audit\/lists$/,       s:10 },
  { re:/تشغيل تقرير|نتيجه التقرير|بيانات التقرير|report data/,              p:/^\/user_reports\/data$/,  s:10 },
  { re:/قوالب التقارير|قالب تقرير|report template/,                         p:/^\/user_report_templates\/lists$/, s:10 },
+ { re:/مسجل في وصل|مسجّل في وصل|حاله في وصل|استعلام وصل|wasl status|wasl inquiry/, p:/^\/wasl_integration\/vehicles\/inquiry$/, s:12 },
  { re:/وصل|واصل|wasl/,                                                         p:/^\/wasl_integration\//,   s:6  },
  { re:/مخالف|رخص|traffic|ticket/,                                          p:/^\/traffic-tickets\/lists$/, s:8 }
 ];
@@ -2624,7 +2645,24 @@ const RECIPES = [
      hint:{ar:'الرقم اللي هيطلع ده هو اللي بيتحط في أي ريكوست تاني.',
            en:'The number produced here is what goes into every other request.'} }]},
 
-{ id:'unit-loc', icon:'\u2462',
+{ id:'wasl-check', icon:'\u2462',
+  title:{ar:'الجهاز مسجّل في وصل ولا لأ؟', en:'Is this device registered with WASL?'},
+  desc:{ar:'تلصق الـ IMEI، والأداة تشوفه في عربيات وصل عند العميل، وبعدين تستعلم من وصل نفسها عن حالته.',
+        en:'Paste the IMEI; the tool looks for it among the customer WASL vehicles, then queries WASL itself for its status.'},
+  inputs:[{k:'imei',t:'text',l:{ar:'الـ IMEI (أو اللوحة أو الاسم)', en:'IMEI (or plate or name)'}}],
+  steps:[
+   { t:{ar:'جلب عربيات وصل عند العميل', en:'Fetch the customer WASL vehicles'}, kind:'call', m:'POST',
+     path:'/wasl_integration/vehicles/lists', body:()=>({data:{limit:10000}}), extract:()=>({}),
+     hint:{ar:'دي العربيات اللي الحساب سجّلها في موديول وصل. لو الحساب مالوش وصل أصلًا، هترجع فاضية.',
+           en:'These are the vehicles this account registered in the WASL module. If the account has no WASL setup, this comes back empty.'} },
+   { t:{ar:'ندوّر على الـ IMEI في اللستة', en:'Look for the IMEI in that list'}, kind:'waslfind', pickBy:'imei', into:'waslId' },
+   { t:{ar:'نستعلم من وصل عن حالته', en:'Query WASL for its status'}, kind:'call', m:'POST',
+     path:'/wasl_integration/vehicles/inquiry', body:v=>({data:{id:v.waslId}}), extract:()=>({}),
+     hint:{ar:'ده بيسأل وصل نفسها، مش بيقرا من عندنا. الرد بيوصف حالة التسجيل عند الهيئة.',
+           en:'This asks WASL itself rather than reading our own copy. The response describes the registration status at the authority.'} },
+   { t:{ar:'قراءة الحالة', en:'Read the status'}, kind:'waslstatus' }]},
+
+{ id:'unit-loc', icon:'\u2463',
   title:{ar:'آخر موقع لعربية', en:'Last location of a vehicle'},
   desc:{ar:'يجيب اللستة، يلاقي العربية بأي رقم عندك، وياخد مواقعها خلال اليوم.',
         en:'Fetches the list, finds the vehicle by any identifier you have, then pulls its locations for the day.'},
@@ -2642,7 +2680,7 @@ const RECIPES = [
      hint:{ar:'رجع فاضي؟ يبقى الجهاز ساكت في اليوم ده، أو مش مُعيَّن على المستخدم — مش عطل في السيستم.',
            en:'Empty result means the device was silent that day, or is not assigned to this user — not a platform fault.'} }]},
 
-{ id:'speed', icon:'\u2463',
+{ id:'speed', icon:'\u2464',
   title:{ar:'سرعة عربية — دلوقتي وخلال فترة', en:'Vehicle speed — now and over a period'},
   desc:{ar:'آخر سرعة مسجّلة، وأعلى سرعة ومتوسطها خلال الفترة اللي تحددها.',
         en:'The last recorded speed, plus the maximum and average over the period you choose.'},
@@ -2667,7 +2705,7 @@ const RECIPES = [
      hint:{ar:'التول بتدوّر على حقل السرعة جوه الرد مهما كان شكله وبتحسب منه.',
            en:'The tool locates the speed field inside the response whatever its shape and computes from it.'} }]},
 
-{ id:'unit-signals', icon:'\u2464',
+{ id:'unit-signals', icon:'\u2465',
   title:{ar:'إشارات جهاز واحد', en:'Signals for one device'},
   desc:{ar:'رسائل الجهاز خلال فترة — ده الرد على شكوى «الجهاز مش بيرسل».',
         en:'Device messages over a period — the answer to a "device is not reporting" complaint.'},
@@ -2686,7 +2724,7 @@ const RECIPES = [
      hint:{ar:'رجع فاضي مع نجاح؟ الجهاز فعلاً ما رسلش في الفترة دي. دي إجابة نهائية للعميل مش تخمين.',
            en:'A successful but empty result means the device genuinely sent nothing in that window. That is a definitive answer, not a guess.'} }]},
 
-{ id:'group-signals', icon:'\u2465',
+{ id:'group-signals', icon:'\u2466',
   title:{ar:'إشارات مجموعة أجهزة', en:'Signals for a device group'},
   desc:{ar:'يفحص كل أجهزة المجموعة واحد واحد ويقولك مين بيرسل ومين ساكت.',
         en:'Checks every device in the group one by one and tells you which are reporting and which are silent.'},
@@ -2705,7 +2743,7 @@ const RECIPES = [
      hint:{ar:'كل جهاز بيتنده لوحده — السيستم بياخد جهاز واحد في المرة.',
            en:'Each device is called separately — the endpoint accepts one device at a time.'} }]},
 
-{ id:'unit-report', icon:'\u2466',
+{ id:'unit-report', icon:'\u2467',
   title:{ar:'تقرير عربية عن فترة', en:'Report for a vehicle over a period'},
   desc:{ar:'السلسلة الكاملة: العربية بالاسم + قالب التقرير + الفترة → النتيجة.',
         en:'The full chain: vehicle by name + report template + period → the result.'},
@@ -2733,7 +2771,7 @@ const RECIPES = [
      hint:{ar:'لو العميل عايزها ملف بدل داتا، استخدم ريكوست التصدير واختار النوع.',
            en:'If the customer wants a file instead of data, use the export request and choose the type.'} }]},
 
-{ id:'counters', icon:'\u2467',
+{ id:'counters', icon:'\u2468',
   title:{ar:'عدادات جهاز — المسافة وساعات التشغيل', en:'Device counters — distance and engine hours'},
   desc:{ar:'بيجيب الجهاز بالمعرّف ويحوّل ساعات التشغيل من ثواني لساعات — أكتر سؤال بيتكرر في الإنتجريشن.',
         en:'Fetches the device by id and converts engine hours from seconds to hours — the single most repeated integration question.'},
@@ -2750,7 +2788,7 @@ const RECIPES = [
      hint:{ar:'ساعات التشغيل بترجع بالثواني. التول بتقسمها على 3600 وتوريك الرقمين.',
            en:'Engine hours come back in seconds. The tool divides by 3600 and shows you both numbers.'} }]},
 
-{ id:'client-units', icon:'\u2468',
+{ id:'client-units', icon:'\u2469',
   title:{ar:'لستة عربيات العميل', en:'Customer vehicle list'},
   desc:{ar:'أسرع فحص: هل الحساب شايف عربيات أصلاً؟ بيقفل نص شكاوى «مش شغال».',
         en:'The fastest check: does the account see any vehicles at all? Closes half of all "not working" complaints.'},
@@ -2956,6 +2994,8 @@ async function runStep(i){
   if(st.kind==='uid') return doUid(i);
   if(st.kind==='speednow') return doSpeedNow(i);
   if(st.kind==='speedstats') return doSpeedStats(i);
+  if(st.kind==='waslfind') return doWaslFind(i);
+  if(st.kind==='waslstatus') return doWaslStatus(i);
   const box=$('out_'+i);
   if(st.auth!==false && !SESSION.token){
     RC.results[i]={ok:false, msg:t('مش متصل. اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال.','Not connected. Enter the username and password above and press Connect.')}; return renderSteps();
@@ -2986,6 +3026,69 @@ function speedCard(rows, note){
     `<tr><td style="font-family:var(--ar); color:var(--ink)">${k}</td><td>${v}</td></tr>`).join('')}</table>
     ${note?`<div class="note" style="margin-top:8px">${note}</div>`:''}`;
 }
+/* البحث عن الـ IMEI في عربيات وصل. لو مش موجود، ده رد نهائي للعميل. */
+function doWaslFind(i){
+  const st=RC.r.steps[i], prev=RC.results[i-1];
+  if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
+  const key=(RC.vars[st.pickBy]||'').trim();
+  const {hit, items, by} = matchByName(prev.json, key);
+  if(!items.length){
+    RC.results[i]={ok:false, msg:t('لستة عربيات وصل رجعت فاضية — الحساب ده غالبًا مالوش تسجيل في وصل أصلًا. ده رد نهائي تقوله للعميل.',
+      'The WASL vehicle list came back empty — this account most likely has no WASL registration at all. That is a definitive answer for the customer.')};
+    return renderSteps();
+  }
+  if(!hit){
+    RC.results[i]={ok:false,
+      msg:t(`ما لقيناش «${esc(key)}» بين ${items.length} عربية مسجّلة في وصل عند الحساب ده.`,
+            `No match for "${esc(key)}" among the ${items.length} vehicles registered with WASL on this account.`),
+      html:`<div class="note warn" style="margin-top:10px">
+        <b>${t('يعني إيه:','What this means:')}</b> ${t('الجهاز ده مش متسجّل في موديول وصل عند العميل.','This device is not registered in the customer WASL module.')}<br>
+        ${t('خد بالك: ممكن يكون متسجّل في وصل من برة أفاقي — الاستعلام ده بيشوف تسجيل الحساب ده بس.',
+            'Note: it could still be registered with WASL outside Afaqy — this check only sees registrations made through this account.')}</div>`};
+    return renderSteps();
+  }
+  RC.vars[st.into]=hit.id; RC.vars.waslLabel=hit.name; RC.vars._waslRaw=hit.raw;
+  const row=(k,v)=>`<tr><td style="font-family:var(--ar); color:var(--ink)">${k}</td><td>${v?`<code>${esc(String(v))}</code>`:'—'}</td></tr>`;
+  RC.results[i]={ok:true,
+    msg:`${t('لقيناه','Found it')} — ${t('اتطابق على','matched on')} <code>${esc(by)}</code>`,
+    html:`<div class="note sig" style="margin-top:10px">
+        ${t('الجهاز ده متسجّل في موديول وصل عند العميل.','This device is registered in the customer WASL module.')}</div>
+      <table class="kv" style="margin-top:10px">
+        ${row(t('الاسم','Name'), hit.name)}${row('IMEI', hit.imei)}
+        ${row(t('رقم سجل وصل','WASL record id'), hit.id)}${row(t('اللوحة','Plate'), hit.plate)}
+      </table>
+      <div class="note" style="margin-top:8px">${t('الخطوة الجاية بتسأل وصل نفسها عن الحالة عندهم.','The next step asks WASL itself for the status on their side.')}</div>`,
+    vars:{[st.into]:hit.id}};
+  renderSteps();
+}
+
+/* الرد بتاع الاستعلام: مش عندنا نموذج محفوظ، فبنعرض اللي رجع ونبرز الحقول اللي شكلها حالة. */
+function doWaslStatus(i){
+  const prev = RC.results[i-1];
+  if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
+  const found=[];
+  const walk=(o,path,d)=>{ if(o==null||d>6) return;
+    if(Array.isArray(o)){ o.slice(0,20).forEach((x,n)=>walk(x,path+'['+n+']',d+1)); return; }
+    if(typeof o==='object'){ Object.entries(o).forEach(([k,v])=>{
+      if(/status|state|result|success|registered|active|message|code|reason|error/i.test(k) && (typeof v!=='object'))
+        found.push([path?path+'.'+k:k, v]);
+      walk(v, path?path+'.'+k:k, d+1); }); }
+  };
+  walk(prev.json,'',0);
+  if(!found.length){
+    RC.results[i]={ok:true, msg:t('الرد وصل بس مفيهوش حقل حالة واضح — اقرا الرد الخام تحت.','The response arrived but has no obvious status field — read the raw response below.'),
+      html:`<pre class="pre" style="margin-top:10px">${esc(JSON.stringify(prev.json,null,2).slice(0,3000))}</pre>`};
+    return renderSteps();
+  }
+  RC.results[i]={ok:true,
+    msg:t('حالة الجهاز عند وصل','The device status at WASL'),
+    html:`<table class="kv" style="margin-top:10px">${found.slice(0,14).map(([k,v])=>
+        `<tr><td><code style="font-size:11.5px">${esc(k)}</code></td><td><b>${esc(String(v))}</b></td></tr>`).join('')}</table>
+      <div class="note" style="margin-top:8px">${t('دي الحقول اللي رجعت من وصل زي ما هي. لو حقل منها مش واضح معناه، صعّدها بالرد كامل بدل ما تفسّره للعميل.',
+        'These are the fields WASL returned, unchanged. If the meaning of one is unclear, escalate with the full response rather than interpreting it for the customer.')}</div>`};
+  renderSteps();
+}
+
 function doSpeedNow(i){
   const u = RC.vars._pickedRaw;
   if(!u){ RC.results[i]={ok:false,msg:t('محتاج تحدد العربية الأول.','Match the vehicle first.')}; return renderSteps(); }
