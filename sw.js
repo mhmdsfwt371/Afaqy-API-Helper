@@ -1,6 +1,6 @@
 /* خدمة الخلفية — الشبكة الأول، والكاش احتياطي.
    اسم الكاش فيه رقم النسخة، فأي نشر جديد بيلغي القديم بالكامل. */
-const VERSION = '5.8';
+const VERSION = '5.9';
 const CACHE = 'afaqy-helper-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.json',
                './icons/icon-192.png', './icons/icon-512.png'];

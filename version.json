@@ -1,16 +1,16 @@
 {
-  "version": "5.8",
+  "version": "5.9",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الحسابات بقت تتحفظ: دوس «احفظ الحساب» بعد الاتصال، والمرة الجاية اختاره من اللستة والخانات تتعبّى لوحدها — بدل ما تكتبه كل شوية",
-      "كلمة السر بتتحفظ بس لو وافقت وقت الحفظ، ولو رفضت بيتحفظ الاسم والبيئة بس وخانة كلمة السر بتفضل فاضية",
-      "الحفظ على الجهاز ده بس ومش بيتبعت لأي مكان، وكلمة السر مكتوبة مموّهة مش صريحة — بس التمويه إخفاء مش تشفير، فعلى جهاز مشترك احفظ الاسم بس"
+      "وضع ليلي كامل للأداة — الشاشات والنوافذ والكروت والجداول كلهم بيتحوّلوا، وزرار القمر في الشريط فوق بيقلب بينهم",
+      "أول فتحة بتمشي على إعداد جهازك نفسه، وأول ما تدوس الزرار اختيارك بيتحفظ على الجهاز وبيفضل معاك",
+      "زرارين «احفظ الحساب» و«امسح» كانوا مكتوبين بلون غامق على شريط غامق فمحدش شافهم — اتصلحوا، والقاعدة اتعمّمت على كل زرار في الشريط عشان ما يتكررش"
     ],
     "en": [
-      "Accounts can now be saved: press Save account after connecting, then pick it from the list next time and the fields fill themselves",
-      "The password is stored only if you agree at save time; decline and only the username and environment are kept, with the password box left empty",
-      "Everything stays on this device and is never sent anywhere, and a stored password is written obfuscated rather than in the clear — but that is hiding, not encryption, so on a shared device save the username only"
+      "A full dark mode — screens, dialogs, cards and tables all switch, and the moon button in the top bar flips between them",
+      "It follows your device setting on first open, and once you press the button your choice is saved on this device",
+      "The Save account and Delete buttons were dark text on the dark bar so nobody could see them — fixed, and the rule now covers every button in that bar so it cannot happen again"
     ]
   }
 }

@@ -21,10 +21,29 @@
   --alert:#A94B08; --alert-soft:#FBEADC;
   --ok:#1F6B45; --ok-soft:#DCEFE4;
   --code-bg:#0E1A22; --code-ink:#D8E6EA;
+  --ink-bg:#101A24;        /* خلفية الهيدر والزراير — منفصلة عن لون النص عشان الوضع الليلي */
   --ar: "Segoe UI", Tahoma, "Noto Naskh Arabic", "Dubai", Arial, sans-serif;
   --mono: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
   --r:3px;
 }
+/* ============ الوضع الليلي ============
+   نفس المتغيرات بقيم تانية — فأي حاجة في الأداة (اللوحات، النوافذ، الكروت،
+   الجداول، النتايج) بتتحوّل معاها لوحدها من غير ما نلمس كل عنصر. */
+html[data-theme="dark"]{
+  --ink:#E7EDF2; --ink-2:#B7C6D2; --muted:#8CA0B0;
+  --surface:#0F171E; --panel:#16212B; --panel-2:#1C2934;
+  --line:#2E4050; --line-soft:#243441;
+  --signal:#2AA5B3; --signal-deep:#6FD9C9; --signal-soft:#123840;
+  --alert:#E8A06A; --alert-soft:#3A2416;
+  --ok:#6FCB9B; --ok-soft:#12321F;
+  --code-bg:#0A1116; --code-ink:#D8E6EA;
+  --ink-bg:#0A1218;
+}
+html[data-theme="dark"] .btn{color:#EAF2F6}
+html[data-theme="dark"] .btn.warn{border-color:#6A4A2E}
+html[data-theme="dark"] .btn.sig{color:#04222A}
+html[data-theme="dark"] .ct[aria-selected="true"]{color:#DCE9EE}
+html[data-theme="dark"] .toast{color:#EAF2F6}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body.en{ --ar: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -39,7 +58,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 :focus-visible{outline:2px solid var(--signal); outline-offset:2px}
 
 /* ---------- header ---------- */
-.top{background:var(--ink); color:#E8EFF3; padding:12px 18px 0}
+.top{background:var(--ink-bg); color:#E8EFF3; padding:12px 18px 0}
 .top-in{max-width:1320px; margin:0 auto; display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between}
 .brand{display:flex; align-items:baseline; gap:10px}
 .brand b{font-size:17px; font-weight:700}
@@ -160,11 +179,15 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .ct[aria-selected="true"]{background:var(--code-bg); color:#fff; border-color:var(--code-bg)}
 .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
 .btn{
-  background:var(--ink); color:#fff; border:1px solid var(--ink); border-radius:var(--r);
+  background:var(--ink-bg); color:#fff; border:1px solid var(--ink-bg); border-radius:var(--r);
   padding:8px 14px; font-weight:600; font-size:13.5px
 }
 .btn:hover{background:#1E2E3C}
 .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+/* الشريط العلوي غامق دايمًا — فأي زرار ghost جواه لازم يبقى نصه فاتح.
+   من غير القاعدة دي الزرار بيتكتب بلون الحبر على خلفية الحبر ويختفي خالص. */
+.conn .btn.ghost{color:#C7D6DF; border-color:#33475C}
+.conn .btn.ghost:hover{background:#1C2A36; border-color:#4A6275}
 .btn.ghost:hover{border-color:var(--ink); background:var(--panel-2)}
 .btn.sig{background:var(--signal); border-color:var(--signal)}
 .btn.sig:hover{background:var(--signal-deep)}
@@ -215,7 +238,7 @@ textarea.out{width:100%; min-height:230px; font-family:var(--mono); font-size:12
   border:1px solid var(--line); border-radius:var(--r); padding:12px; background:var(--panel-2); color:var(--ink); line-height:1.6}
 textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14px; min-height:150px}
 
-.toast{position:fixed; bottom:22px; inset-inline-start:22px; background:var(--ink); color:#fff; padding:11px 18px; border-radius:var(--r); font-size:13.5px; z-index:60; box-shadow:0 6px 22px rgba(16,26,36,.28)}
+.toast{position:fixed; bottom:22px; inset-inline-start:22px; background:var(--ink-bg); color:#fff; padding:11px 18px; border-radius:var(--r); font-size:13.5px; z-index:60; box-shadow:0 6px 22px rgba(16,26,36,.28)}
 .toast[hidden]{display:none}
 @media(max-width:760px){
   .top{padding:8px 12px 0}
@@ -305,6 +328,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
              data-arph="IMEI أو الاسم" data-enph="IMEI or name">
       <button class="btn sig" id="unitGo" hidden style="padding:6px 12px; font-size:13px" data-ar="حدّد الجهاز" data-en="Set device">حدّد الجهاز</button>
       <span id="unitState" class="pill" hidden>—</span>
+      <button class="btn ghost" id="themeBtn" style="padding:6px 12px; font-size:13px" title="الوضع الليلي / النهاري">☾</button>
       <button class="btn ghost" id="langBtn" style="padding:6px 12px; font-size:12px; color:#C7D6DF; border-color:#33475C; font-family:var(--mono)">EN</button>
       <button class="btn ghost" id="sesCopy" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="نسخ التوكن" data-en="Copy token">نسخ التوكن</button>
       <button class="btn ghost" id="sesOut" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="قطع" data-en="Disconnect">قطع</button>
@@ -652,9 +676,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.8",
+  "version": "5.9",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "5.9",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "وضع ليلي كامل للأداة — الشاشات والنوافذ والكروت والجداول كلهم بيتحوّلوا، وزرار القمر في الشريط فوق بيقلب بينهم",
+          "أول فتحة بتمشي على إعداد جهازك نفسه، وأول ما تدوس الزرار اختيارك بيتحفظ على الجهاز وبيفضل معاك",
+          "زرارين «احفظ الحساب» و«امسح» كانوا مكتوبين بلون غامق على شريط غامق فمحدش شافهم — اتصلحوا، والقاعدة اتعمّمت على كل زرار في الشريط عشان ما يتكررش",
+          "قاعدة جديدة في البناء: لون خلفية الهيدر والزراير بقى متغير مستقل عن لون النص، وده اللي خلّى الوضع الليلي يشتغل من غير ما نلمس كل عنصر لوحده"
+        ],
+        "en": [
+          "A full dark mode — screens, dialogs, cards and tables all switch, and the moon button in the top bar flips between them",
+          "It follows your device setting on first open, and once you press the button your choice is saved on this device",
+          "The Save account and Delete buttons were dark text on the dark bar so nobody could see them — fixed, and the rule now covers every button in that bar so it cannot happen again",
+          "A structural change behind it: the header and button background is now its own variable, separate from the text colour, which is what let dark mode work without touching each element"
+        ]
+      }
+    },
     {
       "v": "5.8",
       "date": "2026-08-05",
@@ -1656,14 +1698,16 @@ const DOCS = {
           "٢) حدّد العربية — الصق الـ IMEI أو الاسم أو رقم اللوحة.",
           "٣) ابدأ من التبويب الأول واختار العرض اللي العميل قاله.",
           "مفيش أي بيانات بتتخزن. كل حاجة في ذاكرة المتصفح وبتروح لما تقفل الصفحة.",
-          "**الحسابات المحفوظة:** بعد ما تتصل، دوس «احفظ الحساب» — المرة الجاية تختاره من اللستة والخانات بتتعبّى لوحدها. الحفظ على الجهاز ده بس، وكلمة السر بتتحفظ **بس لو وافقت** وقت الحفظ. على جهاز مشترك: احفظ الاسم من غير كلمة السر."
+          "**الحسابات المحفوظة:** بعد ما تتصل، دوس «احفظ الحساب» — المرة الجاية تختاره من اللستة والخانات بتتعبّى لوحدها. الحفظ على الجهاز ده بس، وكلمة السر بتتحفظ **بس لو وافقت** وقت الحفظ. على جهاز مشترك: احفظ الاسم من غير كلمة السر.",
+          "**الوضع الليلي:** زرار القمر في الشريط فوق بيقلب الأداة كلها — الشاشات والنوافذ والكروت. أول فتحة بتمشي على إعداد جهازك، وأول ما تدوس الزرار اختيارك بيفضل محفوظ."
         ],
         "en": [
           "1) Connect — enter the customer account username and password in the top bar and press Connect. The tool fetches the token and refreshes it if it expires.",
           "2) Set the vehicle — paste the IMEI, the name, or the plate number.",
           "3) Start from the first tab and pick the symptom the customer reported.",
           "Nothing is stored. Everything lives in browser memory and disappears when you close the page.",
-          "**Saved accounts:** after connecting, press Save account — next time pick it from the list and the fields fill themselves. Saved on this device only, and the password is stored **only if you agree** at save time. On a shared device, save the username without the password."
+          "**Saved accounts:** after connecting, press Save account — next time pick it from the list and the fields fill themselves. Saved on this device only, and the password is stored **only if you agree** at save time. On a shared device, save the username without the password.",
+          "**Dark mode:** the moon button in the top bar flips the whole tool — screens, dialogs and cards. It follows your device on first open, and remembers your choice once you press it."
         ]
       }
     },
@@ -2437,7 +2481,7 @@ function _renderDetail(e, why){
         return `<div class="note warn" style="margin-top:10px"><b>نفس الإندبوينت موجود في فولدر تاني:</b> ${others}.<br>الفولدر هنا اتنسخ وما اتعدّلش، فاعتمد على الإندبوينت نفسه مش على اسم الفولدر.</div>`; })()}
       <div class="row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft)">
         <button class="btn sig" id="topTry" ${KIND==='danger'?'disabled':''}>${t('جرّب دلوقتي','Run it now')}</button>
-        <button class="btn sig" id="topCopy" style="background:var(--ink); border-color:var(--ink)">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>
+        <button class="btn sig" id="topCopy" style="background:var(--ink-bg); border-color:var(--ink-bg)">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>
         <span style="font-size:12.5px; color:var(--muted); align-self:center">
           ${SESSION.token ? t('متصل — النتيجة الحقيقية هتتحط في الرد','Connected — the live result goes into the reply')
                           : t('اتصل من فوق عشان الرد يبقى فيه النتيجة الحقيقية','Connect above so the reply carries the live result')}
@@ -7082,6 +7126,39 @@ function acctDelete(){
   sel.value = ''; acctPaint();
   sesPaint(t('اتمسح','Deleted'));
 }
+/* ============ v5.9 — الوضع الليلي ============
+   أول فتحة بتمشي على إعداد الجهاز نفسه. أول ما تدوس الزرار، اختيارك
+   بيتحفظ على الجهاز ده وبيفضل معاك في كل التبويبات والنوافذ. */
+const THEME_KEY = 'afaqy.theme';
+function themeStored(){
+  try{ const v = localStorage.getItem(THEME_KEY); return (v === 'dark' || v === 'light') ? v : 'auto'; }
+  catch(_){ return 'auto'; }
+}
+function themeIsDark(mode){
+  if(mode === 'dark') return true;
+  if(mode === 'light') return false;
+  try{ return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+  catch(_){ return false; }
+}
+function themeApply(mode){
+  const dark = themeIsDark(mode);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const mt = document.querySelector('meta[name="theme-color"]');
+  if(mt) mt.setAttribute('content', dark ? '#0A1218' : '#101A24');
+  const b = $('themeBtn');
+  if(b){
+    b.textContent = dark ? '☀' : '☾';
+    b.title = dark ? t('رجّع الوضع النهاري','Switch to light') : t('الوضع الليلي','Switch to dark');
+  }
+  return dark;
+}
+function themeToggle(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  try{ localStorage.setItem(THEME_KEY, next); }catch(_){}
+  themeApply(next);
+}
+$('themeBtn').onclick = themeToggle;
+themeApply(themeStored());
 $('acctSel').onchange = acctPick;
 $('acctSave').onclick = acctSave;
 $('acctDel').onclick  = acctDelete;
