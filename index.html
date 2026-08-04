@@ -647,9 +647,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.3",
+  "version": "5.4",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "5.4",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اللينك الكامل والأمثلة بقوا بيعرضوا <YOUR_TOKEN> بدل توكنك الحقيقي — دول أكتر حاجة بتتنسخ وتتبعت للعملاء",
+          "زرار «أظهر توكني» جنب اللينك لو عايز تشغّل المثال في الترمنال بنفسك، ولما يظهر بيتكتب تحذير إنك ما تنسخش منه للعميل وهو ظاهر",
+          "التنفيذ الفعلي مش متأثر — «جرّب مرة واحدة» و«جرّب وصحّح» بيبعتوا بالتوكن الحقيقي في كل الحالات",
+          "التوكن بيرجع مخفي لوحده مع أي اتصال جديد أو قطع اتصال"
+        ],
+        "en": [
+          "The full URL and the code examples now show a placeholder instead of your real token — these are the things most often copied and sent to customers",
+          "A Reveal my token button sits beside the link for when you want to run the example in your own terminal, with a warning while it is showing",
+          "Actual execution is unaffected — running a request still sends the real token in every case",
+          "The token hides itself again on any connect or disconnect"
+        ]
+      }
+    },
     {
       "v": "5.3",
       "date": "2026-08-04",
@@ -2077,7 +2095,14 @@ let cur = null, codeMode = 'curl', lastQ = '';
 const $ = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const baseUrl = () => $('baseUrl').value === '__custom' ? ($('baseCustom').value.trim() || 'https://BASE_URL') : $('baseUrl').value;
-const token = () => (typeof SESSION!=='undefined' && SESSION.token) || TOKEN_MEM || '<YOUR_TOKEN>';
+/* الأمثلة واللينك بتتنسخ وتتبعت للعملاء، فالتوكن الحقيقي مايظهرش فيها
+   إلا لما الموظف يطلب بنفسه. التنفيذ الفعلي بياخد التوكن من SESSION
+   مباشرة، فمش متأثر بده. */
+let SHOW_TOKEN = false;
+const haveToken = () => !!((typeof SESSION!=='undefined' && SESSION.token) || TOKEN_MEM);
+const token = () => (SHOW_TOKEN && haveToken())
+  ? ((typeof SESSION!=='undefined' && SESSION.token) || TOKEN_MEM)
+  : '<YOUR_TOKEN>';
 
 function fullUrl(e, real){
   let u = baseUrl() + e.p;
@@ -2313,6 +2338,14 @@ function _renderDetail(e, why){
       <h3>${t('اللينك الكامل','Full URL')}</h3>
       <pre class="pre">${esc(fullUrl(e,false))}</pre>
       ${e.t ? `<div class="note" style="margin-top:8px">التوكن بيتبعت كـ <code>?token=</code> في الرابط، مش في هيدر.</div>` : ''}
+      ${e.t && haveToken() ? `<div class="note ${SHOW_TOKEN?'warn':''}" style="margin-top:8px">
+        ${SHOW_TOKEN
+          ? `<b>${t('توكنك الحقيقي ظاهر في اللينك والأمثلة تحت.','Your real token is showing in the link and the examples below.')}</b><br>
+             ${t('ما تنسخش حاجة منهم للعميل وهو ظاهر.','Do not copy anything from them to a customer while it is showing.')}`
+          : t('اللينك والأمثلة بيعرضوا <YOUR_TOKEN> عشان تنسخهم للعميل على طول. لو عايز تشغّلهم في الترمنال بنفسك، أظهر توكنك.',
+              'The link and examples show <YOUR_TOKEN> so you can copy them straight to a customer. To run them in your own terminal, reveal your token.')}
+        <button class="chip" id="tokInline" style="margin-inline-start:6px">${SHOW_TOKEN?t('اخفي توكني','Hide my token'):t('أظهر توكني','Reveal my token')}</button>
+      </div>` : ''}
     </div>
 
     ${(e.q&&e.q.length) ? `<div class="sec"><h3>${t('باراميترز إضافية','Extra parameters')}</h3><table class="kv">${e.q.map(q=>`<tr><td>${esc(q.k)}</td><td>${esc(q.v||'—')}${q.off?' <em style="color:#94A5B4">(معطّل في الكولكشن)</em>':''}</td></tr>`).join('')}</table></div>` : ''}
@@ -2403,6 +2436,8 @@ function _renderDetail(e, why){
     document.getElementById('tryout').scrollIntoView({block:'center', behavior:'smooth'});
     if(ensureDeps(e, ()=>tryIt(e))) tryIt(e);
   };
+  const ti=$('tokInline');
+  if(ti) ti.onclick = ()=>{ SHOW_TOKEN = !SHOW_TOKEN; renderDetail(e, cur && cur.why); };
   $('cpCode').onclick = ()=>copy(gen(e, codeMode), t('اتنسخ المثال','Example copied'));
   $('cpReply').onclick = openPacket;
   $('escal').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
@@ -4137,7 +4172,7 @@ async function connect(silent){
       SESSION.user=u; SESSION.pass=pw; SESSION.token=tok; SESSION.at=Date.now();
       /* حساب جديد = كل اللي اتخزّن عن الحساب القديم يروح.
          من غير كده هتشوف عربيات عميل وانت متصل بعميل تاني. */
-      SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null;
+      SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
       Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
       $('unitIn').value=''; unitPaint(t('مفيش جهاز محدد','no device set'));
       TOKEN_MEM = tok;
@@ -4159,7 +4194,7 @@ let LAST_LOGIN_FAIL = null;
 
 function disconnect(){
   SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null;
-  SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null;
+  SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
   Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
   $('sesU').value=''; $('sesP').value=''; $('unitIn').value=''; unitPaint(t('—','—'));
   sesPaint(t('غير متصل','Not connected'));
