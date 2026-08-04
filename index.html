@@ -229,7 +229,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 </div>
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b data-ar="مساعد الإنتجريشن" data-en="Integration Helper">مساعد الإنتجريشن</b><span>afaqy support console</span></div>
+    <div class="brand"><b data-ar="مساعد الإنتجريشن" data-en="Integration Helper">مساعد الإنتجريشن</b><span id="verTag">v—</span></div>
     <div class="conn">
       <label for="baseUrl">Base URL</label>
       <select id="baseUrl">
@@ -495,12 +495,16 @@ const DOCS = {
         "ar": [
           "زرار «انسخ رد كامل للعميل» اتنقل فوق خالص — كان مدفون تحت البودي والأمثلة ومحدش لاقيه",
           "معاه زرار «جرّب دلوقتي» في نفس الشريط، تحت اسم الإندبوينت مباشرة",
-          "الشريط بيقولك لو انت متصل ولا لأ، عشان تعرف الرد هيبقى فيه النتيجة الحقيقية ولا لأ"
+          "الشريط بيقولك لو انت متصل ولا لأ، عشان تعرف الرد هيبقى فيه النتيجة الحقيقية ولا لأ",
+          "اتصلح باگ كان بيوقّف تشغيل الأداة في نصه: الكود كان بينده على عنصرين مش موجودين في الصفحة",
+          "اختبار جديد بيتأكد إن كل عنصر الكود بينده عليه موجود فعلًا — 96 مرجع اتفحصوا"
         ],
         "en": [
           "The \"Copy full reply for the customer\" button moved to the very top — it was buried under the body and examples where nobody found it",
           "A \"Run it now\" button sits beside it, directly under the endpoint name",
-          "The bar tells you whether you are connected, so you know if the reply will carry the live result"
+          "The bar tells you whether you are connected, so you know if the reply will carry the live result",
+          "Fixed a bug that aborted the startup sequence: the code referenced two elements that were not in the page",
+          "A new test verifies every element the code references actually exists — 96 references checked"
         ]
       }
     },
@@ -1421,6 +1425,14 @@ function renderDetail(e, why){
       ${(()=>{ const d=dupOf(e); if(!d) return '';
         const others=d.filter(x=>x.i!==e.i).map(x=>esc(x.g+' › '+x.n)).join('، ');
         return `<div class="note warn" style="margin-top:10px"><b>نفس الإندبوينت موجود في فولدر تاني:</b> ${others}.<br>الفولدر هنا اتنسخ وما اتعدّلش، فاعتمد على الإندبوينت نفسه مش على اسم الفولدر.</div>`; })()}
+      <div class="row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft)">
+        <button class="btn sig" id="topTry">${t('جرّب دلوقتي','Run it now')}</button>
+        <button class="btn sig" id="topCopy" style="background:var(--ink); border-color:var(--ink)">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>
+        <span style="font-size:12.5px; color:var(--muted); align-self:center">
+          ${SESSION.token ? t('متصل — النتيجة الحقيقية هتتحط في الرد','Connected — the live result goes into the reply')
+                          : t('اتصل من فوق عشان الرد يبقى فيه النتيجة الحقيقية','Connect above so the reply carries the live result')}
+        </span>
+      </div>
       ${dangerous ? `<div class="note warn" style="margin-top:10px">ريكوست خطر — ما يتبعتش للعميل كمثال إلا بموافقة. جرّبه على البيئة التجريبية بس.</div>` : ''}
     </div>
 
