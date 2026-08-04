@@ -1,16 +1,16 @@
 {
-  "version": "4.3",
+  "version": "4.4",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "اسم ملف الإكسل بقى إنجليزي بالكامل — الاسم اللي فيه عربي وإنجليزي مع بعض كان بيتعرض معكوس في ويندوز، والوقت كان بيبان 56-03 بدل 03-56",
-      "الواجهة زي ما هي بالعربي — الاسم بس هو اللي اتغيّر",
-      "اسم الملف بقى بيقول الفلتر بالظبط: Devices GPS online idling أو WASL inquiry"
+      "التبويبات رجعت ٦ بدل ٧ — «الدليل» بقى تبويب فرعي جوه «أساسيات الإنتجريشن»، والاتنين مرجع فمكانهم واحد",
+      "فاصل بصري في شريط التبويبات: أربعة للشغل اليومي، وبعده المرجع والأدوات",
+      "اللينكات القديمة اللي بتفتح على الدليل لسه شغالة"
     ],
     "en": [
-      "The Excel filename is now fully Latin — mixing Arabic and Latin made Windows display it reversed, showing the time as 56-03 instead of 03-56",
-      "The interface stays in Arabic — only the filename changed",
-      "The filename now states the exact filter, for example Devices GPS online idling, or WASL inquiry"
+      "Back to six tabs instead of seven — the Guide is now a sub-tab inside Integration basics, since both are reference material",
+      "A visual separator in the tab bar: four for daily work, then reference and tools",
+      "Existing links that open the guide still work"
     ]
   }
 }

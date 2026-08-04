@@ -62,6 +62,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 /* ---------- tabs ---------- */
 .tabs{background:var(--panel); border-bottom:1px solid var(--line)}
 .tabs-in{max-width:1320px; margin:0 auto; display:flex; gap:2px; padding:0 12px}
+.tabsep{width:1px; align-self:center; height:20px; background:var(--line); margin:0 8px; flex:none}
 .tab{background:none; border:0; border-bottom:3px solid transparent; padding:13px 16px; color:var(--muted); font-weight:600}
 .tab[aria-selected="true"]{color:var(--signal-deep); border-bottom-color:var(--signal)}
 .tab:hover{color:var(--ink)}
@@ -95,7 +96,8 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
   .conn .btn{width:100%}
   .conn #sesState,.conn #unitState{grid-column:1/-1; text-align:center}
   .tabs-in{overflow-x:auto; -webkit-overflow-scrolling:touch; padding:0 8px}
-  .tab{white-space:nowrap; padding:12px 12px; font-size:14px}
+  .tabsep{width:1px; align-self:center; height:20px; background:var(--line); margin:0 8px; flex:none}
+.tab{white-space:nowrap; padding:12px 12px; font-size:14px}
   .searchbar input{font-size:16px}          /* أقل من 16 بيخلي آيفون يزوّم لوحده */
   .results{max-height:none}
   .pre{font-size:11.5px}
@@ -225,7 +227,8 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   .conn label{display:none}
   .tabs-in{overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none}
   .tabs-in::-webkit-scrollbar{display:none}
-  .tab{padding:11px 12px; font-size:13.5px; white-space:nowrap}
+  .tabsep{width:1px; align-self:center; height:20px; background:var(--line); margin:0 8px; flex:none}
+.tab{padding:11px 12px; font-size:13.5px; white-space:nowrap}
   .wrap{padding:12px 10px 48px}
   .searchbar input{font-size:16px; padding:13px 40px 13px 13px}   /* 16px يمنع الزوم في آيفون */
   .results{max-height:none}
@@ -299,8 +302,8 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   <button class="tab" role="tab" aria-selected="false" data-view="search"><span data-ar="الريكوستات" data-en="Requests">الريكوستات</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="recipes"><span data-ar="سيناريوهات جاهزة" data-en="Ready scenarios">سيناريوهات جاهزة</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="dash"><span data-ar="لوحة الأجهزة" data-en="Device dashboard">لوحة الأجهزة</span></button>
+  <span class="tabsep" aria-hidden="true"></span>
   <button class="tab" role="tab" aria-selected="false" data-view="inspect"><span data-ar="افحص رد" data-en="Inspect a response">افحص رد</span></button>
-  <button class="tab" role="tab" aria-selected="false" data-view="docs"><span data-ar="الدليل" data-en="Guide">الدليل</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="faq"><span data-ar="أساسيات الإنتجريشن" data-en="Integration basics">أساسيات الإنتجريشن</span></button>
 </div></nav>
 
@@ -415,10 +418,20 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 </section>
 
 <!-- ================= DOCS ================= -->
-<section class="view" id="v-docs" hidden><div id="docsBox"></div></section>
+<section class="view" id="v-docs" hidden>
+  <div class="row" style="margin-bottom:12px">
+    <button class="ct" id="gvBasics" aria-selected="false"></button>
+    <button class="ct" id="gvGuide" aria-selected="true"></button>
+  </div>
+  <div id="docsBox"></div>
+</section>
 
 <!-- ================= FAQ ================= -->
 <section class="view" id="v-faq" hidden>
+  <div class="row" style="margin-bottom:12px">
+    <button class="ct" id="fvBasics" aria-selected="true"></button>
+    <button class="ct" id="fvGuide" aria-selected="false"></button>
+  </div>
   <div class="note sig" style="margin-bottom:14px" id="faqIntro"></div>
   <div id="uidFlow" style="margin-bottom:16px"></div>
   <div class="cards" id="faq"></div>
@@ -619,9 +632,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.3",
+  "version": "4.4",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.4",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "التبويبات رجعت ٦ بدل ٧ — «الدليل» بقى تبويب فرعي جوه «أساسيات الإنتجريشن»، والاتنين مرجع فمكانهم واحد",
+          "فاصل بصري في شريط التبويبات: أربعة للشغل اليومي، وبعده المرجع والأدوات",
+          "اللينكات القديمة اللي بتفتح على الدليل لسه شغالة",
+          "سكريبت تجهيز لجهاز جديد: بينزّل كل اللي البناء محتاجه ويجرّبه — عشان مايبقاش فيه شخص واحد بس يقدر ينشر"
+        ],
+        "en": [
+          "Back to six tabs instead of seven — the Guide is now a sub-tab inside Integration basics, since both are reference material",
+          "A visual separator in the tab bar: four for daily work, then reference and tools",
+          "Existing links that open the guide still work",
+          "A setup script for a fresh machine: it installs everything the build needs and verifies it — so publishing is not limited to one person"
+        ]
+      }
+    },
     {
       "v": "4.3",
       "date": "2026-08-04",
@@ -5756,6 +5787,16 @@ const INTROS = {
 function paintIntros(){ Object.entries(INTROS).forEach(([id,v])=>{ const el=$(id); if(el) el.innerHTML = dual(v); }); }
 
 const VIEWS = ['triage','search','recipes','docs','faq','inspect','dash'];
+/* «الدليل» و«الشروحات» تحت تبويب واحد — الاتنين مرجع، والموظف الجديد
+   كان بيلاقي سبع تبويبات في الصف الأول ويتوه. */
+let FAQVIEW = 'basics';
+function paintFaqSwitch(){
+  const L = t('الشروحات','Explanations'), G = t('الدليل','Guide');
+  [['fvBasics',L],['gvBasics',L],['fvGuide',G],['gvGuide',G]].forEach(([id,txt])=>{
+    const el2=$(id); if(el2) el2.textContent = txt; });
+  ['fvBasics','gvBasics'].forEach(id=>{ const e2=$(id); if(e2) e2.setAttribute('aria-selected', FAQVIEW==='basics'); });
+  ['fvGuide','gvGuide'].forEach(id=>{ const e2=$(id); if(e2) e2.setAttribute('aria-selected', FAQVIEW==='guide'); });
+}
 let VIEW_STACK = [];
 function goBack(){
   if(VIEW_STACK.length>1){ VIEW_STACK.pop(); showView(VIEW_STACK[VIEW_STACK.length-1], true); }
@@ -5768,13 +5809,19 @@ function showView(v, noPush){
     try{ history.pushState({v}, '', '#'+v); }catch(_){}
   }
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
-  ['search','faq','recipes','triage','docs','inspect','dash'].forEach(x=>$('v-'+x).hidden = x!==v);
+  if(v==='docs'){ FAQVIEW='guide'; v='faq'; }
+  ['search','faq','recipes','triage','docs','inspect','dash'].forEach(x=>$('v-'+x).hidden = true);
+  if(v==='faq'){
+    paintFaqSwitch();
+    $('v-faq').hidden  = FAQVIEW!=='basics';
+    $('v-docs').hidden = FAQVIEW!=='guide';
+  } else { $('v-'+v).hidden = false; }
   if(v==='dash') paintDash();
   if(v==='inspect'){ paintInspect(); renderInspect(); }
   if(v==='docs') renderDocs();
   paintIntros();
   if(v==='triage') renderTriage();
-  if(v==='faq') renderFaq();
+  if(v==='faq'){ if(FAQVIEW==='basics') renderFaq(); else renderDocs(); }
   if(v==='search') refreshLeft();
   if(v==='recipes'){ if(!RC){ $('rcHome').hidden=false; $('rcRun').hidden=true; renderRecipeCards(); } }
 }
@@ -5823,6 +5870,8 @@ $('baseUrl').addEventListener('change', ev=>{
 $('sesGo').onclick  = ()=>connect(false);
 $('sesOut').onclick = disconnect;
 $('sesCopy').onclick= ()=>copy(SESSION.token, t('اتنسخ التوكن','Token copied'));
+['fvBasics','gvBasics'].forEach(id=>{ const e2=$(id); if(e2) e2.onclick=()=>{ FAQVIEW='basics'; showView('faq'); }; });
+['fvGuide','gvGuide'].forEach(id=>{ const e2=$(id); if(e2) e2.onclick=()=>{ FAQVIEW='guide'; showView('faq'); }; });
 $('dvDevices').onclick = ()=>{ DASHVIEW='devices'; paintDash(); };
 $('dvWasl').onclick    = ()=>{ DASHVIEW='wasl';    paintDash(); };
 $('wsLoad').onclick = waslLoad;
