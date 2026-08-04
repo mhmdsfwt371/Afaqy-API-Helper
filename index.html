@@ -633,9 +633,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.6",
+  "version": "4.7",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.7",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "«افحص رد» بقى يصلّح الرد المكسور لوحده: كلام قبله أو بعده، وعلامات كود، وأرقام عربية، وعلامات تنصيص عربية أو مفردة، وفاصلة زيادة، ومفاتيح بلا تنصيص، ورموز HTML، وأرقام سطور، وأقواس ناقصة من نسخ مقطوع",
+          "وبيقولك صلّح إيه بالظبط، والنص اللي في الخانة بيتظبط عشان تشوف الفرق — مش سحر",
+          "لو لزقت أمر cURL كامل ومعاه الرد، بياخد الرد لوحده",
+          "تلات أمثلة جاهزة: لستة عربيات، ورد فيه خطأ، ورد فاضي — تدوس عليها تشوف الشكل المتوقع",
+          "لو ما قدرش يقرا، بيقولك إيه اللي جرّبه ويعرض الأمثلة بدل رسالة خطأ جافة"
+        ],
+        "en": [
+          "Inspect a response now repairs a broken paste on its own: text around it, code fences, Arabic-Indic digits, curly or single quotes, trailing commas, unquoted keys, HTML entities, line numbers, and missing brackets from a truncated copy",
+          "It names exactly what it fixed and tidies the text in the box so you can see the difference — nothing happens invisibly",
+          "Pasting a full cURL command together with the response now picks out just the response",
+          "Three ready examples: a vehicle list, an error response, and an empty one — press to see the expected shape",
+          "If it still cannot read it, it says what it tried and shows the examples instead of a bare error"
+        ]
+      }
+    },
     {
       "v": "4.6",
       "date": "2026-08-04",
@@ -5577,19 +5597,174 @@ function pickRows(json){
   return {rows, path, total:best.length};
 }
 
+/* ============ تصليح الـ JSON المكسور ============
+   الموظف بينسخ الرد من إيميل أو واتساب أو الكونسول، فبيجي معاه زبالة.
+   بنصلّح المعروف ونقول صلّحنا إيه — عشان يتعلّم، ومايبقاش سحر. */
+function repairJson(raw){
+  const fixes = [];
+  let x = String(raw||'');
+
+  const before = x;
+  x = x.replace(/^\uFEFF/, '')
+       .replace(/[\u00A0\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, ' ');
+  if(x !== before) fixes.push(t('حروف مخفية ومسافات غير عادية','hidden characters and unusual spaces'));
+
+  if(/```/.test(x)){
+    x = x.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '');
+    fixes.push(t('علامات الكود ```','code fences ```'));
+  }
+  if(/&quot;|&amp;|&lt;|&gt;/.test(x)){
+    x = x.replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+    fixes.push(t('رموز HTML زي &quot;','HTML entities'));
+  }
+  if(/[\u201C\u201D\u2018\u2019\u00AB\u00BB]/.test(x)){
+    x = x.replace(/[\u201C\u201D\u00AB\u00BB]/g,'"').replace(/[\u2018\u2019]/g,"'");
+    fixes.push(t('علامات تنصيص عربية أو مائلة','curly or Arabic quotation marks'));
+  }
+  if(/[\u0660-\u0669\u06F0-\u06F9]/.test(x)){
+    x = x.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d=>AR_DIGITS[d]||d);
+    fixes.push(t('أرقام عربية','Arabic-Indic digits'));
+  }
+  if(/^\s*\d+[:|]\s/m.test(x)){
+    x = x.replace(/^\s*\d+[:|]\s/gm, '');
+    fixes.push(t('أرقام السطور','line numbers'));
+  }
+  if(/Object\s*\{|Array\s*\[/.test(x)){
+    x = x.replace(/\b(Object|Array)\s*(?=[{[])/g, '');
+    fixes.push(t('كلمات الكونسول زي Object','console prefixes like Object'));
+  }
+  if(/,\s*[}\]]/.test(x)){
+    x = x.replace(/,(\s*[}\]])/g, '$1');
+    fixes.push(t('فاصلة زيادة قبل القوس','a trailing comma before a bracket'));
+  }
+  /* مفاتيح من غير علامات تنصيص — شكل جافاسكريبت مش JSON */
+  if(/[{,]\s*[A-Za-z_$][\w$]*\s*:/.test(x)){
+    x = x.replace(/([{,]\s*)([A-Za-z_$][\w$]*)(\s*:)/g, '$1"$2"$3');
+    fixes.push(t('مفاتيح من غير علامات تنصيص','keys without quotation marks'));
+  }
+  if(/:\s*'/.test(x)){
+    x = x.replace(/'([^'\\]*)'/g, (m,g)=>'"'+g.replace(/"/g,'\\"')+'"');
+    fixes.push(t('علامة تنصيص مفردة بدل مزدوجة','single quotes instead of double'));
+  }
+
+  /* نص قبل أو بعد الـ JSON — «الرد كان:» أو أمر curl أو كلام العميل.
+     بندوّر على كل جزء متوازن الأقواس وناخد أكبر واحد بيتقرا فعلًا —
+     عشان curl فيه {} ما يخدعناش ونقطع من مكان غلط. */
+  const best = (()=>{
+    let win=null;
+    for(let a=0; a<x.length; a++){
+      const open = x[a];
+      if(open!=='{' && open!=='[') continue;
+      const close = open==='{' ? '}' : ']';
+      let depth=0, inStr=false, esc2=false;
+      for(let b=a; b<x.length; b++){
+        const c = x[b];
+        if(inStr){
+          if(esc2) esc2=false;
+          else if(c==='\\') esc2=true;
+          else if(c==='"') inStr=false;
+          continue;
+        }
+        if(c==='"'){ inStr=true; continue; }
+        if(c===open) depth++;
+        else if(c===close){
+          depth--;
+          if(depth===0){
+            const cand = x.slice(a, b+1);
+            if(cand.length > (win?win.length:0)){
+              try{ JSON.parse(cand); win=cand; }catch(_){}
+            }
+            break;
+          }
+        }
+      }
+    }
+    return win;
+  })();
+  if(best && best.length !== x.trim().length){
+    x = best;
+    fixes.push(t('كلام قبل أو بعد الرد','text before or after the response'));
+  } else if(!best){
+    const i1 = x.search(/[{[]/);
+    const i2 = Math.max(x.lastIndexOf('}'), x.lastIndexOf(']'));
+    if(i1 > 0 && i2 > i1){ x = x.slice(i1, i2+1); fixes.push(t('كلام قبل أو بعد الرد','text before or after the response')); }
+  }
+
+  let json=null;
+  try{ json = JSON.parse(x); }
+  catch(_){
+    /* أقواس ناقصة — بيحصل لما النسخ يتقطع */
+    const need = (o,c)=>((x.match(new RegExp('\\'+o,'g'))||[]).length) - ((x.match(new RegExp('\\'+c,'g'))||[]).length);
+    const nb = need('{','}'), nk = need('[',']');
+    if(nb>0 || nk>0){
+      const patched = x + ']'.repeat(Math.max(0,nk)) + '}'.repeat(Math.max(0,nb));
+      try{ json = JSON.parse(patched); x = patched;
+           fixes.push(t('أقواس ناقصة في الآخر — النسخ كان مقطوع','missing closing brackets — the copy was cut short')); }catch(_){}
+    }
+  }
+  return {json, text:x, fixes};
+}
+
+const INSPECT_SAMPLES = [
+ {k:'list', ttl:{ar:'لستة عربيات', en:'Vehicle list'}, v:{message:'success',status_code:200,data:{items:[
+    {_id:'5fb0e2e703ed529bb30f9af3',name:'NB YD - TH - 1129',imei:'357454075086551',
+     counters:{odometer:233207.2,engine_hours:95761694},
+     last_update:{time:'2026-08-04 09:12:00',pos:{speed:64}}},
+    {_id:'6009324fd77b9f0552247855',name:'DP 18181',imei:'352094083043288',
+     counters:{odometer:1200.5,engine_hours:3600},
+     last_update:{time:'2026-08-03 21:40:00',pos:{speed:0}}}]}}},
+ {k:'err', ttl:{ar:'رد فيه خطأ', en:'An error response'},
+  v:{message:'validation_error',status_code:405,errors:{unit_id:['not_found','invalid_resource']},extra:[]}},
+ {k:'empty', ttl:{ar:'رد فاضي', en:'An empty response'},
+  v:{message:'success',status_code:200,data:{items:[]}}}
+];
+
 function renderInspect(){
   const raw = ($('inText').value||'').trim();
   const out = $('inOut');
-  if(!raw){ out.innerHTML = `<div class="panel"><div class="empty">
-    <b>${t('الصق الرد فوق','Paste the response above')}</b>
-    ${t('أي رد من الـ API — بتاعك أو اللي العميل بعته.','Any API response — yours or one the customer sent.')}</div></div>`; return; }
-  let j=null;
+  if(!raw){
+    out.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
+      <h3>${t('مش عارف تلزق إيه؟','Not sure what to paste?')}</h3>
+      <p style="margin:0 0 10px; font-size:14px; color:var(--ink-2)">
+        ${t('أي رد من الـ API، من أول { لآخر }. دوس على مثال عشان تشوف الشكل:',
+            'Any API response, from the first brace to the last. Press an example to see the shape:')}</p>
+      <div class="row">${INSPECT_SAMPLES.map(x=>`<button class="btn ghost" data-samp="${x.k}">${esc(dual(x.ttl))}</button>`).join('')}</div>
+      <div class="note" style="margin-top:10px">
+        <b>${t('ما تقلقش من الشكل.','Do not worry about the formatting.')}</b>
+        ${t('لو فيه كلام قبله أو بعده، أو مسافات، أو أرقام عربية، أو علامات تنصيص غريبة، أو أقواس ناقصة من نسخ مقطوع — الأداة بتصلّحها لوحدها وبتقولك صلّحت إيه.',
+            'If there is text before or after it, odd spacing, Arabic-Indic digits, curly quotes, or missing brackets from a truncated copy, the tool repairs it and tells you what it fixed.')}</div>
+    </div></div>`;
+    out.querySelectorAll('[data-samp]').forEach(b=>b.onclick=()=>{
+      const smp = INSPECT_SAMPLES.find(x=>x.k===b.dataset.samp);
+      $('inText').value = JSON.stringify(smp.v, null, 2); renderInspect(); });
+    return; }
+  let j=null, fixNote='';
   try{ j = JSON.parse(raw); }
-  catch(err){
-    out.innerHTML = `<div class="panel"><div class="sec"><div class="note warn">
-      <b>${t('ده مش JSON سليم.','This is not valid JSON.')}</b><br>
-      ${t('لو نسخته من إيميل، غالبًا فيه حروف زيادة أو ناقص قوس. الرسالة من المتصفح:','If you copied it from an email it probably has stray characters or a missing brace. The browser says:')}
-      <br><code>${esc(String(err.message).slice(0,160))}</code></div></div></div>`; return; }
+  catch(_){
+    const rep = repairJson(raw);
+    if(rep.json){
+      j = rep.json;
+      $('inText').value = JSON.stringify(rep.json, null, 2);
+      fixNote = `<div class="note sig" style="margin-bottom:10px">
+        <b>${t('كان فيه حاجات غلط وصلّحناها:','A few things were wrong and were fixed:')}</b>
+        <ul style="margin:6px 0 0; padding-inline-start:20px">${rep.fixes.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+        <span style="font-size:12.5px; color:var(--muted)">${t('النص اللي فوق اتظبط — قارنه باللي لزقته لو حابب.',
+          'The text above has been tidied — compare it with what you pasted if you like.')}</span></div>`;
+    } else {
+      out.innerHTML = `<div class="panel"><div class="sec"><div class="note warn">
+        <b>${t('ما قدرناش نقرا الرد ده.','We could not read this response.')}</b><br>
+        ${rep.fixes.length ? t('جرّبنا نصلّح: ','We tried fixing: ')+esc(rep.fixes.join('، '))+'<br>' : ''}
+        ${t('اتأكد إنك نسخت الرد كامل من أول { لآخر }. ولو نسخته من واتساب، جرّب تنسخه من المتصفح مباشرة.',
+            'Make sure you copied the whole response from the first brace to the last. If you copied it from a chat app, try copying it from the browser instead.')}
+        </div>
+        <div class="row">${INSPECT_SAMPLES.map(x=>`<button class="chip" data-samp="${x.k}">${esc(dual(x.ttl))}</button>`).join('')}</div>
+        <div class="note" style="margin-top:8px">${t('دوس على أي مثال فوق عشان تشوف الشكل المتوقع.','Press any example above to see the expected shape.')}</div>
+      </div></div>`;
+      out.querySelectorAll('[data-samp]').forEach(b=>b.onclick=()=>{
+        const smp = INSPECT_SAMPLES.find(x=>x.k===b.dataset.samp);
+        $('inText').value = JSON.stringify(smp.v, null, 2); renderInspect(); });
+      return; }
+  }
 
   const code = j && (j.status_code || (j.data && j.data.status_code));
   const msg  = j && (j.message || j.error);
@@ -5605,7 +5780,7 @@ function renderInspect(){
 
   const {rows, path, total} = pickRows(j);
   if(!rows.length){
-    out.innerHTML = `<div class="panel"><div class="sec">${head}
+    out.innerHTML = `<div class="panel"><div class="sec">${fixNote}${head}
       <div class="note" style="margin-top:8px">${t('مفيش سجلات في الرد ده — يا هو رد على عملية مش قايمة، يا رجع فاضي.','No records in this response — either it is not a list, or it came back empty.')}</div>
       <pre class="pre" style="margin-top:8px">${esc(JSON.stringify(j,null,2).slice(0,3000))}</pre></div></div>`;
     clipBlocks(out); return;
@@ -5640,7 +5815,7 @@ function renderInspect(){
                           silent + ' records at zero speed (stationary)');
 
   out.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
-    ${head}
+    ${fixNote}${head}
     <div class="note sig" style="margin-top:8px">${sumLine}</div>
     <div style="overflow-x:auto; margin-top:10px">
       <table class="kv" style="min-width:100%">

@@ -1,16 +1,16 @@
 {
-  "version": "4.6",
+  "version": "4.7",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "اتشالت رسالة «حظر CORS» من الأداة خالص — كانت بتتقال في حالة السبب فيها عدم الاتصال مش الشبكة",
-      "خطوة تسجيل الدخول في السيناريوهات بقت تتأكد إن فيه بيانات حساب قبل ما تشتغل، بدل ما تبعت اسم فاضي وترجع رسالة محيّرة",
-      "رسالة الفشل بقت تفرّق بين حالتين: مش متصل، والريكوست ما وصلش للسيرفر — وكل واحدة بتقولك تعمل إيه"
+      "«افحص رد» بقى يصلّح الرد المكسور لوحده: كلام قبله أو بعده، وعلامات كود، وأرقام عربية، وعلامات تنصيص عربية أو مفردة، وفاصلة زيادة، ومفاتيح بلا تنصيص، ورموز HTML، وأرقام سطور، وأقواس ناقصة من نسخ مقطوع",
+      "وبيقولك صلّح إيه بالظبط، والنص اللي في الخانة بيتظبط عشان تشوف الفرق — مش سحر",
+      "لو لزقت أمر cURL كامل ومعاه الرد، بياخد الرد لوحده"
     ],
     "en": [
-      "The CORS-blocked message was removed entirely — it was being shown when the real cause was simply not being connected",
-      "The login step in scenarios now checks for account credentials before running, instead of sending an empty username and returning a confusing message",
-      "The failure message now distinguishes two cases: not connected, and the request did not reach the server — each with what to do about it"
+      "Inspect a response now repairs a broken paste on its own: text around it, code fences, Arabic-Indic digits, curly or single quotes, trailing commas, unquoted keys, HTML entities, line numbers, and missing brackets from a truncated copy",
+      "It names exactly what it fixed and tidies the text in the box so you can see the difference — nothing happens invisibly",
+      "Pasting a full cURL command together with the response now picks out just the response"
     ]
   }
 }
