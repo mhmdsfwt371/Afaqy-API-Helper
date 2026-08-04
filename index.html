@@ -291,9 +291,12 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
         <option value="__custom">أخرى…</option>
       </select>
       <input id="baseCustom" placeholder="https://…" hidden>
+      <select id="acctSel" style="max-width:170px" title="الحسابات المحفوظة على الجهاز ده"><option value="">— حسابات محفوظة —</option></select>
       <input id="sesU" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px; font-family:var(--ar); text-align:right; direction:rtl">
       <input id="sesP" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px; font-family:var(--ar); text-align:right; direction:rtl">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
+      <button class="btn ghost" id="acctSave" style="padding:6px 10px; font-size:13px" data-ar="احفظ الحساب" data-en="Save account">احفظ الحساب</button>
+      <button class="btn ghost" id="acctDel" hidden style="padding:6px 10px; font-size:13px" data-ar="امسح" data-en="Delete">امسح</button>
       <span id="sesState" class="pill">غير متصل</span>
       <input id="tickCust" autocomplete="off" style="width:150px; font-family:var(--ar); text-align:right; direction:rtl" data-arph="عميل التذكرة (اختياري)" data-enph="Ticket customer (optional)" placeholder="عميل التذكرة (اختياري)">
       <span id="tickWarn" class="pill" style="background:#F6D9DC; color:#8E2430; border:1px solid #E5B4BA" hidden data-ar="⚠ حساب مختلف عن عميل التذكرة" data-en="⚠ Different account from the ticket customer">⚠ حساب مختلف عن عميل التذكرة</span>
@@ -649,9 +652,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.7",
+  "version": "5.8",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "5.8",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "الحسابات بقت تتحفظ: دوس «احفظ الحساب» بعد الاتصال، والمرة الجاية اختاره من اللستة والخانات تتعبّى لوحدها — بدل ما تكتبه كل شوية",
+          "كلمة السر بتتحفظ بس لو وافقت وقت الحفظ، ولو رفضت بيتحفظ الاسم والبيئة بس وخانة كلمة السر بتفضل فاضية",
+          "الحفظ على الجهاز ده بس ومش بيتبعت لأي مكان، وكلمة السر مكتوبة مموّهة مش صريحة — بس التمويه إخفاء مش تشفير، فعلى جهاز مشترك احفظ الاسم بس",
+          "نفس اليوزر على بيئتين بيتحفظ سجلين مستقلين، واختيار الحساب بيظبط البيئة معاه، و«امسح» بتشيله فورًا"
+        ],
+        "en": [
+          "Accounts can now be saved: press Save account after connecting, then pick it from the list next time and the fields fill themselves",
+          "The password is stored only if you agree at save time; decline and only the username and environment are kept, with the password box left empty",
+          "Everything stays on this device and is never sent anywhere, and a stored password is written obfuscated rather than in the clear — but that is hiding, not encryption, so on a shared device save the username only",
+          "The same username on two environments is kept as two separate records, picking an account also sets its environment, and Delete removes it immediately"
+        ]
+      }
+    },
     {
       "v": "5.7",
       "date": "2026-08-05",
@@ -1634,13 +1655,15 @@ const DOCS = {
           "١) اتصل — اكتب اسم المستخدم وكلمة السر بتوع حساب العميل في الشريط اللي فوق واضغط «اتصال». الأداة بتجيب التوكن لوحدها وبتجدّده لو خلص.",
           "٢) حدّد العربية — الصق الـ IMEI أو الاسم أو رقم اللوحة.",
           "٣) ابدأ من التبويب الأول واختار العرض اللي العميل قاله.",
-          "مفيش أي بيانات بتتخزن. كل حاجة في ذاكرة المتصفح وبتروح لما تقفل الصفحة."
+          "مفيش أي بيانات بتتخزن. كل حاجة في ذاكرة المتصفح وبتروح لما تقفل الصفحة.",
+          "**الحسابات المحفوظة:** بعد ما تتصل، دوس «احفظ الحساب» — المرة الجاية تختاره من اللستة والخانات بتتعبّى لوحدها. الحفظ على الجهاز ده بس، وكلمة السر بتتحفظ **بس لو وافقت** وقت الحفظ. على جهاز مشترك: احفظ الاسم من غير كلمة السر."
         ],
         "en": [
           "1) Connect — enter the customer account username and password in the top bar and press Connect. The tool fetches the token and refreshes it if it expires.",
           "2) Set the vehicle — paste the IMEI, the name, or the plate number.",
           "3) Start from the first tab and pick the symptom the customer reported.",
-          "Nothing is stored. Everything lives in browser memory and disappears when you close the page."
+          "Nothing is stored. Everything lives in browser memory and disappears when you close the page.",
+          "**Saved accounts:** after connecting, press Save account — next time pick it from the list and the fields fill themselves. Saved on this device only, and the password is stored **only if you agree** at save time. On a shared device, save the username without the password."
         ]
       }
     },
@@ -1788,7 +1811,8 @@ const DOCS = {
           "«جرّب وصحّح» بقى للقراءة بس، لأنه بيرمي أكتر من محاولة — وده على الكتابة خطر.",
           "الريكوستات الحساسة على حساب العميل نفسه (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة خالص — للتوثيق بس.",
           "خانة «عميل التذكرة» جنب الاتصال: لو الحساب المتصل مختلف عن العميل اللي بترد عليه، تحذير بيظهر قبل ما تخلط بين عميلين.",
-          "حد أقصى ٤ ريكوستات في نفس اللحظة — الداشبوردات ما تضربش حساب العميل دفعة واحدة."
+          "حد أقصى ٤ ريكوستات في نفس اللحظة — الداشبوردات ما تضربش حساب العميل دفعة واحدة.",
+          "الحسابات المحفوظة على الجهاز بس ومحدش بيشوفها غيرك — بس كلمة السر مموّهة مش مشفّرة، يعني اللي قدامه الجهاز مفتوح يقدر يوصلها. على جهاز مشترك احفظ الاسم من غير كلمة السر، و«امسح» بتشيل الحساب فورًا."
         ],
         "en": [
           "Every request in the tool is classified: read, write, or sensitive — the label shows next to the path and in search results.",
@@ -1796,7 +1820,8 @@ const DOCS = {
           "Try-and-auto-fix is now read-only, because it fires several attempts — dangerous on writes.",
           "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only.",
           "The ticket-customer box beside the connection warns you when the connected account differs from the customer you are answering.",
-          "At most 4 requests run at the same moment — dashboards no longer hammer the customer account in one burst."
+          "At most 4 requests run at the same moment — dashboards no longer hammer the customer account in one burst.",
+          "Saved accounts live on this device only — but a stored password is obfuscated, not encrypted, so anyone at an unlocked device can recover it. On a shared device save the username without the password; Delete removes the account immediately."
         ]
       }
     },
@@ -6981,6 +7006,86 @@ function checkTick(){
 }
 try{ $('tickCust').value = sessionStorage.getItem('tickCust') || ''; }catch(_){}
 $('tickCust').oninput = ()=>{ try{ sessionStorage.setItem('tickCust', $('tickCust').value); }catch(_){} checkTick(); };
+/* ============ v5.8 — الحسابات المحفوظة ============
+   محفوظة على الجهاز ده بس، في المتصفح — مش على سيرفر ولا بتتبعت لحد.
+   الاسم والبيئة بيتحفظوا دايمًا. كلمة السر اختيارية وبتتخزّن بس لو اخترت،
+   وبتتكتب مموّهة عشان ما تظهرش لأول عين تفتح إعدادات المتصفح —
+   والتمويه ده إخفاء مش تشفير: أي حد قدامه الجهاز مفتوح يقدر يوصلها.
+   عشان كده: ما تحفظش باسورد على جهاز مشترك، والمسح بضغطة. */
+const ACCT_KEY = 'afaqy.accounts.v1';
+function acctMask(txt, key){
+  let out = '';
+  for(let i=0;i<txt.length;i++) out += String.fromCharCode(txt.charCodeAt(i) ^ (key.charCodeAt(i % key.length) + 41) % 256);
+  try{ return btoa(unescape(encodeURIComponent(out))); }catch(_){ return ''; }
+}
+function acctUnmask(b64, key){
+  let raw;
+  try{ raw = decodeURIComponent(escape(atob(b64))); }catch(_){ return ''; }
+  let out = '';
+  for(let i=0;i<raw.length;i++) out += String.fromCharCode(raw.charCodeAt(i) ^ (key.charCodeAt(i % key.length) + 41) % 256);
+  return out;
+}
+function acctLoad(){
+  try{ const a = JSON.parse(localStorage.getItem(ACCT_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+  catch(_){ return []; }
+}
+function acctStore(list){
+  try{ localStorage.setItem(ACCT_KEY, JSON.stringify(list.slice(0, 40))); return true; }
+  catch(_){ return false; }
+}
+function acctPaint(){
+  const sel = $('acctSel'); if(!sel) return;
+  const list = acctLoad(), keep = sel.value;
+  sel.innerHTML = `<option value="">${t('— حسابات محفوظة —','— saved accounts —')}</option>`
+    + list.map((a,i)=>`<option value="${i}">${esc(a.u)}${a.pw ? '' : ' ' + t('(من غير باسورد)','(no password)')}</option>`).join('');
+  sel.value = keep && Number(keep) < list.length ? keep : '';
+  $('acctDel').hidden = sel.value === '';
+}
+function acctPick(){
+  const sel = $('acctSel'), list = acctLoad();
+  $('acctDel').hidden = sel.value === '';
+  if(sel.value === '') return;
+  const a = list[Number(sel.value)]; if(!a) return;
+  $('sesU').value = a.u || '';
+  $('sesP').value = a.pw ? acctUnmask(a.pw, a.u) : '';
+  if(a.base){
+    const opts = [...$('baseUrl').options].map(o=>o.value);
+    if(opts.indexOf(a.base) >= 0){ $('baseUrl').value = a.base; $('baseCustom').hidden = true; }
+    else { $('baseUrl').value = '__custom'; $('baseCustom').hidden = false; $('baseCustom').value = a.base; }
+  }
+  sesPaint(a.pw ? t('اتعبّى — دوس اتصال','Filled in — press connect')
+                : t('اتعبّى الاسم — اكتب كلمة السر','Username filled — type the password'));
+  (a.pw ? $('sesGo') : $('sesP')).focus();
+}
+function acctSave(){
+  const u = $('sesU').value.trim(), pw = $('sesP').value;
+  if(!u){ sesPaint(t('اكتب اسم المستخدم الأول','Enter the username first'), true); return; }
+  const withPw = pw ? confirm(t(
+    'أحفظ كلمة السر كمان؟\n\nهتتخزّن على الجهاز ده مموّهة — التمويه إخفاء مش تشفير، وأي حد قدامه الجهاز مفتوح يقدر يوصلها.\n\nموافق = يتحفظ الاسم وكلمة السر. إلغاء = الاسم بس.',
+    'Save the password too?\n\nIt is stored on this device obfuscated — that is hiding, not encryption, and anyone at this unlocked device can recover it.\n\nOK = save both. Cancel = username only.')) : false;
+  const list = acctLoad();
+  const rec = {u, base: baseUrl(), pw: withPw ? acctMask(pw, u) : ''};
+  const at = list.findIndex(a => a.u === u && a.base === rec.base);
+  if(at >= 0) list[at] = rec; else list.unshift(rec);
+  if(!acctStore(list)){ sesPaint(t('المتصفح رافض يحفظ','The browser refused to save'), true); return; }
+  acctPaint();
+  const i2 = acctLoad().findIndex(a => a.u === u && a.base === rec.base);
+  $('acctSel').value = String(i2); $('acctDel').hidden = false;
+  sesPaint(withPw ? t('اتحفظ بكلمة السر','Saved with the password')
+                  : t('اتحفظ — من غير كلمة السر','Saved — without the password'));
+}
+function acctDelete(){
+  const sel = $('acctSel'); if(sel.value === '') return;
+  const list = acctLoad(), a = list[Number(sel.value)]; if(!a) return;
+  if(!confirm(t(`أمسح «${a.u}» من الجهاز ده؟`, `Delete "${a.u}" from this device?`))) return;
+  list.splice(Number(sel.value), 1); acctStore(list);
+  sel.value = ''; acctPaint();
+  sesPaint(t('اتمسح','Deleted'));
+}
+$('acctSel').onchange = acctPick;
+$('acctSave').onclick = acctSave;
+$('acctDel').onclick  = acctDelete;
+acctPaint();
 $('sesGo').onclick  = ()=>connect(false);
 $('sesOut').onclick = disconnect;
 $('sesCopy').onclick= ()=>copy(SESSION.token, t('اتنسخ التوكن','Token copied'));

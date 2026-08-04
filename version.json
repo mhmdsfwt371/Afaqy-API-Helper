@@ -1,16 +1,16 @@
 {
-  "version": "5.7",
+  "version": "5.8",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الرد الفاضي بقى صريح: «سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر» بدل ما يتقال عليه مش لستة — عشان محدش يقول للعميل في عطل وهو الفلتر ضيّق",
-      "التصعيد بقى بياخد معاه الحساب المتصل وعميل التذكرة أوتوماتيك، جنب سجل اللي اتنفذ اللي كان موجود — من غير توكن ولا باسورد",
-      "كارت العربية بقى يعرض المجموعات اللي العربية فيها"
+      "الحسابات بقت تتحفظ: دوس «احفظ الحساب» بعد الاتصال، والمرة الجاية اختاره من اللستة والخانات تتعبّى لوحدها — بدل ما تكتبه كل شوية",
+      "كلمة السر بتتحفظ بس لو وافقت وقت الحفظ، ولو رفضت بيتحفظ الاسم والبيئة بس وخانة كلمة السر بتفضل فاضية",
+      "الحفظ على الجهاز ده بس ومش بيتبعت لأي مكان، وكلمة السر مكتوبة مموّهة مش صريحة — بس التمويه إخفاء مش تشفير، فعلى جهاز مشترك احفظ الاسم بس"
     ],
     "en": [
-      "An empty result is now stated plainly: valid response, working connection, zero records matching the filter — so nobody tells the customer it is broken when the filter is just narrow",
-      "Escalations now carry the connected account and the ticket customer automatically, beside the session log that was already there — never the token or the password",
-      "The vehicle card now shows the groups the vehicle belongs to"
+      "Accounts can now be saved: press Save account after connecting, then pick it from the list next time and the fields fill themselves",
+      "The password is stored only if you agree at save time; decline and only the username and environment are kept, with the password box left empty",
+      "Everything stays on this device and is never sent anywhere, and a stored password is written obfuscated rather than in the clear — but that is hiding, not encryption, so on a shared device save the username only"
     ]
   }
 }
