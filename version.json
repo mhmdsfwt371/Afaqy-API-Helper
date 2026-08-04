@@ -1,16 +1,16 @@
 {
-  "version": "1.9",
+  "version": "2.0",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "زرار «انسخ رد كامل للعميل» اتنقل فوق خالص — كان مدفون تحت البودي والأمثلة ومحدش لاقيه",
-      "معاه زرار «جرّب دلوقتي» في نفس الشريط، تحت اسم الإندبوينت مباشرة",
-      "الشريط بيقولك لو انت متصل ولا لأ، عشان تعرف الرد هيبقى فيه النتيجة الحقيقية ولا لأ"
+      "اتصلحت مشكلة إن شريط «في نسخة أحدث» كان بيفضل يطلع مهما تعمل تحديث",
+      "السبب كان تلات طبقات كاش فوق بعض: كاش المتصفح، وخدنة الخلفية، وكاش الأداة — والتحديث كان بيفك واحدة بس",
+      "زرار «تحديث» بقى يمسح كل الكاشات ويلغي خدمة الخلفية ويعيد التحميل من الشبكة"
     ],
     "en": [
-      "The \"Copy full reply for the customer\" button moved to the very top — it was buried under the body and examples where nobody found it",
-      "A \"Run it now\" button sits beside it, directly under the endpoint name",
-      "The bar tells you whether you are connected, so you know if the reply will carry the live result"
+      "Fixed the \"newer version\" bar reappearing no matter how many times you refreshed",
+      "The cause was three cache layers stacked: the browser cache, the service worker, and the app cache — the update button only cleared one",
+      "The Update button now clears every cache, unregisters the service worker, and reloads from the network"
     ]
   }
 }

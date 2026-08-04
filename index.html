@@ -407,7 +407,9 @@ function initPWA(){
   }
   let deferred=null;
   if(typeof window==='undefined' || !window.addEventListener) return;
+  const dismissed = (()=>{ try{ return sessionStorage.getItem('instOff')==='1'; }catch(_){ return false; } })();
   window.addEventListener('beforeinstallprompt', ev=>{
+    if(dismissed) return;
     ev.preventDefault(); deferred=ev;
     const bar=$('instBar'); if(!bar) return;
     $('instMsg').textContent = t('تقدر تثبّت الأداة على الجهاز وتفتحها زي أي تطبيق.',
@@ -415,7 +417,7 @@ function initPWA(){
     bar.hidden=false;
     $('instGo').onclick = async ()=>{ bar.hidden=true; deferred.prompt();
       try{ await deferred.userChoice; }catch(_){ } deferred=null; };
-    $('instSkip').onclick = ()=>{ bar.hidden=true; };
+    $('instSkip').onclick = ()=>{ $('instBar').hidden = true; try{ sessionStorage.setItem('instOff','1'); }catch(_){} };
   });
   /* آيفون مالوش دعوة تلقائية — بنشرحها بنفسنا */
   const ua = (typeof navigator!=='undefined' && navigator.userAgent) || '';
@@ -429,7 +431,7 @@ function initPWA(){
                                'To install on iPhone: tap the Share button below, then "Add to Home Screen".');
     $('instGo').hidden = true;
     bar.hidden = false;
-    $('instSkip').onclick = ()=>{ bar.hidden=true; };
+    $('instSkip').onclick = ()=>{ $('instBar').hidden = true; try{ sessionStorage.setItem('instOff','1'); }catch(_){} };
   }
 }
 
@@ -452,8 +454,23 @@ async function checkUpdate(silent){
     $('updBar').hidden = false;
   }catch(_){ /* شغال من الجهاز أو مفيش نت — عادي */ }
 }
-function applyUpdate(){
+/* التحديث لازم يفك كل طبقات الكاش: كاش الأداة، وخدمة الخلفية، وكاش المتصفح.
+   من غير كده الشريط بيفضل يطلع مهما عملت تحديث. */
+async function applyUpdate(){
   const hash = location.hash || '';
+  const btn = $('updGo'); if(btn){ btn.disabled = true; btn.textContent = t('بيحدّث…','Updating…'); }
+  try{
+    if(typeof caches !== 'undefined' && caches.keys){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  }catch(_){}
+  try{
+    if(navigator.serviceWorker){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  }catch(_){}
   location.replace(location.pathname + '?v=' + Date.now() + hash);
 }
 
@@ -485,9 +502,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "1.9",
+  "version": "2.0",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.0",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اتصلحت مشكلة إن شريط «في نسخة أحدث» كان بيفضل يطلع مهما تعمل تحديث",
+          "السبب كان تلات طبقات كاش فوق بعض: كاش المتصفح، وخدنة الخلفية، وكاش الأداة — والتحديث كان بيفك واحدة بس",
+          "زرار «تحديث» بقى يمسح كل الكاشات ويلغي خدمة الخلفية ويعيد التحميل من الشبكة",
+          "اسم الكاش بقى فيه رقم النسخة، فأي نشر جديد بيلغي القديم لوحده",
+          "الصفحة بتتجاب من الشبكة متجاهلة كاش المتصفح — سيرفر الصفحات كان بيرجّع نسخة مخزّنة لحد عشر دقايق",
+          "«لأ شكرًا» في شريط التثبيت بقى يفضل مقفول طول الجلسة"
+        ],
+        "en": [
+          "Fixed the \"newer version\" bar reappearing no matter how many times you refreshed",
+          "The cause was three cache layers stacked: the browser cache, the service worker, and the app cache — the update button only cleared one",
+          "The Update button now clears every cache, unregisters the service worker, and reloads from the network",
+          "The cache name now carries the version number, so each deploy invalidates the previous one automatically",
+          "The page is fetched bypassing the browser cache — the Pages CDN was serving a stored copy for up to ten minutes",
+          "\"No thanks\" on the install bar now stays dismissed for the session"
+        ]
+      }
+    },
     {
       "v": "1.9",
       "date": "2026-08-04",
