@@ -353,6 +353,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   <div id="trDetail" style="margin-top:14px"></div>
   <div id="trLog" style="margin-top:18px"></div>
   <div id="trExamples"></div>
+  <div id="trTally"></div>
 </section>
 
 <!-- ================= RECIPES ================= -->
@@ -632,9 +633,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.4",
+  "version": "4.5",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.5",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "«ابدأ من هنا» بقت تنفع من غير اتصال — الموظف الجديد لسه مالوش بيانات عميل، فبدل ما يلاقي أول حاجة معطّلة، بيتقاله إيه اللي يقدر يعمله دلوقتي وإيه اللي محتاج اتصال",
+          "عدّاد التذاكر في آخر الصفحة: زرار واحد لما تقفل تذكرة، والتصعيد بيتعد لوحده لما تنسخ رسالته",
+          "بيوريك نسبة القفل من غير تصعيد لآخر سبع أيام، وبيتصدّر إكسل جاهز لورقة القياس",
+          "المحفوظ على الجهاز تواريخ وأرقام بس — مفيش أي بيانات عميل، ومتقفل باختبار",
+          "اتصلح النسخ: كان بيرمي خطأ في المتصفحات اللي ما بتسمحش بالوصول للحافظة بدل ما يستخدم البديل"
+        ],
+        "en": [
+          "Start here now works without a connection — a new agent has no customer credentials yet, so instead of a dead first screen it states what can be done now and what needs a login",
+          "A ticket tally at the bottom of the page: one button when you close a ticket, and escalations count themselves when their message is copied",
+          "It shows the closed-without-escalation rate for the last seven days and exports an Excel ready for the measurement sheet",
+          "What is stored on the device is dates and counts only — no customer data, and a test enforces it",
+          "Fixed copying: it threw an error in browsers that block clipboard access instead of using the fallback"
+        ]
+      }
+    },
     {
       "v": "4.4",
       "date": "2026-08-04",
@@ -2354,11 +2375,19 @@ document.addEventListener('keydown', ev=>{
 let tt;
 function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,1900); }
 function copy(text, msg){
-  navigator.clipboard.writeText(text).then(()=>toast(msg)).catch(()=>{
-    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta);
-    ta.select(); try{document.execCommand('copy'); toast(msg);}catch(_){toast(t('انسخ يدويًا','Copy manually'));}
-    ta.remove();
-  });
+  /* clipboard مش موجود أصلًا في المتصفحات القديمة ولا على http عادي —
+     من غير الحماية دي الزرار بيرمي خطأ قبل ما يوصل للبديل. */
+  const fallback = ()=>{
+    try{
+      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove(); toast(msg);
+    }catch(_){ toast(t('المتصفح مش سامح بالنسخ — حدّد النص وانسخه بإيدك','The browser blocked copying — select the text and copy it manually')); }
+  };
+  try{
+    if(typeof navigator!=='undefined' && navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(text).then(()=>toast(msg)).catch(fallback);
+    else fallback();
+  }catch(_){ fallback(); }
 }
 
 /* ---------------- empty state ---------------- */
@@ -4361,6 +4390,30 @@ function quickCandidates(q){
 }
 function renderQuick(){
   const box=$('quick'); if(!box) return;
+  /* من غير اتصال، الصندوق ده مايقدرش يشتغل. الموظف الجديد لسه مالوش
+     بيانات أي عميل — فبدل ما يلاقي أول حاجة معطّلة، بنوجّهه للأمثلة. */
+  if(!SESSION.token){
+    box.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
+      <h3>${t('لسه مش متصل','Not connected yet')}</h3>
+      <p style="margin:0 0 10px; font-size:14px; color:var(--ink-2)">
+        ${t('الشغل الحي محتاج بيانات دخول حساب عميل. لو لسه مالكش، ده طبيعي في الأول — ابدأ من التحت.',
+            'Live work needs a customer account login. If you do not have one yet, that is normal at the start — begin further down.')}</p>
+      <table class="kv">
+        <tr><td style="width:30%; font-family:var(--ar); color:var(--ink)">${t('تقدر تعمله دلوقتي','You can do now')}</td>
+            <td>${t('تقرا الأمثلة الكاملة تحت · تدوّر في الريكوستات · تقرا الشروحات والدليل · تفحص رد عميل بعتهولك',
+                    'Read the worked examples below, search the requests, read the explanations and guide, inspect a response a customer sent you')}</td></tr>
+        <tr><td style="font-family:var(--ar); color:var(--ink)">${t('محتاج اتصال','Needs a connection')}</td>
+            <td>${t('التجربة الحية · اللوحات · تحويل الـ IMEI لـ UID','Live runs, the boards, and IMEI to UID conversion')}</td></tr>
+      </table>
+      <div class="row">
+        <button class="btn sig" id="qkExamples">${t('وريني الأمثلة','Show me the examples')}</button>
+        <button class="btn ghost" id="qkLearn">${t('الشروحات والدليل','Explanations and guide')}</button>
+      </div>
+    </div></div>`;
+    $('qkExamples').onclick = ()=>{ const e2=$('trExamples'); if(e2) e2.scrollIntoView({behavior:'smooth', block:'start'}); };
+    $('qkLearn').onclick = ()=>{ FAQVIEW='basics'; showView('faq'); };
+    return;
+  }
   box.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
     <h3>${t('من الـ IMEI للرد الجاهز','From IMEI to a ready reply')}</h3>
     <p style="margin:0 0 12px; font-size:14px; color:var(--ink-2)">
@@ -4534,6 +4587,10 @@ function renderTriage(){
   if(TR) openTriage(TR);
   renderLog();
   $('trExamples').innerHTML = renderExamples();
+  /* من غير اتصال، الأمثلة هي أهم حاجة في الصفحة — منبّه عليها */
+  const trE = $('trExamples');
+  if(trE) trE.style.order = SESSION.token ? '' : '-1';
+  renderTally();
 }
 function openTriage(id){
   TR = id;
@@ -4635,7 +4692,7 @@ ${log}
   };
   $('evBox').querySelectorAll('input').forEach(b=>b.onchange=build);
   build();
-  $('mcopy').onclick = ()=>copy($('mtext').value, t('اتنسخ','Copied'));
+  $('mcopy').onclick = ()=>{ tallyAdd('escalated'); return (copy($('mtext').value, t('اتنسخ','Copied'))); };
   $('mask').hidden = false;
 }
 
@@ -5773,6 +5830,73 @@ function paintInspect(){
   $('inIntro').innerHTML = t(
     'الصق أي رد من الـ API — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء: أسماء وأرقام وعدادات محوّلة. لو الرد فيه خطأ، بتقولك السبب.',
     'Paste any API response — yours or one a customer sent you — and the tool turns it into a readable table: names, ids, converted counters. If the response carries an error, it explains it.');
+}
+
+/* ================= عدّاد التذاكر =================
+   ورقة القياس محتاجة رقمين: قفل من غير تصعيد، وتصعيد.
+   لو الموظف هيعدّهم بإيده، مش هيعدّهم. فبنجمّعهم هنا.
+   المخزّن: تواريخ وأرقام بس — مفيش ولا بيان عميل واحد. */
+const TALLY_KEY = 'afaqy_tally_v1';
+function tallyRead(){
+  try{ return JSON.parse(localStorage.getItem(TALLY_KEY) || '{}') || {}; }catch(_){ return {}; }
+}
+function tallyWrite(o){ try{ localStorage.setItem(TALLY_KEY, JSON.stringify(o)); }catch(_){} }
+function tallyAdd(kind){
+  const o = tallyRead(), d = today();
+  o[d] = o[d] || {closed:0, escalated:0};
+  o[d][kind] = (o[d][kind]||0) + 1;
+  tallyWrite(o);
+  if(!$('v-triage').hidden) renderTally();
+}
+function tallyWeek(){
+  const o = tallyRead(), out = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(Date.now() - i*864e5).toISOString().slice(0,10);
+    const v = o[d] || {closed:0, escalated:0};
+    out.push({date:d, closed:v.closed||0, escalated:v.escalated||0});
+  }
+  return out;
+}
+function renderTally(){
+  const box = $('trTally'); if(!box) return;
+  const w = tallyWeek();
+  const C = w.reduce((a,x)=>a+x.closed,0), E = w.reduce((a,x)=>a+x.escalated,0);
+  const total = C + E;
+  const pct = total ? Math.round(C/total*100) : null;
+  box.innerHTML = `<div class="panel" style="margin-top:18px"><div class="sec" style="border-top:0">
+    <h3>${t('عدّاد التذاكر','Ticket tally')}</h3>
+    <p style="margin:0 0 10px; font-size:13.5px; color:var(--ink-2)">
+      ${t('أول ما تخلص تذكرة، دوس. الرقم ده هو اللي بيقول هل الأداة نافعة — والتصعيد بيتعد لوحده.',
+          'Press one button when you finish a ticket. This number is what tells you whether the tool is working — escalations are counted automatically.')}</p>
+    <div class="row">
+      <button class="btn sig" id="tlClosed">${t('قفلتها من غير تصعيد','Closed without escalating')}</button>
+      <span style="font-size:12.5px; color:var(--muted); align-self:center">
+        ${total ? t(`آخر ٧ أيام: ${C} قفل · ${E} تصعيد · ${pct}٪ من غير تصعيد`,
+                    `Last 7 days: ${C} closed, ${E} escalated, ${pct}% without escalation`)
+                : t('لسه مفيش تذاكر متسجّلة','no tickets recorded yet')}</span>
+    </div>
+    ${total ? `<table class="kv" style="margin-top:10px">
+      ${w.filter(x=>x.closed||x.escalated).map(x=>`<tr>
+        <td style="width:36%"><code>${esc(x.date)}</code></td>
+        <td>${x.closed} ${t('قفل','closed')} · ${x.escalated} ${t('تصعيد','escalated')}</td></tr>`).join('')}
+    </table>
+    <div class="row">
+      <button class="btn ghost" id="tlCsv">${t('تصدير للأسبوع','Export the week')}</button>
+      <button class="btn ghost" id="tlClear">${t('صفّر العدّاد','Reset')}</button>
+    </div>` : ''}
+    <div class="note" style="margin-top:10px">${t('المحفوظ على جهازك: تواريخ وأرقام بس. مفيش أي بيانات عميل.',
+      'Stored on your device: dates and counts only. No customer data whatsoever.')}</div>
+  </div></div>`;
+  $('tlClosed').onclick = ()=>{ tallyAdd('closed'); toast(t('اتسجّلت','Recorded')); };
+  const cs=$('tlCsv'); if(cs) cs.onclick = ()=>downloadXlsx(
+    ['date','closed','escalated','total','pct_without_escalation'],
+    tallyWeek().map(x=>({...x, total:x.closed+x.escalated,
+      pct_without_escalation: (x.closed+x.escalated) ? Math.round(x.closed/(x.closed+x.escalated)*100) : ''})),
+    exportName('Ticket tally'), 'Tally');
+  const cl=$('tlClear'); if(cl) cl.onclick = ()=>{
+    if(confirm(t('هتمسح كل الأرقام المسجّلة. متأكد؟','This clears every recorded number. Are you sure?'))){
+      tallyWrite({}); renderTally(); }
+  };
 }
 
 /* ---------------- views ---------------- */
