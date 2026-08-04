@@ -1,16 +1,12 @@
 {
-  "version": "4.0",
+  "version": "4.1",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "ترتيب اسم ملف الإكسل اتغيّر: اسم المستخدم - التاريخ - الموديول - الوقت",
-      "اسم الموديول بقى واضح في الاسم: «لوحة الأجهزة GPS» أو «لوحة وصل استعلام»",
-      "الشرطات الجوانية بتتشال من اسم الموديول عشان الأربع أجزاء تفضل واضحة ومقروءة"
+      "الوقت في اسم ملف الإكسل بقى بنظام ١٢ ساعة مع AM و PM بدل نظام الـ ٢٤ ساعة"
     ],
     "en": [
-      "The Excel filename order changed to: username, date, module, time",
-      "The module name is now explicit in the filename, naming the board and the filter",
-      "Internal dashes are stripped from the module name so the four parts stay readable"
+      "The time in the Excel filename is now 12-hour with AM and PM instead of 24-hour"
     ]
   }
 }

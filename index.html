@@ -619,9 +619,21 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.0",
+  "version": "4.1",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.1",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "الوقت في اسم ملف الإكسل بقى بنظام ١٢ ساعة مع AM و PM بدل نظام الـ ٢٤ ساعة"
+        ],
+        "en": [
+          "The time in the Excel filename is now 12-hour with AM and PM instead of 24-hour"
+        ]
+      }
+    },
     {
       "v": "4.0",
       "date": "2026-08-04",
@@ -5141,7 +5153,11 @@ function exportName(what){
   const d = new Date();
   const p2 = n => String(n).padStart(2,'0');
   const date = d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
-  const time = p2(d.getHours())+'-'+p2(d.getMinutes());
+  /* ١٢ ساعة مع AM/PM — أوضح في القراءة من نظام ٢٤ ساعة */
+  const h24 = d.getHours();
+  const ap  = h24 < 12 ? 'AM' : 'PM';
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const time = p2(h12)+'-'+p2(d.getMinutes())+' '+ap;
   const user = clean(SESSION.user) || t('بدون حساب','no-account');
   return `${user} - ${date} - ${clean(what)} - ${time}.xlsx`;
 }
