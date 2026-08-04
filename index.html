@@ -298,6 +298,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   <button class="tab" role="tab" aria-selected="true" data-view="triage"><span data-ar="ابدأ من هنا" data-en="Start here">ابدأ من هنا</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="search"><span data-ar="الريكوستات" data-en="Requests">الريكوستات</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="recipes"><span data-ar="سيناريوهات جاهزة" data-en="Ready scenarios">سيناريوهات جاهزة</span></button>
+  <button class="tab" role="tab" aria-selected="false" data-view="inspect"><span data-ar="افحص رد" data-en="Inspect a response">افحص رد</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="docs"><span data-ar="الدليل" data-en="Guide">الدليل</span></button>
   <button class="tab" role="tab" aria-selected="false" data-view="faq"><span data-ar="أساسيات الإنتجريشن" data-en="Integration basics">أساسيات الإنتجريشن</span></button>
 </div></nav>
@@ -358,6 +359,24 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
     <div class="cards" id="rcCards"></div>
   </div>
   <div id="rcRun" hidden></div>
+</section>
+
+<!-- ================= INSPECT ================= -->
+<section class="view" id="v-inspect" hidden>
+  <div class="note sig" style="margin-bottom:14px" id="inIntro"></div>
+  <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    <h3 id="inH1"></h3>
+    <textarea id="inText" style="width:100%; min-height:150px; font-family:var(--mono); font-size:12.5px;
+      direction:ltr; text-align:left; border:1px solid var(--line); border-radius:3px; padding:12px;
+      background:var(--panel-2); color:var(--ink)"></textarea>
+    <div class="row">
+      <button class="btn sig" id="inGo"></button>
+      <label class="btn ghost" style="cursor:pointer"><span id="inFileLbl"></span>
+        <input type="file" id="inFile" accept="application/json,.json,.txt" hidden></label>
+      <button class="btn ghost" id="inClear"></button>
+    </div>
+  </div></div>
+  <div id="inOut"></div>
 </section>
 
 <!-- ================= DOCS ================= -->
@@ -551,12 +570,35 @@ function setLang(l){
   if(!$('v-recipes').hidden){ if(RC) renderRecipe(); else renderRecipeCards(); }
   if(!$('v-triage').hidden) renderTriage();
   if(!$('v-docs').hidden) renderDocs();
+  if(!$('v-inspect').hidden){ paintInspect(); renderInspect(); }
 }
 
 const DOCS = {
-  "version": "2.6",
+  "version": "2.7",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.7",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "تبويب جديد «افحص رد»: الصق أي رد JSON — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء بأسماء وأرقام وعدادات محوّلة",
+          "ساعات التشغيل بتتحوّل من ثواني لساعات في الجدول أوتوماتيك، والملخص بيقول إن التحويل حصل",
+          "لو الرد فيه خطأ، بيتعرض السبب والحقل المرفوض بالاسم — نفس تشخيص التجربة الحية",
+          "بيمسك الـ JSON المكسور ويقول السبب، وبيقول لو الرد فاضي بدل ما يسيبك تحزّر",
+          "زرار «نسخ ملخص للعميل» بيطلّع أول عشر سجلات في نص إنجليزي مرتب بدل JSON خام",
+          "اتأكدنا بالتجربة إن نسختين شغالين مع بعض مفيش بينهم أي تداخل — توكن ولا عربية ولا كاش"
+        ],
+        "en": [
+          "New Inspect tab: paste any JSON response — yours or one a customer sent — and it becomes a readable table with names, ids and converted counters",
+          "Engine hours are converted from seconds to hours in the table automatically, and the summary says so",
+          "If the response carries an error, the cause and the rejected field are named — the same diagnosis as a live run",
+          "Broken JSON is caught with a clear reason, and an empty response is stated rather than left ambiguous",
+          "A Copy summary button produces the first ten records as tidy English text instead of raw JSON",
+          "Verified by test that two instances running side by side share nothing — no token, vehicle or cache"
+        ]
+      }
+    },
     {
       "v": "2.6",
       "date": "2026-08-04",
@@ -4247,6 +4289,163 @@ function renderDocs(){
     });
 }
 
+/* ================= فحص رد ================= 
+   العميل بيبعت رده، أو انت بتلزق ردك — والأداة بتحوّله لجدول مقروء.
+   الفايدة الأكبر: إن العميل يقول «الرد ده غلط» وانت تشوفه بعينك في ثانية. */
+const FIELD_LBL = {
+  name:{ar:'الاسم',en:'Name'}, id:{ar:'UID',en:'UID'}, imei:{ar:'IMEI',en:'IMEI'},
+  device_serial:{ar:'سيريال الجهاز',en:'Device serial'}, plate_number:{ar:'اللوحة',en:'Plate'},
+  odometer:{ar:'المسافة (كم)',en:'Odometer (km)'}, engine_hours:{ar:'ساعات التشغيل',en:'Engine hours'},
+  speed:{ar:'السرعة',en:'Speed'}, last_time:{ar:'آخر تحديث',en:'Last update'}, active:{ar:'مفعّلة',en:'Active'}
+};
+
+function pickRows(json){
+  /* بندوّر على أكبر مصفوفة سجلات في الرد */
+  let best=null, path='';
+  const walk=(o,p2,d)=>{ if(d>7||o==null) return;
+    if(Array.isArray(o)){ if(o.length && typeof o[0]==='object' && (!best||o.length>best.length)){best=o;path=p2;}
+      o.slice(0,2).forEach(x=>walk(x,p2,d+1)); return; }
+    if(typeof o==='object') Object.entries(o).forEach(([k,v])=>walk(v, p2?p2+'.'+k:k, d+1));
+  };
+  walk(json,'',0);
+  if(!best) return {rows:[], path:''};
+  const rows = best.slice(0,500).map(o=>{
+    const c = (o && o.counters) || {};
+    const lu = (o && o.last_update) || {};
+    const pos = lu.pos || lu.position || {};
+    const num = v => (v==null||v==='')?null:Number(v);
+    const eh = num(c.engine_hours);
+    return {
+      name: o.name || o.title || o.username || '',
+      id: String(o.id || o._id || ''),
+      imei: o.imei!=null ? String(o.imei) : '',
+      device_serial: o.device_serial!=null ? String(o.device_serial) : '',
+      plate_number: o.plate_number || o.plate || '',
+      odometer: num(c.odometer),
+      engine_hours: (eh!=null && isFinite(eh)) ? eh/3600 : null,
+      speed: num(pos.speed!=null ? pos.speed : o.speed),
+      last_time: lu.time || o.last_time || '',
+      active: (o.active===true||o.active===false) ? o.active : null,
+      _raw: o
+    };
+  });
+  return {rows, path, total:best.length};
+}
+
+function renderInspect(){
+  const raw = ($('inText').value||'').trim();
+  const out = $('inOut');
+  if(!raw){ out.innerHTML = `<div class="panel"><div class="empty">
+    <b>${t('الصق الرد فوق','Paste the response above')}</b>
+    ${t('أي رد من الـ API — بتاعك أو اللي العميل بعته.','Any API response — yours or one the customer sent.')}</div></div>`; return; }
+  let j=null;
+  try{ j = JSON.parse(raw); }
+  catch(err){
+    out.innerHTML = `<div class="panel"><div class="sec"><div class="note warn">
+      <b>${t('ده مش JSON سليم.','This is not valid JSON.')}</b><br>
+      ${t('لو نسخته من إيميل، غالبًا فيه حروف زيادة أو ناقص قوس. الرسالة من المتصفح:','If you copied it from an email it probably has stray characters or a missing brace. The browser says:')}
+      <br><code>${esc(String(err.message).slice(0,160))}</code></div></div></div>`; return; }
+
+  const code = j && (j.status_code || (j.data && j.data.status_code));
+  const msg  = j && (j.message || j.error);
+  const bad  = code && Number(code) >= 400;
+
+  let head = '';
+  if(bad){
+    head = `<div class="note warn"><b>${t('الرد ده فيه خطأ','This response carries an error')}</b> — <code>${esc(String(msg||''))}</code> · <code>${esc(String(code))}</code><br>${diagnose(Number(code), raw)}</div>`;
+  } else if(code){
+    head = `<div class="note sig"><b>${t('رد ناجح','Successful response')}</b> — <code>${esc(String(msg||'ok'))}</code> · <code>${esc(String(code))}</code>
+      <br>${t('خد بالك: السيستم بيرجع 200 حتى مع الأخطاء، فالحكم من هنا مش من كود الـ HTTP.','Note: the platform returns 200 even on failure, so this is what to read — not the HTTP status.')}</div>`;
+  }
+
+  const {rows, path, total} = pickRows(j);
+  if(!rows.length){
+    out.innerHTML = `<div class="panel"><div class="sec">${head}
+      <div class="note" style="margin-top:8px">${t('مفيش سجلات في الرد ده — يا هو رد على عملية مش قايمة، يا رجع فاضي.','No records in this response — either it is not a list, or it came back empty.')}</div>
+      <pre class="pre" style="margin-top:8px">${esc(JSON.stringify(j,null,2).slice(0,3000))}</pre></div></div>`;
+    clipBlocks(out); return;
+  }
+
+  const cols = ['name','id','imei','device_serial','plate_number','odometer','engine_hours','speed','last_time','active']
+    .filter(c => rows.some(r => r[c]!==null && r[c]!=='' && r[c]!==undefined));
+  const fmt = (c,v)=>{
+    if(v===null||v===undefined||v==='') return '—';
+    if(c==='engine_hours') return `<b>${Number(v).toLocaleString('en-US',{maximumFractionDigits:0})}</b>`;
+    if(c==='odometer') return Number(v).toLocaleString('en-US',{maximumFractionDigits:1});
+    if(c==='active') return v ? t('أيوه','yes') : t('لأ','no');
+    if(c==='id'||c==='imei'||c==='device_serial') return `<code style="font-size:11.5px">${esc(String(v))}</code>`;
+    return esc(String(v));
+  };
+  const silent = rows.filter(r=>r.speed===0).length;
+  const noImei = rows.filter(r=>!r.imei).length;
+
+  /* بنبني سطر الملخص على مراحل — أنضف من قوالب متداخلة */
+  const bits = [];
+  bits.push('<b>' + total + ' ' + t('سجل','records') + '</b>');
+  if(total > rows.length) bits.push(t('بنعرض أول','showing first') + ' ' + rows.length);
+  if(path) bits.push(t('مكانهم','under') + ' <code>' + esc(path) + '</code>');
+  let sumLine = bits.join(' · ');
+  if(rows.some(r=>r.engine_hours!=null))
+    sumLine += '<br>' + t('ساعات التشغيل اتحوّلت من ثواني لساعات أوتوماتيك.',
+                          'Engine hours were converted from seconds to hours automatically.');
+  if(noImei)
+    sumLine += '<br>' + t(noImei + ' سجل من غير IMEI', noImei + ' records without an IMEI');
+  if(silent)
+    sumLine += '<br>' + t(silent + ' سجل سرعته صفر (واقفة دلوقتي)',
+                          silent + ' records at zero speed (stationary)');
+
+  out.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
+    ${head}
+    <div class="note sig" style="margin-top:8px">${sumLine}</div>
+    <div style="overflow-x:auto; margin-top:10px">
+      <table class="kv" style="min-width:100%">
+        <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(dual(FIELD_LBL[c]||{ar:c,en:c}))}</td>`).join('')}</tr>
+        ${rows.slice(0,200).map(r=>`<tr>${cols.map(c=>`<td style="white-space:nowrap">${fmt(c, r[c])}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>
+    <div class="row">
+      <button class="btn sig" id="inCopy">${t('نسخ ملخص للعميل','Copy summary for the customer')}</button>
+      <button class="btn ghost" id="inRaw">${t('اعرض الرد الخام','Show raw response')}</button>
+    </div>
+    <div id="inRawBox"></div>
+  </div></div>`;
+
+  $('inCopy').onclick = ()=>{
+    const NL = String.fromCharCode(10);
+    const lines = rows.slice(0,10).map(r=>
+      cols.map(c=>((FIELD_LBL[c]||{en:c}).en) + ': ' +
+        (r[c]===null||r[c]===''?'—':(c==='engine_hours'?Math.round(r[c])+' h':r[c]))).join(' | '));
+    const parts = [];
+    parts.push('Response verified on ' + new Date().toISOString().slice(0,10));
+    parts.push('');
+    parts.push('Records returned: ' + total);
+    if(rows.some(r=>r.engine_hours!=null))
+      parts.push('Engine hours below are converted from seconds (raw / 3600).');
+    parts.push('');
+    parts.push('First ' + Math.min(10,rows.length) + ' of ' + total + ':');
+    lines.forEach(l=>parts.push(l));
+    parts.push('');
+    parts.push('Note: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the body.');
+    copy(parts.join(NL), t('اتنسخ الملخص','Summary copied'));
+  };
+  $('inRaw').onclick = ()=>{
+    const b=$('inRawBox');
+    b.innerHTML = b.innerHTML ? '' : `<pre class="pre" style="margin-top:10px">${esc(redactToken(JSON.stringify(j,null,2)).slice(0,20000))}</pre>`;
+    if(b.innerHTML) clipBlocks(b);
+  };
+  clipBlocks(out);
+}
+
+function paintInspect(){
+  $('inH1').textContent = t('الصق الرد هنا','Paste the response here');
+  $('inGo').textContent = t('افحص','Inspect');
+  $('inFileLbl').textContent = t('أو ارفع ملف','or upload a file');
+  $('inClear').textContent = t('مسح','Clear');
+  $('inIntro').innerHTML = t(
+    'الصق أي رد من الـ API — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء: أسماء وأرقام وعدادات محوّلة. لو الرد فيه خطأ، بتقولك السبب.',
+    'Paste any API response — yours or one a customer sent you — and the tool turns it into a readable table: names, ids, converted counters. If the response carries an error, it explains it.');
+}
+
 /* ---------------- views ---------------- */
 const INTROS = {
   trIntro:{ar:`أي تذكرة تبدأ من هنا. اختار العرض اللي العميل قاله، والتول تديك: اللي ما تعملهوش، الخطوات بالترتيب، والرد الجاهز. الهدف إن الرد يبقى واحد مهما كان اللي رد.`,
@@ -4271,7 +4470,8 @@ function showView(v, noPush){
     try{ history.pushState({v}, '', '#'+v); }catch(_){}
   }
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
-  ['search','faq','recipes','triage','docs'].forEach(x=>$('v-'+x).hidden = x!==v);
+  ['search','faq','recipes','triage','docs','inspect'].forEach(x=>$('v-'+x).hidden = x!==v);
+  if(v==='inspect'){ paintInspect(); renderInspect(); }
   if(v==='docs') renderDocs();
   paintIntros();
   if(v==='triage') renderTriage();
@@ -4324,6 +4524,11 @@ $('baseUrl').addEventListener('change', ev=>{
 $('sesGo').onclick  = ()=>connect(false);
 $('sesOut').onclick = disconnect;
 $('sesCopy').onclick= ()=>copy(SESSION.token, t('اتنسخ التوكن','Token copied'));
+$('inGo').onclick = renderInspect;
+$('inClear').onclick = ()=>{ $('inText').value=''; renderInspect(); };
+$('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>{ $('inText').value=String(rd.result||''); renderInspect(); };
+  rd.readAsText(f); };
 $('unitGo').onclick = ()=>resolveUnit($('unitIn').value);
 $('unitIn').addEventListener('keydown', ev=>{ if(ev.key==='Enter') resolveUnit($('unitIn').value); });
 $('mdRes').onclick = ()=>{ MODE='res'; refreshLeft(); };
