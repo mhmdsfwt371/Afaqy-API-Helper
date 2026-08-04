@@ -189,6 +189,13 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 </head>
 <body>
 
+<div id="updBar" hidden style="background:#00707F; color:#fff; padding:10px 18px; font-size:14px">
+  <div style="max-width:1320px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+    <span id="updMsg" style="flex:1"></span>
+    <button class="btn" id="updGo" style="background:#fff; color:#00707F; border-color:#fff; padding:6px 16px">تحديث</button>
+    <button class="btn ghost" id="updSkip" style="color:#CFF0F2; border-color:#4E9AA3; padding:6px 12px">بعدين</button>
+  </div>
+</div>
 <header class="top">
   <div class="top-in">
     <div class="brand"><b data-ar="مساعد الإنتجريشن" data-en="Integration Helper">مساعد الإنتجريشن</b><span>afaqy support console</span></div>
@@ -360,6 +367,30 @@ function authGate(done){
   });
 }
 
+/* ============ التحديث الذاتي ============
+   الأداة بتسأل السيرفر كل شوية: في نسخة أحدث؟ لو أيوه بتقولك وبتحدّث نفسها.
+   من غير كده الفريق هيفضل شغال على نسخة قديمة مخزّنة في المتصفح من غير ما يعرف. */
+let UPD_SEEN = null;
+async function checkUpdate(silent){
+  try{
+    const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'});
+    if(!r.ok) return;
+    const v = await r.json();
+    if(!v || !v.version || v.version === DOCS.version) return;
+    if(UPD_SEEN === v.version) return;
+    UPD_SEEN = v.version;
+    const items = (v.notes && (LANG==='en' ? v.notes.en : v.notes.ar)) || [];
+    $('updMsg').innerHTML = `<b>${t('في نسخة أحدث','A newer version is available')}: v${esc(v.version)}</b>`
+      + (items.length ? ` — ${esc(items.slice(0,2).join('، '))}` : '')
+      + `<br><span style="opacity:.85; font-size:12.5px">${t('اللي عندك دلوقتي','You are on')} v${esc(DOCS.version)}</span>`;
+    $('updBar').hidden = false;
+  }catch(_){ /* شغال من الجهاز أو مفيش نت — عادي */ }
+}
+function applyUpdate(){
+  const hash = location.hash || '';
+  location.replace(location.pathname + '?v=' + Date.now() + hash);
+}
+
 /* ============ اللغة ============ */
 let LANG = 'ar';
 const t = (ar, en) => LANG === 'en' ? en : ar;
@@ -388,9 +419,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "1.6",
+  "version": "1.7",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "1.7",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "الأداة بقت تعرف لوحدها لما تنزل نسخة أحدث وبتقولك — من غير كده الفريق يفضل شغال على نسخة قديمة مخزّنة في المتصفح",
+          "شريط فوق بيقول رقم النسخة الجديدة وإيه فيها، وزرار بيحدّث وبيرجعك لنفس التبويب",
+          "البناء بقى يشغّل كل الاختبارات وبيقف لو واحد فشل — مستحيل ينشر حاجة كسرت حاجة قديمة"
+        ],
+        "en": [
+          "The tool now detects when a newer version is published and tells you — otherwise the team keeps running an old copy cached in the browser",
+          "A bar at the top shows the new version and what changed, with a button that updates and returns you to the same tab",
+          "The build now runs every test and stops if any fails — it cannot publish something that broke an older feature"
+        ]
+      }
+    },
     {
       "v": "1.6",
       "date": "2026-08-04",
@@ -763,24 +810,28 @@ const DOCS = {
     },
     {
       "id": "rule",
-      "since": "1.1",
+      "since": "1.7",
       "t": {
         "ar": "قاعدة التحديث",
         "en": "The update rule"
       },
       "b": {
         "ar": [
-          "كل نسخة جديدة ليها رقم، والرقم ظاهر فوق في الشريط.",
+          "كل نسخة ليها رقم، والرقم ظاهر فوق في الشريط.",
           "الدليل بيتنزّل من جوه الأداة نفسها — تبويب «الدليل» ← زرار «نزّل الدليل».",
-          "أي تعديل في الأداة لازم يتسجّل في الدليل ده وفي الملف المطبوع، في نفس الوقت.",
-          "الجديد في كل نسخة بيتعلّم بلون مختلف عشان تعرف تقرا الفرق بسرعة.",
+          "أي تعديل في الأداة لازم يتسجّل في الدليل والملف المطبوع، في نفس الوقت.",
+          "الجديد في كل نسخة بيتعلّم بلون مختلف عشان تقرا الفرق بسرعة.",
+          "**قبل أي نشر، كل الاختبارات بتتشغّل.** لو واحد فشل، البناء بيقف ومفيش نشر. مش وعد — الكود بيمنعه.",
+          "**الأداة بتقول لوحدها لما تنزل نسخة أحدث.** الفريق ما يفضلش شغال على نسخة قديمة من غير ما يعرف.",
           "دليل قديم أخطر من إنه ما يكونش موجود، لأن الناس بتصدّقه."
         ],
         "en": [
           "Every release has a number, shown in the top bar.",
           "The guide downloads from inside the tool — the Guide tab, then \"Download the guide\".",
-          "Any change to the tool must be recorded in this guide and in the printed file at the same time.",
+          "Any change must be recorded in the guide and the printed file at the same time.",
           "What is new in each release is marked in a different colour so you can read the difference quickly.",
+          "**Before any publish, every test runs.** If one fails the build stops and nothing ships. Not a promise — the code enforces it.",
+          "**The tool announces newer versions itself.** The team never keeps running an old copy unknowingly.",
           "An outdated guide is more dangerous than no guide, because people believe it."
         ]
       }
@@ -3810,6 +3861,10 @@ paintIntros();
 refreshLeft();
 renderRecent();
 $('langBtn').onclick = ()=>setLang(LANG==='ar'?'en':'ar');
+$('updGo').onclick = applyUpdate;
+$('updSkip').onclick = ()=>{ $('updBar').hidden = true; };
+checkUpdate();
+setInterval(checkUpdate, 10*60*1000);
 $('q').setAttribute('title', t('اضغط / للوصول السريع','Press / to jump here'));
 unitPaint(t('مفيش عربية محددة','no vehicle set'));
 $('verTag').textContent = 'v'+DOCS.version;

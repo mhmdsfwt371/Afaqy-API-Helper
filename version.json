@@ -1,0 +1,16 @@
+{
+  "version": "1.7",
+  "date": "2026-08-04",
+  "notes": {
+    "ar": [
+      "الأداة بقت تعرف لوحدها لما تنزل نسخة أحدث وبتقولك — من غير كده الفريق يفضل شغال على نسخة قديمة مخزّنة في المتصفح",
+      "شريط فوق بيقول رقم النسخة الجديدة وإيه فيها، وزرار بيحدّث وبيرجعك لنفس التبويب",
+      "البناء بقى يشغّل كل الاختبارات وبيقف لو واحد فشل — مستحيل ينشر حاجة كسرت حاجة قديمة"
+    ],
+    "en": [
+      "The tool now detects when a newer version is published and tells you — otherwise the team keeps running an old copy cached in the browser",
+      "A bar at the top shows the new version and what changed, with a button that updates and returns you to the same tab",
+      "The build now runs every test and stops if any fails — it cannot publish something that broke an older feature"
+    ]
+  }
+}
