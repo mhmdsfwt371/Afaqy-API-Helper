@@ -1,16 +1,16 @@
 {
-  "version": "4.7",
+  "version": "4.8",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "«افحص رد» بقى يصلّح الرد المكسور لوحده: كلام قبله أو بعده، وعلامات كود، وأرقام عربية، وعلامات تنصيص عربية أو مفردة، وفاصلة زيادة، ومفاتيح بلا تنصيص، ورموز HTML، وأرقام سطور، وأقواس ناقصة من نسخ مقطوع",
-      "وبيقولك صلّح إيه بالظبط، والنص اللي في الخانة بيتظبط عشان تشوف الفرق — مش سحر",
-      "لو لزقت أمر cURL كامل ومعاه الرد، بياخد الرد لوحده"
+      "زرار «طباعة / PDF» في لوحة الأجهزة ولوحة وصل — بيطلّع تقرير مرتب تختار من المتصفح تحفظه PDF أو تطبعه",
+      "التقرير بيتبع اللي معروض بالظبط: نفس الفلتر ونفس السطور اللي قدامك",
+      "فيه رأس فيه اسم الحساب، والمعروض إيه، وعدد السطور، والتاريخ والوقت، ورقم نسخة الأداة"
     ],
     "en": [
-      "Inspect a response now repairs a broken paste on its own: text around it, code fences, Arabic-Indic digits, curly or single quotes, trailing commas, unquoted keys, HTML entities, line numbers, and missing brackets from a truncated copy",
-      "It names exactly what it fixed and tidies the text in the box so you can see the difference — nothing happens invisibly",
-      "Pasting a full cURL command together with the response now picks out just the response"
+      "A Print / PDF button on the device board and the WASL board — it produces a tidy report you can save as PDF or print from the browser",
+      "The report follows exactly what is on screen: the same filter and the same rows",
+      "It carries a header with the account, what is being shown, the row count, the date and time, and the tool version"
     ]
   }
 }

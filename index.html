@@ -240,12 +240,23 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
   .modal{max-height:94vh}
   table.kv td:first-child{width:42%}
 }
+/* الطباعة: لما يكون فيه صفحة تقرير مبنية، بنخفي كل الباقي.
+   المتصفح هو اللي بيرسم العربي ويحوّله PDF — أنضف من أي مكتبة. */
 @media print{
   .top,.ruler,.tabs,.row,.toast,.mask{display:none !important}
   body{background:#fff}
   .panel{border-color:#999; break-inside:avoid}
   .wrap{max-width:none; padding:0}
+  body.printing > *{display:none !important}
+  body.printing > #printArea{display:block !important}
+  #printArea{padding:0; font-size:11.5px}
+  #printArea table{width:100%; border-collapse:collapse}
+  #printArea th,#printArea td{border:1px solid #bbb; padding:5px 7px; text-align:start}
+  #printArea thead{display:table-header-group}
+  #printArea tr{break-inside:avoid}
+  #printArea .ph{border-bottom:2px solid #333; padding-bottom:10px; margin-bottom:14px}
 }
+#printArea{display:none}
 @media (prefers-reduced-motion:no-preference){
   .toast{animation:up .18s ease-out}
   @keyframes up{from{opacity:0; transform:translateY(8px)}}
@@ -376,6 +387,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
     <div class="row">
       <button class="btn sig" id="dashLoad"></button>
       <button class="btn ghost" id="dashCsv" hidden></button>
+      <button class="btn ghost" id="dashPdf" hidden></button>
       <span id="dashState" style="font-size:12.5px; color:var(--muted); align-self:center"></span>
     </div>
   </div></div>
@@ -385,6 +397,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <button class="btn sig" id="wsInq" hidden></button>
       <button class="btn warn" id="wsStop" hidden></button>
       <button class="btn ghost" id="wsCsv" hidden></button>
+      <button class="btn ghost" id="wsPdf" hidden></button>
       <span id="wsState" style="font-size:12.5px; color:var(--muted); align-self:center"></span>
     </div>
     <div id="wsSearchWrap" hidden style="margin-top:10px">
@@ -440,6 +453,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 
 </main>
 
+<div id="printArea"></div>
 <div class="mask" id="mask" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
   <div class="mh">
     <h3 id="mtitle" style="flex:1; min-width:0"></h3>
@@ -633,9 +647,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.7",
+  "version": "4.8",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.8",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "زرار «طباعة / PDF» في لوحة الأجهزة ولوحة وصل — بيطلّع تقرير مرتب تختار من المتصفح تحفظه PDF أو تطبعه",
+          "التقرير بيتبع اللي معروض بالظبط: نفس الفلتر ونفس السطور اللي قدامك",
+          "فيه رأس فيه اسم الحساب، والمعروض إيه، وعدد السطور، والتاريخ والوقت، ورقم نسخة الأداة",
+          "وفي آخره تنويه إن الأرقام لحظية واتسحبت وقت الطباعة",
+          "التوكن مش بيدخل التقرير خالص، والصفحة بترجع طبيعية والداتا بتتمسح بعد الطباعة على طول"
+        ],
+        "en": [
+          "A Print / PDF button on the device board and the WASL board — it produces a tidy report you can save as PDF or print from the browser",
+          "The report follows exactly what is on screen: the same filter and the same rows",
+          "It carries a header with the account, what is being shown, the row count, the date and time, and the tool version",
+          "It ends with a note that the figures are a snapshot taken at print time",
+          "The token never enters the report, and the page returns to normal with the data cleared immediately after printing"
+        ]
+      }
+    },
     {
       "v": "4.7",
       "date": "2026-08-04",
@@ -5182,7 +5216,7 @@ function dashRender(){
   if(!DASH.units.length){
     out.innerHTML = `<div class="panel"><div class="empty"><b>${t('مفيش عربيات','No vehicles')}</b>
       ${t('الحساب ده ما رجّعش أي عربية.','This account returned no vehicles.')}</div></div>`;
-    $('dashCsv').hidden = true; return; }
+    $('dashCsv').hidden = true; $('dashPdf').hidden = true; return; }
 
   const counts=new Map();
   DASH.units.forEach(u=>{ const k=typeOf(u); counts.set(k,(counts.get(k)||0)+1); });
@@ -5252,7 +5286,7 @@ function dashRender(){
     ${rows.length>300?`<div class="note" style="margin-top:8px">${t('بنعرض أول 300. التصدير بينزّل الكل.','Showing the first 300. Export downloads all of them.')}</div>`:''}
   </div></div>`;
 
-  $('dashCsv').hidden = false;
+  $('dashCsv').hidden = false; $('dashPdf').hidden = false;
   $('dashState').textContent = t('اتجابت','Loaded')+' '+DASH.at.toTimeString().slice(0,5);
   out.querySelectorAll('[data-slice]').forEach(el2=>el2.onclick=()=>{
     const k=el2.dataset.slice;
@@ -5279,6 +5313,32 @@ function dashRender(){
   });
   const ab=$('dashAll'); if(ab) ab.onclick=()=>{
     DASH.filter=null; DASH.flag=null; DASH.scope=null; DASH.state=null; dashRender(); };
+}
+
+function dashLabel(){
+  if(DASH.flag) return dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl);
+  if(DASH.filter) return typeLabel(DASH.filter)
+    + (DASH.scope ? ' — ' + (DASH.scope==='on'?t('أونلاين','online'):t('أوفلاين','offline')) : '')
+    + (DASH.state ? ' — ' + dual(STATE_META[DASH.state].ttl) : '');
+  return t('كل الأجهزة','all devices');
+}
+function dashPrint(){
+  const rows=dashRows(), cols=dashColumns(rows);
+  return printReport(t('تقرير الأجهزة','Device report'), cols, rows,
+    {account:SESSION.user, filter:dashLabel()});
+}
+function waslPrint(){
+  const rows=waslFiltered(), cols0=waslCols(rows);
+  const anyInq = Object.keys(WASL.inq).length>0;
+  const cols = cols0.concat(anyInq ? ['wasl_status'] : []);
+  const data = rows.map(u=>{
+    const o={}; cols0.forEach(c=>o[c]=u[c]);
+    if(anyInq){ const q=WASL.inq[String(u.id||u._id||'')]; o.wasl_status = q?q.txt:''; }
+    return o; });
+  return printReport(t('تقرير وصل','WASL report'), cols, data,
+    {account:SESSION.user,
+     filter:(anyInq?t('باستعلام وصل','with WASL inquiry'):t('اللستة','the list'))
+            + (WASL.q ? ' — ' + WASL.q : '')});
 }
 
 function dashExport(){
@@ -5371,6 +5431,54 @@ function exportName(what){
   const time = p2(h12)+'-'+p2(d.getMinutes())+' '+ap;
   const user = clean(SESSION.user) || 'no-account';
   return `${user} - ${date} - ${clean(what)} - ${time}.xlsx`;
+}
+
+/* PDF من غير أي مكتبة: بنبني صفحة تقرير ونسيب المتصفح يطبعها.
+   المستخدم يختار «حفظ كـ PDF». العربي بيطلع مضبوط لأن المتصفح
+   هو اللي بيرسمه — أي مكتبة كنا هنجيبها مكانتش هتعرف تشكّل الحروف. */
+function printReport(title, cols, rows, meta){
+  const box = $('printArea');
+  const d = new Date(), p2 = n => String(n).padStart(2,'0');
+  const h24 = d.getHours(), ap = h24<12 ? 'AM' : 'PM', h12 = h24%12===0 ? 12 : h24%12;
+  const when = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} · ${p2(h12)}:${p2(d.getMinutes())} ${ap}`;
+  const cell = (u,c)=>{
+    const v = u[c];
+    if(v===null||v===undefined||v==='') return '—';
+    if(typeof v==='boolean') return v ? t('أيوه','yes') : t('لأ','no');
+    return esc(String(v).slice(0,60));
+  };
+  const html = `
+    <div class="ph">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+        <b style="font-size:16px">${esc(title)}</b>
+        <span style="font-size:11px; color:#555">${t('مساعد الإنتجريشن','Integration Helper')} v${esc(DOCS.version)}</span>
+      </div>
+      <div style="font-size:11.5px; color:#444; margin-top:6px">
+        ${meta && meta.account ? `${t('الحساب','Account')}: <b>${esc(meta.account)}</b> · ` : ''}
+        ${meta && meta.filter ? `${t('المعروض','Showing')}: <b>${esc(meta.filter)}</b> · ` : ''}
+        ${t('عدد السطور','Rows')}: <b>${rows.length}</b> · ${esc(when)}
+      </div>
+    </div>
+    <table>
+      <thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(u=>`<tr>${cols.map(c=>`<td>${cell(u,c)}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>
+    <div style="margin-top:14px; font-size:10.5px; color:#666; border-top:1px solid #ccc; padding-top:8px">
+      ${t('اتسحبت من الـ API وقت الطباعة. الأرقام دي لحظية.','Pulled from the API at print time. These figures are a snapshot.')}
+    </div>`;
+  box.innerHTML = html;
+  document.body.classList.add('printing');
+  const done = ()=>{ document.body.classList.remove('printing'); box.innerHTML=''; };
+  try{
+    /* بنرجّع الصفحة فورًا بعد ما الطباعة تخلص. window.print بتوقف التنفيذ
+       لحد ما المستخدم يخلص، فالمحتوى بيكون اتصوّر خلاص.
+       الاتنين التانيين احتياطي لو المتصفح تصرّف بشكل مختلف. */
+    window.addEventListener('afterprint', done, {once:true});
+    window.print();
+    done();
+    setTimeout(()=>{ if(document.body.classList.contains('printing')) done(); }, 3000);
+  }catch(_){ done(); toast(t('المتصفح مش سامح بالطباعة','The browser blocked printing')); }
+  return html;                 // بنرجّع اللي اتبنى — الصفحة بتتفضّى فورًا
 }
 
 function downloadXlsx(cols, rows, name, sheetName){
@@ -5472,7 +5580,8 @@ function waslRender(){
     out.innerHTML = `<div class="panel"><div class="empty"><b>${t('مفيش عربيات في وصل','No WASL vehicles')}</b>
       ${t('الحساب ده ما رجّعش أي عربية مسجّلة في وصل — وده رد نهائي تقوله للعميل.',
           'This account returned no WASL-registered vehicles — that is a definitive answer for the customer.')}</div></div>`;
-    $('wsInq').hidden = true; $('wsCsv').hidden = true; $('wsSearchWrap').hidden = true; return; }
+    $('wsInq').hidden = true; $('wsCsv').hidden = true;
+    $('wsPdf').hidden = true; $('wsSearchWrap').hidden = true; return; }
 
   const rows = waslFiltered(), cols = waslCols(rows);
   const anyInq = Object.keys(WASL.inq).length > 0;
@@ -5499,7 +5608,8 @@ function waslRender(){
   </div></div>`;
 
   $('wsInq').textContent = t(`استعلام عن المعروض (${rows.length})`, `Query what is shown (${rows.length})`);
-  $('wsInq').hidden = WASL.running; $('wsCsv').hidden = false; $('wsSearchWrap').hidden = false;
+  $('wsInq').hidden = WASL.running; $('wsCsv').hidden = false;
+  $('wsPdf').hidden = false; $('wsSearchWrap').hidden = false;
 }
 
 function waslExport(){
@@ -5528,6 +5638,7 @@ function paintDashSwitch(){
   $('wsLoad').textContent = t('جيب عربيات وصل','Load WASL vehicles');
   $('wsStop').textContent = t('وقّف','Stop');
   $('wsCsv').textContent  = t('تصدير إكسل','Export Excel');
+  $('wsPdf').textContent  = t('طباعة / PDF','Print / PDF');
   $('wsQ').placeholder    = t('دوّر بالـ IMEI أو الاسم أو اللوحة…','Search by IMEI, name or plate…');
   if(DASHVIEW==='wasl'){
     $('dashIntro').innerHTML = t(
@@ -5545,6 +5656,7 @@ function paintDash(){
   if(DASHVIEW==='wasl') return;
   $('dashLoad').textContent = t('جيب العربيات','Load vehicles');
   $('dashCsv').textContent  = t('تصدير إكسل','Export Excel');
+  $('dashPdf').textContent  = t('طباعة / PDF','Print / PDF');
   $('dashIntro').innerHTML = t(
     'بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. دوس على أي شريحة أو نوع عشان تفلتر الجدول، والتصدير بينزّل المفلتر بس.',
     'Loads the account vehicles and splits them by device type. Click a slice or a type to filter the table; the export downloads only what is filtered.');
@@ -6221,6 +6333,8 @@ let wsDeb; $('wsQ').addEventListener('input', ev=>{ clearTimeout(wsDeb);
   wsDeb=setTimeout(()=>{ WASL.q=ev.target.value; waslRender(); }, 140); });
 $('dashLoad').onclick = dashLoadUnits;
 $('dashCsv').onclick  = dashExport;
+$('dashPdf').onclick  = dashPrint;
+$('wsPdf').onclick    = waslPrint;
 $('ivResp').onclick = ()=>{ INSPVIEW='resp'; paintInspect(); };
 $('ivReq').onclick  = ()=>{ INSPVIEW='req';  paintInspect(); };
 $('inGo').onclick = renderInspect;
