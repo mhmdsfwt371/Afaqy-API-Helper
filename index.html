@@ -127,7 +127,9 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 
 /* ---------- detail ---------- */
 .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--r)}
-.p-head{padding:16px 18px; border-bottom:1px solid var(--line-soft)}
+.p-head{padding:14px 18px; border-bottom:1px solid var(--line-soft);
+  position:sticky; top:0; background:var(--panel); z-index:3}
+@media(max-width:900px){ .p-head{position:static} }
 .p-head .path{font-family:var(--mono); font-size:16px; color:var(--ink); direction:ltr; text-align:left; word-break:break-all; margin-top:6px; font-weight:600}
 .p-head .crumb{font-size:12px; color:var(--muted)}
 .why{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; align-items:center}
@@ -138,9 +140,18 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .sec > h3{margin:0 0 8px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
 .pre{
   background:var(--code-bg); color:var(--code-ink); border-radius:var(--r); padding:12px 14px;
-  font-family:var(--mono); font-size:12.5px; line-height:1.6; overflow:auto; direction:ltr; text-align:left;
-  white-space:pre; max-height:340px; margin:0
+  font-family:var(--mono); font-size:12.5px; line-height:1.6; direction:ltr; text-align:left;
+  white-space:pre; margin:0; overflow-x:auto; overflow-y:visible
 }
+/* الطويل بيتقفل بتدريج بدل سكرول جوه سكرول */
+.preWrap{position:relative}
+.preWrap.clip .pre{max-height:300px; overflow:hidden}
+.preWrap.clip::after{content:''; position:absolute; inset-inline:0; bottom:34px; height:60px;
+  background:linear-gradient(to bottom, rgba(14,26,34,0) 0%, var(--code-bg) 95%); pointer-events:none; border-radius:0 0 var(--r) var(--r)}
+.preMore{display:block; width:100%; margin-top:-1px; padding:7px; border:1px solid var(--line-soft);
+  border-top:0; border-radius:0 0 var(--r) var(--r); background:var(--panel-2); color:var(--signal-deep);
+  font-size:12.5px; font-weight:600}
+.preMore:hover{background:var(--signal-soft)}
 .pre .tk{color:#5FD3C4}
 .codetabs{display:flex; gap:2px; margin-bottom:6px}
 .ct{background:var(--panel-2); border:1px solid var(--line-soft); border-bottom:0; border-radius:var(--r) var(--r) 0 0; padding:5px 12px; font-size:12px; color:var(--muted); font-family:var(--mono)}
@@ -204,6 +215,28 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 
 .toast{position:fixed; bottom:22px; inset-inline-start:22px; background:var(--ink); color:#fff; padding:11px 18px; border-radius:var(--r); font-size:13.5px; z-index:60; box-shadow:0 6px 22px rgba(16,26,36,.28)}
 .toast[hidden]{display:none}
+@media(max-width:760px){
+  .top{padding:8px 12px 0}
+  .top-in{gap:8px}
+  .brand b{font-size:15px}
+  .conn{width:100%; gap:6px; padding-bottom:8px}
+  .conn input{flex:1 1 120px; min-width:0; width:auto}
+  .conn select{flex:1 1 100%}
+  .conn label{display:none}
+  .tabs-in{overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+  .tabs-in::-webkit-scrollbar{display:none}
+  .tab{padding:11px 12px; font-size:13.5px; white-space:nowrap}
+  .wrap{padding:12px 10px 48px}
+  .searchbar input{font-size:16px; padding:13px 40px 13px 13px}   /* 16px يمنع الزوم في آيفون */
+  .results{max-height:none}
+  .row{gap:6px}
+  .btn{padding:9px 12px; font-size:13.5px}
+  .sec{padding:12px 13px}
+  .p-head{padding:12px 13px}
+  .cards{grid-template-columns:1fr}
+  .modal{max-height:94vh}
+  table.kv td:first-child{width:42%}
+}
 @media print{
   .top,.ruler,.tabs,.row,.toast,.mask{display:none !important}
   body{background:#fff}
@@ -1329,6 +1362,31 @@ function search(raw){
   const top = all.slice(0,40); top.total = all.length; return top;
 }
 
+/* أي بلوك طويل بيتقفل مع زرار «اعرض الكل» — بدل ما يبقى فيه سكرول جواه
+   والموظف يلف العجلة والصفحة واقفة. */
+function clipBlocks(root){
+  if(!root || !root.querySelectorAll) return;
+  root.querySelectorAll('pre.pre').forEach(pre=>{
+    if(pre.parentElement && pre.parentElement.classList.contains('preWrap')) return;
+    if(pre.scrollHeight <= 320) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'preWrap clip';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    const btn = document.createElement('button');
+    btn.className = 'preMore';
+    const lines = (pre.textContent.match(/\n/g)||[]).length + 1;
+    btn.textContent = t(`اعرض الكل (${lines} سطر)`, `Show all (${lines} lines)`);
+    wrap.parentNode.insertBefore(btn, wrap.nextSibling);
+    btn.onclick = ()=>{
+      const open = wrap.classList.toggle('clip');
+      btn.textContent = open ? t(`اعرض الكل (${lines} سطر)`, `Show all (${lines} lines)`)
+                             : t('اطوي','Collapse');
+      if(open) wrap.scrollIntoView({block:'nearest'});
+    };
+  });
+}
+
 /* ---------------- state ---------------- */
 let cur = null, codeMode = 'curl', lastQ = '';
 const $ = id => document.getElementById(id);
@@ -1619,10 +1677,12 @@ function _renderDetail(e, why){
     </div>
   </div>`;
 
+  clipBlocks($('detail'));
   $('detail').querySelectorAll('.ct').forEach(t=>t.onclick=()=>{
     codeMode = t.dataset.m;
     $('detail').querySelectorAll('.ct').forEach(x=>x.setAttribute('aria-selected', x.dataset.m===codeMode));
     $('codeout').textContent = gen(e, codeMode);
+    clipBlocks($('detail'));
   });
   const openPacket = ()=>{
     const pk = packetFor(e);
@@ -1630,10 +1690,11 @@ function _renderDetail(e, why){
     $('mbody').innerHTML =
       (pk.live ? `<div class="note sig" style="margin-bottom:10px">${t('فيه الرد الحقيقي اللي رجع من السيرفر.','Includes the live response returned by the server.')}</div>`
                : `<div class="note warn" style="margin-bottom:10px"><b>${t('الرد الحقيقي مش موجود.','No live response yet.')}</b><br>${t('اضغط «جرّب دلوقتي» الأول، وبعدين انسخ — ساعتها الرد الحقيقي هيبقى جوه.','Press "Run it now" first, then copy — the real response will be included.')}</div>`)
-      + `<pre class="pre" style="max-height:none; white-space:pre-wrap">${esc(pk.text)}</pre>
+      + `<pre class="pre" style="white-space:pre-wrap">${esc(pk.text)}</pre>
          <div class="row"><button class="btn sig" id="pkCopy">${t('نسخ','Copy')}</button></div>`;
     $('pkCopy').onclick = ()=>copy(pk.text, t('اتنسخ الرد الكامل','Full reply copied'));
     $('mask').hidden = false;
+    clipBlocks($('mbody'));
   };
   $('topCopy').onclick = openPacket;
   $('topTry').onclick = ()=>{
@@ -1747,6 +1808,7 @@ async function tryItRun(e, out){
       +   `<button class="btn ghost" id="cpSent">${t('نسخ اللي اتبعت كـ curl','Copy what was sent as curl')}</button>`
       +   (r.ok ? '' : `<button class="btn warn" id="cpEsc">${t('تصعيد','Escalate')}</button>`)
       + `</div>`;
+    clipBlocks(out);
     if(hasTok && $('tokShow')) $('tokShow').onclick = ()=>{
       const box=$('respBox'), btn=$('tokShow'), shown = btn.dataset.on==='1';
       box.textContent = shown ? redactToken(r.pretty).slice(0,4000) : r.pretty.slice(0,4000);
@@ -1777,6 +1839,7 @@ function openModal(title, text, arabic){
   $('mtext').value = text;
   $('mcopy').onclick = ()=>copy($('mtext').value, t('اتنسخ','Copied'));
   $('mask').hidden = false;
+  clipBlocks($('mbody'));
   $('mtext').focus();
 }
 $('mclose').onclick = ()=> $('mask').hidden = true;
@@ -2618,9 +2681,9 @@ function renderSteps(){
         <span style="font-family:var(--mono); font-size:11.5px; color:${color}">${state}</span>
       </div>
       ${st.kind==='call' ? `<div style="padding:0 14px 12px">
-        <pre class="pre" style="max-height:190px">${esc(st.m+' '+stepUrl(st))}\n\n${esc(stepBody(st))}</pre></div>`:''}
+        <pre class="pre">${esc(st.m+' '+stepUrl(st))}\n\n${esc(stepBody(st))}</pre></div>`:''}
       ${st.kind==='loop' ? `<div style="padding:0 14px 12px">
-        <pre class="pre" style="max-height:150px">${esc(st.m+' '+baseUrl()+st.path+'?token=…')}\n${esc('ريكوست مستقل لكل جهاز في المجموعة')}</pre></div>`:''}
+        <pre class="pre">${esc(st.m+' '+baseUrl()+st.path+'?token=…')}\n${esc('ريكوست مستقل لكل جهاز في المجموعة')}</pre></div>`:''}
       ${st.hint ? `<div style="padding:0 14px 12px"><div class="note">${esc(dual(st.hint))}</div></div>`:''}
       <div style="padding:0 14px 14px" class="row">
         ${locked ? '' : `<button class="btn sig" data-run="${i}">${st.kind==='call'?t('شغّل الخطوة','Run step'):t('نفّذ','Run')}</button>`}
@@ -3456,7 +3519,7 @@ async function labRunLadder(e){
       <b>${t('اشتغلت بالصيغة:','Worked with variant:')}</b> ${esc(win.v.n)} — ${win.code}.
       ${tried.length>1 ? `<br>الصيغة الأصلية فشلت — الفرق ظاهر في الرد الجاهز تحت.` : ''}</div>
     <h3 style="margin:16px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الرد الجاهز للعميل','Ready bundle for the customer')}</h3>
-    <pre class="pre" style="max-height:420px">${esc(labBundle(e, win, safeUrl, safeResp))}</pre>
+    <pre class="pre">${esc(labBundle(e, win, safeUrl, safeResp))}</pre>
     <div class="row">
       <button class="btn sig" id="labCopy">${t('نسخ الرد الجاهز','Copy bundle')}</button>
       <button class="btn ghost" id="labCopyResp">${t('نسخ الرد لوحده','Copy response only')}</button>
@@ -3853,7 +3916,7 @@ async function runQuick(){
       <h3 style="margin:16px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الـ curl الشغّال','The working curl')}</h3>
       <pre class="pre">${esc(curl)}</pre>
       <h3 style="margin:16px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الرد الحقيقي','The actual response')}</h3>
-      <pre class="pre" style="max-height:300px">${esc(resp.slice(0,3000))}</pre>
+      <pre class="pre">${esc(resp.slice(0,3000))}</pre>
       <div class="row">
         <button class="btn sig" id="qkCopyAll">${t('نسخ الرد الجاهز للعميل','Copy the customer reply')}</button>
         <button class="btn ghost" id="qkCopyCurl">${t('نسخ الـ curl بس','Copy the curl only')}</button>
