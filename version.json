@@ -1,16 +1,16 @@
 {
-  "version": "2.3",
+  "version": "2.4",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "زرار إغلاق واحد (×) بدل اتنين بنفس المعنى",
-      "خانة العربية بتظهر بعد الاتصال بس — الشريط العلوي كان مزدحم من غير لزوم",
-      "باگ خصوصية: لما تتصل بعميل تاني، بيانات العميل الأول كانت بتفضل متخزنة — أسماء عربياته وأرقامه. دلوقتي كل حاجة بتتمسح مع كل اتصال"
+      "خلاص من السكرول جوه السكرول — البلوك الطويل بيتقفل مع زرار «اعرض الكل» ورقم السطور، وعجلة الماوس بتحرّك الصفحة زي ما المفروض",
+      "اسم الإندبوينت وأزرار التجربة والنسخ بيفضلوا ثابتين وانت نازل — مش هتنسى انت في أنهي ريكوست ولا هتطلع فوق تاني",
+      "الأداة اتظبطت للموبايل: التبويبات بتتزحلق، والشريط العلوي بيتلف، والكروت عمود واحد، وخانة البحث ما بتزوّمش في آيفون"
     ],
     "en": [
-      "One close button (×) instead of two with the same meaning",
-      "The vehicle field only appears once connected — the top bar was needlessly crowded",
-      "Privacy bug: connecting to a second customer left the first customer's data cached — vehicle names and ids. Everything now clears on each connect"
+      "No more scroll inside scroll — long blocks collapse with a Show all button and a line count, and the mouse wheel moves the page as it should",
+      "The endpoint name and the run and copy buttons stay pinned as you scroll, so you never lose track of which request you are on",
+      "Mobile layout: tabs scroll sideways, the top bar wraps, cards stack, and the search box no longer triggers zoom on iPhone"
     ]
   }
 }
