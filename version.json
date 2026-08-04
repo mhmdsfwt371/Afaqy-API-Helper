@@ -1,16 +1,16 @@
 {
-  "version": "3.5",
+  "version": "3.6",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "موديول «ارصد ريكوست من المنصة» جوه تبويب الفحص، بخطوات مكتوبة: افتح أدوات المطوّر، Network، Fetch/XHR، كليك يمين، Copy as cURL",
-      "تلزق الأمر والأداة تحلّله: الإندبوينت، وشكل البودي، ونوع المحتوى، ووجود التوكن",
-      "بتقارنه بالكولكشن وتقولك الفرق بالظبط — شكل بودي مختلف، أو ميثود، أو توكن، أو إندبوينت مش موجود أصلًا"
+      "التصدير بقى ملف إكسل حقيقي بدل CSV — من غير أي مكتبة خارجية، فالأداة فاضلة ملف واحد شغال من غير نت",
+      "قسم جديد في لوحة الأجهزة: «محتاج تصرّف» — بيقلب اللوحة من وصف لأرقام تتصرّف عليها",
+      "ساكتة أكتر من أسبوع، وساكتة أكتر من يوم، ومن غير IMEI ولا سيريال، وما رسلتش ولا مرة، وموقوفة"
     ],
     "en": [
-      "A Capture a request module inside the Inspect tab, with written steps: open developer tools, Network, Fetch/XHR, right-click, Copy as cURL",
-      "Paste the command and the tool parses it: endpoint, body shape, content type, and whether a token is present",
-      "It compares against the collection and names the differences exactly — a different body shape, method, token, or an endpoint not in the collection at all"
+      "Export is now a real Excel file instead of CSV — with no external library, so the tool remains a single file that works offline",
+      "A new section on the device board: Needs attention — turning the board from descriptive into numbers you act on",
+      "Silent over a week, silent over a day, no IMEI or serial, never reported, and deactivated"
     ]
   }
 }

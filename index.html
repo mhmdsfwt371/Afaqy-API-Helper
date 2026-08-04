@@ -610,9 +610,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "3.5",
+  "version": "3.6",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.6",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "التصدير بقى ملف إكسل حقيقي بدل CSV — من غير أي مكتبة خارجية، فالأداة فاضلة ملف واحد شغال من غير نت",
+          "قسم جديد في لوحة الأجهزة: «محتاج تصرّف» — بيقلب اللوحة من وصف لأرقام تتصرّف عليها",
+          "ساكتة أكتر من أسبوع، وساكتة أكتر من يوم، ومن غير IMEI ولا سيريال، وما رسلتش ولا مرة، وموقوفة",
+          "ومش مسجّلة في وصل — بيتحسب بتقاطع لوحة الأجهزة مع لوحة وصل، وبيبان بعد ما تجيب لستة وصل",
+          "كل بطاقة تدوس عليها تفلتر الجدول، والتصدير بينزّل المفلتر بس",
+          "ولو كل حاجة سليمة، القسم بيقول كده صراحة بدل ما يعرض بطاقات فاضية"
+        ],
+        "en": [
+          "Export is now a real Excel file instead of CSV — with no external library, so the tool remains a single file that works offline",
+          "A new section on the device board: Needs attention — turning the board from descriptive into numbers you act on",
+          "Silent over a week, silent over a day, no IMEI or serial, never reported, and deactivated",
+          "And not registered with WASL — computed by crossing the device board with the WASL board, appearing once the WASL list is loaded",
+          "Each card filters the table when clicked, and the export downloads only what is filtered",
+          "If everything is healthy, the section says so plainly instead of showing empty cards"
+        ]
+      }
+    },
     {
       "v": "3.5",
       "date": "2026-08-04",
@@ -4503,7 +4525,7 @@ function renderDocs(){
 /* ================= لوحة الأجهزة =================
    بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
    مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
-const DASH = { units:[], filter:null, at:null };
+const DASH = { units:[], filter:null, flag:null, at:null };
 const TYPE_LBL = { gps:{ar:'GPS', en:'GPS'},
                    stationary:{ar:'وحدة ثابتة', en:'Stationary unit'},
                    stationary_unit:{ar:'وحدة ثابتة', en:'Stationary unit'},
@@ -4530,7 +4552,7 @@ async function dashLoadUnits(){
     if(!r.ok){ $('dashState').textContent=''; $('dashOut').innerHTML =
       `<div class="panel"><div class="sec"><div class="note warn">${diagnose(r.code, r.txt)}</div></div></div>`; return; }
     DASH.units = deepItems(r.json).map(x=>x.raw);
-    DASH.filter = null; DASH.at = new Date();
+    DASH.filter = null; DASH.flag = null; DASH.at = new Date();
     dashRender();
   }catch(err){
     $('dashState').textContent='';
@@ -4578,7 +4600,54 @@ function dashColumns(rows){
   return first.filter(k=>seen.has(k)).concat(rest).slice(0,14);
 }
 
+/* آخر مرة الجهاز رسل فيها */
+function unitLastSeen(u){
+  const lu = (u && u.last_update) || {};
+  const raw = lu.time || lu.datetime || u.last_time || null;
+  if(!raw) return null;
+  const d = new Date(String(raw).replace(' ','T'));
+  return isFinite(d.getTime()) ? d : null;
+}
+function hoursSince(d){ return d ? (Date.now()-d.getTime())/36e5 : null; }
+
+/* ============ اللي محتاج تصرّف ============
+   العدد بنوع الجهاز معلومة وصفية. دي الحاجات اللي بتفتح تذاكر بكرة. */
+function dashInsights(){
+  const U = DASH.units;
+  const silent1 = U.filter(u=>{ const h=hoursSince(unitLastSeen(u)); return h!==null && h>24; });
+  const silent7 = U.filter(u=>{ const h=hoursSince(unitLastSeen(u)); return h!==null && h>168; });
+  const noTime  = U.filter(u=>unitLastSeen(u)===null);
+  const noImei  = U.filter(u=>!u.imei && !u.device_serial);
+  const inactive= U.filter(u=>u.active===false);
+  const waslIds = new Set(WASL.rows.map(w=>String(w.imei||'')).filter(Boolean));
+  const notWasl = waslIds.size ? U.filter(u=>u.imei && !waslIds.has(String(u.imei))) : [];
+  return [
+    {k:'silent7',  n:silent7.length,  set:silent7,  sev:'high',
+     ttl:{ar:'ساكتة أكتر من أسبوع', en:'Silent over a week'},
+     why:{ar:'دي تذاكر جاية. اتصل بالعميل قبل ما يتصل بيك.', en:'These are tickets waiting to happen. Call the customer before they call you.'}},
+    {k:'silent1',  n:silent1.length,  set:silent1,  sev:'mid',
+     ttl:{ar:'ساكتة أكتر من يوم', en:'Silent over a day'},
+     why:{ar:'ممكن تكون واقفة عادي، وممكن تكون مشكلة تركيب أو شريحة.', en:'They may simply be parked, or it may be an installation or SIM problem.'}},
+    {k:'notWasl',  n:notWasl.length,  set:notWasl,  sev:'mid',
+     ttl:{ar:'مش مسجّلة في وصل', en:'Not registered with WASL'},
+     why:{ar:'فجوة التزام عند العميل. جيب لستة وصل الأول عشان الرقم ده يبان.', en:'A compliance gap for the customer. Load the WASL list first for this number to appear.'}},
+    {k:'noImei',   n:noImei.length,   set:noImei,   sev:'mid',
+     ttl:{ar:'من غير IMEI ولا سيريال', en:'No IMEI or serial'},
+     why:{ar:'دي بتكسر أي إنتجريشن بعدين — العميل مش هيعرف يوصل لها.', en:'These break any later integration — the customer cannot address them.'}},
+    {k:'noTime',   n:noTime.length,   set:noTime,   sev:'low',
+     ttl:{ar:'ما رسلتش ولا مرة', en:'Never reported'},
+     why:{ar:'اتضافت في النظام ومحصلش تركيب أو تفعيل.', en:'Added to the platform but never installed or activated.'}},
+    {k:'inactive', n:inactive.length, set:inactive, sev:'low',
+     ttl:{ar:'موقوفة', en:'Deactivated'},
+     why:{ar:'متوقفة عن قصد. تأكد إن العميل عارف.', en:'Deliberately switched off. Confirm the customer knows.'}}
+  ].filter(x=>x.n>0);
+}
+
 function dashRows(){
+  if(DASH.flag){
+    const f = dashInsights().find(x=>x.k===DASH.flag);
+    if(f) return f.set;
+  }
   return DASH.filter ? DASH.units.filter(u=>typeOf(u)===DASH.filter) : DASH.units;
 }
 
@@ -4629,8 +4698,23 @@ function dashRender(){
     </div>
   </div></div>
 
+  ${(()=>{ const ins=dashInsights(); if(!ins.length) return `<div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+      <div class="note sig">${t('مفيش حاجة محتاجة تصرّف — كل الأجهزة بترسل وبياناتها كاملة.','Nothing needs attention — every device is reporting and its data is complete.')}</div></div></div>`;
+    const col=s2=>s2==='high'?'var(--alert)':(s2==='mid'?'#B45309':'var(--muted)');
+    return `<div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+      <h3>${t('محتاج تصرّف','Needs attention')}</h3>
+      <div class="cards" style="margin-top:10px">
+        ${ins.map(x=>`<div class="card" data-flag="${esc(x.k)}" style="cursor:pointer; ${DASH.flag===x.k?'border-color:var(--signal); border-inline-start:4px solid var(--signal)':''}">
+          <div style="font-size:30px; font-weight:700; color:${col(x.sev)}; line-height:1.1">${x.n}</div>
+          <h3 style="font-family:var(--ar); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink); margin:4px 0 6px">${esc(dual(x.ttl))}</h3>
+          <p style="margin:0; font-size:13px; color:var(--ink-2)">${esc(dual(x.why))}</p>
+        </div>`).join('')}
+      </div>
+      ${WASL.rows.length ? '' : `<div class="note" style="margin-top:10px">${t('جيب لستة وصل من تبويب «وصل» عشان تشوف كام عربية مش مسجّلة.','Load the WASL list from the WASL board to see how many vehicles are unregistered.')}</div>`}
+    </div></div>`; })()}
   <div class="panel"><div class="sec" style="border-top:0">
-    <h3>${t('البيانات','The data')} — ${rows.length} ${t('من','of')} ${total}</h3>
+    <h3>${t('البيانات','The data')} — ${rows.length} ${t('من','of')} ${total}
+      ${DASH.flag?`<span class="tagv">${esc(dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'',en:''}}).ttl))}</span>`:''}</h3>
     <div style="overflow-x:auto; margin-top:8px">
       <table class="kv" style="min-width:100%">
         <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(c)}</td>`).join('')}</tr>
@@ -4644,26 +4728,96 @@ function dashRender(){
   $('dashState').textContent = t('اتجابت','Loaded')+' '+DASH.at.toTimeString().slice(0,5);
   out.querySelectorAll('[data-slice]').forEach(el2=>el2.onclick=()=>{
     const k=el2.dataset.slice;
-    DASH.filter = (DASH.filter===k) ? null : k;
+    DASH.filter = (DASH.filter===k) ? null : k; DASH.flag = null;
     dashRender();
   });
-  const ab=$('dashAll'); if(ab) ab.onclick=()=>{ DASH.filter=null; dashRender(); };
+  out.querySelectorAll('[data-flag]').forEach(el2=>el2.onclick=()=>{
+    const k=el2.dataset.flag;
+    DASH.flag = (DASH.flag===k) ? null : k; DASH.filter = null;
+    dashRender();
+  });
+  const ab=$('dashAll'); if(ab) ab.onclick=()=>{ DASH.filter=null; DASH.flag=null; dashRender(); };
 }
 
 function dashExport(){
   const rows=dashRows(), cols=dashColumns(rows);
-  const NL=String.fromCharCode(10);
-  const q=v=>{ const s2=(v===null||v===undefined)?'':String(v);
-    return /[",\n]/.test(s2) ? '"'+s2.replace(/"/g,'""')+'"' : s2; };
-  const csv=[cols.join(',')].concat(rows.map(u=>cols.map(c=>q(u[c])).join(','))).join(NL);
-  const name='units-'+(DASH.filter||'all')+'-'+new Date().toISOString().slice(0,10)+'.csv';
+  downloadXlsx(cols, rows,
+    'units-'+(DASH.filter||'all')+'-'+new Date().toISOString().slice(0,10)+'.xlsx',
+    t('العربيات','Vehicles'));
+}
+
+/* ---------------- تصدير إكسل ----------------
+   XLSX من غير أي مكتبة خارجية: الملف ده ZIP فيه XML.
+   بنكتبه بإيدنا عشان الأداة تفضل ملف واحد شغال من غير نت. */
+function crc32(buf){
+  let c, crc = 0xFFFFFFFF;
+  for(let i=0;i<buf.length;i++){
+    c = (crc ^ buf[i]) & 0xFF;
+    for(let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    crc = (crc >>> 8) ^ c;
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(files){
+  /* ZIP من غير ضغط — أبسط وأأمن، والملفات هنا صغيرة */
+  const enc = new TextEncoder();
+  const chunks = [], central = [];
+  let offset = 0;
+  const u16=n=>[n&255,(n>>8)&255];
+  const u32=n=>[n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255];
+  files.forEach(f=>{
+    const name = enc.encode(f.name), data = enc.encode(f.data);
+    const crc = crc32(data);
+    const local = [].concat([0x50,0x4b,0x03,0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
+                            u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
+    chunks.push(new Uint8Array(local), name, data);
+    central.push({name, crc, len:data.length, offset});
+    offset += local.length + name.length + data.length;
+  });
+  const cd = [];
+  central.forEach(c=>{
+    const h = [].concat([0x50,0x4b,0x01,0x02], u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+                        u32(c.crc), u32(c.len), u32(c.len), u16(c.name.length),
+                        u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.offset));
+    cd.push(new Uint8Array(h), c.name);
+  });
+  const cdSize = cd.reduce((a,b)=>a+b.length,0);
+  const end = new Uint8Array([].concat([0x50,0x4b,0x05,0x06], u16(0), u16(0),
+                             u16(central.length), u16(central.length), u32(cdSize), u32(offset), u16(0)));
+  return new Blob(chunks.concat(cd, [end]), {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function xlsxBlob(cols, rows, sheetName){
+  const esc2 = v => String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cell = (v, r, c) => {
+    const ref = (()=>{ let n=c+1, s2=''; while(n>0){ const m=(n-1)%26; s2=String.fromCharCode(65+m)+s2; n=Math.floor((n-1)/26); } return s2+r; })();
+    if(typeof v === 'number' && isFinite(v)) return `<c r="${ref}"><v>${v}</v></c>`;
+    return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${esc2(v)}</t></is></c>`;
+  };
+  const head = `<row r="1">${cols.map((c,i)=>cell(c,1,i)).join('')}</row>`;
+  const body = rows.map((u,ri)=>`<row r="${ri+2}">${cols.map((c,ci)=>cell(u[c],ri+2,ci)).join('')}</row>`).join('');
+  const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${head}${body}</sheetData></worksheet>`;
+  return zipStore([
+    {name:'[Content_Types].xml', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`},
+    {name:'_rels/.rels', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name:'xl/workbook.xml', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${esc2((sheetName||'Sheet1').slice(0,28))}" sheetId="1" r:id="rId1"/></sheets></workbook>`},
+    {name:'xl/_rels/workbook.xml.rels', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`},
+    {name:'xl/worksheets/sheet1.xml', data:sheet}
+  ]);
+}
+function downloadXlsx(cols, rows, name, sheetName){
   try{
-    const blob=new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+    const blob = xlsxBlob(cols, rows, sheetName);
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); a.remove();
     toast(t('اتنزّل '+rows.length+' سطر','Exported '+rows.length+' rows'));
-  }catch(_){ copy(csv, t('اتنسخ الجدول','Table copied')); }
+    return true;
+  }catch(err){ toast(t('التصدير فشل — '+String(err.message||err).slice(0,40),'Export failed')); return false; }
 }
 
 /* ---------------- لوحة وصل ---------------- */
@@ -4785,24 +4939,17 @@ function waslRender(){
 }
 
 function waslExport(){
-  const rows=waslFiltered(), cols=waslCols(rows);
+  const rows=waslFiltered(), cols0=waslCols(rows);
   const anyInq = Object.keys(WASL.inq).length>0;
-  const NL=String.fromCharCode(10);
-  const q=v=>{ const s2=(v===null||v===undefined)?'':String(v);
-    return /[",\n]/.test(s2) ? '"'+s2.replace(/"/g,'""')+'"' : s2; };
-  const head = cols.concat(anyInq ? ['wasl_status'] : []).join(',');
-  const body = rows.map(u=>{
-    const id=String(u.id||u._id||''); const inq=WASL.inq[id];
-    return cols.map(c=>q(u[c])).concat(anyInq ? [q(inq?inq.txt:'')] : []).join(',');
+  const cols = cols0.concat(anyInq ? ['wasl_status'] : []);
+  const data = rows.map(u=>{
+    const o={}; cols0.forEach(c=>o[c]=u[c]);
+    if(anyInq){ const inq=WASL.inq[String(u.id||u._id||'')]; o.wasl_status = inq?inq.txt:''; }
+    return o;
   });
-  const csv=[head].concat(body).join(NL);
-  const name='wasl-'+(anyInq?'inquiry':'list')+'-'+new Date().toISOString().slice(0,10)+'.csv';
-  try{
-    const blob=new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-    document.body.appendChild(a); a.click(); a.remove();
-    toast(t('اتنزّل '+rows.length+' سطر','Exported '+rows.length+' rows'));
-  }catch(_){ copy(csv, t('اتنسخ الجدول','Table copied')); }
+  downloadXlsx(cols, data,
+    'wasl-'+(anyInq?'inquiry':'list')+'-'+new Date().toISOString().slice(0,10)+'.xlsx',
+    'WASL');
 }
 
 let DASHVIEW = 'devices';
@@ -4817,7 +4964,7 @@ function paintDashSwitch(){
   $('waslOut').hidden     = DASHVIEW!=='wasl';
   $('wsLoad').textContent = t('جيب عربيات وصل','Load WASL vehicles');
   $('wsStop').textContent = t('وقّف','Stop');
-  $('wsCsv').textContent  = t('تصدير CSV','Export CSV');
+  $('wsCsv').textContent  = t('تصدير إكسل','Export Excel');
   $('wsQ').placeholder    = t('دوّر بالـ IMEI أو الاسم أو اللوحة…','Search by IMEI, name or plate…');
   if(DASHVIEW==='wasl'){
     $('dashIntro').innerHTML = t(
@@ -4834,7 +4981,7 @@ function paintDash(){
   paintDashSwitch();
   if(DASHVIEW==='wasl') return;
   $('dashLoad').textContent = t('جيب العربيات','Load vehicles');
-  $('dashCsv').textContent  = t('تصدير CSV','Export CSV');
+  $('dashCsv').textContent  = t('تصدير إكسل','Export Excel');
   $('dashIntro').innerHTML = t(
     'بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. دوس على أي شريحة أو نوع عشان تفلتر الجدول، والتصدير بينزّل المفلتر بس.',
     'Loads the account vehicles and splits them by device type. Click a slice or a type to filter the table; the export downloads only what is filtered.');
