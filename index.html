@@ -190,7 +190,12 @@ details.grp[open] > summary{border-bottom:1px solid var(--line-soft)}
 .mask{position:fixed; inset:0; background:rgba(16,26,36,.62); display:flex; align-items:center; justify-content:center; padding:18px; z-index:50}
 .mask[hidden]{display:none}
 .modal{background:var(--panel); border-radius:var(--r); max-width:760px; width:100%; max-height:88vh; overflow:auto}
-.modal .mh{padding:16px 18px; border-bottom:1px solid var(--line-soft); display:flex; justify-content:space-between; align-items:center}
+.modal .mh{padding:14px 18px; border-bottom:1px solid var(--line-soft); display:flex; gap:10px;
+  justify-content:space-between; align-items:center;
+  position:sticky; top:0; background:var(--panel); z-index:2}
+.mx{background:none; border:1px solid var(--line); border-radius:3px; width:34px; height:34px;
+  font-size:20px; line-height:1; color:var(--muted); padding:0; flex:none}
+.mx:hover{border-color:var(--alert); color:var(--alert); background:var(--alert-soft)}
 .modal .mh h3{margin:0; font-size:16px}
 .modal .mb{padding:16px 18px}
 textarea.out{width:100%; min-height:230px; font-family:var(--mono); font-size:12.5px; direction:ltr; text-align:left;
@@ -335,7 +340,11 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 </main>
 
 <div class="mask" id="mask" hidden><div class="modal">
-  <div class="mh"><h3 id="mtitle"></h3><button class="btn ghost" id="mclose" data-ar="إغلاق" data-en="Close">إغلاق</button></div>
+  <div class="mh">
+    <h3 id="mtitle" style="flex:1; min-width:0"></h3>
+    <button class="btn ghost" id="mclose" data-ar="إغلاق" data-en="Close">إغلاق</button>
+    <button class="mx" id="mx" title="إغلاق" aria-label="إغلاق">×</button>
+  </div>
   <div class="mb" id="mbody"></div>
 </div></div>
 
@@ -513,9 +522,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.1",
+  "version": "2.2",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.2",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "هيدر النافذة بقى ثابت مع زرار × — مكنتش بتوصل لزرار الإغلاق إلا بعد سكرول طويل",
+          "زرار Esc برضه بيقفل، ودوس بره النافذة كمان",
+          "وضّحنا ليه التوكن ظاهر كـ <YOUR_TOKEN>: عشان لو صوّرت الشاشة وبعتها للعميل ما يخرجش",
+          "زرار «أظهر التوكن» لو محتاج تشوفه أو تنسخه من الرد نفسه — والرد اللي بيروح للعميل بيفضل متشال منه مهما حصل"
+        ],
+        "en": [
+          "The dialog header is now sticky with an × button — you had to scroll a long way to reach Close",
+          "Esc closes it too, as does clicking outside",
+          "Clarified why the token shows as <YOUR_TOKEN>: so a screenshot sent to a customer never leaks it",
+          "A \"Reveal token\" button if you need to see or copy it — the customer-facing reply always keeps it stripped"
+        ]
+      }
+    },
     {
       "v": "2.1",
       "date": "2026-08-04",
@@ -1685,18 +1712,27 @@ async function tryItRun(e, out){
     const r = await apiFetch(e.p, (b && e.m!=='GET') ? b : null,
                              {method:e.m||'POST', noToken:!e.t, noRetry:NO_RETRY.test(e.p||'')});
     rememberRun(e, b, r);
+    const hasTok = /"token"\s*:/.test(r.pretty||'');
     out.innerHTML =
       `<div class="note ${r.ok?'sig':'warn'}" style="margin-top:12px">${t('الرد','Response')}: <b>${r.code}</b>`
       + `${r.relogged?t(' — التوكن كان خلص واتجدّد لوحده',' — the token had expired and was refreshed'):''}`
       + `${r.ok?'':'<br>'+diagnose(r.code, r.txt)}</div>`
       + echoReq(e.m||'POST', sentUrl, sentHdr, b)
       + `<h3 style="margin:14px 0 6px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)">${t('الرد كامل','Full response')}</h3>`
-      + `<pre class="pre">${esc(redactToken(r.pretty).slice(0,4000))}</pre>`
+      + (hasTok ? `<div class="note" style="margin-bottom:8px">${t('التوكن مخفي عشان لو صوّرت الشاشة وبعتها ما يخرجش. تقدر تشوفه أو تنسخه من فوق.','The token is hidden so a screenshot stays safe to send. You can reveal or copy it from the top bar.')}
+           <button class="chip" id="tokShow" style="margin-inline-start:6px">${t('أظهر التوكن','Reveal token')}</button></div>` : '')
+      + `<pre class="pre" id="respBox">${esc(redactToken(r.pretty).slice(0,4000))}</pre>`
       + `<div class="row">`
       +   (r.ok ? `<button class="btn sig" id="cpPacket">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>` : '')
       +   `<button class="btn ghost" id="cpSent">${t('نسخ اللي اتبعت كـ curl','Copy what was sent as curl')}</button>`
       +   (r.ok ? '' : `<button class="btn warn" id="cpEsc">${t('تصعيد','Escalate')}</button>`)
       + `</div>`;
+    if(hasTok && $('tokShow')) $('tokShow').onclick = ()=>{
+      const box=$('respBox'), btn=$('tokShow'), shown = btn.dataset.on==='1';
+      box.textContent = shown ? redactToken(r.pretty).slice(0,4000) : r.pretty.slice(0,4000);
+      btn.dataset.on = shown ? '' : '1';
+      btn.textContent = shown ? t('أظهر التوكن','Reveal token') : t('اخفي التوكن','Hide token');
+    };
     if(r.ok && $('cpPacket')) $('cpPacket').onclick = ()=>{
       const pk = packetFor(e);
       copy(pk.text, t('اتنسخ الرد الكامل','Full reply copied'));
@@ -1724,6 +1760,7 @@ function openModal(title, text, arabic){
   $('mtext').focus();
 }
 $('mclose').onclick = ()=> $('mask').hidden = true;
+$('mx').onclick = ()=> $('mask').hidden = true;
 $('mask').onclick = ev => { if(ev.target === $('mask')) $('mask').hidden = true; };
 document.addEventListener('keydown', ev=>{
   if(ev.key==='Escape'){ $('mask').hidden = true; return; }
