@@ -372,7 +372,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 
 </main>
 
-<div class="mask" id="mask" hidden><div class="modal">
+<div class="mask" id="mask" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
   <div class="mh">
     <h3 id="mtitle" style="flex:1; min-width:0"></h3>
     <button class="mx" id="mclose" title="إغلاق" aria-label="إغلاق">×</button>
@@ -554,9 +554,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.4",
+  "version": "2.5",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "2.5",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "سباق الردود: لو فتحت ريكوست تاني وانت مستني رد، الرد القديم كان بيوصل ويكتب فوق الشاشة الجديدة. دلوقتي بيتجاهل",
+          "ملف المعرفة المستورد بقى بيتنضّف من أي وسوم قبل العرض — كان ممكن ملف من حد تاني يحقن كود في الأداة",
+          "التركيز بيفضل جوه النافذة المفتوحة، والنافذة بقى ليها الوصف الصح لقارئ الشاشة",
+          "عنوان البيئة المكتوب بالإيد بيتفحص، والخانة بتتلوّن لو الشكل غلط",
+          "البحث اتحسّن: تطبيع القاموس بيحصل مرة واحدة، والنوايا بتتفحص على السؤال مش على كل إندبوينت"
+        ],
+        "en": [
+          "Response race: opening another request while one was in flight let the old response overwrite the new screen. It is now discarded",
+          "Imported knowledge files are stripped of markup before display — a file from someone else could previously inject code",
+          "Focus stays inside an open dialog, and the dialog is now announced correctly to screen readers",
+          "A hand-typed environment URL is validated, and the field highlights when the format is wrong",
+          "Search tuned: dictionary normalisation happens once, and intents are matched against the question rather than every endpoint"
+        ]
+      }
+    },
     {
       "v": "2.4",
       "date": "2026-08-04",
@@ -1294,6 +1314,11 @@ Object.keys(DUP).forEach(k=>{ if(new Set(DUP[k].map(x=>x.g)).size < 2) { delete 
 });
 const dupOf = e => DUP[e.m+' '+e.p] || null;
 
+/* المصطلحات بتتطبّع مرة واحدة. قبل كده كانت 491 عملية تطبيع في كل ضغطة زرار. */
+const VOCAB_N = {}, ACTIONS_N = {};
+Object.entries(VOCAB).forEach(([k,v])=>{ VOCAB_N[k] = v.map(x=>[norm(x), x]); });
+Object.entries(ACTIONS).forEach(([k,v])=>{ ACTIONS_N[k] = v.map(x=>[norm(x), x]); });
+
 EPS.forEach(e=>{
   e._full = (e.g + ' ' + (e.s||'') + ' ' + e.n + ' ' + e.p).toLowerCase();
   e._nn = norm(e.g + ' ' + (e.s||'') + ' ' + e.n);
@@ -1316,9 +1341,9 @@ function search(raw){
   };
 
   const modHits = {};
-  for(const [mod,list] of Object.entries(VOCAB)){
-    for(const term of list){
-      const sc = termScore(norm(term));
+  for(const [mod,list] of Object.entries(VOCAB_N)){
+    for(const [tn,term] of list){
+      const sc = termScore(tn);
       if(sc){
         const base = mod.split('/')[0];
         modHits[base] = Math.max(modHits[base]||0, sc);
@@ -1331,15 +1356,18 @@ function search(raw){
 
   // which action?
   const actHits = {}; const actWhy = {};
-  for(const [act,list] of Object.entries(ACTIONS)){
-    for(const term of list){
-      const sc = termScore(norm(term));
+  for(const [act,list] of Object.entries(ACTIONS_N)){
+    for(const [tn,term] of list){
+      const sc = termScore(tn);
       if(sc){
         actHits[act] = Math.max(actHits[act]||0, sc*0.66);
         (actWhy[act] = actWhy[act]||[]).push(term);
       }
     }
   }
+
+  /* النية بتتحدد من السؤال مرة واحدة. قبل كده كانت 14 × 529 = 7406 اختبار في كل بحثة. */
+  const hitIntents = INTENT.filter(it=>it.re.test(qn));
 
   EPS.forEach(e=>{
     let s = 0; const why = [];
@@ -1355,8 +1383,8 @@ function search(raw){
       else if(e._bk.includes('"'+w+'"')) s += 1.1;
     });
     // نية مباشرة: السؤال ده ليه إجابة واحدة معروفة
-    for(const it of INTENT){
-      if(it.re.test(qn) && it.p.test(e.p||'')){ s += it.s; why.push(t('سؤال متكرر','common question')); break; }
+    for(const it of hitIntents){
+      if(it.p.test(e.p||'')){ s += it.s; why.push(t('سؤال متكرر','common question')); break; }
     }
     // نية الموقع: افصل بين الموقع والعنوان والإشارة
     const wantsLoc = ['موقع','مواقع','لوكيشن','احداثيات','خريطه','location','position','gps'].some(t=>qn.includes(norm(t)));
@@ -1459,6 +1487,9 @@ function trimResponse(json, raw){
 
 /* آخر تشغيل ناجح — عشان زرار النسخ يدي الرد الحقيقي مهما كنت شغّلته منين */
 let LAST_RUN = null;
+/* عدّاد الطلبات: لو فتحت ريكوست تاني وانت مستني رد، الرد القديم بيوصل
+   ويكتب فوق الشاشة الجديدة. العدّاد بيخلي أي رد متأخر يتجاهل. */
+let RUN_SEQ = 0;
 function rememberRun(e, sentBody, resp){
   if(resp && resp.ok) LAST_RUN = {i:e.i, body:sentBody, resp};
 }
@@ -1607,6 +1638,7 @@ function select(e, why){
 
 function renderDetail(e, why){ return _renderDetail(e, why); }
 function _renderDetail(e, why){
+  RUN_SEQ++;                               // فتحت ريكوست تاني: أي رد قديم يتجاهل
   const dangerous = SAFE.test(e.n);
   const isLogin = NO_RETRY.test(e.p||'');
   const noFix = isLogin || DESTRUCTIVE.test(e.n) || DESTRUCTIVE.test(e.p);
@@ -1804,12 +1836,14 @@ async function tryItRun(e, out){
     out.innerHTML = `<div class="note warn" style="margin-top:12px">${t('البودي ده فيه علامات مكان البيانات مش بيانات حقيقية. اتصل من الشريط اللي فوق الأول.','This body carries placeholders, not real credentials. Connect from the top bar first.')}</div>`;
     return;
   }
+  const myseq = ++RUN_SEQ;
   out.innerHTML = `<div class="note" style="margin-top:12px">${t('جاري الإرسال…','Sending…')}</div>`;
   const sentUrl = baseUrl() + e.p + (e.t ? ('?token=' + (SESSION.token||'')) : '');
   const sentHdr = {'Content-Type':'application/json','Accept':'application/json'};
   try{
     const r = await apiFetch(e.p, (b && e.m!=='GET') ? b : null,
                              {method:e.m||'POST', noToken:!e.t, noRetry:NO_RETRY.test(e.p||'')});
+    if(myseq !== RUN_SEQ) return;          // رد متأخر لريكوست قديم — نتجاهله
     rememberRun(e, b, r);
     const hasTok = /"token"\s*:/.test(r.pretty||'');
     out.innerHTML =
@@ -1842,6 +1876,7 @@ async function tryItRun(e, out){
       t('اتنسخ','Copied'));
     if(!r.ok && $('cpEsc')) $('cpEsc').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
   }catch(err){
+    if(myseq !== RUN_SEQ) return;
     out.innerHTML = `<div class="note warn" style="margin-top:12px">
       <b>${t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')}</b><br>
       ${t('اتأكد من النت ومن عنوان البيئة، أو انسخ مثال cURL وشغّله من الترمنال.','Check the connection and the environment URL, or copy the cURL example and run it from a terminal.')}<br>
@@ -1864,6 +1899,15 @@ $('mclose').onclick = ()=> $('mask').hidden = true;
 $('mask').onclick = ev => { if(ev.target === $('mask')) $('mask').hidden = true; };
 document.addEventListener('keydown', ev=>{
   if(ev.key==='Escape'){ $('mask').hidden = true; return; }
+  /* التركيز يفضل جوه النافذة — من غير كده الـ Tab بيهرب للصفحة اللي ورا */
+  if(ev.key==='Tab' && !$('mask').hidden){
+    const f = $('mask').querySelectorAll('button, [href], input, select, textarea');
+    if(!f.length) return;
+    const first=f[0], last=f[f.length-1];
+    if(ev.shiftKey && document.activeElement===first){ ev.preventDefault(); last.focus(); }
+    else if(!ev.shiftKey && document.activeElement===last){ ev.preventDefault(); first.focus(); }
+    return;
+  }
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((ev.target.tagName||''));
   if(ev.key==='/' && !typing){ ev.preventDefault(); showView('search'); $('q').focus(); $('q').select(); return; }
   if(!typing || ev.target.id==='q'){
@@ -2332,7 +2376,15 @@ function wireAdder(){
     rd.onload=()=>{ try{
       const arr=JSON.parse(rd.result);
       if(!Array.isArray(arr)) throw 0;
-      arr.forEach(x=>{ LEARNED.push(x); ADDED.push(x); });
+      /* الملف ممكن ييجي من أي حد — بنشيل أي وسوم قبل ما نعرضه */
+      const clean = v => typeof v==='string' ? esc(v).replace(/&lt;br&gt;/g,'<br>') : v;
+      const safe = x => ({
+        sev: (x && x.sev==='high') ? 'high' : (x && x.sev==='mid' ? 'mid' : 'ok'),
+        t:   {ar: clean((x.t||{}).ar||''), en: clean((x.t||{}).en||(x.t||{}).ar||'')},
+        src: {ar: clean((x.src||{}).ar||''), en: clean((x.src||{}).en||(x.src||{}).ar||'')},
+        body:{ar: '<p>'+clean((x.body||{}).ar||'')+'</p>', en: '<p>'+clean((x.body||{}).en||(x.body||{}).ar||'')+'</p>'}
+      });
+      arr.filter(x=>x && x.t).map(safe).forEach(x=>{ LEARNED.push(x); ADDED.push(x); });
       toast(t('اتضافت '+arr.length, arr.length+' imported')); renderFaq();
     }catch(_){ toast(t('الملف مش سليم','Invalid file')); } };
     rd.readAsText(f);
@@ -4242,6 +4294,15 @@ document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
   $('q').value = c.dataset.ex;
   $('q').dispatchEvent(new Event('input'));
   $('q').focus();
+});
+function baseUrlOk(){
+  const u = baseUrl();
+  return /^https?:\/\/[^\s/]+$/i.test(u.replace(/\/+$/,''));
+}
+$('baseCustom').addEventListener('input', ()=>{
+  const bad = $('baseUrl').value==='__custom' && $('baseCustom').value.trim() && !baseUrlOk();
+  $('baseCustom').style.borderColor = bad ? '#8A4A1C' : '#33475C';
+  $('baseCustom').title = bad ? t('العنوان لازم يبدأ بـ http وما فيهوش مسار','Must start with http and contain no path') : '';
 });
 $('baseUrl').addEventListener('change', ev=>{
   $('baseCustom').hidden = ev.target.value !== '__custom';

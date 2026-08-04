@@ -1,16 +1,16 @@
 {
-  "version": "2.4",
+  "version": "2.5",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "خلاص من السكرول جوه السكرول — البلوك الطويل بيتقفل مع زرار «اعرض الكل» ورقم السطور، وعجلة الماوس بتحرّك الصفحة زي ما المفروض",
-      "اسم الإندبوينت وأزرار التجربة والنسخ بيفضلوا ثابتين وانت نازل — مش هتنسى انت في أنهي ريكوست ولا هتطلع فوق تاني",
-      "الأداة اتظبطت للموبايل: التبويبات بتتزحلق، والشريط العلوي بيتلف، والكروت عمود واحد، وخانة البحث ما بتزوّمش في آيفون"
+      "سباق الردود: لو فتحت ريكوست تاني وانت مستني رد، الرد القديم كان بيوصل ويكتب فوق الشاشة الجديدة. دلوقتي بيتجاهل",
+      "ملف المعرفة المستورد بقى بيتنضّف من أي وسوم قبل العرض — كان ممكن ملف من حد تاني يحقن كود في الأداة",
+      "التركيز بيفضل جوه النافذة المفتوحة، والنافذة بقى ليها الوصف الصح لقارئ الشاشة"
     ],
     "en": [
-      "No more scroll inside scroll — long blocks collapse with a Show all button and a line count, and the mouse wheel moves the page as it should",
-      "The endpoint name and the run and copy buttons stay pinned as you scroll, so you never lose track of which request you are on",
-      "Mobile layout: tabs scroll sideways, the top bar wraps, cards stack, and the search box no longer triggers zoom on iPhone"
+      "Response race: opening another request while one was in flight let the old response overwrite the new screen. It is now discarded",
+      "Imported knowledge files are stripped of markup before display — a file from someone else could previously inject code",
+      "Focus stays inside an open dialog, and the dialog is now announced correctly to screen readers"
     ]
   }
 }
