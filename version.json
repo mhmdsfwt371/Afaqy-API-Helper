@@ -1,16 +1,16 @@
 {
-  "version": "4.8",
+  "version": "4.9",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "زرار «طباعة / PDF» في لوحة الأجهزة ولوحة وصل — بيطلّع تقرير مرتب تختار من المتصفح تحفظه PDF أو تطبعه",
-      "التقرير بيتبع اللي معروض بالظبط: نفس الفلتر ونفس السطور اللي قدامك",
-      "فيه رأس فيه اسم الحساب، والمعروض إيه، وعدد السطور، والتاريخ والوقت، ورقم نسخة الأداة"
+      "زرار «دليل استخدام للعميل» — بيحوّل الرد اللي قدامك لورقة بتقول لمطوّر العميل يقراه إزاي",
+      "بيطلّع أسماء الحقول من الرد نفسه بقيمها الحقيقية، ويشرح اللي يعرفه منها: الفرق بين IMEI و UID، وإن ساعات التشغيل بالثواني، وإن status_code هو الحالة الحقيقية",
+      "ومعاه كود شغّال بايثون وجافاسكريبت بالمسار الصح، بيفحص الحالة من البودي، وبيلف على السجلات، وبيحوّل الثواني لساعات"
     ],
     "en": [
-      "A Print / PDF button on the device board and the WASL board — it produces a tidy report you can save as PDF or print from the browser",
-      "The report follows exactly what is on screen: the same filter and the same rows",
-      "It carries a header with the account, what is being shown, the row count, the date and time, and the tool version"
+      "A Usage guide button — it turns the response in front of you into a document telling the customer's developer how to read it",
+      "It lists the field names from the response itself with their real values, and explains the ones it knows: IMEI versus UID, engine hours arriving in seconds, and status_code being the real status",
+      "It comes with working Python and JavaScript that uses the right path, checks the status from the body, loops the records, and converts seconds to hours"
     ]
   }
 }

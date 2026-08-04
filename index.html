@@ -647,9 +647,33 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.8",
+  "version": "4.9",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.9",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "زرار «دليل استخدام للعميل» — بيحوّل الرد اللي قدامك لورقة بتقول لمطوّر العميل يقراه إزاي",
+          "بيطلّع أسماء الحقول من الرد نفسه بقيمها الحقيقية، ويشرح اللي يعرفه منها: الفرق بين IMEI و UID، وإن ساعات التشغيل بالثواني، وإن status_code هو الحالة الحقيقية",
+          "ومعاه كود شغّال بايثون وجافاسكريبت بالمسار الصح، بيفحص الحالة من البودي، وبيلف على السجلات، وبيحوّل الثواني لساعات",
+          "وقايمة بالفخاخ: الـ200 اللي معناهاش نجاح، والتوكن في اللينك مش في الهيدر، وإن أغلب الريكوستات POST حتى للقراءة",
+          "بيتكيّف مع الرد — ما بيتكلمش عن ساعات تشغيل لو مش موجودة، ولا عن التوكن لو الإندبوينت مالوش",
+          "القيم الحساسة زي التوكن بتتعرض كـ hidden لأن الورقة دي بتروح للعميل",
+          "موجود من مكانين: بعد أي تجربة ناجحة، ومن تبويب «افحص رد» على أي رد تلزقه"
+        ],
+        "en": [
+          "A Usage guide button — it turns the response in front of you into a document telling the customer's developer how to read it",
+          "It lists the field names from the response itself with their real values, and explains the ones it knows: IMEI versus UID, engine hours arriving in seconds, and status_code being the real status",
+          "It comes with working Python and JavaScript that uses the right path, checks the status from the body, loops the records, and converts seconds to hours",
+          "Plus the traps: an HTTP 200 that does not mean success, the token belonging in the URL rather than a header, and almost every request being POST even for reads",
+          "It adapts to the response — it says nothing about engine hours if they are absent, or about tokens on an endpoint that needs none",
+          "Sensitive values such as tokens are shown as hidden, because this document goes to the customer",
+          "Available from two places: after any successful run, and from the Inspect tab on any response you paste"
+        ]
+      }
+    },
     {
       "v": "4.8",
       "date": "2026-08-04",
@@ -2379,10 +2403,12 @@ async function tryItRun(e, out){
       + `<pre class="pre" id="respBox">${esc(redactToken(r.pretty).slice(0,4000))}</pre>`
       + `<div class="row">`
       +   (r.ok ? `<button class="btn sig" id="cpPacket">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>` : '')
+      +   (r.ok ? `<button class="btn ghost" id="cpGuide">${t('دليل استخدام للعميل','Usage guide for the customer')}</button>` : '')
       +   `<button class="btn ghost" id="cpSent">${t('نسخ اللي اتبعت كـ curl','Copy what was sent as curl')}</button>`
       +   (r.ok ? '' : `<button class="btn warn" id="cpEsc">${t('تصعيد','Escalate')}</button>`)
       + `</div>`;
     clipBlocks(out);
+    if(r.ok && $('cpGuide')) $('cpGuide').onclick = ()=>showUsageGuide(r.json, e);
     if(hasTok && $('tokShow')) $('tokShow').onclick = ()=>{
       const box=$('respBox'), btn=$('tokShow'), shown = btn.dataset.on==='1';
       box.textContent = shown ? redactToken(r.pretty).slice(0,4000) : r.pretty.slice(0,4000);
@@ -5113,10 +5139,6 @@ function stateSplit(rows){
     unknown: rows.filter(u=>speedOf(u)===null || engineOn(u)===null)
   };
 }
-function stateBuckets(rows){
-  const on = rows.filter(isOnline), off = rows.filter(u=>!isOnline(u));
-  return Object.assign({on, off}, stateSplit(on));
-}
 const STATE_META = {
   driving:{ttl:{ar:'متحركة وشغّالة', en:'Moving, engine on'},  file:'driving', tone:'var(--signal)'},
   idling: {ttl:{ar:'واقفة وشغّالة',  en:'Stopped, engine on'}, file:'idling',  tone:'#B45309'},
@@ -5831,6 +5853,165 @@ const INSPECT_SAMPLES = [
   v:{message:'success',status_code:200,data:{items:[]}}}
 ];
 
+/* ============ دليل استخدام للعميل ============
+   الأداة كانت بتثبت إن الريكوست شغال. دي بتقول للعميل يقرا الرد إزاي:
+   أنهي حقل معناه إيه، وكود شغّال بيقراه، والفخاخ اللي هيقع فيها. */
+const FIELD_MEANING = [
+  [/(^|\.)_?id$/i,                'The record UID. Pass this as unit_id to other endpoints.'],
+  [/(^|\.)imei$/i,                'The tracker IMEI printed on the device. Not the same as the UID.'],
+  [/(^|\.)device_serial$/i,       'The hardware serial. A third number, different from both IMEI and UID.'],
+  [/(^|\.)sim_(number|serial)$/i, 'SIM details. Unrelated to identifying the vehicle.'],
+  [/(^|\.)name$/i,                'Display name as the customer set it.'],
+  [/(^|\.)plate_number$/i,        'Plate number.'],
+  [/(^|\.)active$/i,              'Whether the unit is enabled on the platform.'],
+  [/counters\.odometer$/i,        'Distance in kilometres.'],
+  [/counters\.engine_hours$/i,    'Engine hours in SECONDS. Divide by 3600 for hours.'],
+  [/last_update\.time$/i,         'Timestamp of the last report received.'],
+  [/(pos|position)\.speed$/i,     'Speed in km/h at the last report.'],
+  [/(pos|position)\.(lat|lng|latitude|longitude)$/i, 'Last known coordinates.'],
+  [/^status_code$/i,               'The REAL status. Read this, not the HTTP status.'],
+  [/^message$/i,                   'success, or the reason for failure.'],
+  [/^errors$/i,                    'Field-by-field rejection reasons when validation fails.'],
+  [/(^|\.)token$/i,               'Session token. Send it as the token query parameter.']
+];
+function meaningOf(path){
+  for(const [re, txt] of FIELD_MEANING) if(re.test(path)) return txt;
+  return '';
+}
+function fieldMap(json){
+  const rows = [], seen = new Set();
+  /* العمق ٨ مش ٥ — الحقول المهمة زي last_update.pos.speed بتقع على عمق ٦،
+     وكانت بتتقطع من غير ما حد ياخد باله. */
+  const walk=(o, path, d)=>{
+    if(o==null || d>8) return;
+    if(Array.isArray(o)){ if(o.length) walk(o[0], path+'[0]', d+1); return; }
+    if(typeof o==='object'){ Object.entries(o).forEach(([k,v])=>walk(v, path?path+'.'+k:k, d+1)); return; }
+    const clean = path.replace(/\[0\]/g,'');
+    if(seen.has(clean)) return;
+    seen.add(clean);
+    /* القيم الحساسة بيتعرض شكلها مش قيمتها — الدليل ده بيروح للعميل */
+    const secret = /(^|\.)(token|password|secret|api_?key|authorization)$/i.test(clean);
+    const sample = secret ? '<hidden>' : String(o).slice(0,40);
+    rows.push({path, sample, why:meaningOf(clean)});
+  };
+  walk(json,'',0);
+  return rows.slice(0,40);
+}
+
+function usageGuide(json, method, path, hasToken){
+  const NL = String.fromCharCode(10);
+  const L = [];
+  const fields = fieldMap(json);
+  const items = pickRows(json);
+  const arrPath = items.path || '';
+  const has = k => fields.some(f=>f.path.replace(/\[0\]/g,'').endsWith(k));
+  const M = method || 'POST', P = path || '/units/lists';
+
+  L.push('HOW TO CONSUME THIS RESPONSE');
+  L.push('Verified on our side on ' + today() + '.');
+  L.push('');
+  L.push('1. THE CALL');
+  L.push(`   ${M} https://api.afaqy.sa${P}` + (hasToken ? '?token=<YOUR_TOKEN>' : ''));
+  L.push('   Content-Type: application/json');
+  L.push('   The request body is always wrapped in a "data" object.');
+  L.push('');
+  L.push('2. READ THE STATUS FROM THE BODY, NOT FROM HTTP');
+  L.push('   This API returns HTTP 200 even when a call fails.');
+  L.push('   Check "status_code" and "message" inside the response body.');
+  L.push('   A value of 200 with message "success" means it worked.');
+  L.push('');
+  L.push('3. THE FIELDS');
+  fields.filter(f=>f.why).forEach(f=>{
+    L.push(`   ${f.path}`);
+    L.push(`       example: ${f.sample}`);
+    L.push(`       ${f.why}`);
+  });
+  const plain = fields.filter(f=>!f.why).slice(0,14);
+  if(plain.length){
+    L.push('');
+    L.push('   Other fields present in this response:');
+    plain.forEach(f=>L.push(`       ${f.path} = ${f.sample}`));
+  }
+  L.push('');
+  L.push('4. WORKING CODE');
+  L.push('');
+  L.push('   Python');
+  L.push('   ------');
+  L.push('   import requests');
+  L.push('');
+  L.push('   TOKEN = "<YOUR_TOKEN>"');
+  L.push(`   r = requests.post("https://api.afaqy.sa${P}"` + (hasToken ? ',' : ')'));
+  if(hasToken) L.push('                     params={"token": TOKEN},');
+  L.push('                     json={"data": {}})');
+  L.push('   body = r.json()');
+  L.push('');
+  L.push('   # the real status lives in the body');
+  L.push('   if body.get("status_code") != 200:');
+  L.push('       raise RuntimeError(body.get("message"))');
+  L.push('');
+  if(arrPath){
+    L.push(`   items = body${arrPath.split('.').map(k=>`["${k}"]`).join('')}`);
+    L.push('   for it in items:');
+    if(has('name'))  L.push('       name = it.get("name")');
+    if(has('imei'))  L.push('       imei = it.get("imei")');
+    if(has('_id') || has('id')) L.push('       uid  = it.get("_id") or it.get("id")');
+    if(has('engine_hours')){
+      L.push('       # engine_hours arrives in SECONDS');
+      L.push('       secs  = (it.get("counters") or {}).get("engine_hours")');
+      L.push('       hours = round(secs / 3600) if secs else None');
+    }
+    if(has('speed')) L.push('       speed = (((it.get("last_update") or {}).get("pos")) or {}).get("speed")');
+    L.push((has('name') && has('imei')) ? '       print(name, imei)' : '       print(it)');
+  } else {
+    L.push('   data = body.get("data")');
+    L.push('   print(data)');
+  }
+  L.push('');
+  L.push('   JavaScript');
+  L.push('   ----------');
+  L.push(`   const res  = await fetch("https://api.afaqy.sa${P}` + (hasToken ? '?token=" + TOKEN, {' : '", {'));
+  L.push('     method: "' + M + '",');
+  L.push('     headers: { "Content-Type": "application/json" },');
+  L.push('     body: JSON.stringify({ data: {} })');
+  L.push('   });');
+  L.push('   const body = await res.json();');
+  L.push('   if (body.status_code !== 200) throw new Error(body.message);');
+  if(arrPath){
+    L.push(`   const items = body${arrPath.split('.').map(k=>`.${k}`).join('')};`);
+    if(has('engine_hours')){
+      L.push('   items.forEach(it => {');
+      L.push('     const hours = it.counters?.engine_hours');
+      L.push('       ? Math.round(it.counters.engine_hours / 3600)   // seconds to hours');
+      L.push('       : null;');
+      L.push('   });');
+    }
+  }
+  L.push('');
+  L.push('5. THINGS THAT CATCH PEOPLE OUT');
+  L.push('   - HTTP 200 does not mean success. Read status_code from the body.');
+  if(hasToken) L.push('   - The token goes in the URL as ?token=, not in an Authorization header.');
+  L.push('   - Almost every endpoint uses POST, including ones that only read.');
+  if(has('engine_hours')) L.push('   - engine_hours is in seconds. Divide by 3600.');
+  if(has('imei')) L.push('   - The IMEI identifies the device; the UID identifies the record. Other endpoints take the UID.');
+  if(arrPath) L.push('   - Large lists are paged with "offset" and "limit" inside data.');
+  return L.join(NL);
+}
+
+function showUsageGuide(json, ep){
+  if(!json){ toast(t('مفيش رد نقرا منه','No response to read from')); return; }
+  const txt = usageGuide(json, ep && ep.m, ep && ep.p, ep ? !!ep.t : true);
+  $('mtitle').textContent = t('دليل استخدام للعميل','Usage guide for the customer');
+  $('mbody').innerHTML = `
+    <div class="note sig" style="margin-bottom:10px">
+      ${t('اتعمل من الرد الحقيقي اللي قدامك — أسماء الحقول والقيم من عنده هو، مش من مثال عام.',
+          'Built from the actual response in front of you — the field names and values are his own, not a generic sample.')}</div>
+    <pre class="pre" style="white-space:pre-wrap">${esc(txt)}</pre>
+    <div class="row"><button class="btn sig" id="ugCopy">${t('نسخ','Copy')}</button></div>`;
+  $('ugCopy').onclick = ()=>copy(txt, t('اتنسخ الدليل','Guide copied'));
+  $('mask').hidden = false;
+  clipBlocks($('mbody'));
+}
+
 function renderInspect(){
   const raw = ($('inText').value||'').trim();
   const out = $('inOut');
@@ -5936,7 +6117,8 @@ function renderInspect(){
       </table>
     </div>
     <div class="row">
-      <button class="btn sig" id="inCopy">${t('نسخ ملخص للعميل','Copy summary for the customer')}</button>
+      <button class="btn sig" id="inGuide">${t('اعمل دليل استخدام للعميل','Build a usage guide for the customer')}</button>
+      <button class="btn ghost" id="inCopy">${t('نسخ ملخص للعميل','Copy summary for the customer')}</button>
       <button class="btn ghost" id="inRaw">${t('اعرض الرد الخام','Show raw response')}</button>
     </div>
     <div id="inRawBox"></div>
@@ -5960,6 +6142,7 @@ function renderInspect(){
     parts.push('Note: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the body.');
     copy(parts.join(NL), t('اتنسخ الملخص','Summary copied'));
   };
+  $('inGuide').onclick = ()=>showUsageGuide(j, null);
   $('inRaw').onclick = ()=>{
     const b=$('inRawBox');
     b.innerHTML = b.innerHTML ? '' : `<pre class="pre" style="margin-top:10px">${esc(redactToken(JSON.stringify(j,null,2)).slice(0,20000))}</pre>`;
