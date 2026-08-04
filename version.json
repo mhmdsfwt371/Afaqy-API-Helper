@@ -1,16 +1,16 @@
 {
-  "version": "3.6",
+  "version": "3.7",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "التصدير بقى ملف إكسل حقيقي بدل CSV — من غير أي مكتبة خارجية، فالأداة فاضلة ملف واحد شغال من غير نت",
-      "قسم جديد في لوحة الأجهزة: «محتاج تصرّف» — بيقلب اللوحة من وصف لأرقام تتصرّف عليها",
-      "ساكتة أكتر من أسبوع، وساكتة أكتر من يوم، ومن غير IMEI ولا سيريال، وما رسلتش ولا مرة، وموقوفة"
+      "لما تفلتر بنوع جهاز، بتظهر مؤشرات مخصوصة للنوع ده",
+      "GPS و MDVR: أونلاين وأوفلاين، والأونلاين متقسّمة لأربع حالات — متحركة وشغّالة، وواقفة وشغّالة (وقود بيضيع)، وواقفة ومطفية، ومتحركة ومطفية (يا سحب يا حساس غلط)",
+      "الوحدات الثابتة: الأونلاين والحساسات اللي راجعة — حرارة ورطوبة وبطارية ومصدر الكهرباء، بقيمها"
     ],
     "en": [
-      "Export is now a real Excel file instead of CSV — with no external library, so the tool remains a single file that works offline",
-      "A new section on the device board: Needs attention — turning the board from descriptive into numbers you act on",
-      "Silent over a week, silent over a day, no IMEI or serial, never reported, and deactivated"
+      "Filtering by device type now reveals indicators specific to that type",
+      "GPS and MDVR: online and offline, with the online ones split into four states — moving with engine on, stopped with engine on (fuel being wasted), stopped with engine off, and moving with engine off (towed or a faulty sensor)",
+      "Stationary units: how many are online, and the sensors that came back — temperature, humidity, battery and power source, with their values"
     ]
   }
 }
