@@ -320,7 +320,6 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
     <button class="chip" data-ex="لستة السواقين"><span data-ar="السواقين" data-en="Drivers">السواقين</span></button>
     <button class="chip" data-ex="إضافة منطقة جيوفنس"><span data-ar="إضافة منطقة" data-en="Add zone">إضافة منطقة</span></button>
     <button class="chip" data-ex="تشغيل تقرير"><span data-ar="تشغيل تقرير" data-en="Run report">تشغيل تقرير</span></button>
-    <button class="chip" data-ex="تسجيل عربية في واصل"><span data-ar="واصل" data-en="WASL">واصل</span></button>
     <small style="margin-inline-start:auto; color:#93A4B3" data-ar="اضغط ⁄ للبحث ⁄ الأسهم للتنقل" data-en="Press / to search · arrows to move">اضغط ⁄ للبحث ⁄ الأسهم للتنقل</small>
   </div>
 
@@ -574,9 +573,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "2.9",
+  "version": "3.0",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "3.0",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "الاسم الصح «وصل» مش «واصل» — اتصلح في كل مكان في الأداة",
+          "البحث بيلاقيها بالاتنين، لأن ناس هتكتب «واصل» بحكم العادة",
+          "اتشال اقتراح «واصل» من صف الأمثلة تحت خانة البحث"
+        ],
+        "en": [
+          "The correct name is WASL spelled the short way in Arabic — corrected everywhere in the tool",
+          "Search matches both spellings, since people will type the common misspelling out of habit",
+          "Removed the WASL chip from the example row under the search box"
+        ]
+      }
+    },
     {
       "v": "2.9",
       "date": "2026-08-04",
@@ -1307,9 +1322,10 @@ const VOCAB = {
   'Customers':['عميل','عملاء','كستمر','customer','customers','client'],
   'CustomerType':['نوع العميل','أنواع العملاء','customer type'],
   'Traffic':['مخالفة','مخالفه','مخالفات','رخصة','رخص','غرامة','غرامات','traffic','ticket','violation','fine'],
-  'WASL Integration':['واصل','wasl','هيئة النقل','تسجيل واصل'],
-  'WASL Unit':['واصل','wasl','تسجيل عربية واصل'],
-  'WASL Driver':['واصل','wasl','تسجيل سائق واصل'],
+  /* الاسم الصح «وصل». سايبين «واصل» كمان لأن ناس بتكتبها كده وبيدوّروا بيها */
+  'WASL Integration':['وصل','واصل','wasl','هيئة النقل','تسجيل وصل'],
+  'WASL Unit':['وصل','واصل','wasl','تسجيل عربية وصل'],
+  'WASL Driver':['وصل','واصل','wasl','تسجيل سائق وصل'],
   'Waste':['نفايات','نفايه','حاوية','حاويه','حاويات','قمامة','waste','container','containers'],
   'Warehouses':['مستودع','مستودعات','مخزن','مخازن','warehouse','warehouses'],
   'Warehouses groups':['مجموعة مستودعات'],
@@ -1369,7 +1385,7 @@ const INTENT = [
  { re:/مين عدل|مين غير|سجل التدقيق|audit/,                                 p:/^\/audit\/lists$/,       s:10 },
  { re:/تشغيل تقرير|نتيجه التقرير|بيانات التقرير|report data/,              p:/^\/user_reports\/data$/,  s:10 },
  { re:/قوالب التقارير|قالب تقرير|report template/,                         p:/^\/user_report_templates\/lists$/, s:10 },
- { re:/واصل|wasl/,                                                         p:/^\/wasl_integration\//,   s:6  },
+ { re:/وصل|واصل|wasl/,                                                         p:/^\/wasl_integration\//,   s:6  },
  { re:/مخالف|رخص|traffic|ticket/,                                          p:/^\/traffic-tickets\/lists$/, s:8 }
 ];
 
@@ -2266,8 +2282,8 @@ const LEARNED = [
    <div class="note sig" style="margin-top:8px">The scenarios in this tool accept any of the four and convert for you, and tell you which one matched.</div>`}},
 
  { sev:'mid', src:{ar:'من الكولكشن — wasl_integration', en:'From the collection — wasl_integration'},
-   t:{ar:'تغيير الـ IMEI في واصل له ريكوست لوحده', en:'Changing the IMEI in WASL has its own request'},
-   body:{ar:`<p>لو الجهاز اتغيّر، الـ IMEI في واصل لازم يتحدّث بريكوست منفصل — مش بتعديل العربية:</p>
+   t:{ar:'تغيير الـ IMEI في وصل له ريكوست لوحده', en:'Changing the IMEI in WASL has its own request'},
+   body:{ar:`<p>لو الجهاز اتغيّر، الـ IMEI في وصل لازم يتحدّث بريكوست منفصل — مش بتعديل العربية:</p>
    <pre class="pre">POST /wasl_integration/vehicles/update_imei
 {"data":{"id":"...","imeiNumber":"..."}}</pre>
    <p>خد بالك إن اسم الحقل هنا <code>imeiNumber</code> مش <code>imei</code>.</p>`,

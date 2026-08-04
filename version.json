@@ -1,16 +1,16 @@
 {
-  "version": "2.9",
+  "version": "3.0",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الريدمي وسجل التغييرات بقوا بيتولّدوا من نفس المصدر — كانوا يدويين ووقفوا عند v1.8 والأداة على v2.8",
-      "اللينكات المؤقتة اللي فضلت من أول يوم اتصلحت — الريدمي وملف النشر كانوا لسه بيقولوا اسم مستودع مش موجود",
-      "حارس جديد في البناء: أي ملف بيقول رقم نسخة لازم يقول نفس الرقم، وأي لينك مؤقت بيوقّف النشر"
+      "الاسم الصح «وصل» مش «واصل» — اتصلح في كل مكان في الأداة",
+      "البحث بيلاقيها بالاتنين، لأن ناس هتكتب «واصل» بحكم العادة",
+      "اتشال اقتراح «واصل» من صف الأمثلة تحت خانة البحث"
     ],
     "en": [
-      "The readme and changelog are now generated from the same source — they were manual and had drifted to v1.8 while the tool was on v2.8",
-      "Placeholder links left over from day one were fixed — the readme and deploy guide still pointed at a repository name that does not exist",
-      "A new build guard: every file that states a version must state the same one, and any placeholder link stops the release"
+      "The correct name is WASL spelled the short way in Arabic — corrected everywhere in the tool",
+      "Search matches both spellings, since people will type the common misspelling out of habit",
+      "Removed the WASL chip from the example row under the search box"
     ]
   }
 }
