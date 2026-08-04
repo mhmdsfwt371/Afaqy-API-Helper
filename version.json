@@ -1,16 +1,12 @@
 {
-  "version": "2.5",
+  "version": "2.6",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "سباق الردود: لو فتحت ريكوست تاني وانت مستني رد، الرد القديم كان بيوصل ويكتب فوق الشاشة الجديدة. دلوقتي بيتجاهل",
-      "ملف المعرفة المستورد بقى بيتنضّف من أي وسوم قبل العرض — كان ممكن ملف من حد تاني يحقن كود في الأداة",
-      "التركيز بيفضل جوه النافذة المفتوحة، والنافذة بقى ليها الوصف الصح لقارئ الشاشة"
+      "اتضافت ورقة قياس في المستودع: الأرقام اللي بتقول هل الأداة نافعة فعلًا، وإزاي تجمعها"
     ],
     "en": [
-      "Response race: opening another request while one was in flight let the old response overwrite the new screen. It is now discarded",
-      "Imported knowledge files are stripped of markup before display — a file from someone else could previously inject code",
-      "Focus stays inside an open dialog, and the dialog is now announced correctly to screen readers"
+      "A measurement sheet was added to the repository: the numbers that show whether the tool is actually working, and how to collect them"
     ]
   }
 }
