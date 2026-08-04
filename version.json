@@ -1,16 +1,16 @@
 {
-  "version": "3.2",
+  "version": "3.3",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "تبويب جديد «لوحة الأجهزة»: بيجيب عربيات الحساب ويقسّمها بنوع الجهاز — GPS ووحدة ثابتة و MDVR",
-      "رسم دائري بلون لكل نوع، ودوسة عليه أو على اسم النوع بتفلتر الجدول والأرقام مع بعض",
-      "جدول بكل الحقول اللي رجعت فعلًا — الأعمدة بتتاخد من الداتا نفسها مش من قايمة ثابتة، فلو ظهر حقل جديد بكرة هيبان"
+      "لوحة وصل جوه تبويب اللوحات: مفتاح فوق بين «الأجهزة» و«وصل»",
+      "دوسة واحدة بتجيب كل العربيات المسجّلة في وصل عند الحساب المتصل",
+      "بحث فوري في اللستة بالـ IMEI أو الاسم أو اللوحة — للو اللستة كبيرة وانت عايز جهاز أو اتنين"
     ],
     "en": [
-      "New Device dashboard tab: loads the account vehicles and splits them by device type — GPS, stationary unit and MDVR",
-      "A donut chart with a colour per type; clicking a slice or a type name filters both the table and the counts",
-      "A table with every field that actually came back — columns are derived from the data, not a fixed list, so a new field shows up on its own"
+      "A WASL board inside the dashboards tab, with a switch between Devices and WASL",
+      "One click loads every vehicle registered with WASL on the connected account",
+      "Instant search across IMEI, name and plate — for when the list is long and you want one or two devices"
     ]
   }
 }
