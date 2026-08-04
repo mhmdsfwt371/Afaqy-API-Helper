@@ -388,9 +388,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "1.4",
+  "version": "1.5",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "1.5",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "زرار «نسخ رد كامل للعميل» بعد أي تجربة ناجحة — بيلمّ الإندبوينت والهيدرز والبودي والرد الحقيقي في بلوك واحد",
+          "الردود الكبيرة بتتقص أوتوماتيك: أول عنصرين مع سطر بيقول العدد الكامل — بدل إيميل فيه ٨٤٧ عربية",
+          "زرار «عرض نضيف للقطة» بيفتح نافذة من غير أزرار عشان الصورة تطلع مرتبة",
+          "التوكن بيتشال من الرد والبودي قبل النسخ"
+        ],
+        "en": [
+          "A \"Copy full reply for the customer\" button after any successful run — endpoint, headers, body, and the real response in one block",
+          "Large responses are trimmed automatically: the first two items plus a line stating the full count, instead of an email with 847 vehicles",
+          "A \"Clean view for a screenshot\" button opens a chrome-free window so the screenshot comes out tidy",
+          "The token is stripped from the response and body before copying"
+        ]
+      }
+    },
     {
       "v": "1.4",
       "date": "2026-08-04",
@@ -674,14 +692,16 @@ const DOCS = {
           "الأداة بتقرا رد السيرفر وبتقولك أنهي حقل اترفض وليه بالاسم.",
           "خد بالك: الأكواد الرقمية في السيستم ده مش قياسية. شفنا 405 معناها خطأ بيانات مش «ميثود غلط»، و401 جوه رد 200.",
           "القاعدة: اقرا message و errors من البودي. الرقم آخر حاجة تبص عليها.",
-          "لو رجع unit_id: not_found — يبقى البودي لسه فيه رقم العينة. حدّد عربية بالـ IMEI من فوق."
+          "لو رجع unit_id: not_found — يبقى البودي لسه فيه رقم العينة. حدّد عربية بالـ IMEI من فوق.",
+          "لو الريكوست نجح، اضغط «نسخ رد كامل للعميل» — بيديك الإندبوينت والبودي والرد في بلوك واحد جاهز للإيميل."
         ],
         "en": [
           "First: look at the \"what was actually sent\" panel under the result. It shows the URL, headers, and body exactly.",
           "The tool reads the server response and tells you which field was rejected and why, by name.",
           "Note: the numeric codes on this platform are not standard. We have seen 405 mean a data error, and 401 inside a 200 response.",
           "The rule: read message and errors from the body. The number is the last thing to look at.",
-          "If you get unit_id: not_found, the body still carries the sample id. Set a vehicle by IMEI in the top bar."
+          "If you get unit_id: not_found, the body still carries the sample id. Set a vehicle by IMEI in the top bar.",
+          "If the request succeeded, press \"Copy full reply for the customer\" — you get the endpoint, body, and response in one email-ready block."
         ]
       }
     },
@@ -1001,6 +1021,58 @@ function gen(e, mode){
     return `const res = await fetch("${url}", {\n  method: "${m}",\n  headers: { "Content-Type": "application/json" }${hasBody ? `,\n  body: JSON.stringify(${b})` : ''}\n});\nconst data = await res.json();\nconsole.log(data);`;
   }
   return `import requests\n\nres = requests.${m.toLowerCase()}(\n    "${url}",\n    headers={"Content-Type": "application/json"}${hasBody ? `,\n    json=${b.replace(/\btrue\b/g,'True').replace(/\bfalse\b/g,'False').replace(/\bnull\b/g,'None')}` : ''}\n)\nprint(res.json())`;
+}
+
+/* الرد الكامل للعميل: الإندبوينت + البودي + الرد الحقيقي.
+   الردود الكبيرة بتتقص — محدش عايز إيميل فيه ألف عربية. */
+function trimResponse(json, raw){
+  if(!json) return {text: raw||'', trimmed:false, note:''};
+  let biggest=null, path='';
+  const walk=(o, p2, d)=>{ if(d>6||o==null) return;
+    if(Array.isArray(o)){ if(o.length>3 && typeof o[0]==='object' && (!biggest||o.length>biggest.length)){ biggest=o; path=p2; } o.slice(0,3).forEach(x=>walk(x,p2,d+1)); return; }
+    if(typeof o==='object') Object.entries(o).forEach(([k,v])=>walk(v, p2?p2+'.'+k:k, d+1));
+  };
+  walk(json,'',0);
+  if(!biggest) return {text: JSON.stringify(json,null,2), trimmed:false, note:''};
+  const n = biggest.length;
+  const clone = JSON.parse(JSON.stringify(json));
+  const parts = path.split('.');
+  let ref = clone;
+  for(let i=0;i<parts.length-1;i++) ref = ref[parts[i]];
+  ref[parts[parts.length-1]] = biggest.slice(0,2);
+  return {text: JSON.stringify(clone,null,2), trimmed:true,
+          note:`Showing the first 2 of ${n} items in "${path}". The full response returns all ${n}.`};
+}
+
+function customerPacket(e, sentBody, resp){
+  const url = baseUrl() + e.p + (e.t ? '?token=<YOUR_TOKEN>' : '');
+  const tr = trimResponse(resp.json, resp.pretty);
+  const body = redactToken(sentBody||'');
+  return `Hi,
+
+Below is the exact call, verified on our side on ${new Date().toISOString().slice(0,10)}.
+
+ENDPOINT
+${e.m||'POST'} ${url}
+
+HEADERS
+Content-Type: application/json
+Accept: application/json
+
+REQUEST BODY
+${body}
+
+RESPONSE  (${resp.code})
+${redactToken(tr.text).slice(0,4000)}
+${tr.trimmed ? `\n${tr.note}` : ''}
+
+NOTES
+- Get the token from POST ${baseUrl()}/auth/login with body {"data":{"username":"...","password":"..."}}. It is returned in data.token.
+- The token is passed as a "token" query parameter, not in an Authorization header.
+- Almost every endpoint uses POST, including reads, and the body is always wrapped in a "data" object.
+- IMPORTANT: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the response body rather than relying on the HTTP status.
+
+Best regards,`;
 }
 
 function customerReply(e){
