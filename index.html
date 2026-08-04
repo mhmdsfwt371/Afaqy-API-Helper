@@ -633,9 +633,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.5",
+  "version": "4.6",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.6",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "اتشالت رسالة «حظر CORS» من الأداة خالص — كانت بتتقال في حالة السبب فيها عدم الاتصال مش الشبكة",
+          "خطوة تسجيل الدخول في السيناريوهات بقت تتأكد إن فيه بيانات حساب قبل ما تشتغل، بدل ما تبعت اسم فاضي وترجع رسالة محيّرة",
+          "رسالة الفشل بقت تفرّق بين حالتين: مش متصل، والريكوست ما وصلش للسيرفر — وكل واحدة بتقولك تعمل إيه",
+          "الفرق ده اتقفل باختبار عشان ما ترجعش رسالة تشخيص غلط تاني"
+        ],
+        "en": [
+          "The CORS-blocked message was removed entirely — it was being shown when the real cause was simply not being connected",
+          "The login step in scenarios now checks for account credentials before running, instead of sending an empty username and returning a confusing message",
+          "The failure message now distinguishes two cases: not connected, and the request did not reach the server — each with what to do about it",
+          "The distinction is locked in a test so a wrong diagnosis cannot come back"
+        ]
+      }
+    },
     {
       "v": "4.5",
       "date": "2026-08-04",
@@ -3343,15 +3361,37 @@ async function runStep(i){
   if(st.kind==='speednow') return doSpeedNow(i);
   if(st.kind==='speedstats') return doSpeedStats(i);
   const box=$('out_'+i);
+  const needsLogin = /^\/auth\/(login|send_login_otp|verify_login_otp)/.test(st.path||'');
   if(st.auth!==false && !SESSION.token){
     RC.results[i]={ok:false, msg:t('مش متصل. اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال.','Not connected. Enter the username and password above and press Connect.')}; return renderSteps();
+  }
+  /* خطوة الدخول مش محتاجة توكن، بس محتاجة بيانات الحساب.
+     من غير الفحص ده كانت بتبعت اسم فاضي وترجع رسالة محيّرة. */
+  if(needsLogin && !SESSION.user){
+    RC.results[i]={ok:false,
+      msg:t('الخطوة دي بتعيد تسجيل الدخول بحساب العميل، وانت لسه ما اتصلتش.',
+            'This step re-logs in with the customer account, and you are not connected yet.'),
+      html:`<div class="note warn" style="margin-top:8px">
+        ${t('اكتب اسم المستخدم وكلمة السر في الشريط اللي فوق واضغط «اتصال»، وبعدين شغّل السيناريو من الأول.',
+            'Enter the username and password in the top bar, press Connect, then run the scenario from the start.')}</div>`};
+    return renderSteps();
   }
   box.innerHTML=`<div class="note">${t('جاري الإرسال…','Sending…')}</div>`;
   try{
     const r = await apiFetch(st.path, stepBodyRaw(st), {method:st.m, noToken: st.auth===false, noRetry: st.auth===false});
     finishCall(i, r.ok, r.code, r.json, r.pretty, r.ok?null:diagnose(r.code, r.txt), r.relogged);
   }catch(err){
-    RC.results[i]={ok:false, msg:`<b>المتصفح ما قدرش يوصل للسيرفر.</b><br>ده غالبًا حظر <span class="lat">CORS</span> — مش معناه إن الريكوست غلط. استضيف الصفحة على نفس دومين الـ API، أو اضغط «الصق الرد يدويًا» وكمّل السلسلة عادي.`};
+    const noSession = String(err && err.message) === 'NO_SESSION';
+    RC.results[i]={ok:false,
+      msg: noSession
+        ? t('مش متصل بحساب العميل.','Not connected to the customer account.')
+        : t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.'),
+      html: `<div class="note warn" style="margin-top:8px">${ noSession
+        ? t('اكتب اسم المستخدم وكلمة السر فوق واضغط «اتصال»، وبعدين شغّل السيناريو تاني.',
+            'Enter the username and password above, press Connect, then run the scenario again.')
+        : t('اتأكد من النت ومن عنوان البيئة اللي فوق. ولو الشبكة عندك بتحجب الاتصال، اضغط «الصق الرد يدويًا» وكمّل السلسلة عادي.',
+            'Check your connection and the environment URL above. If your network blocks the call, press paste the response manually and continue the chain.') }
+        ${ noSession ? '' : `<br><small>${esc(String(err && err.message || err).slice(0,120))}</small>` }</div>`};
     renderSteps();
   }
 }

@@ -1,16 +1,16 @@
 {
-  "version": "4.5",
+  "version": "4.6",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "«ابدأ من هنا» بقت تنفع من غير اتصال — الموظف الجديد لسه مالوش بيانات عميل، فبدل ما يلاقي أول حاجة معطّلة، بيتقاله إيه اللي يقدر يعمله دلوقتي وإيه اللي محتاج اتصال",
-      "عدّاد التذاكر في آخر الصفحة: زرار واحد لما تقفل تذكرة، والتصعيد بيتعد لوحده لما تنسخ رسالته",
-      "بيوريك نسبة القفل من غير تصعيد لآخر سبع أيام، وبيتصدّر إكسل جاهز لورقة القياس"
+      "اتشالت رسالة «حظر CORS» من الأداة خالص — كانت بتتقال في حالة السبب فيها عدم الاتصال مش الشبكة",
+      "خطوة تسجيل الدخول في السيناريوهات بقت تتأكد إن فيه بيانات حساب قبل ما تشتغل، بدل ما تبعت اسم فاضي وترجع رسالة محيّرة",
+      "رسالة الفشل بقت تفرّق بين حالتين: مش متصل، والريكوست ما وصلش للسيرفر — وكل واحدة بتقولك تعمل إيه"
     ],
     "en": [
-      "Start here now works without a connection — a new agent has no customer credentials yet, so instead of a dead first screen it states what can be done now and what needs a login",
-      "A ticket tally at the bottom of the page: one button when you close a ticket, and escalations count themselves when their message is copied",
-      "It shows the closed-without-escalation rate for the last seven days and exports an Excel ready for the measurement sheet"
+      "The CORS-blocked message was removed entirely — it was being shown when the real cause was simply not being connected",
+      "The login step in scenarios now checks for account credentials before running, instead of sending an empty username and returning a confusing message",
+      "The failure message now distinguishes two cases: not connected, and the request did not reach the server — each with what to do about it"
     ]
   }
 }
