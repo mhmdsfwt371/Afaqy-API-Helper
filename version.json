@@ -1,16 +1,16 @@
 {
-  "version": "4.9",
+  "version": "5.0",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "زرار «دليل استخدام للعميل» — بيحوّل الرد اللي قدامك لورقة بتقول لمطوّر العميل يقراه إزاي",
-      "بيطلّع أسماء الحقول من الرد نفسه بقيمها الحقيقية، ويشرح اللي يعرفه منها: الفرق بين IMEI و UID، وإن ساعات التشغيل بالثواني، وإن status_code هو الحالة الحقيقية",
-      "ومعاه كود شغّال بايثون وجافاسكريبت بالمسار الصح، بيفحص الحالة من البودي، وبيلف على السجلات، وبيحوّل الثواني لساعات"
+      "«افحص رد» بقى يفتح على «عرض للمستخدم»: كل سجل في كارت بأسماء عربية ووحدات محوّلة وحالة واضحة، بدل صف حقول خام",
+      "ساعات التشغيل بتتعرض بالساعات ومكتوب تحتها إن الرد بيرجّعها بالثواني · المسافة بالكيلومتر بفواصل · السرعة بوحدتها",
+      "شارة أونلاين أو أوفلاين، وشارة بتتحرك أو واقفة — من آخر تحديث ومن السرعة"
     ],
     "en": [
-      "A Usage guide button — it turns the response in front of you into a document telling the customer's developer how to read it",
-      "It lists the field names from the response itself with their real values, and explains the ones it knows: IMEI versus UID, engine hours arriving in seconds, and status_code being the real status",
-      "It comes with working Python and JavaScript that uses the right path, checks the status from the body, loops the records, and converts seconds to hours"
+      "Inspect a response now opens in a human view: each record as a card with proper labels, converted units and a clear status, instead of a row of raw fields",
+      "Engine hours are shown in hours with a note that the response returns seconds, distance in kilometres with separators, and speed with its unit",
+      "An online or offline badge, and a moving or stopped badge, derived from the last update and the speed"
     ]
   }
 }

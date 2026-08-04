@@ -647,9 +647,33 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.9",
+  "version": "5.0",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "5.0",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "«افحص رد» بقى يفتح على «عرض للمستخدم»: كل سجل في كارت بأسماء عربية ووحدات محوّلة وحالة واضحة، بدل صف حقول خام",
+          "ساعات التشغيل بتتعرض بالساعات ومكتوب تحتها إن الرد بيرجّعها بالثواني · المسافة بالكيلومتر بفواصل · السرعة بوحدتها",
+          "شارة أونلاين أو أوفلاين، وشارة بتتحرك أو واقفة — من آخر تحديث ومن السرعة",
+          "آخر تحديث بيتعرض بالوقت النسبي: من دقيقتين، من 5 ساعات، من يومين",
+          "زرار «جدول الحقول» لو عايز الأسماء الخام زي ما هي",
+          "الرد اللي مش لستة — زي تسجيل الدخول — بقى يتعرض بقراءة مفهومة بدل JSON خام، والقيم الحساسة متخبية",
+          "اتصلح الجمع في العربي: كان بيكتب «من 5 ساعة» و«من 2 يوم»"
+        ],
+        "en": [
+          "Inspect a response now opens in a human view: each record as a card with proper labels, converted units and a clear status, instead of a row of raw fields",
+          "Engine hours are shown in hours with a note that the response returns seconds, distance in kilometres with separators, and speed with its unit",
+          "An online or offline badge, and a moving or stopped badge, derived from the last update and the speed",
+          "The last update is shown as relative time, correctly pluralised in Arabic",
+          "A Field table button is there when you want the raw names",
+          "A response that is not a list, such as a login, is now given a readable reading instead of raw JSON, with sensitive values hidden",
+          "Fixed Arabic pluralisation, which was producing broken forms for hours and days"
+        ]
+      }
+    },
     {
       "v": "4.9",
       "date": "2026-08-04",
@@ -4900,6 +4924,7 @@ function renderDocs(){
    بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
    مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
 const DASH = { units:[], filter:null, flag:null, scope:null, state:null, at:null };
+let INSP_MODE = 'user';        // العرض للمستخدم هو الافتراضي — ده اللي الدعم محتاجه
 const TYPE_LBL = { gps:{ar:'GPS', en:'GPS'},
                    stationary:{ar:'وحدة ثابتة', en:'Stationary unit'},
                    stationary_unit:{ar:'وحدة ثابتة', en:'Stationary unit'},
@@ -6012,6 +6037,94 @@ function showUsageGuide(json, ep){
   clipBlocks($('mbody'));
 }
 
+/* ============ عرض للمستخدم ============
+   الجدول بيوري الحقول الخام. ده بيوري اللي المستخدم المفروض يشوفه:
+   أسماء بالعربي، وحدات محوّلة، وحالة مقروءة. */
+/* الجمع في العربي مش زي الإنجليزي: ٢ مثنى، ومن ٣ لـ ١٠ جمع، وبعد كده مفرد */
+function arPlural(n, one, two, few, many){
+  if(n === 1) return one;
+  if(n === 2) return two;
+  if(n >= 3 && n <= 10) return `${n} ${few}`;
+  return `${n} ${many}`;
+}
+function timeAgo(d){
+  if(!d) return '';
+  const mins = Math.round((Date.now()-d.getTime())/6e4);
+  if(mins < 0) return t('في المستقبل','in the future');
+  if(mins < 1) return t('دلوقتي','just now');
+  if(mins < 60) return t('من ' + arPlural(mins,'دقيقة','دقيقتين','دقايق','دقيقة'), `${mins} min ago`);
+  const h = Math.round(mins/60);
+  if(h < 24) return t('من ' + arPlural(h,'ساعة','ساعتين','ساعات','ساعة'), `${h} h ago`);
+  const dd = Math.round(h/24);
+  return t('من ' + arPlural(dd,'يوم','يومين','أيام','يوم'), `${dd} d ago`);
+}
+function num(v, dec){
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString('en-US',{maximumFractionDigits: dec===undefined?0:dec}) : null;
+}
+/* بناخد السجل الخام ونطلّع منه اللي المستخدم بيشوفه */
+function userCard(u){
+  const g = (o, ks) => { let c=o; for(const k of ks){ if(c==null) return undefined; c=c[k]; } return c; };
+  const lu   = u.last_update || {};
+  const pos  = lu.pos || lu.position || {};
+  const cnt  = u.counters || {};
+  const seen = unitLastSeen(u);
+  const hrs  = hoursSince(seen);
+  const online = hrs !== null && hrs <= 1;
+  const speed  = pos.speed!==undefined ? Number(pos.speed) : (u.speed!==undefined?Number(u.speed):null);
+  const eng    = engineOn(u);
+  const eh     = cnt.engine_hours!==undefined ? Number(cnt.engine_hours) : null;
+
+  const rows = [];
+  const add = (lbl, val, hint) => { if(val!==null && val!==undefined && val!=='') rows.push({lbl, val, hint}); };
+  add(t('اللوحة','Plate'), u.plate_number || u.plate);
+  add('IMEI', u.imei, t('الرقم المطبوع على الجهاز','printed on the device'));
+  add(t('رقم السجل','Record id'), u.id || u._id, t('ده اللي بيتبعت للإندبوينتس التانية','this is what other endpoints take'));
+  add(t('سيريال الجهاز','Device serial'), u.device_serial);
+  if(seen) add(t('آخر تحديث','Last update'),
+               lu.time || lu.datetime || '', timeAgo(seen));
+  if(speed!==null && isFinite(speed))
+    add(t('السرعة','Speed'), num(speed) + ' ' + t('كم/س','km/h'),
+        speed>0 ? t('بتتحرك','moving') : t('واقفة','stationary'));
+  if(cnt.odometer!==undefined) add(t('المسافة','Odometer'), num(cnt.odometer,1) + ' ' + t('كم','km'));
+  if(eh!==null && isFinite(eh))
+    add(t('ساعات التشغيل','Engine hours'), num(eh/3600) + ' ' + t('ساعة','h'),
+        t(`الرد بيرجّعها ${num(eh)} ثانية`, `the response returns ${num(eh)} seconds`));
+  if(eng!==null) add(t('المحرك','Engine'), eng ? t('شغّال','on') : t('مطفي','off'));
+  if(u.active===true || u.active===false) add(t('مفعّلة','Active'), u.active ? t('أيوه','yes') : t('لأ','no'));
+  sensorsOf(u).slice(0,6).forEach(s2=>add(esc(s2.name), esc(String(s2.value))));
+
+  const badge = (txt, tone) => `<span style="display:inline-block; padding:2px 9px; border-radius:2px;
+      font-size:11.5px; font-weight:600; background:${tone.bg}; color:${tone.fg}">${esc(txt)}</span>`;
+  const OK={bg:'var(--ok-soft)',fg:'var(--ok)'}, BAD={bg:'var(--alert-soft)',fg:'var(--alert)'},
+        MID={bg:'var(--signal-soft)',fg:'var(--signal-deep)'}, GREY={bg:'var(--panel-2)',fg:'var(--muted)'};
+
+  return `<div class="card" style="break-inside:avoid">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap">
+      <b style="font-size:15.5px; font-family:var(--ar)">${esc(u.name || u.title || t('بدون اسم','Unnamed'))}</b>
+      <span style="display:flex; gap:6px">
+        ${badge(online ? t('أونلاين','Online') : t('أوفلاين','Offline'), online?OK:BAD)}
+        ${speed!==null && isFinite(speed) ? badge(speed>0 ? t('بتتحرك','Moving') : t('واقفة','Stopped'), speed>0?MID:GREY) : ''}
+      </span>
+    </div>
+    <table class="kv" style="margin-top:8px">
+      ${rows.map(r=>`<tr><td style="width:38%; font-family:var(--ar); color:var(--ink)">${r.lbl}</td>
+        <td>${esc(String(r.val))}${r.hint?`<br><span style="font-size:11.5px; color:var(--muted)">${esc(r.hint)}</span>`:''}</td></tr>`).join('')}
+    </table>
+  </div>`;
+}
+
+/* رد مش لستة — زي تسجيل الدخول */
+function userPlain(json){
+  const rows = fieldMap(json).filter(f=>!/^(errors)/.test(f.path));
+  return `<div class="card"><table class="kv">
+    ${rows.slice(0,20).map(f=>`<tr>
+      <td style="width:44%"><code style="font-size:11.5px">${esc(f.path)}</code></td>
+      <td>${esc(f.sample)}${f.why?`<br><span style="font-size:11.5px; color:var(--muted)">${esc(f.why)}</span>`:''}</td>
+    </tr>`).join('')}
+  </table></div>`;
+}
+
 function renderInspect(){
   const raw = ($('inText').value||'').trim();
   const out = $('inOut');
@@ -6074,8 +6187,14 @@ function renderInspect(){
   const {rows, path, total} = pickRows(j);
   if(!rows.length){
     out.innerHTML = `<div class="panel"><div class="sec">${fixNote}${head}
-      <div class="note" style="margin-top:8px">${t('مفيش سجلات في الرد ده — يا هو رد على عملية مش قايمة، يا رجع فاضي.','No records in this response — either it is not a list, or it came back empty.')}</div>
-      <pre class="pre" style="margin-top:8px">${esc(JSON.stringify(j,null,2).slice(0,3000))}</pre></div></div>`;
+      <div class="note" style="margin-top:8px">${t('الرد ده مش لستة سجلات — دي قراءة مباشرة لمحتواه.','This response is not a list of records — here is a direct reading of its contents.')}</div>
+      ${userPlain(j)}
+      <div class="row"><button class="btn ghost" id="inRaw2">${t('اعرض الرد الخام','Show raw response')}</button></div>
+      <div id="inRawBox2"></div></div></div>`;
+    const rb=$('inRaw2'); if(rb) rb.onclick=()=>{
+      const b=$('inRawBox2');
+      b.innerHTML = b.innerHTML ? '' : `<pre class="pre" style="margin-top:10px">${esc(redactToken(JSON.stringify(j,null,2)).slice(0,8000))}</pre>`;
+      if(b.innerHTML) clipBlocks(b); };
     clipBlocks(out); return;
   }
 
@@ -6110,12 +6229,19 @@ function renderInspect(){
   out.innerHTML = `<div class="panel"><div class="sec" style="border-top:0">
     ${fixNote}${head}
     <div class="note sig" style="margin-top:8px">${sumLine}</div>
-    <div style="overflow-x:auto; margin-top:10px">
+    <div class="row" style="margin-top:10px">
+      <button class="ct" id="imUser" aria-selected="${INSP_MODE==='user'}">${t('عرض للمستخدم','As the user sees it')}</button>
+      <button class="ct" id="imTable" aria-selected="${INSP_MODE==='table'}">${t('جدول الحقول','Field table')}</button>
+    </div>
+    ${INSP_MODE==='user'
+      ? `<div class="cards" style="margin-top:10px">${rows.slice(0,60).map(r=>userCard(r._raw||r)).join('')}</div>
+         ${rows.length>60?`<div class="note" style="margin-top:8px">${t('بنعرض أول 60 — بدّل لجدول الحقول لو عايز الكل.','Showing the first 60 — switch to the field table for all of them.')}</div>`:''}`
+      : `<div style="overflow-x:auto; margin-top:10px">
       <table class="kv" style="min-width:100%">
         <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(dual(FIELD_LBL[c]||{ar:c,en:c}))}</td>`).join('')}</tr>
         ${rows.slice(0,200).map(r=>`<tr>${cols.map(c=>`<td style="white-space:nowrap">${fmt(c, r[c])}</td>`).join('')}</tr>`).join('')}
       </table>
-    </div>
+    </div>`}
     <div class="row">
       <button class="btn sig" id="inGuide">${t('اعمل دليل استخدام للعميل','Build a usage guide for the customer')}</button>
       <button class="btn ghost" id="inCopy">${t('نسخ ملخص للعميل','Copy summary for the customer')}</button>
@@ -6142,6 +6268,8 @@ function renderInspect(){
     parts.push('Note: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the body.');
     copy(parts.join(NL), t('اتنسخ الملخص','Summary copied'));
   };
+  $('imUser').onclick  = ()=>{ INSP_MODE='user';  renderInspect(); };
+  $('imTable').onclick = ()=>{ INSP_MODE='table'; renderInspect(); };
   $('inGuide').onclick = ()=>showUsageGuide(j, null);
   $('inRaw').onclick = ()=>{
     const b=$('inRawBox');
