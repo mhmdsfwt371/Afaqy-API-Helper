@@ -496,13 +496,17 @@ const DOCS = {
           "الأداة بقت تتثبّت على الجهاز زي أي تطبيق — أندرويد وآيفون وويندوز وماك",
           "بتفتح بأيقونتها من غير شريط متصفح، وليها اختصارات للتبويبات",
           "بتشتغل من غير نت في البحث والشروحات والأمثلة — التنفيذ الحي بس هو اللي محتاج نت",
-          "التنسيق اتظبط للشاشات الصغيرة: الشريط العلوي والتبويبات والأزرار"
+          "التنسيق اتظبط للشاشات الصغيرة: الشريط العلوي والتبويبات والأزرار",
+          "زرار «نسخ رد كامل للعميل» بقى واحد في كل مكان — كان تلاتة بيدوا تلات حاجات مختلفة، ودي كانت لخبطة",
+          "الزرار بيدي الرد الحقيقي لو شغّلت الريكوست، ولو ما شغّلتش بيقولك «شغّله الأول» بدل ما يديك قالب ناقص"
         ],
         "en": [
           "The tool now installs on a device like any app — Android, iPhone, Windows, and Mac",
           "It opens with its own icon and no browser bar, with shortcuts to the tabs",
           "Search, explanations, and examples work offline — only live execution needs a connection",
-          "The layout is tuned for small screens: top bar, tabs, and buttons"
+          "The layout is tuned for small screens: top bar, tabs, and buttons",
+          "The \"Copy full reply for the customer\" button is now one button everywhere — there were three producing three different things",
+          "It includes the live response if you ran the request; if not, it says so instead of handing you an incomplete template"
         ]
       }
     },
@@ -1239,6 +1243,16 @@ function trimResponse(json, raw){
           note:`Showing the first 2 of ${n} items in "${path}". The full response returns all ${n}.`};
 }
 
+/* آخر تشغيل ناجح — عشان زرار النسخ يدي الرد الحقيقي مهما كنت شغّلته منين */
+let LAST_RUN = null;
+function rememberRun(e, sentBody, resp){
+  if(resp && resp.ok) LAST_RUN = {i:e.i, body:sentBody, resp};
+}
+function packetFor(e){
+  if(LAST_RUN && LAST_RUN.i === e.i) return {text: customerPacket(e, LAST_RUN.body, LAST_RUN.resp), live:true};
+  return {text: customerPacket(e, bodyOf(e), {code:'—', json:null, pretty:''}), live:false};
+}
+
 function customerPacket(e, sentBody, resp){
   const url = baseUrl() + e.p + (e.t ? '?token=<YOUR_TOKEN>' : '');
   const tr = trimResponse(resp.json, resp.pretty);
@@ -1258,7 +1272,7 @@ REQUEST BODY
 ${body}
 
 RESPONSE  (${resp.code})
-${redactToken(tr.text).slice(0,4000)}
+${resp.pretty ? redactToken(tr.text).slice(0,4000) : '(not captured yet — run the request in the tool to include the live response here)'}
 ${tr.trimmed ? `\n${tr.note}` : ''}
 
 NOTES
@@ -1440,7 +1454,7 @@ function renderDetail(e, why){
       <pre class="pre" id="codeout">${esc(gen(e, codeMode))}</pre>
       <div class="row">
         <button class="btn sig" id="cpCode">${t('نسخ المثال','Copy example')}</button>
-        <button class="btn ghost" id="cpReply">${t('نسخ رد جاهز للعميل','Copy reply to customer')}</button>
+        <button class="btn ghost" id="cpReply">${t('نسخ رد كامل للعميل','Copy full reply for the customer')}</button>
         <button class="btn warn" id="escal">${t('تصعيد','Escalate')}</button>
       </div>
       <div class="row" style="margin-top:2px; padding-top:10px; border-top:1px dashed var(--line-soft)">
@@ -1464,7 +1478,17 @@ function renderDetail(e, why){
     $('codeout').textContent = gen(e, codeMode);
   });
   $('cpCode').onclick = ()=>copy(gen(e, codeMode), t('اتنسخ المثال','Example copied'));
-  $('cpReply').onclick = ()=>openModal(t('رد جاهز للعميل','Ready reply to customer'), customerReply(e), false);
+  $('cpReply').onclick = ()=>{
+    const pk = packetFor(e);
+    $('mtitle').textContent = t('رد كامل للعميل','Full reply for the customer');
+    $('mbody').innerHTML =
+      (pk.live ? `<div class="note sig" style="margin-bottom:10px">${t('فيه الرد الحقيقي اللي رجع من السيرفر.','Includes the live response returned by the server.')}</div>`
+               : `<div class="note warn" style="margin-bottom:10px"><b>${t('الرد الحقيقي مش موجود.','No live response yet.')}</b><br>${t('اضغط «جرّب مرة واحدة» تحت الأول، وبعدين انسخ — ساعتها الرد الحقيقي هيبقى جوه.','Press "Run once" below first, then copy — the real response will be included.')}</div>`)
+      + `<pre class="pre" style="max-height:none; white-space:pre-wrap">${esc(pk.text)}</pre>
+         <div class="row"><button class="btn sig" id="pkCopy">${t('نسخ','Copy')}</button></div>`;
+    $('pkCopy').onclick = ()=>copy(pk.text, t('اتنسخ الرد الكامل','Full reply copied'));
+    $('mask').hidden = false;
+  };
   $('escal').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };
@@ -3227,6 +3251,7 @@ async function labRunLadder(e){
       `\n\nالمطلوب: الشكل الصحيح للطلب، ونموذج رد ناجح، ومعنى الكود اللي رجع.`, true);
     return;
   }
+  rememberRun(e, win.v.body ? JSON.stringify(win.v.body, null, 4) : '', {ok:true, code:win.code, json:win.json, pretty:win.pretty});
   const safeUrl = win.v.url.split(SESSION.token||'\u0000').join('<YOUR_TOKEN>');
   const safeResp = redactToken(win.pretty);
   out.innerHTML = renderLadder(tried, null) +
@@ -3240,7 +3265,7 @@ async function labRunLadder(e){
       <button class="btn ghost" id="labCopyResp">${t('نسخ الرد لوحده','Copy response only')}</button>
     </div>
     <div class="note warn" style="margin-top:10px">التوكن اتشال أوتوماتيك. بص عليه بعينك قبل ما تبعته — ممكن يكون فيه بيانات ما ينفعش تخرج للعميل.</div>`;
-  $('labCopy').onclick = ()=>copy(labBundle(e, win, safeUrl, safeResp), t('اتنسخ الرد الجاهز','Bundle copied'));
+  $('labCopy').onclick = ()=>copy(packetFor(e).text, t('اتنسخ الرد الكامل','Full reply copied'));
   $('labCopyResp').onclick = ()=>copy(safeResp, t('اتنسخ الرد','Response copied'));
 }
 
