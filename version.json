@@ -1,12 +1,16 @@
 {
-  "version": "4.1",
+  "version": "4.2",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "الوقت في اسم ملف الإكسل بقى بنظام ١٢ ساعة مع AM و PM بدل نظام الـ ٢٤ ساعة"
+      "الحالة بقت على طبقتين: أونلاين وأوفلاين بس في الأول، ولما تدوس على واحدة تتفتح حالاتها الأربعة تحتها",
+      "المجموع مكتوب صراحة تحت الحالات — «حالات الأونلاين: 5 من 5» — ولو في فرق بيتقال بالأحمر إن الرد ناقص حقول",
+      "الأوفلاين ليها حالاتها كمان، ومكتوب إنها آخر حالة اتسجّلت قبل ما الجهاز يسكت"
     ],
     "en": [
-      "The time in the Excel filename is now 12-hour with AM and PM instead of 24-hour"
+      "State is now two layers: online and offline first, and clicking one opens its four states underneath",
+      "The total is stated under the states — online states, 5 of 5 — and any mismatch is flagged in red as missing fields in the response",
+      "Offline units get their states too, labelled as the last state recorded before the device went quiet"
     ]
   }
 }

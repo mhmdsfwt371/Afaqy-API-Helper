@@ -619,9 +619,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "4.1",
+  "version": "4.2",
   "date": "2026-08-04",
   "history": [
+    {
+      "v": "4.2",
+      "date": "2026-08-04",
+      "items": {
+        "ar": [
+          "الحالة بقت على طبقتين: أونلاين وأوفلاين بس في الأول، ولما تدوس على واحدة تتفتح حالاتها الأربعة تحتها",
+          "المجموع مكتوب صراحة تحت الحالات — «حالات الأونلاين: 5 من 5» — ولو في فرق بيتقال بالأحمر إن الرد ناقص حقول",
+          "الأوفلاين ليها حالاتها كمان، ومكتوب إنها آخر حالة اتسجّلت قبل ما الجهاز يسكت",
+          "أي بطاقة صغيرة تدوس عليها بتفلتر الجدول، والتصدير بياخد الحالة في اسم الملف",
+          "الضغط تاني على أونلاين أو أوفلاين بيقفل الحالات",
+          "اتشالت اللوحة المكررة اللي كانت تحت — نفس الأرقام كانت بتظهر مرتين"
+        ],
+        "en": [
+          "State is now two layers: online and offline first, and clicking one opens its four states underneath",
+          "The total is stated under the states — online states, 5 of 5 — and any mismatch is flagged in red as missing fields in the response",
+          "Offline units get their states too, labelled as the last state recorded before the device went quiet",
+          "Clicking any small card filters the table, and the export carries that state in the filename",
+          "Clicking online or offline again collapses the states",
+          "Removed the duplicated panel below — the same figures were being shown twice"
+        ]
+      }
+    },
     {
       "v": "4.1",
       "date": "2026-08-04",
@@ -4651,7 +4673,7 @@ function renderDocs(){
 /* ================= لوحة الأجهزة =================
    بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
    مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
-const DASH = { units:[], filter:null, flag:null, at:null };
+const DASH = { units:[], filter:null, flag:null, scope:null, state:null, at:null };
 const TYPE_LBL = { gps:{ar:'GPS', en:'GPS'},
                    stationary:{ar:'وحدة ثابتة', en:'Stationary unit'},
                    stationary_unit:{ar:'وحدة ثابتة', en:'Stationary unit'},
@@ -4678,7 +4700,7 @@ async function dashLoadUnits(){
     if(!r.ok){ $('dashState').textContent=''; $('dashOut').innerHTML =
       `<div class="panel"><div class="sec"><div class="note warn">${diagnose(r.code, r.txt)}</div></div></div>`; return; }
     DASH.units = deepItems(r.json).map(x=>x.raw);
-    DASH.filter = null; DASH.flag = null; DASH.at = new Date();
+    DASH.filter = null; DASH.flag = null; DASH.scope = null; DASH.state = null; DASH.at = new Date();
     dashRender();
   }catch(err){
     $('dashState').textContent='';
@@ -4839,6 +4861,11 @@ function dashInsights(){
 }
 
 function dashRows(){
+  if(DASH.filter && DASH.state){
+    const set = scopeRows();
+    return stateSplit(set)[DASH.state] || [];
+  }
+  if(DASH.filter && DASH.scope) return scopeRows();
   if(DASH.flag){
     const f = dashInsights().find(x=>x.k===DASH.flag);
     if(f) return f.set;
@@ -4870,118 +4897,114 @@ function recOf(u){
 /* ============ مؤشرات لكل نوع جهاز ============
    الـ GPS والـ MDVR ليهم حركة ومحرك. الوحدات الثابتة ليها حساسات.
    كله بيتقرا من الرد — لو حقل مش موجود بنقول كده بدل ما نعرض صفر. */
-function stateBuckets(rows){
-  const on = rows.filter(isOnline), off = rows.filter(u=>!isOnline(u));
-  const cell = (mv, en) => on.filter(u=>{
+/* بتقسّم أي مجموعة للحالات الأربعة + غير الواضحة.
+   المجموع لازم يساوي عدد المجموعة الأصلية — عشان كده «غير واضحة» موجودة. */
+function stateSplit(rows){
+  const cell = (mv, en) => rows.filter(u=>{
     const sp = speedOf(u), eg = engineOn(u);
     if(sp===null || eg===null) return false;
     return (sp>0)===mv && eg===en;
   });
   return {
-    on, off,
-    driving: cell(true, true),      // متحرك وشغّال
-    idling:  cell(false, true),     // واقف وشغّال — وقود بيضيع
-    parked:  cell(false, false),    // واقف ومطفي
-    towed:   cell(true, false),     // متحرك ومطفي — يا سحب يا حساس غلط
-    unknown: on.filter(u=>speedOf(u)===null || engineOn(u)===null)
+    driving: cell(true, true),      // متحركة وشغّالة
+    idling:  cell(false, true),     // واقفة وشغّالة — وقود بيضيع
+    parked:  cell(false, false),    // واقفة ومطفية
+    towed:   cell(true, false),     // متحركة ومطفية — سحب أو حساس غلط
+    unknown: rows.filter(u=>speedOf(u)===null || engineOn(u)===null)
   };
 }
-
-function statePanel(rows){
-  const b = stateBuckets(rows);
-  const box = (n, ttl, note, tone) => `<div class="card" style="${tone?'border-inline-start:4px solid '+tone:''}">
-      <div style="font-size:26px; font-weight:700; line-height:1.1; color:${tone||'var(--ink)'}">${n}</div>
-      <h3 style="font-family:var(--ar); font-size:13.5px; letter-spacing:0; text-transform:none; color:var(--ink); margin:4px 0 4px">${esc(ttl)}</h3>
-      ${note?`<p style="margin:0; font-size:12.5px; color:var(--ink-2)">${esc(note)}</p>`:''}</div>`;
-  let cards =
-    box(b.on.length,  t('أونلاين','Online'),  t('رسلت خلال آخر ساعة','reported within the last hour'), 'var(--ok)') +
-    box(b.off.length, t('أوفلاين','Offline'), t('عدّى عليها أكتر من ساعة','more than an hour since the last report'), b.off.length?'var(--alert)':null);
-  if(b.unknown.length === b.on.length && b.on.length){
-    cards += `<div class="card" style="grid-column:1/-1"><div class="note warn" style="margin:0">
-      ${t('السرعة أو حالة المحرك مش راجعين في الرد، فمقدرناش نقسّم الأونلاين لحالات. الأرقام فوق صحيحة.',
-          'Speed or engine state are not present in the response, so we cannot split the online devices by state. The figures above are correct.')}</div></div>`;
-  } else {
-    cards +=
-      box(b.driving.length, t('متحركة وشغّالة','Moving, engine on'),  t('في الطريق دلوقتي','on the road right now'), 'var(--signal)') +
-      box(b.idling.length,  t('واقفة وشغّالة','Stopped, engine on'),  t('محرك شغال وهي واقفة — وقود بيضيع','engine running while parked — fuel being wasted'), b.idling.length?'#B45309':null) +
-      box(b.parked.length,  t('واقفة ومطفية','Stopped, engine off'),  t('راكنة عادي','parked normally'), null) +
-      box(b.towed.length,   t('متحركة ومطفية','Moving, engine off'),  t('يا بتتسحب يا الحساس غلط — دي تستاهل تتشاف','either being towed or a faulty sensor — worth checking'), b.towed.length?'var(--alert)':null);
-    if(b.unknown.length) cards += box(b.unknown.length, t('حالتها مش واضحة','State unclear'), t('ناقصها سرعة أو حالة محرك','missing speed or engine state'), null);
-  }
-  return `<h3 style="margin-top:16px">${t('الحالة دلوقتي','Current state')}</h3>
-    <div class="cards" style="margin-top:10px">${cards}</div>`;
+function stateBuckets(rows){
+  const on = rows.filter(isOnline), off = rows.filter(u=>!isOnline(u));
+  return Object.assign({on, off}, stateSplit(on));
+}
+const STATE_META = {
+  driving:{ttl:{ar:'متحركة وشغّالة', en:'Moving, engine on'},  tone:'var(--signal)'},
+  idling: {ttl:{ar:'واقفة وشغّالة',  en:'Stopped, engine on'}, tone:'#B45309'},
+  parked: {ttl:{ar:'واقفة ومطفية',   en:'Stopped, engine off'},tone:null},
+  towed:  {ttl:{ar:'متحركة ومطفية',  en:'Moving, engine off'}, tone:'var(--alert)'},
+  unknown:{ttl:{ar:'حالتها مش واضحة',en:'State unclear'},      tone:'var(--muted)'}
+};
+function scopeRows(){
+  if(!DASH.filter) return [];
+  const rows = DASH.units.filter(u=>typeOf(u)===DASH.filter);
+  if(DASH.scope==='on')  return rows.filter(isOnline);
+  if(DASH.scope==='off') return rows.filter(u=>!isOnline(u));
+  return rows;
 }
 
-function sensorPanel(rows){
-  const on = rows.filter(isOnline);
-  const kinds = SENSOR_KIND.map(k=>{
-    const hits=[];
-    rows.forEach(u=>sensorsOf(u).forEach(s2=>{ if(k.re.test(s2.name)) hits.push({unit:u.name||'—', ...s2}); }));
-    return {...k, hits};
-  }).filter(k=>k.hits.length);
-  let body = `<div class="cards" style="margin-top:10px">
-    <div class="card"><div style="font-size:26px; font-weight:700; color:var(--ok); line-height:1.1">${on.length}</div>
-      <h3 style="font-family:var(--ar); font-size:13.5px; letter-spacing:0; text-transform:none; color:var(--ink); margin:4px 0 4px">${t('أونلاين','Online')}</h3>
-      <p style="margin:0; font-size:12.5px; color:var(--ink-2)">${t('من','of')} ${rows.length}</p></div>
-    ${kinds.map(k=>`<div class="card">
-      <div style="font-size:26px; font-weight:700; color:var(--signal); line-height:1.1">${k.hits.length}</div>
-      <h3 style="font-family:var(--ar); font-size:13.5px; letter-spacing:0; text-transform:none; color:var(--ink); margin:4px 0 4px">${esc(dual(k.ttl))}</h3>
-      <p style="margin:0; font-size:12.5px; color:var(--ink-2)">${esc(k.hits.slice(0,3).map(h=>h.unit+': '+h.value).join(' · '))}</p></div>`).join('')}
-  </div>`;
-  if(!kinds.length) body += `<div class="note warn" style="margin-top:10px">
-    ${t('مفيش حساسات راجعة في الرد. لو العميل بيقول إن عنده حرارة أو رطوبة، يبقى الـ projection مش بيرجّع الحساسات — صعّدها.',
-        'No sensors present in the response. If the customer says they have temperature or humidity, the projection is not returning sensors — escalate.')}</div>`;
-  return `<h3 style="margin-top:16px">${t('الحساسات','Sensors')}</h3>` + body;
-}
 
-/* المساحة الفاضية جنب الرسم: ملخص سريع لحالة النوع المفلتر */
+
+/* طبقتين: أونلاين/أوفلاين فوق، ولما تدوس على واحدة تتفتح حالاتها الأربعة تحتها.
+   مجموع الأربعة + غير الواضحة = عدد اللي دوست عليه بالظبط. */
 function miniState(){
   if(DASH.flag || !DASH.filter) return '';
   const rows = DASH.units.filter(u=>typeOf(u)===DASH.filter);
   if(!rows.length) return '';
-  const chip=(n,lbl,tone)=>`<div style="flex:1 1 88px; min-width:88px; padding:8px 10px; border:1px solid var(--line-soft);
-      border-radius:3px; border-inline-start:3px solid ${tone||'var(--line)'}; background:var(--panel-2)">
+  const chip=(n,lbl,tone,attr,on)=>`<div ${attr} style="flex:1 1 96px; min-width:96px; padding:8px 11px;
+      border:1px solid ${on?'var(--signal)':'var(--line-soft)'}; border-radius:3px;
+      border-inline-start:3px solid ${tone||'var(--line)'}; cursor:pointer;
+      background:${on?'var(--signal-soft)':'var(--panel-2)'}">
       <div style="font-size:19px; font-weight:700; line-height:1.1; color:${tone||'var(--ink)'}">${n}</div>
       <div style="font-size:11.5px; color:var(--ink-2); margin-top:2px">${esc(lbl)}</div></div>`;
-  const b = stateBuckets(rows);
-  let chips = chip(b.on.length, t('أونلاين','Online'), 'var(--ok)') +
-              chip(b.off.length, t('أوفلاين','Offline'), b.off.length?'var(--alert)':null);
+
+  const onRows = rows.filter(isOnline), offRows = rows.filter(u=>!isOnline(u));
+  let html = `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
+    ${chip(onRows.length,  t('أونلاين','Online'),  'var(--ok)',
+           'data-scope="on"',  DASH.scope==='on')}
+    ${chip(offRows.length, t('أوفلاين','Offline'), offRows.length?'var(--alert)':null,
+           'data-scope="off"', DASH.scope==='off')}
+  </div>`;
+
+  if(DASH.scope){
+    const set = DASH.scope==='on' ? onRows : offRows;
+    const sp  = stateSplit(set);
+    const keys = ['driving','idling','parked','towed'].concat(sp.unknown.length?['unknown']:[]);
+    const sum = keys.reduce((a,k)=>a+sp[k].length,0);
+    html += `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; padding-top:10px; border-top:1px dashed var(--line-soft)">
+      ${keys.map(k=>chip(sp[k].length, dual(STATE_META[k].ttl), STATE_META[k].tone,
+                         `data-state="${k}"`, DASH.state===k)).join('')}
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:6px">
+      ${t(`حالات ${DASH.scope==='on'?'الأونلاين':'الأوفلاين'}: ${sum} من ${set.length}`,
+          `${DASH.scope==='on'?'Online':'Offline'} states: ${sum} of ${set.length}`)}
+      ${sum!==set.length?` · <b style="color:var(--alert)">${t('في فرق — الرد ناقص حقول','mismatch — fields missing from the response')}</b>`:''}
+      ${DASH.scope==='off'?` · ${t('دي آخر حالة اتسجّلت قبل ما تسكت','this is the last state recorded before it went quiet')}`:''}
+    </div>`;
+  }
+
   if(/stationary|lora/i.test(DASH.filter)){
     const kinds = SENSOR_KIND.map(k=>({k, n: rows.filter(u=>sensorsOf(u).some(s2=>k.re.test(s2.name))).length}))
                              .filter(x=>x.n);
-    chips += kinds.map(x=>chip(x.n, dual(x.k.ttl), 'var(--signal)')).join('');
-  } else if(b.unknown.length !== b.on.length || !b.on.length){
-    chips += chip(b.driving.length, t('متحركة شغّالة','Moving'), 'var(--signal)') +
-             chip(b.idling.length,  t('واقفة شغّالة','Idling'), b.idling.length?'#B45309':null) +
-             chip(b.parked.length,  t('واقفة مطفية','Parked'), null) +
-             chip(b.towed.length,   t('متحركة مطفية','Towed?'), b.towed.length?'var(--alert)':null);
+    if(kinds.length) html += `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+      ${kinds.map(x=>chip(x.n, dual(x.k.ttl), 'var(--signal)', '', false)).join('')}</div>`;
   }
   if(/mdvr/i.test(DASH.filter)){
     const r = rows.map(recOf);
-    const noRec = r.filter(x=>x.rec===null).length;
-    const offRec = r.filter(x=>x.rec===false).length;
-    chips += noRec ? chip(noRec, t('التسجيل مش راجع','No recording data'), 'var(--muted)')
-                   : chip(offRec, t('مش بتسجّل','Not recording'), offRec?'var(--alert)':'var(--ok)');
+    const noRec = r.filter(x=>x.rec===null).length, offRec = r.filter(x=>x.rec===false).length;
+    html += `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+      ${noRec ? chip(noRec, t('التسجيل مش راجع','No recording data'), 'var(--muted)','',false)
+              : chip(offRec, t('مش بتسجّل','Not recording'), offRec?'var(--alert)':'var(--ok)','',false)}</div>`;
   }
-  return `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">${chips}</div>`;
+  return html;
 }
 
 function typePanel(){
+  /* الحالة بقت جنب الرسم في miniState — هنا بس التفاصيل اللي مالهاش مكان فوق */
   if(DASH.flag) return '';
   const k = DASH.filter;
   if(!k) return '';
   const rows = DASH.units.filter(u=>typeOf(u)===k);
   if(!rows.length) return '';
-  if(/stationary|lora/i.test(k)) return sensorPanel(rows);
+  if(/stationary|lora/i.test(k)) return '';
   if(/mdvr/i.test(k)){
     const recs=[];
     rows.forEach(u=>sensorsOf(u).forEach(s2=>{ if(/record|storage|disk|hdd|sd|تسجيل|تخزين/i.test(s2.name)) recs.push(u.name+': '+s2.value); }));
-    return statePanel(rows) + `<h3 style="margin-top:16px">${t('التسجيل والتخزين','Recording and storage')}</h3>` +
+    return `<h3 style="margin-top:0">${t('التسجيل والتخزين','Recording and storage')}</h3>` +
       (recs.length ? `<table class="kv" style="margin-top:8px">${recs.slice(0,20).map(r=>`<tr><td>${esc(r)}</td></tr>`).join('')}</table>`
                    : `<div class="note warn" style="margin-top:8px">${t('حالة التسجيل مش راجعة في الرد لأجهزة الـ MDVR — صعّدها عشان تتضاف.',
                         'Recording status is not present in the response for MDVR devices — escalate so it gets added.')}</div>`);
   }
-  return statePanel(rows);
+  return '';
 }
 
 function dashRender(){
@@ -5063,22 +5086,38 @@ function dashRender(){
   $('dashState').textContent = t('اتجابت','Loaded')+' '+DASH.at.toTimeString().slice(0,5);
   out.querySelectorAll('[data-slice]').forEach(el2=>el2.onclick=()=>{
     const k=el2.dataset.slice;
-    DASH.filter = (DASH.filter===k) ? null : k; DASH.flag = null;
+    DASH.filter = (DASH.filter===k) ? null : k;
+    DASH.flag = null; DASH.scope = null; DASH.state = null;
+    dashRender();
+  });
+  out.querySelectorAll('[data-scope]').forEach(el2=>el2.onclick=()=>{
+    const k=el2.dataset.scope;
+    DASH.scope = (DASH.scope===k) ? null : k;
+    DASH.state = null; DASH.flag = null;
+    dashRender();
+  });
+  out.querySelectorAll('[data-state]').forEach(el2=>el2.onclick=()=>{
+    const k=el2.dataset.state;
+    DASH.state = (DASH.state===k) ? null : k;
     dashRender();
   });
   out.querySelectorAll('[data-flag]').forEach(el2=>el2.onclick=()=>{
     const k=el2.dataset.flag;
-    DASH.flag = (DASH.flag===k) ? null : k; DASH.filter = null;
+    DASH.flag = (DASH.flag===k) ? null : k;
+    DASH.filter = null; DASH.scope = null; DASH.state = null;
     dashRender();
   });
-  const ab=$('dashAll'); if(ab) ab.onclick=()=>{ DASH.filter=null; DASH.flag=null; dashRender(); };
+  const ab=$('dashAll'); if(ab) ab.onclick=()=>{
+    DASH.filter=null; DASH.flag=null; DASH.scope=null; DASH.state=null; dashRender(); };
 }
 
 function dashExport(){
   const rows=dashRows(), cols=dashColumns(rows);
   const what = t('لوحة الأجهزة','Device board') + ' '
              + (DASH.flag ? dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'مفلتر',en:'filtered'}}).ttl)
-              : DASH.filter ? typeLabel(DASH.filter)
+              : DASH.filter ? (typeLabel(DASH.filter)
+                  + (DASH.scope ? ' ' + (DASH.scope==='on'?t('أونلاين','online'):t('أوفلاين','offline')) : '')
+                  + (DASH.state ? ' ' + dual(STATE_META[DASH.state].ttl) : ''))
               : t('الكل','all'));
   downloadXlsx(cols, rows, exportName(what), t('العربيات','Vehicles'));
 }
