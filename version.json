@@ -1,16 +1,16 @@
 {
-  "version": "5.2",
+  "version": "5.3",
   "date": "2026-08-04",
   "notes": {
     "ar": [
-      "«افحص رد» بقى يفتح على الرد نفسه — كان بيفتح على العرض المقروء ويخبّي اللي انت لزقته، وده كان غلط",
-      "تلات أوضاع تختار بينها: الرد زي ما هو، وعرض مقروء بالكروت، وجدول الحقول",
-      "التحليل اللي فوق — النجاح ولا الخطأ وعدد السجلات — بيفضل ظاهر في كل الأوضاع"
+      "الأوضاع التلاتة بقت تحت الرد الحي كمان — مش في «افحص رد» بس. تشغّل ريكوست وتبدّل العرض في مكانه من غير ما تنسخ وتروح لتبويب تاني",
+      "التبديل بين الأوضاع بيعيد الرسم من الرد المحفوظ — ما بيبعتش ريكوست جديد لحساب العميل",
+      "الأزرار اللي تحت الرد — نسخ رد كامل ودليل الاستخدام ونسخ الـ curl — بتفضل شغالة بعد أي تبديل"
     ],
     "en": [
-      "Inspect a response now opens on the response itself — it used to open on the readable view and hide what you pasted, which was wrong",
-      "Three modes to choose from: the response as it is, a readable card view, and the field table",
-      "The analysis at the top — success or error and the record count — stays visible in every mode"
+      "The three views are now under the live response too, not only in Inspect — run a request and switch views in place, without copying it to another tab",
+      "Switching views re-renders from the stored response — it does not send a new request to the customer's account",
+      "The buttons under the response — copy full reply, usage guide, copy curl — keep working after any switch"
     ]
   }
 }
