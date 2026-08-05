@@ -1,16 +1,16 @@
 {
-  "version": "6.5",
+  "version": "6.6",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "خانة «عميل التذكرة» بقت «رقم التاسك» — ده اللي الفريق بيشتغل بيه فعلًا، وبيروح مع التصعيد أوتوماتيك",
-      "تحذير «حساب مختلف عن عميل التذكرة» اتشال: مقارنة رقم تاسك بإيميل الحساب كانت هتدّي تحذير كاذب على طول",
-      "الوضع الليلي: الملاحظة التحذيرية كان لونها مثبّت غامق فبقت شبه غير مقروءة على الخلفية الغامقة — التباين اترفع من 1.43 لـ 9.15"
+      "اتضاف API تاني بالكامل: أفاقي إن نسخة 1.6 — 37 ريكوست من التوثيق الرسمي، جنب كولكشن AVL الأصلي",
+      "النظامين مختلفين جوهريًا: AVL بيشتغل POST وتوكن وUID، وأفاقي إن بيشتغل GET وapiKey وIMEI مباشرة — والأداة بتبني شكل كل واحد صح",
+      "ريكوستات النظام التاني عليها وسم «أفاقي إن» في لستة النتايج عشان محدش يبعت شكل نظام لعميل على النظام التاني"
     ],
     "en": [
-      "The ticket customer box is now the task number — that is what the team actually works with, and it travels with escalations automatically",
-      "The different-account warning was removed: comparing a task number against an account email would have warned falsely every time",
-      "Dark mode: the warning note had a hardcoded dark colour that made it almost unreadable on a dark background — contrast went from 1.43 to 9.15"
+      "A second API was added in full: Afaqy IN version 1.6 — 37 requests taken from the official documentation, alongside the original AVL collection",
+      "The two systems differ fundamentally: AVL uses POST, a token and UIDs, while Afaqy IN uses GET, an apiKey and the IMEI directly — and the tool builds each shape correctly",
+      "Second-system requests carry an Afaqy IN badge in the results so nobody sends one system's shape to a customer on the other"
     ]
   }
 }
