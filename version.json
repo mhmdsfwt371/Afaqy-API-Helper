@@ -1,16 +1,16 @@
 {
-  "version": "6.1",
+  "version": "6.2",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "شريط التثبيت وشريط التحديث كانوا بيفضلوا بلغة اللحظة اللي ظهروا فيها — دلوقتي بيتحدّثوا مع زرار اللغة زي أي حاجة تانية",
-      "خانات الاسم وكلمة السر وعميل التذكرة كان اتجاهها ثابت يمين — في الوضع الإنجليزي كانت بترمي النقطة قبل الإيميل وتقصّ النص. بقت تتبع اللغة",
-      "خانة عميل التذكرة اتوسّعت وعنوانها الإنجليزي اتقصّر عشان يبان كامل"
+      "مراجعة ختامية شاملة: الكود والنصين والفيتشرز — بعدسة مهاجم وعدسة مترجم وعدسة مستلم جديد",
+      "منفذ حقن اتقفل: اسم الحساس جاي من رد السيرفر وكان بيتحط في كارت العربية من غير تهريب — أي رد فيه وسوم كان هيتنفذ جوه الصفحة. اتهرّب صح، والتهريب المزدوج اللي كان بيبوّظ شكل القيم اتشال",
+      "أربع نصوص في صفحة الريكوست كانوا عربي ثابت في الوضع الإنجليزي — ملاحظة التوكن، تنبيه الفولدر المكرر بجزأيه، ووسم المعطّل"
     ],
     "en": [
-      "The install and update bars used to stay in whichever language they first appeared in — they now follow the language button like everything else",
-      "The username, password and ticket-customer boxes had a fixed right-to-left direction, which pushed the full stop before the email and clipped English text. They now follow the language",
-      "The ticket-customer box is wider and its English label shorter so it is fully visible"
+      "A final full review of the code, both languages and every feature — through an attacker's lens, a translator's lens and a fresh reader's lens",
+      "An injection path is closed: sensor names come from the server response and were placed into the vehicle card unescaped, so a response carrying markup would have executed in the page. They are escaped once now, and the double-escaping that garbled values is gone",
+      "Four strings on the request page were fixed Arabic in English mode — the token note, both halves of the duplicated-folder warning, and the disabled tag"
     ]
   }
 }

@@ -696,9 +696,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.1",
+  "version": "6.2",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.2",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "مراجعة ختامية شاملة: الكود والنصين والفيتشرز — بعدسة مهاجم وعدسة مترجم وعدسة مستلم جديد",
+          "منفذ حقن اتقفل: اسم الحساس جاي من رد السيرفر وكان بيتحط في كارت العربية من غير تهريب — أي رد فيه وسوم كان هيتنفذ جوه الصفحة. اتهرّب صح، والتهريب المزدوج اللي كان بيبوّظ شكل القيم اتشال",
+          "أربع نصوص في صفحة الريكوست كانوا عربي ثابت في الوضع الإنجليزي — ملاحظة التوكن، تنبيه الفولدر المكرر بجزأيه، ووسم المعطّل",
+          "شبكة أمان للوعود: أي نداء شبكة اتنسي من غير حماية بيطلع رسالة واضحة وبيتسجّل، بدل ما يفشل بصمت",
+          "اختبار جديد بيرسم الأداة كلها باللغتين وبيصطاد: عربي مندسّ في الإنجليزي، قيم مكسورة، وسوم متنفذة، وأي نص في السيناريوهات من غير مقابل — وهو اللي اصطاد كل اللي فوق",
+          "زيب المصدر بقى كامل: الترقيعات وأداة جرد الترجمة انضموا ليه"
+        ],
+        "en": [
+          "A final full review of the code, both languages and every feature — through an attacker's lens, a translator's lens and a fresh reader's lens",
+          "An injection path is closed: sensor names come from the server response and were placed into the vehicle card unescaped, so a response carrying markup would have executed in the page. They are escaped once now, and the double-escaping that garbled values is gone",
+          "Four strings on the request page were fixed Arabic in English mode — the token note, both halves of the duplicated-folder warning, and the disabled tag",
+          "A promise safety net: any unguarded network call now shows a clear message and is logged instead of failing silently",
+          "A new test renders the whole tool in both languages and hunts for stray Arabic in English, broken values, executing markup, and any scenario text without a counterpart — it is what caught everything above",
+          "The source zip is complete: the patch scripts and the translation audit tool are now included"
+        ]
+      }
+    },
     {
       "v": "6.1",
       "date": "2026-08-05",
@@ -2536,7 +2558,7 @@ function _renderDetail(e, why){
       ${why && why.length ? `<div class="why"><b>${t('ظهر لأن سؤالك فيه:','Matched because your question contains:')}</b>${why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>` : ''}
       ${(()=>{ const d=dupOf(e); if(!d) return '';
         const others=d.filter(x=>x.i!==e.i).map(x=>esc(x.g+' › '+x.n)).join('، ');
-        return `<div class="note warn" style="margin-top:10px"><b>نفس الإندبوينت موجود في فولدر تاني:</b> ${others}.<br>الفولدر هنا اتنسخ وما اتعدّلش، فاعتمد على الإندبوينت نفسه مش على اسم الفولدر.</div>`; })()}
+        return `<div class="note warn" style="margin-top:10px"><b>${t('نفس الإندبوينت موجود في فولدر تاني:','The same endpoint exists in another folder:')}</b> ${others}.<br>${t('الفولدر هنا اتنسخ وما اتعدّلش، فاعتمد على الإندبوينت نفسه مش على اسم الفولدر.','This folder was copied without being updated — trust the endpoint itself, not the folder name.')}</div>`; })()}
       <div class="row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft)">
         <button class="btn sig" id="topTry" ${KIND==='danger'?'disabled':''}>${t('جرّب دلوقتي','Run it now')}</button>
         <button class="btn sig" id="topCopy" style="background:var(--ink-bg); border-color:var(--ink-bg)">\u2709 ${t('انسخ رد كامل للعميل','Copy full reply for the customer')}</button>
@@ -2553,7 +2575,7 @@ function _renderDetail(e, why){
     <div class="sec">
       <h3>${t('اللينك الكامل','Full URL')}</h3>
       <pre class="pre">${esc(fullUrl(e,false))}</pre>
-      ${e.t ? `<div class="note" style="margin-top:8px">التوكن بيتبعت كـ <code>?token=</code> في الرابط، مش في هيدر.</div>` : ''}
+      ${e.t ? `<div class="note" style="margin-top:8px">${t('التوكن بيتبعت كـ','The token goes as')} <code>?token=</code> ${t('في الرابط، مش في هيدر.','in the URL, not in a header.')}</div>` : ''}
       ${e.t && haveToken() ? `<div class="note ${SHOW_TOKEN?'warn':''}" style="margin-top:8px">
         ${SHOW_TOKEN
           ? `<b>${t('توكنك الحقيقي ظاهر في اللينك والأمثلة تحت.','Your real token is showing in the link and the examples below.')}</b><br>
@@ -2564,7 +2586,7 @@ function _renderDetail(e, why){
       </div>` : ''}
     </div>
 
-    ${(e.q&&e.q.length) ? `<div class="sec"><h3>${t('باراميترز إضافية','Extra parameters')}</h3><table class="kv">${e.q.map(q=>`<tr><td>${esc(q.k)}</td><td>${esc(q.v||'—')}${q.off?' <em style="color:#94A5B4">(معطّل في الكولكشن)</em>':''}</td></tr>`).join('')}</table></div>` : ''}
+    ${(e.q&&e.q.length) ? `<div class="sec"><h3>${t('باراميترز إضافية','Extra parameters')}</h3><table class="kv">${e.q.map(q=>`<tr><td>${esc(q.k)}</td><td>${esc(q.v||'—')}${q.off?` <em style="color:#94A5B4">${t('(معطّل في الكولكشن)','(disabled in the collection)')}</em>`:''}</td></tr>`).join('')}</table></div>` : ''}
 
     ${(e.h&&e.h.length) ? `<div class="sec"><h3>${t('هيدرز خاصة','Special headers')}</h3><table class="kv">${e.h.map(h=>`<tr><td>${esc(h.k)}</td><td>${esc(h.v)}</td></tr>`).join('')}</table></div>` : ''}
 
@@ -6550,7 +6572,7 @@ function userCard(u){
     add(t('اتضافت على الحساب','Added to the account'), String(cAt),
         isFinite(cd.getTime()) ? timeAgo(cd) : '');
   }
-  sensorsOf(u).slice(0,6).forEach(s2=>add(esc(s2.name), esc(String(s2.value))));
+  sensorsOf(u).slice(0,6).forEach(s2=>add(String(s2.name), String(s2.value)));
 
   const badge = (txt, tone) => `<span style="display:inline-block; padding:2px 9px; border-radius:2px;
       font-size:11.5px; font-weight:600; background:${tone.bg}; color:${tone.fg}">${esc(txt)}</span>`;
@@ -6566,7 +6588,7 @@ function userCard(u){
       </span>
     </div>
     <table class="kv" style="margin-top:8px">
-      ${rows.map(r=>`<tr><td style="width:38%; font-family:var(--ar); color:var(--ink)">${r.lbl}</td>
+      ${rows.map(r=>`<tr><td style="width:38%; font-family:var(--ar); color:var(--ink)">${esc(String(r.lbl))}</td>
         <td>${esc(String(r.val))}${r.hint?`<br><span style="font-size:11.5px; color:var(--muted)">${esc(r.hint)}</span>`:''}</td></tr>`).join('')}
     </table>
   </div>`;
@@ -7308,6 +7330,13 @@ renderDocs   = guard(renderDocs,   'renderDocs');
 renderRecipe = guard(renderRecipe, 'renderRecipe');
 showView     = guard(showView,     'showView');
 window.addEventListener('error', ev=>{ if(ev && ev.error) console.error('uncaught', ev.error); });
+/* نفس الفكرة للوعود: نداء شبكة اتنسي من غير حماية ما يكسرش حاجة بصمت —
+   رسالة واضحة للموظف، وتسجيل للكونسول، والأداة تكمّل. */
+window.addEventListener('unhandledrejection', ev=>{
+  try{ toast(t('حصل خطأ غير متوقع — اتسجّل وتقدر تكمّل عادي','Something unexpected failed — logged, you can continue')); }catch(_){}
+  try{ console.error('unhandled promise:', ev.reason); }catch(_){}
+  ev.preventDefault();
+});
 
 authGate(boot);
 </script>
