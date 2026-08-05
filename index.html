@@ -73,6 +73,10 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
   padding:6px 9px; font-size:13px; font-family:var(--mono); direction:ltr; text-align:left;
 }
 .conn input{width:190px}
+/* خانات الاسم والعميل بتتكتب عربي في الوضع العربي وإنجليزي في الإنجليزي —
+   الاتجاه الثابت كان بيرمي النقطة قبل الإيميل ويقصّ النص الإنجليزي. */
+.conn input.bidi{direction:rtl; text-align:right; font-family:var(--ar)}
+body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)}
 /* telemetry ruler — the one decorative motif */
 .ruler{height:6px; background:
   repeating-linear-gradient(to right, var(--signal) 0 1px, transparent 1px 9px);
@@ -315,13 +319,13 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       </select>
       <input id="baseCustom" placeholder="https://…" hidden>
       <select id="acctSel" style="max-width:170px" title="الحسابات المحفوظة على الجهاز ده"><option value="" data-ar="— حسابات محفوظة —" data-en="— saved accounts —">— حسابات محفوظة —</option></select>
-      <input id="sesU" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px; font-family:var(--ar); text-align:right; direction:rtl">
-      <input id="sesP" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px; font-family:var(--ar); text-align:right; direction:rtl">
+      <input id="sesU" class="bidi" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px">
+      <input id="sesP" class="bidi" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
       <button class="btn ghost" id="acctSave" style="padding:6px 10px; font-size:13px" data-ar="احفظ الحساب" data-en="Save account">احفظ الحساب</button>
       <button class="btn ghost" id="acctDel" hidden style="padding:6px 10px; font-size:13px" data-ar="امسح" data-en="Delete">امسح</button>
       <span id="sesState" class="pill" data-ar="غير متصل" data-en="Not connected">غير متصل</span>
-      <input id="tickCust" autocomplete="off" style="width:150px; font-family:var(--ar); text-align:right; direction:rtl" data-arph="عميل التذكرة (اختياري)" data-enph="Ticket customer (optional)" placeholder="عميل التذكرة (اختياري)">
+      <input id="tickCust" class="bidi" autocomplete="off" style="width:190px" data-arph="عميل التذكرة (اختياري)" data-enph="Ticket customer" placeholder="عميل التذكرة (اختياري)">
       <span id="tickWarn" class="pill" style="background:#F6D9DC; color:#8E2430; border:1px solid #E5B4BA" hidden data-ar="⚠ حساب مختلف عن عميل التذكرة" data-en="⚠ Different account from the ticket customer">⚠ حساب مختلف عن عميل التذكرة</span>
       <span id="unitSep" style="color:#33475C" hidden>|</span>
       <input id="unitIn" hidden placeholder="IMEI" autocomplete="off" style="width:150px"
@@ -571,8 +575,11 @@ function initPWA(){
     if(dismissed) return;
     ev.preventDefault(); deferred=ev;
     const bar=$('instBar'); if(!bar) return;
-    $('instMsg').textContent = t('تقدر تثبّت الأداة على الجهاز وتفتحها زي أي تطبيق.',
-                                 'You can install this on your device and open it like any app.');
+    /* بنسجّل النصين على العنصر نفسه — الشريط ممكن يفضل مفتوح والمستخدم يقلب اللغة،
+       وساعتها setLang بيعيد كتابته زي أي نص تاني في الصفحة. */
+    $('instMsg').dataset.ar = 'تقدر تثبّت الأداة على الجهاز وتفتحها زي أي تطبيق.';
+    $('instMsg').dataset.en = 'You can install this on your device and open it like any app.';
+    $('instMsg').textContent = t($('instMsg').dataset.ar, $('instMsg').dataset.en);
     bar.hidden=false;
     $('instGo').onclick = async ()=>{ bar.hidden=true; deferred.prompt();
       try{ await deferred.userChoice; }catch(_){ } deferred=null; };
@@ -599,6 +606,14 @@ function initPWA(){
    من غير كده الفريق هيفضل شغال على نسخة قديمة مخزّنة في المتصفح من غير ما يعرف. */
 let UPD_SEEN = null;
 const UPD = { at:null, server:null, err:null };
+let UPD_LAST = null;
+function paintUpdBar(){
+  const v = UPD_LAST; if(!v || $('updBar').hidden) return;
+  const items = (v.notes && (LANG==='en' ? v.notes.en : v.notes.ar)) || [];
+  $('updMsg').innerHTML = `<b>${t('في نسخة أحدث','A newer version is available')}: v${esc(v.version)}</b>`
+    + (items.length ? ` — ${esc(items.slice(0,2).join(t('، ','; ')))}` : '')
+    + `<br><span style="opacity:.85; font-size:12.5px">${t('اللي عندك دلوقتي','You are on')} v${esc(DOCS.version)}</span>`;
+}
 async function checkUpdate(silent){
   try{
     const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'});
@@ -626,6 +641,7 @@ async function checkUpdate(silent){
       + (items.length ? ` — ${esc(items.slice(0,2).join('، '))}` : '')
       + `<br><span style="opacity:.85; font-size:12.5px">${t('اللي عندك دلوقتي','You are on')} v${esc(DOCS.version)}</span>`;
     $('updBar').hidden = false;
+    UPD_LAST = v;                       // بنحتفظ بالنسخة عشان نعيد كتابة الشريط لو اللغة اتغيرت
   }catch(err){ UPD.at = new Date(); UPD.err = String(err && err.message || err).slice(0,60);
                if(!$('v-docs').hidden) renderDocs(); }
 }
@@ -665,6 +681,7 @@ function setLang(l){
   document.querySelectorAll('[data-arph]').forEach(el=>{ el.placeholder = l==='en' ? el.dataset.enph : el.dataset.arph; });
   // إعادة رسم كل حاجة
   const view = document.querySelector('.tab[aria-selected="true"]');
+  paintUpdBar();
   sesPaint(SESSION.token ? t('متصل — ','Connected — ')+SESSION.user : t('غير متصل','Not connected'));
   unitPaint(SESSION.unit ? SESSION.unit.name : t('مفيش جهاز محدد','no device set'));
   renderRecent();
@@ -679,9 +696,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.0",
+  "version": "6.1",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.1",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "شريط التثبيت وشريط التحديث كانوا بيفضلوا بلغة اللحظة اللي ظهروا فيها — دلوقتي بيتحدّثوا مع زرار اللغة زي أي حاجة تانية",
+          "خانات الاسم وكلمة السر وعميل التذكرة كان اتجاهها ثابت يمين — في الوضع الإنجليزي كانت بترمي النقطة قبل الإيميل وتقصّ النص. بقت تتبع اللغة",
+          "خانة عميل التذكرة اتوسّعت وعنوانها الإنجليزي اتقصّر عشان يبان كامل"
+        ],
+        "en": [
+          "The install and update bars used to stay in whichever language they first appeared in — they now follow the language button like everything else",
+          "The username, password and ticket-customer boxes had a fixed right-to-left direction, which pushed the full stop before the email and clipped English text. They now follow the language",
+          "The ticket-customer box is wider and its English label shorter so it is fully visible"
+        ]
+      }
+    },
     {
       "v": "6.0",
       "date": "2026-08-05",

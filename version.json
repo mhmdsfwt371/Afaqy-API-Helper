@@ -1,16 +1,16 @@
 {
-  "version": "6.0",
+  "version": "6.1",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الوضع الإنجليزي اتراجع كلمة كلمة: شريط التثبيت والتحديث وحالة الاتصال وخيارات البيئة والحسابات كانوا لسه عربي — كلهم بقوا بيتحوّلوا",
-      "أسماء صيغ «جرّب وصحّح» كانت بتظهر عربية جوه واجهة إنجليزية بالكامل — دلوقتي بتترجم مع الأداة",
-      "الفاصلة العليا في خانة البحث كانت بتظهر كرمز مكسور بدل حرف — اتصلحت"
+      "شريط التثبيت وشريط التحديث كانوا بيفضلوا بلغة اللحظة اللي ظهروا فيها — دلوقتي بيتحدّثوا مع زرار اللغة زي أي حاجة تانية",
+      "خانات الاسم وكلمة السر وعميل التذكرة كان اتجاهها ثابت يمين — في الوضع الإنجليزي كانت بترمي النقطة قبل الإيميل وتقصّ النص. بقت تتبع اللغة",
+      "خانة عميل التذكرة اتوسّعت وعنوانها الإنجليزي اتقصّر عشان يبان كامل"
     ],
     "en": [
-      "English mode was reviewed word by word: the install and update bars, the connection status, the environment and account lists were all still Arabic — every one of them now switches",
-      "The names of the auto-fix variants appeared in Arabic inside an otherwise English interface — they are translated now",
-      "The apostrophe in the search box was rendering as a broken code instead of a character — fixed"
+      "The install and update bars used to stay in whichever language they first appeared in — they now follow the language button like everything else",
+      "The username, password and ticket-customer boxes had a fixed right-to-left direction, which pushed the full stop before the email and clipped English text. They now follow the language",
+      "The ticket-customer box is wider and its English label shorter so it is fully visible"
     ]
   }
 }
