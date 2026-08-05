@@ -1,16 +1,16 @@
 {
-  "version": "6.3",
+  "version": "6.4",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "مراجعة UX/UI شاملة بالصور الفعلية للشاشات في العربي والإنجليزي والوضع الليلي — مش قراءة كود بس",
-      "باگ اتلقط واتصلح: قائمة الحسابات المحفوظة وخيار «أخرى» كانوا بيفضلوا عربي في الوضع الإنجليزي — القوائم المنسدلة مبتتحدّثش زي باقي النصوص، دلوقتي بتتترجم مع تغيير اللغة",
-      "الشريط العلوي اتنضّف: فاصل بصري بين مجموعة الدخول ومجموعة الحساب، وعرض أدنى للقوائم عشان النص الإنجليزي ما يتقصّش"
+      "الشريط العلوي بقى سطر واحد دايمًا — عربي وإنجليزي، قبل الاتصال وبعده، وعلى كل مقاسات الشاشة",
+      "زرار الوضع الليلي وزرار اللغة اتنقلوا لصف العنوان — دول أدوات عامة مش خاصة بالاتصال، ونقلهم فضّى مساحة للشريط",
+      "بعد الاتصال خانات اسم المستخدم وكلمة السر بتختفي عشان تفضّي مكان للحالة والجهاز — «قطع» بترجّعهم"
     ],
     "en": [
-      "A full UX/UI review from real screenshots of the screens in Arabic, English and dark mode — not just reading the code",
-      "A bug was caught and fixed: the saved-accounts list and the Other option stayed Arabic in English mode — dropdown options do not update like other text, and they now translate on language switch",
-      "The top bar was tidied: a visual separator between the sign-in group and the account group, and a minimum width on the dropdowns so English text is not clipped"
+      "The top bar is now a single line at all times — Arabic and English, before and after connecting, at every screen size",
+      "The dark-mode and language buttons moved up to the title row — they are app-wide controls, not connection controls, and moving them freed space",
+      "Once connected, the username and password boxes disappear to make room for the status and the device — Disconnect brings them back"
     ]
   }
 }
