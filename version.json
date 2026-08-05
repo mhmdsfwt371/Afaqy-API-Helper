@@ -1,16 +1,16 @@
 {
-  "version": "6.6",
+  "version": "6.7",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "اتضاف API تاني بالكامل: أفاقي إن نسخة 1.6 — 37 ريكوست من التوثيق الرسمي، جنب كولكشن AVL الأصلي",
-      "النظامين مختلفين جوهريًا: AVL بيشتغل POST وتوكن وUID، وأفاقي إن بيشتغل GET وapiKey وIMEI مباشرة — والأداة بتبني شكل كل واحد صح",
-      "ريكوستات النظام التاني عليها وسم «أفاقي إن» في لستة النتايج عشان محدش يبعت شكل نظام لعميل على النظام التاني"
+      "لينك أفاقي إن اتضاف لقائمة Base URL — كان ناقص في النسخة اللي فاتت وده كان بيخلي النظام التاني صعب الوصول",
+      "اختيار البيئة بقى يبدّل النظام كله: تختار لينك أفاقي إن، الأداة توريك ريكوستاته هو بس، وترجع لـAVL توريك ريكوستات AVL",
+      "وسم جنب البيئة بيقولك انت في أنهي نظام وكام ريكوست فيه، عشان تبقى عارف من غير ما تسأل"
     ],
     "en": [
-      "A second API was added in full: Afaqy IN version 1.6 — 37 requests taken from the official documentation, alongside the original AVL collection",
-      "The two systems differ fundamentally: AVL uses POST, a token and UIDs, while Afaqy IN uses GET, an apiKey and the IMEI directly — and the tool builds each shape correctly",
-      "Second-system requests carry an Afaqy IN badge in the results so nobody sends one system's shape to a customer on the other"
+      "The Afaqy IN link was added to the Base URL list — it was missing in the previous release, which made the second system hard to reach",
+      "Choosing the environment now switches the whole system: pick the Afaqy IN link and the tool shows only its requests, switch back to AVL and you get AVL's",
+      "A badge beside the environment tells you which system you are in and how many requests it holds, so you know without asking"
     ]
   }
 }

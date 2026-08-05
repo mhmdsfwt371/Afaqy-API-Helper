@@ -81,6 +81,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
   .conn input, .conn select{min-width:0}
   .conn #sesState{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; min-width:120px; flex:0 1 auto}
   .conn #unitState{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px; min-width:90px; flex:0 1 auto}
+  .conn #sysTag{white-space:nowrap; flex:0 0 auto}
   .conn .btn{flex:0 0 auto; white-space:nowrap}
   .conn label{flex:0 0 auto}
 }
@@ -340,9 +341,11 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
         <option value="https://api.afaqy.sa">https://api.afaqy.sa</option>
         <option value="https://apibeta.afaqy.pro">https://apibeta.afaqy.pro</option>
         <option value="http://api.stageavl.afaqy.sa">http://api.stageavl.afaqy.sa</option>
+        <option value="http://afaqy.in/api">http://afaqy.in/api</option>
         <option value="__custom" data-ar="أخرى…" data-en="Other…">أخرى…</option>
       </select>
       <input id="baseCustom" placeholder="https://…" hidden>
+      <span id="sysTag" class="pill" title="النظام اللي بتشتغل عليه دلوقتي"></span>
       <select id="acctSel" style="max-width:170px" title="الحسابات المحفوظة على الجهاز ده"><option value="" data-ar="— حسابات محفوظة —" data-en="— saved accounts —">— حسابات محفوظة —</option></select>
       <input id="sesU" class="bidi" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px">
       <input id="sesP" class="bidi" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px">
@@ -712,6 +715,7 @@ function setLang(l){
   paintUpdBar();
   sesPaint(SESSION.token ? t('متصل — ','Connected — ')+SESSION.user : t('غير متصل','Not connected'));
   unitPaint(SESSION.unit ? SESSION.unit.name : t('مفيش جهاز محدد','no device set'));
+  sysPaint();
   renderRecent();
   if(!$('v-search').hidden) refreshLeft();
   if(cur) renderDetail(cur, []); else if(!lastQ) resetEmpty();
@@ -724,9 +728,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.6",
+  "version": "6.7",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.7",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "لينك أفاقي إن اتضاف لقائمة Base URL — كان ناقص في النسخة اللي فاتت وده كان بيخلي النظام التاني صعب الوصول",
+          "اختيار البيئة بقى يبدّل النظام كله: تختار لينك أفاقي إن، الأداة توريك ريكوستاته هو بس، وترجع لـAVL توريك ريكوستات AVL",
+          "وسم جنب البيئة بيقولك انت في أنهي نظام وكام ريكوست فيه، عشان تبقى عارف من غير ما تسأل",
+          "تغيير البيئة بيعيد بناء كل المعروض مش التفاصيل بس، ولو كان مفتوح ريكوست من النظام التاني بيتقفل عشان ما تبعتش شكل غلط",
+          "الفلترة دي بتمنع أخطر لبس: إنك تبعت ريكوست نظام لعميل على النظام التاني"
+        ],
+        "en": [
+          "The Afaqy IN link was added to the Base URL list — it was missing in the previous release, which made the second system hard to reach",
+          "Choosing the environment now switches the whole system: pick the Afaqy IN link and the tool shows only its requests, switch back to AVL and you get AVL's",
+          "A badge beside the environment tells you which system you are in and how many requests it holds, so you know without asking",
+          "Changing the environment rebuilds everything on screen rather than the details alone, and an open request from the other system is closed so you cannot send the wrong shape",
+          "This filtering removes the most dangerous confusion: sending one system's request to a customer on the other"
+        ]
+      }
+    },
     {
       "v": "6.6",
       "date": "2026-08-05",
@@ -1896,7 +1920,7 @@ const DOCS = {
           "**الوضع الليلي:** زرار القمر في الشريط فوق بيقلب الأداة كلها — الشاشات والنوافذ والكروت. أول فتحة بتمشي على إعداد جهازك، وأول ما تدوس الزرار اختيارك بيفضل محفوظ.",
           "**اللغة:** زرار `EN` بيقلب الأداة كلها للإنجليزي — الشاشات والنوافذ والرسايل والأمثلة. في الوضع الإنجليزي كلمة تأكيد التنفيذ بتبقى `RUN` بدل «نفّذ».",
           "**الشريط العلوي:** بعد ما تتصل، خانات اسم المستخدم وكلمة السر بتختفي عشان تفضّي مكان للحالة والجهاز — والشريط بيفضل سطر واحد. زرار «قطع» بيرجّعهم.",
-          "**نظامين مختلفين:** الأداة فيها كولكشن AVL (529 ريكوست، POST، العربية بالـ UID) وكمان API أفاقي إن 1.6 (37 ريكوست، GET، العربية بالـ IMEI مباشرة، والمصادقة بـ apiKey مش توكن). ريكوستات النظام التاني عليها وسم «أفاقي إن» في لستة النتايج — اتأكد من نظام العميل قبل ما تبعتله المثال."
+          "**نظامين مختلفين:** الأداة فيها كولكشن AVL (529 ريكوست، POST، العربية بالـ UID) وكمان API أفاقي إن 1.6 (37 ريكوست، GET، العربية بالـ IMEI مباشرة، والمصادقة بـ apiKey مش توكن). اختار لينك النظام من قائمة Base URL فوق، والأداة هتوريك ريكوستات النظام ده بس — والوسم جنب اللينك بيقولك انت في أنهي نظام وكام ريكوست فيه."
         ],
         "en": [
           "1) Connect — enter the customer account username and password in the top bar and press Connect. The tool fetches the token and refreshes it if it expires.",
@@ -1907,7 +1931,7 @@ const DOCS = {
           "**Dark mode:** the moon button in the top bar flips the whole tool — screens, dialogs and cards. It follows your device on first open, and remembers your choice once you press it.",
           "**Language:** the `EN` button switches the whole tool — screens, dialogs, messages and examples. In English the confirmation word is `RUN`.",
           "**The top bar:** once you connect, the username and password boxes disappear to make room for the status and the selected device, keeping the bar on one line. Disconnect brings them back.",
-          "**Two different systems:** the tool carries the AVL collection (529 requests, POST, vehicles by UID) and also the Afaqy IN 1.6 API (37 requests, GET, vehicles by IMEI directly, authenticated with an apiKey rather than a token). Second-system requests carry an Afaqy IN badge in the results — confirm which system the customer is on before sending them an example."
+          "**Two different systems:** the tool carries the AVL collection (529 requests, POST, vehicles by UID) and also the Afaqy IN 1.6 API (37 requests, GET, vehicles by IMEI directly, authenticated with an apiKey rather than a token). Pick the system's link from the Base URL list above and the tool shows only that system's requests — the badge beside the link tells you which system you are in and how many requests it holds."
         ]
       }
     },
@@ -2199,6 +2223,11 @@ const KB_IN = {"endpoints":[{"i":901,"g":"Auth (IN)","n":"Login","m":"GET","p":"
 const EPS = KB.endpoints.map(e => (e.sys ? e : Object.assign({sys:'avl'}, e)))
                         .concat(KB_IN.endpoints);
 const SYSNAME = { avl:{ar:'AVL', en:'AVL'}, in:{ar:'أفاقي إن', en:'Afaqy IN'} };
+/* النظام بيتحدد من البيئة اللي فوق: لو اخترت دومين أفاقي إن، الأداة بتوريك
+   ريكوستاته هو بس. عميل واحد بيبقى على نظام واحد، وعرض التنين مع بعض
+   بيخلي الموظف يبعت شكل نظام لعميل على التاني. */
+function curSys(){ return /afaqy\.in/i.test(baseUrl()) ? 'in' : 'avl'; }
+function sysEps(){ const c = curSys(); return EPS.filter(e => sysOf(e) === c); }
 function sysOf(e){ return (e && e.sys) || 'avl'; }
 function sysBase(sys){ return sys === 'in' ? 'http://afaqy.in/api' : baseUrl(); }
 
@@ -2411,7 +2440,7 @@ function search(raw){
   /* النية بتتحدد من السؤال مرة واحدة. قبل كده كانت 14 × 529 = 7406 اختبار في كل بحثة. */
   const hitIntents = INTENT.filter(it=>it.re.test(qn));
 
-  EPS.forEach(e=>{
+  sysEps().forEach(e=>{
     let s = 0; const why = [];
     if(modHits[e.g]){ s += modHits[e.g]*4*(STRONG[e.g]||1); (why0[e.g]||[]).slice(0,2).forEach(w=>why.push(w)); }
     for(const [act,v] of Object.entries(actHits)){
@@ -3564,7 +3593,7 @@ function renderFaq(){
 function renderBrowse(filter){
   const f = norm(filter||'');
   const groups = {};
-  EPS.forEach(e=>{
+  sysEps().forEach(e=>{
     if(f && !norm(e.g+' '+(e.s||'')+' '+e.n+' '+e.p).includes(f)) return;
     (groups[e.g] = groups[e.g] || []).push(e);
   });
@@ -7297,9 +7326,30 @@ $('baseCustom').addEventListener('input', ()=>{
 });
 $('baseUrl').addEventListener('change', ev=>{
   $('baseCustom').hidden = ev.target.value !== '__custom';
-  if(cur) renderDetail(cur, []);
-  if(!$('v-faq').hidden) renderFaq();
+  onBaseChanged();
 });
+$('baseCustom').addEventListener('change', onBaseChanged);
+/* تغيير البيئة ممكن يغيّر النظام كله — فلازم كل اللي معروض يتبني من جديد،
+   مش التفاصيل بس. والريكوست المفتوح لو بقى من نظام تاني بنقفله. */
+function onBaseChanged(){
+  const sys = curSys();
+  if(cur && sysOf(cur) !== sys){ cur = null; resetEmpty(); }
+  else if(cur) renderDetail(cur, []);
+  if(MODE === 'mod') renderBrowse(lastQ || '');
+  else if(lastQ) renderResults(search(lastQ));
+  else resetEmpty();
+  renderRecent();
+  if(!$('v-faq').hidden) renderFaq();
+  sysPaint();
+}
+/* عدّاد صغير جنب البيئة بيقول انت في أنهي نظام وكام ريكوست فيه */
+function sysPaint(){
+  const el = $('sysTag'); if(!el) return;
+  const sys = curSys(), n = sysEps().length;
+  el.textContent = t(`${SYSNAME[sys].ar} · ${n}`, `${SYSNAME[sys].en} · ${n}`);
+  el.style.background = sys === 'in' ? 'var(--signal-soft)' : '';
+  el.style.color = sys === 'in' ? 'var(--signal-deep)' : '';
+}
 /* v5.5 — خانة عميل التذكرة: تحذير لو الحساب المتصل مختلف عن العميل اللي بترد عليه */
 /* الخانة بقت رقم تاسك مش اسم عميل، فمقارنتها بالحساب المتصل بقت بلا معنى
    (رقم مش هيساوي إيميل أبدًا = تحذير كاذب دايم). الدالة سايبة فاضية لأنها
@@ -7416,6 +7466,7 @@ function themeToggle(){
 }
 $('themeBtn').onclick = themeToggle;
 themeApply(themeStored());
+sysPaint();
 $('acctSel').onchange = acctPick;
 $('acctSave').onclick = acctSave;
 $('acctDel').onclick  = acctDelete;
@@ -7453,8 +7504,8 @@ $('sesP').addEventListener('keydown', ev=>{ if(ev.key==='Enter') connect(false);
 function resetEmpty(){
   $('detail').innerHTML = `<div class="panel"><div class="empty">
     <b>${t('اكتب سؤال العميل فوق','Type the customer\u0027s question above')}</b>
-    ${t(`بندوّر لك جوه ${EPS.length} ريكوست ونطلّع الريكوست الصح بمثال جاهز للنسخ.`,
-        `We search all ${EPS.length} requests and hand you the right one with a ready-to-copy example.`)}<br>
+    ${t(`بندوّر لك جوه ${sysEps().length} ريكوست في ${SYSNAME[curSys()].ar} ونطلّع الريكوست الصح بمثال جاهز للنسخ.`,
+        `We search all ${sysEps().length} requests in ${SYSNAME[curSys()].en} and hand you the right one with a ready-to-copy example.`)}<br>
     ${t('عايز تجرّبه على حساب عميل؟ اكتب اسم المستخدم وكلمة السر فوق واضغط اتصال — التوكن بيتجاب لوحده.',
         'Want to run it against a customer account? Enter the username and password above and press Connect — the token is fetched for you.')}
   </div></div>`;
