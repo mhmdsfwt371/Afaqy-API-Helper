@@ -1,16 +1,16 @@
 {
-  "version": "5.9",
+  "version": "6.0",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "وضع ليلي كامل للأداة — الشاشات والنوافذ والكروت والجداول كلهم بيتحوّلوا، وزرار القمر في الشريط فوق بيقلب بينهم",
-      "أول فتحة بتمشي على إعداد جهازك نفسه، وأول ما تدوس الزرار اختيارك بيتحفظ على الجهاز وبيفضل معاك",
-      "زرارين «احفظ الحساب» و«امسح» كانوا مكتوبين بلون غامق على شريط غامق فمحدش شافهم — اتصلحوا، والقاعدة اتعمّمت على كل زرار في الشريط عشان ما يتكررش"
+      "الوضع الإنجليزي اتراجع كلمة كلمة: شريط التثبيت والتحديث وحالة الاتصال وخيارات البيئة والحسابات كانوا لسه عربي — كلهم بقوا بيتحوّلوا",
+      "أسماء صيغ «جرّب وصحّح» كانت بتظهر عربية جوه واجهة إنجليزية بالكامل — دلوقتي بتترجم مع الأداة",
+      "الفاصلة العليا في خانة البحث كانت بتظهر كرمز مكسور بدل حرف — اتصلحت"
     ],
     "en": [
-      "A full dark mode — screens, dialogs, cards and tables all switch, and the moon button in the top bar flips between them",
-      "It follows your device setting on first open, and once you press the button your choice is saved on this device",
-      "The Save account and Delete buttons were dark text on the dark bar so nobody could see them — fixed, and the rule now covers every button in that bar so it cannot happen again"
+      "English mode was reviewed word by word: the install and update bars, the connection status, the environment and account lists were all still Arabic — every one of them now switches",
+      "The names of the auto-fix variants appeared in Arabic inside an otherwise English interface — they are translated now",
+      "The apostrophe in the search box was rendering as a broken code instead of a character — fixed"
     ]
   }
 }

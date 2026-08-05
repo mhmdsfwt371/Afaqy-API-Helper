@@ -291,15 +291,15 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 <div id="instBar" class="instBar" hidden style="background:#1C2A36; color:#E8EFF3; padding:10px 18px; font-size:14px">
   <div style="max-width:1320px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
     <span id="instMsg" style="flex:1"></span>
-    <button class="btn" id="instGo" style="background:#00707F; border-color:#00707F; padding:6px 16px">تثبيت</button>
-    <button class="btn ghost" id="instSkip" style="color:#8FA6B4; border-color:#33475C; padding:6px 12px">لأ شكرًا</button>
+    <button class="btn" id="instGo" style="background:#00707F; border-color:#00707F; padding:6px 16px" data-ar="تثبيت" data-en="Install">تثبيت</button>
+    <button class="btn ghost" id="instSkip" style="color:#8FA6B4; border-color:#33475C; padding:6px 12px" data-ar="لأ شكرًا" data-en="No thanks">لأ شكرًا</button>
   </div>
 </div>
 <div id="updBar" hidden style="background:#00707F; color:#fff; padding:10px 18px; font-size:14px">
   <div style="max-width:1320px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
     <span id="updMsg" style="flex:1"></span>
-    <button class="btn" id="updGo" style="background:#fff; color:#00707F; border-color:#fff; padding:6px 16px">تحديث</button>
-    <button class="btn ghost" id="updSkip" style="color:#CFF0F2; border-color:#4E9AA3; padding:6px 12px">بعدين</button>
+    <button class="btn" id="updGo" style="background:#fff; color:#00707F; border-color:#fff; padding:6px 16px" data-ar="تحديث" data-en="Update">تحديث</button>
+    <button class="btn ghost" id="updSkip" style="color:#CFF0F2; border-color:#4E9AA3; padding:6px 12px" data-ar="بعدين" data-en="Later">بعدين</button>
   </div>
 </div>
 <header class="top">
@@ -311,16 +311,16 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
         <option value="https://api.afaqy.sa">https://api.afaqy.sa</option>
         <option value="https://apibeta.afaqy.pro">https://apibeta.afaqy.pro</option>
         <option value="http://api.stageavl.afaqy.sa">http://api.stageavl.afaqy.sa</option>
-        <option value="__custom">أخرى…</option>
+        <option value="__custom" data-ar="أخرى…" data-en="Other…">أخرى…</option>
       </select>
       <input id="baseCustom" placeholder="https://…" hidden>
-      <select id="acctSel" style="max-width:170px" title="الحسابات المحفوظة على الجهاز ده"><option value="">— حسابات محفوظة —</option></select>
+      <select id="acctSel" style="max-width:170px" title="الحسابات المحفوظة على الجهاز ده"><option value="" data-ar="— حسابات محفوظة —" data-en="— saved accounts —">— حسابات محفوظة —</option></select>
       <input id="sesU" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px; font-family:var(--ar); text-align:right; direction:rtl">
       <input id="sesP" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px; font-family:var(--ar); text-align:right; direction:rtl">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
       <button class="btn ghost" id="acctSave" style="padding:6px 10px; font-size:13px" data-ar="احفظ الحساب" data-en="Save account">احفظ الحساب</button>
       <button class="btn ghost" id="acctDel" hidden style="padding:6px 10px; font-size:13px" data-ar="امسح" data-en="Delete">امسح</button>
-      <span id="sesState" class="pill">غير متصل</span>
+      <span id="sesState" class="pill" data-ar="غير متصل" data-en="Not connected">غير متصل</span>
       <input id="tickCust" autocomplete="off" style="width:150px; font-family:var(--ar); text-align:right; direction:rtl" data-arph="عميل التذكرة (اختياري)" data-enph="Ticket customer (optional)" placeholder="عميل التذكرة (اختياري)">
       <span id="tickWarn" class="pill" style="background:#F6D9DC; color:#8E2430; border:1px solid #E5B4BA" hidden data-ar="⚠ حساب مختلف عن عميل التذكرة" data-en="⚠ Different account from the ticket customer">⚠ حساب مختلف عن عميل التذكرة</span>
       <span id="unitSep" style="color:#33475C" hidden>|</span>
@@ -353,7 +353,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 <section class="view" id="v-search">
   <div class="searchbar">
     <span class="ic">⌕</span>
-    <input id="q" data-arph="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" data-enph="Type the customer\u0027s question… e.g. how do I list vehicles" placeholder="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" autocomplete="off">
+    <input id="q" data-arph="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" data-enph="Type the customer&#39;s question — e.g. how do I list vehicles" placeholder="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" autocomplete="off">
   </div>
   <div class="hintrow" id="recent"></div>
   <div class="hintrow">
@@ -511,17 +511,20 @@ const AUTH = {
 
 function authGate(done){
   if(!AUTH.enabled) return done();
+  /* البوابة بتظهر قبل ما الأداة تحمّل، فمفيش زرار لغة لسه — بنمشي على لغة المتصفح */
+  const gEn = String((navigator.language || navigator.userLanguage || 'ar')).slice(0,2) !== 'ar';
+  const g = (ar, en) => gEn ? en : ar;
   document.body.style.visibility='hidden';
   const shell=document.createElement('div');
   shell.style.cssText='position:fixed; inset:0; background:#101A24; color:#E8EFF3; display:flex;'+
     'align-items:center; justify-content:center; z-index:9999; visibility:visible; font-family:'+
-    '"Segoe UI",Tahoma,Arial,sans-serif; direction:rtl';
+    '"Segoe UI",Tahoma,Arial,sans-serif; direction:'+(gEn?'ltr':'rtl');
   shell.innerHTML='<div style="width:320px; text-align:center">'+
-    '<div style="font-size:18px; font-weight:700; margin-bottom:4px">مساعد الإنتجريشن</div>'+
-    '<div style="font-size:12px; color:#8FA6B4; margin-bottom:18px">دعم أفاقي — استخدام داخلي</div>'+
-    '<input id="gEmail" placeholder="إيميل الشغل" style="width:100%; padding:10px; margin-bottom:8px; border-radius:3px; border:1px solid #33475C; background:#1C2A36; color:#E8EFF3; direction:ltr; text-align:left">'+
-    '<input id="gPass" type="password" placeholder="كلمة السر" style="width:100%; padding:10px; margin-bottom:12px; border-radius:3px; border:1px solid #33475C; background:#1C2A36; color:#E8EFF3">'+
-    '<button id="gGo" style="width:100%; padding:10px; border:0; border-radius:3px; background:#00707F; color:#fff; font-size:15px; cursor:pointer">دخول</button>'+
+    '<div style="font-size:18px; font-weight:700; margin-bottom:4px">'+g('مساعد الإنتجريشن','Integration Helper')+'</div>'+
+    '<div style="font-size:12px; color:#8FA6B4; margin-bottom:18px">'+g('دعم أفاقي — استخدام داخلي','Afaqy support — internal use')+'</div>'+
+    '<input id="gEmail" placeholder='+g('إيميل الشغل','Work email')+' style="width:100%; padding:10px; margin-bottom:8px; border-radius:3px; border:1px solid #33475C; background:#1C2A36; color:#E8EFF3; direction:ltr; text-align:left">'+
+    '<input id="gPass" type="password" placeholder='+g('كلمة السر','Password')+' style="width:100%; padding:10px; margin-bottom:12px; border-radius:3px; border:1px solid #33475C; background:#1C2A36; color:#E8EFF3">'+
+    '<button id="gGo" style="width:100%; padding:10px; border:0; border-radius:3px; background:#00707F; color:#fff; font-size:15px; cursor:pointer">'+g('دخول','Sign in')+'</button>'+
     '<div id="gErr" style="color:#F0B48A; font-size:13px; margin-top:10px; min-height:18px"></div></div>';
   document.body.appendChild(shell);
 
@@ -537,16 +540,16 @@ function authGate(done){
     });
     document.getElementById('gGo').onclick = ()=>{
       const em=document.getElementById('gEmail').value.trim(), pw=document.getElementById('gPass').value;
-      const err=document.getElementById('gErr'); err.textContent='بيتأكد…';
-      if(AUTH.allowedDomain && !em.endsWith('@'+AUTH.allowedDomain)){ err.textContent='الإيميل لازم يكون على '+AUTH.allowedDomain; return; }
+      const err=document.getElementById('gErr'); err.textContent=g('بيتأكد…','Checking…');
+      if(AUTH.allowedDomain && !em.endsWith('@'+AUTH.allowedDomain)){ err.textContent=g('الإيميل لازم يكون على ','The email must be on ')+AUTH.allowedDomain; return; }
       firebase.auth().signInWithEmailAndPassword(em, pw)
         .then(enter)
         .catch(e=>{ err.textContent = /user-not-found|invalid-credential|wrong-password/.test(e.code||'')
-          ? 'البيانات غلط، أو الحساب مش متعمل لسه.' : 'ما قدرناش نتحقق: '+(e.code||e.message); });
+          ? g('البيانات غلط، أو الحساب مش متعمل لسه.','Wrong credentials, or the account is not set up yet.') : g('ما قدرناش نتحقق: ','Could not verify: ')+(e.code||e.message); });
     };
     document.getElementById('gPass').addEventListener('keydown', ev=>{ if(ev.key==='Enter') document.getElementById('gGo').click(); });
   }).catch(()=>{
-    document.getElementById('gErr').textContent='ما قدرناش نحمّل مكتبة الدخول — اتأكد من النت.';
+    document.getElementById('gErr').textContent=g('ما قدرناش نحمّل مكتبة الدخول — اتأكد من النت.','Could not load the sign-in library — check the network.');
   });
 }
 
@@ -676,9 +679,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "5.9",
+  "version": "6.0",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.0",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "الوضع الإنجليزي اتراجع كلمة كلمة: شريط التثبيت والتحديث وحالة الاتصال وخيارات البيئة والحسابات كانوا لسه عربي — كلهم بقوا بيتحوّلوا",
+          "أسماء صيغ «جرّب وصحّح» كانت بتظهر عربية جوه واجهة إنجليزية بالكامل — دلوقتي بتترجم مع الأداة",
+          "الفاصلة العليا في خانة البحث كانت بتظهر كرمز مكسور بدل حرف — اتصلحت",
+          "كلمة تأكيد التنفيذ بقت RUN في الوضع الإنجليزي، والأداة بتقبل الاتنين",
+          "حارس ترجمة بيشتغل مع كل بناء: أي نص للمستخدم من غير مقابل، أو عربي مندسّ في الإنجليزي، أو رمز مكسور — بيوقّف النشر"
+        ],
+        "en": [
+          "English mode was reviewed word by word: the install and update bars, the connection status, the environment and account lists were all still Arabic — every one of them now switches",
+          "The names of the auto-fix variants appeared in Arabic inside an otherwise English interface — they are translated now",
+          "The apostrophe in the search box was rendering as a broken code instead of a character — fixed",
+          "The execution confirmation word is RUN in English, and the tool accepts either word",
+          "A translation guard now runs with every build: any user-facing text without a counterpart, any Arabic left inside an English string, or any broken escape stops the release"
+        ]
+      }
+    },
     {
       "v": "5.9",
       "date": "2026-08-05",
@@ -1699,7 +1722,8 @@ const DOCS = {
           "٣) ابدأ من التبويب الأول واختار العرض اللي العميل قاله.",
           "مفيش أي بيانات بتتخزن. كل حاجة في ذاكرة المتصفح وبتروح لما تقفل الصفحة.",
           "**الحسابات المحفوظة:** بعد ما تتصل، دوس «احفظ الحساب» — المرة الجاية تختاره من اللستة والخانات بتتعبّى لوحدها. الحفظ على الجهاز ده بس، وكلمة السر بتتحفظ **بس لو وافقت** وقت الحفظ. على جهاز مشترك: احفظ الاسم من غير كلمة السر.",
-          "**الوضع الليلي:** زرار القمر في الشريط فوق بيقلب الأداة كلها — الشاشات والنوافذ والكروت. أول فتحة بتمشي على إعداد جهازك، وأول ما تدوس الزرار اختيارك بيفضل محفوظ."
+          "**الوضع الليلي:** زرار القمر في الشريط فوق بيقلب الأداة كلها — الشاشات والنوافذ والكروت. أول فتحة بتمشي على إعداد جهازك، وأول ما تدوس الزرار اختيارك بيفضل محفوظ.",
+          "**اللغة:** زرار `EN` بيقلب الأداة كلها للإنجليزي — الشاشات والنوافذ والرسايل والأمثلة. في الوضع الإنجليزي كلمة تأكيد التنفيذ بتبقى `RUN` بدل «نفّذ»."
         ],
         "en": [
           "1) Connect — enter the customer account username and password in the top bar and press Connect. The tool fetches the token and refreshes it if it expires.",
@@ -1707,7 +1731,8 @@ const DOCS = {
           "3) Start from the first tab and pick the symptom the customer reported.",
           "Nothing is stored. Everything lives in browser memory and disappears when you close the page.",
           "**Saved accounts:** after connecting, press Save account — next time pick it from the list and the fields fill themselves. Saved on this device only, and the password is stored **only if you agree** at save time. On a shared device, save the username without the password.",
-          "**Dark mode:** the moon button in the top bar flips the whole tool — screens, dialogs and cards. It follows your device on first open, and remembers your choice once you press it."
+          "**Dark mode:** the moon button in the top bar flips the whole tool — screens, dialogs and cards. It follows your device on first open, and remembers your choice once you press it.",
+          "**Language:** the `EN` button switches the whole tool — screens, dialogs, messages and examples. In English the confirmation word is `RUN`."
         ]
       }
     },
@@ -1860,7 +1885,7 @@ const DOCS = {
         ],
         "en": [
           "Every request in the tool is classified: read, write, or sensitive — the label shows next to the path and in search results.",
-          "A write request (add / edit / delete / assign / import) only runs after you type نفّذ yourself — a stray click cannot touch customer data.",
+          "A write request (add / edit / delete / assign / import) only runs after you type the confirmation word yourself — RUN in English, نفّذ in Arabic — so a stray click cannot touch customer data.",
           "Try-and-auto-fix is now read-only, because it fires several attempts — dangerous on writes.",
           "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only.",
           "The ticket-customer box beside the connection warns you when the connected account differs from the customer you are answering.",
@@ -2681,7 +2706,7 @@ async function tryItRun(e, out, armed){
   if(k === 'write' && !armed){
     out.innerHTML = `<div class="note warn" style="margin-top:12px">
       <b>${t('ريكوست كتابة — هيغيّر داتا العميل فعليًا.','A write request — it changes real customer data.')}</b><br>
-      ${t('لو قاصدها فعلًا: اكتب','If you really mean it: type')} <b>نفّذ</b> ${t('في الخانة ودوس تأكيد.','in the box, then press confirm.')}
+      ${t('لو قاصدها فعلًا: اكتب','If you really mean it: type')} <b>${t('نفّذ','RUN')}</b> ${t('في الخانة ودوس تأكيد.','in the box, then press confirm.')}
       <div class="row" style="margin-top:8px">
         <input class="wgIn" style="width:110px" autocomplete="off">
         <button class="btn warn wgGo">${t('تأكيد التنفيذ','Confirm the run')}</button>
@@ -2691,7 +2716,7 @@ async function tryItRun(e, out, armed){
     const gi = out.querySelector('.wgIn'), gg = out.querySelector('.wgGo'), gn = out.querySelector('.wgNo');
     if(gg) gg.onclick = ()=>{
       const v = ((gi && gi.value) || '').trim();
-      if(v === 'نفّذ' || v === 'نفذ') tryItRun(e, out, true);
+      if(v === 'نفّذ' || v === 'نفذ' || v.toUpperCase() === 'RUN') tryItRun(e, out, true);
       else if(gi) gi.style.borderColor = '#B4232F';
     };
     if(gn) gn.onclick = ()=>{ out.innerHTML = ''; };
@@ -2840,8 +2865,8 @@ function typingState(){
 }
 function emptyState(q){
   $('detail').innerHTML = `<div class="panel"><div class="empty">
-    <b>مفيش ريكوست مطابق في الكولكشن</b>
-    ما تخمّنش وما تبعتش للعميل حاجة مش متأكد منها. صعّدها لتيم مصر.
+    <b>${t('مفيش ريكوست مطابق في الكولكشن','No matching request in the collection')}</b>
+    ${t('ما تخمّنش وما تبعتش للعميل حاجة مش متأكد منها. صعّدها لتيم مصر.','Do not guess, and do not send the customer anything you are unsure of. Escalate it to the Egypt team.')}
     <div class="row" style="justify-content:center; margin-top:14px">
       <button class="btn warn" id="escal0">${t('تصعيد لتيم مصر','Escalate')}</button>
     </div></div></div>`;
@@ -3949,8 +3974,8 @@ async function runLoop(i){
     try{
       const r = await apiFetch(st.path, st.body(RC.vars, u.id), {method:st.m});
       rows.push({name:u.name, ok:r.ok, n: r.ok?countRows(r.json):0,
-                 msg: r.ok?'':((r.json&&r.json.message)||('حالة '+r.code))});
-    }catch(err){ rows.push({name:u.name, ok:false, n:0, msg:'المتصفح ما وصلش للسيرفر'}); }
+                 msg: r.ok?'':((r.json&&r.json.message)||(t('حالة ','Status ')+r.code))});
+    }catch(err){ rows.push({name:u.name, ok:false, n:0, msg:t('المتصفح ما وصلش للسيرفر','The browser could not reach the server')}); }
   }
   const live = rows.filter(r=>r.ok && r.n>0).length,
         silent = rows.filter(r=>r.ok && r.n===0).length,
@@ -4476,36 +4501,36 @@ function labVariants(e, override){
   const ov = OVERRIDES[e.i];
   if(ov){
     if(ov.form && ov.body && ov.body.data!==undefined)
-      out.push({n:'الشكل المرصود من المنصة', url, h:{'Content-Type':'application/x-www-form-urlencoded'},
+      out.push({n:t('الشكل المرصود من المنصة','The shape observed from the platform'), url, h:{'Content-Type':'application/x-www-form-urlencoded'},
                 raw:'data=' + encodeURIComponent(JSON.stringify(ov.body.data))});
     else if(ov.body)
-      out.push({n:'الشكل المرصود من المنصة', url, body:ov.body, h:H});
+      out.push({n:t('الشكل المرصود من المنصة','The shape observed from the platform'), url, body:ov.body, h:H});
   }
-  out.push({n:'زي ما هو في الكولكشن', url, body:obj, h:{'Content-Type':'application/json'}});
-  out.push({n:'مع هيدر القبول', url, body:obj, h:H});
-  if(obj && !('data' in obj)) out.push({n:'تغليف البودي في data', url, body:{data:obj}, h:H});
-  if(obj && obj.data && obj.data.data) out.push({n:'فك التغليف المزدوج', url, body:{data:obj.data.data}, h:H});
+  out.push({n:t('زي ما هو في الكولكشن','Exactly as in the collection'), url, body:obj, h:{'Content-Type':'application/json'}});
+  out.push({n:t('مع هيدر القبول','With the Accept header'), url, body:obj, h:H});
+  if(obj && !('data' in obj)) out.push({n:t('تغليف البودي في data','Body wrapped in data'), url, body:{data:obj}, h:H});
+  if(obj && obj.data && obj.data.data) out.push({n:t('فك التغليف المزدوج','Double wrapping removed'), url, body:{data:obj.data.data}, h:H});
   if(obj && obj.data && typeof obj.data==='object'){
     const d=obj.data;
     if('projection' in d || 'simplify' in d){
       const d2={...d}; delete d2.projection; delete d2.simplify;
-      out.push({n:'من غير projection', url, body:{data:d2}, h:H});
+      out.push({n:t('من غير projection','Without projection'), url, body:{data:d2}, h:H});
     }
     if('limit' in d){
-      out.push({n:'الأرقام كنصوص', url, body:{data:{...d, limit:String(d.limit), offset:String(d.offset==null?0:d.offset)}}, h:H});
+      out.push({n:t('الأرقام كنصوص','Numbers sent as strings'), url, body:{data:{...d, limit:String(d.limit), offset:String(d.offset==null?0:d.offset)}}, h:H});
     }
     const keep={}; ['id','ids','unit_id','user_id','limit','offset'].forEach(k=>{ if(k in d) keep[k]=d[k]; });
     if(Object.keys(keep).length && Object.keys(keep).length < Object.keys(d).length)
-      out.push({n:'أقل بودي ممكن', url, body:{data:keep}, h:H});
+      out.push({n:t('أقل بودي ممكن','Smallest possible body'), url, body:{data:keep}, h:H});
   }
   /* المنصة نفسها بتبعت data كنص JSON مش ككائن على بعض الإندبوينتس
      (اترصدت على /units/getAddress). لو الشكل العادي فشل، دي بتنقذ. */
   if(obj && obj.data && typeof obj.data==='object'){
-    out.push({n:'data كنص JSON', url, body:{data: JSON.stringify(obj.data)}, h:H});
-    out.push({n:'form-encoded زي المنصة', url, h:{'Content-Type':'application/x-www-form-urlencoded'},
+    out.push({n:t('data كنص JSON','data as a JSON string'), url, body:{data: JSON.stringify(obj.data)}, h:H});
+    out.push({n:t('form-encoded زي المنصة','form-encoded like the platform'), url, h:{'Content-Type':'application/x-www-form-urlencoded'},
               raw:'data=' + encodeURIComponent(JSON.stringify(obj.data))});
   }
-  if(!obj) out.push({n:'بودي فاضي', url, body:{data:{}}, h:H});
+  if(!obj) out.push({n:t('بودي فاضي','Empty body'), url, body:{data:{}}, h:H});
   return out;
 }
 
@@ -4556,7 +4581,7 @@ async function labRunLadder(e){
       if(ok){ win = {v, code, pretty, json}; break; }
     }catch(err){
       out.innerHTML = `<div class="note warn" style="margin-top:12px">
-        <b>المتصفح ما وصلش للسيرفر.</b> استضيف الصفحة على نفس دومين الـ API، أو انسخ الصيغ كأوامر وشغّلها من الترمنال.</div>`;
+        <b>${t('المتصفح ما وصلش للسيرفر.','The browser could not reach the server.')}</b> ${t('استضيف الصفحة على نفس دومين الـ API، أو انسخ الصيغ كأوامر وشغّلها من الترمنال.','Host this page on the same domain as the API, or copy the variants as commands and run them from a terminal.')}</div>`;
       return;
     }
   }
