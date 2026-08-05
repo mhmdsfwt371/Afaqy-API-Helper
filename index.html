@@ -728,9 +728,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.8",
+  "version": "6.9",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.9",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "مراجعة QA نهائية لقت باگ خطير: كل مسارات التنفيذ الحي مبنية على AVL (توكن في الرابط وبودي POST). لو الموظف على النظام التاني وضغط «جرّب دلوقتي» كان هيتبعت شكل غلط ويفشل بطريقة غامضة",
+          "التنفيذ الحي بقى مقفول على النظام التاني بوضوح — الزرار بيختفي والسبب مكتوب، بدل فشل من غير تفسير",
+          "الاتصال بالنظام التاني بقى شغّال فعلًا: نداء GET بيجيب الـ apiKey ويحطه في الروابط أوتوماتيك — قبل كده كان الكود بيستخدم مفتاح محدش بيملاه",
+          "مفتاح العميل بيظهر في التنفيذ بس، والمثال المعروض بيفضل فيه العلامة — مفيش تسريب لمفتاح حقيقي في اللي بيتنسخ للعميل",
+          "قطع الاتصال بيمسح المفتاح، ونص التصعيد بقى يقول اسم النظام وعدد ريكوستاته الصح بدل المجموع",
+          "اختبار جديد بيثبت البوابة بالنداءات: صفر نداء شبكة للنظام التاني حتى مع التأكيد، وAVL لسه بينفّذ عادي"
+        ],
+        "en": [
+          "A final QA pass found a serious bug: every live-execution path is built on AVL (token in the URL, POST body). A support agent on the second system pressing Run it now would have sent the wrong shape and failed obscurely",
+          "Live execution is now clearly gated for the second system — the button hides and the reason is written out, instead of an unexplained failure",
+          "Connecting to the second system now genuinely works: a GET call fetches the apiKey and fills it into the URLs automatically — previously the code referenced a key nothing ever set",
+          "The customer key appears only in execution; the displayed example keeps the placeholder — no real key leaks into what gets copied to the customer",
+          "Disconnecting clears the key, and the escalation text now names the system and its own request count instead of the combined total",
+          "A new test proves the gate by counting calls: zero network calls for the second system even when confirmed, while AVL still executes normally"
+        ]
+      }
+    },
     {
       "v": "6.8",
       "date": "2026-08-05",
@@ -2098,7 +2120,8 @@ const DOCS = {
           "الريكوستات الحساسة على حساب العميل نفسه (الدخول بحسابه، تصفير الباسورد، مسح الحساب) اتقفل تنفيذها من الأداة خالص — للتوثيق بس.",
           "خانة «رقم التاسك» جنب الاتصال: لو الحساب المتصل مختلف عن العميل اللي بترد عليه، تحذير بيظهر قبل ما تخلط بين عميلين.",
           "حد أقصى ٤ ريكوستات في نفس اللحظة — الداشبوردات ما تضربش حساب العميل دفعة واحدة.",
-          "الحسابات المحفوظة على الجهاز بس ومحدش بيشوفها غيرك — بس كلمة السر مموّهة مش مشفّرة، يعني اللي قدامه الجهاز مفتوح يقدر يوصلها. على جهاز مشترك احفظ الاسم من غير كلمة السر، و«امسح» بتشيل الحساب فورًا."
+          "الحسابات المحفوظة على الجهاز بس ومحدش بيشوفها غيرك — بس كلمة السر مموّهة مش مشفّرة، يعني اللي قدامه الجهاز مفتوح يقدر يوصلها. على جهاز مشترك احفظ الاسم من غير كلمة السر، و«امسح» بتشيل الحساب فورًا.",
+          "**النظام التاني (أفاقي إن):** الاتصال شغّال وبيجيب الـ apiKey لوحده، والرابط الكامل بيتعبّى بيه. لكن زرار «جرّب دلوقتي» مقفول عليه لسه — المخرج هو الرابط الجاهز فوق: افتحه في المتصفح أو انسخه كـ curl."
         ],
         "en": [
           "Every request in the tool is classified: read, write, or sensitive — the label shows next to the path and in search results.",
@@ -2107,7 +2130,8 @@ const DOCS = {
           "Sensitive account requests (impersonation, password reset, account deletion) are fully locked from the tool — documentation only.",
           "The ticket-customer box beside the connection warns you when the connected account differs from the customer you are answering.",
           "At most 4 requests run at the same moment — dashboards no longer hammer the customer account in one burst.",
-          "Saved accounts live on this device only — but a stored password is obfuscated, not encrypted, so anyone at an unlocked device can recover it. On a shared device save the username without the password; Delete removes the account immediately."
+          "Saved accounts live on this device only — but a stored password is obfuscated, not encrypted, so anyone at an unlocked device can recover it. On a shared device save the username without the password; Delete removes the account immediately.",
+          "**The second system (Afaqy IN):** connecting works and fetches the apiKey for you, and the full URL is filled with it. The Run it now button is still disabled there — the way out is the ready URL above: open it in a browser or copy it as curl."
         ]
       }
     },
@@ -2679,7 +2703,7 @@ What we need:
 - The expected successful response
 - Possible error codes and their meaning
 
-Source: AVL PROOOO collection \u2014 ${EPS.length} requests.`;
+Source: ${SYSNAME[curSys()].en} \u2014 ${sysEps().length} requests.`;
   return `تصعيد لتيم التطوير — مصر
 
 سؤال العميل:
@@ -2695,7 +2719,7 @@ ${e ? `${e.m} ${e.p}  (موديول: ${e.g})` : 'مفيش ريكوست مطاب�
 - شكل الرد المتوقع (نموذج ناجح)
 - أكواد الأخطاء المحتملة ومعناها
 
-المصدر: كولكشن AVL PROOOO — ${EPS.length} ريكوست.`;
+المصدر: ${SYSNAME[curSys()].ar} — ${sysEps().length} ريكوست.`;
 }
 
 /* ---------------- render ---------------- */
@@ -2891,6 +2915,11 @@ function _renderDetail(e, why){
   $('cpCode').onclick = ()=>copy(gen(e, codeMode), t('اتنسخ المثال','Example copied'));
   $('cpReply').onclick = openPacket;
   $('escal').onclick = ()=>openEscalation(`${e.m} ${e.p}`);
+  /* أوضح من إن الزرار يتضغط ويطلّع رسالة: يختفي أصلًا على النظام اللي
+     مالوش تنفيذ حي، ويفضل الرابط والمثال الجاهزين هما المخرج. */
+  const liveOff = sysOf(e) === 'in';
+  if($('tryIt'))  $('tryIt').hidden  = liveOff;
+  if($('tryFix')) $('tryFix').hidden = liveOff;
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };
 }
@@ -2964,6 +2993,20 @@ function liveBody(e){
 }
 
 async function tryItRun(e, out, armed){
+  /* التنفيذ الحي مبني على AVL: توكن في الرابط وبودي POST. النظام التاني
+     مختلف تمامًا (GET وapiKey في الرابط)، فتشغيله من هنا كان هيبعت شكل
+     غلط ويفشل بطريقة غامضة. بنقفله بوضوح ونقول للموظف يعمل إيه بدلها. */
+  if(sysOf(e) === 'in'){
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">
+      <b>${t('التنفيذ الحي مش متاح للنظام ده لسه.','Live run is not available for this system yet.')}</b><br>
+      ${SESSION.apiKey
+        ? t('انت متصل، والرابط الكامل فوق فيه الـ apiKey بتاع الحساب فعلًا — افتحه في المتصفح أو انسخه كـ curl.',
+            'You are connected, and the full URL above already carries the account apiKey — open it in a browser or copy it as curl.')
+        : t('الرابط الكامل فوق جاهز — اتصل من الشريط عشان الأداة تحط الـ apiKey، أو حطه بإيدك مكان العلامة.',
+            'The full URL above is ready — connect from the top bar so the tool inserts the apiKey, or put it in by hand.')}
+    </div>`;
+    return;
+  }
   const k = epKind(e);
   if(k === 'danger'){
     out.innerHTML = `<div class="note warn" style="margin-top:12px"><b>${t('مقفول.','Locked.')}</b> ${t('الريكوست ده بيلمس حساب العميل نفسه (دخول بحسابه / باسورد / مسح) — ما يتنفذش من أداة الدعم.','This request touches the customer account itself — impersonation / password / deletion — and it does not run from the support tool.')}</div>`;
@@ -4444,7 +4487,7 @@ function openDepsModal(e, missing, cont){
 }
 
 /* ================= الجلسة: التوكن بيتجاب لوحده ================= */
-const SESSION = { user:'', pass:'', token:'', at:null, unit:null };
+const SESSION = { user:'', pass:'', token:'', apiKey:'', at:null, unit:null };
 let UNITS_CACHE = null;          // لستة العربيات بتتجاب مرة واحدة في الجلسة
 
 function unitPaint(msg, bad){
@@ -4642,10 +4685,43 @@ function sesPaint(msg, bad){
 }
 
 /* تسجيل دخول واحد. مفيش إعادة محاولة على بيانات غلط عشان الحساب ما يتقفلش. */
+/* دخول النظام التاني: نداء واحد GET بيرجّع api_key بيتحط في كل نداء بعده. */
+async function connectIn(u, pw, silent){
+  try{
+    const data = encodeURIComponent(JSON.stringify({username:u, password:pw}));
+    const res = await fetch(baseUrl() + '/?r=users/login&data=' + data, {method:'GET'});
+    const txt = await res.text(); let json=null; try{ json=JSON.parse(txt); }catch(_){}
+    const key = json && (deepFindKey(json,'api_key') || deepFindKey(json,'apiKey'));
+    if(key){
+      SESSION.user=u; SESSION.pass=pw; SESSION.apiKey=key; SESSION.token=''; SESSION.at=Date.now();
+      SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
+      Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
+      $('unitIn').value=''; unitPaint(t('مفيش جهاز محدد','no device set'));
+      sesPaint(t('متصل — ','Connected — ') + u);
+      logCall('users/login', res.status, true);
+      if(cur) renderDetail(cur, []);
+      return true;
+    }
+    SESSION.apiKey='';
+    const msg = (json && json.message) || '';
+    sesPaint(msg === 'invalid_username_password'
+      ? t('اسم المستخدم أو كلمة السر غلط','Wrong username or password')
+      : t('فشل الاتصال','Login failed'), true);
+    logCall('users/login', res.status, false);
+    return false;
+  }catch(err){
+    SESSION.apiKey='';
+    sesPaint(t('المتصفح ما وصلش للسيرفر','The browser could not reach the server'), true);
+    return false;
+  }
+}
 async function connect(silent){
   const u=$('sesU').value.trim(), pw=$('sesP').value;
   if(!u || !pw){ sesPaint(t('اكتب اسم المستخدم وكلمة السر','Enter username and password'), true); return false; }
   if(!silent) sesPaint(t('جاري الاتصال…','Connecting…'));
+  /* النظام التاني له دخول مختلف: GET وبيرجّع api_key مش token.
+     من غير المسار ده كان الاتصال هيفشل دايمًا على بيئته. */
+  if(curSys() === 'in') return connectIn(u, pw, silent);
   try{
     const res = await fetch(baseUrl()+'/auth/login', {method:'POST',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -4678,7 +4754,7 @@ async function connect(silent){
 let LAST_LOGIN_FAIL = null;
 
 function disconnect(){
-  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.at=null; SESSION.unit=null; checkTick();
+  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.apiKey=''; SESSION.at=null; SESSION.unit=null; checkTick();
   SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
   Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
   $('sesU').value=''; $('sesP').value=''; $('unitIn').value=''; unitPaint(t('—','—'));

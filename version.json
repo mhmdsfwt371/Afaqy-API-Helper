@@ -1,16 +1,16 @@
 {
-  "version": "6.8",
+  "version": "6.9",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "فحص سلامة بيانات دائم اتضاف: كل ريكوست من الـ529 بتوع AVL بيتقارن بالأصل حقل بحقل مع كل بناء — أي تغيير مهما كان صغير بيوقّف النشر",
-      "الفحص بيتأكد كمان إن مفيش تسرّب في الاتجاهين: مفيش apiKey في ريكوست AVL، ومفيش توكن AVL في ريكوستات النظام التاني",
-      "وبيتأكد إن قاموس البحث بتاع AVL ما اتبهدلش، والأرقام والمسارات مفيش بينها تصادم"
+      "مراجعة QA نهائية لقت باگ خطير: كل مسارات التنفيذ الحي مبنية على AVL (توكن في الرابط وبودي POST). لو الموظف على النظام التاني وضغط «جرّب دلوقتي» كان هيتبعت شكل غلط ويفشل بطريقة غامضة",
+      "التنفيذ الحي بقى مقفول على النظام التاني بوضوح — الزرار بيختفي والسبب مكتوب، بدل فشل من غير تفسير",
+      "الاتصال بالنظام التاني بقى شغّال فعلًا: نداء GET بيجيب الـ apiKey ويحطه في الروابط أوتوماتيك — قبل كده كان الكود بيستخدم مفتاح محدش بيملاه"
     ],
     "en": [
-      "A permanent data-integrity check was added: each of AVL's 529 requests is compared against the original field by field on every build — any change at all stops the release",
-      "The check also confirms there is no leakage in either direction: no apiKey inside an AVL request, and no AVL token inside a second-system one",
-      "It further confirms AVL's search vocabulary was not disturbed, and that ids and paths do not collide between the systems"
+      "A final QA pass found a serious bug: every live-execution path is built on AVL (token in the URL, POST body). A support agent on the second system pressing Run it now would have sent the wrong shape and failed obscurely",
+      "Live execution is now clearly gated for the second system — the button hides and the reason is written out, instead of an unexplained failure",
+      "Connecting to the second system now genuinely works: a GET call fetches the apiKey and fills it into the URLs automatically — previously the code referenced a key nothing ever set"
     ]
   }
 }
