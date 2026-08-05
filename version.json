@@ -1,16 +1,16 @@
 {
-  "version": "6.4",
+  "version": "6.5",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الشريط العلوي بقى سطر واحد دايمًا — عربي وإنجليزي، قبل الاتصال وبعده، وعلى كل مقاسات الشاشة",
-      "زرار الوضع الليلي وزرار اللغة اتنقلوا لصف العنوان — دول أدوات عامة مش خاصة بالاتصال، ونقلهم فضّى مساحة للشريط",
-      "بعد الاتصال خانات اسم المستخدم وكلمة السر بتختفي عشان تفضّي مكان للحالة والجهاز — «قطع» بترجّعهم"
+      "خانة «عميل التذكرة» بقت «رقم التاسك» — ده اللي الفريق بيشتغل بيه فعلًا، وبيروح مع التصعيد أوتوماتيك",
+      "تحذير «حساب مختلف عن عميل التذكرة» اتشال: مقارنة رقم تاسك بإيميل الحساب كانت هتدّي تحذير كاذب على طول",
+      "الوضع الليلي: الملاحظة التحذيرية كان لونها مثبّت غامق فبقت شبه غير مقروءة على الخلفية الغامقة — التباين اترفع من 1.43 لـ 9.15"
     ],
     "en": [
-      "The top bar is now a single line at all times — Arabic and English, before and after connecting, at every screen size",
-      "The dark-mode and language buttons moved up to the title row — they are app-wide controls, not connection controls, and moving them freed space",
-      "Once connected, the username and password boxes disappear to make room for the status and the device — Disconnect brings them back"
+      "The ticket customer box is now the task number — that is what the team actually works with, and it travels with escalations automatically",
+      "The different-account warning was removed: comparing a task number against an account email would have warned falsely every time",
+      "Dark mode: the warning note had a hardcoded dark colour that made it almost unreadable on a dark background — contrast went from 1.43 to 9.15"
     ]
   }
 }
