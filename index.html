@@ -64,6 +64,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .brand b{font-size:17px; font-weight:700}
 .brand span{font-size:11px; color:#8FA6B4; font-family:var(--mono); letter-spacing:.14em; text-transform:uppercase}
 .conn{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding-bottom:12px}
+.conn .grp-sep{width:1px; align-self:stretch; min-height:24px; background:#33475C; opacity:.6; margin:0 3px}
 .pill{font-size:12px; padding:4px 11px; border-radius:99px; border:1px solid #33475C; background:#1C2A36; color:#8FA6B4; white-space:nowrap}
 .pill.on{background:#0E3F35; border-color:#1F6B45; color:#7FD4B0}
 .pill.bad{background:#4A2412; border-color:#8A4A1C; color:#F0B48A}
@@ -73,6 +74,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
   padding:6px 9px; font-size:13px; font-family:var(--mono); direction:ltr; text-align:left;
 }
 .conn input{width:190px}
+.conn select{min-width:118px}
 /* خانات الاسم والعميل بتتكتب عربي في الوضع العربي وإنجليزي في الإنجليزي —
    الاتجاه الثابت كان بيرمي النقطة قبل الإيميل ويقصّ النص الإنجليزي. */
 .conn input.bidi{direction:rtl; text-align:right; font-family:var(--ar)}
@@ -144,7 +146,7 @@ body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)
 .res .rn{font-size:13.5px; color:var(--ink); font-weight:600; margin-top:2px}
 .res .rg{font-size:11.5px; color:var(--muted)}
 
-.m{font-family:var(--mono); font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:2px; letter-spacing:.06em}
+.m{font-family:var(--mono); font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:var(--r); letter-spacing:.06em}
 .m-POST{background:var(--signal-soft); color:var(--signal-deep)}
 .m-GET{background:var(--ok-soft); color:var(--ok)}
 .m-DELETE{background:var(--alert-soft); color:var(--alert)}
@@ -159,7 +161,7 @@ body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)
 .p-head .crumb{font-size:12px; color:var(--muted)}
 .why{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; align-items:center}
 .why b{font-size:11px; color:var(--muted); font-weight:600}
-.why span{background:var(--panel-2); border:1px solid var(--line-soft); border-radius:2px; padding:1px 7px; font-size:11.5px; color:var(--ink-2)}
+.why span{background:var(--panel-2); border:1px solid var(--line-soft); border-radius:var(--r); padding:1px 7px; font-size:11.5px; color:var(--ink-2)}
 
 .sec{padding:14px 18px; border-top:1px solid var(--line-soft)}
 .sec > h3{margin:0 0 8px; font-size:12px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
@@ -195,8 +197,8 @@ body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)
 .btn.ghost:hover{border-color:var(--ink); background:var(--panel-2)}
 .btn.sig{background:var(--signal); border-color:var(--signal)}
 .btn.sig:hover{background:var(--signal-deep)}
-.btn.warn{background:transparent; color:var(--alert); border-color:#E3C3A6}
-.btn.warn:hover{background:var(--alert-soft)}
+.btn.warn{background:transparent; color:var(--alert); border-color:var(--line)}
+.btn.warn:hover{background:var(--alert-soft); border-color:#E3C3A6}
 .btn[disabled]{opacity:.45; cursor:not-allowed}
 
 table.kv{width:100%; border-collapse:collapse; font-size:13px}
@@ -216,8 +218,8 @@ table.kv td:first-child{font-family:var(--mono); color:var(--signal-deep); width
 .card h3{margin:0 0 8px; font-size:15px}
 .card p{margin:0 0 8px; font-size:13.5px; color:var(--ink-2)}
 .card .pre{font-size:12px; max-height:none}
-.tagv{display:inline-block; background:var(--ok-soft); color:var(--ok); font-size:11px; padding:1px 7px; border-radius:2px; font-weight:600}
-.tagu{display:inline-block; background:var(--alert-soft); color:var(--alert); font-size:11px; padding:1px 7px; border-radius:2px; font-weight:600}
+.tagv{display:inline-block; background:var(--ok-soft); color:var(--ok); font-size:11px; padding:1px 7px; border-radius:var(--r); font-weight:600}
+.tagu{display:inline-block; background:var(--alert-soft); color:var(--alert); font-size:11px; padding:1px 7px; border-radius:var(--r); font-weight:600}
 
 details.grp{background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--r); margin-bottom:6px}
 details.grp > summary{padding:11px 14px; cursor:pointer; font-weight:600; display:flex; justify-content:space-between; align-items:center}
@@ -322,6 +324,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <input id="sesU" class="bidi" data-arph="اسم المستخدم" data-enph="Username" placeholder="اسم المستخدم" autocomplete="off" style="width:130px">
       <input id="sesP" class="bidi" type="password" data-arph="كلمة السر" data-enph="Password" placeholder="كلمة السر" autocomplete="off" style="width:120px">
       <button class="btn sig" id="sesGo" style="padding:6px 14px; font-size:13px" data-ar="اتصال" data-en="Connect">اتصال</button>
+      <span class="grp-sep" aria-hidden="true"></span>
       <button class="btn ghost" id="acctSave" style="padding:6px 10px; font-size:13px" data-ar="احفظ الحساب" data-en="Save account">احفظ الحساب</button>
       <button class="btn ghost" id="acctDel" hidden style="padding:6px 10px; font-size:13px" data-ar="امسح" data-en="Delete">امسح</button>
       <span id="sesState" class="pill" data-ar="غير متصل" data-en="Not connected">غير متصل</span>
@@ -679,6 +682,11 @@ function setLang(l){
   // النصوص الثابتة
   document.querySelectorAll('[data-ar]').forEach(el=>{ el.textContent = l==='en' ? el.dataset.en : el.dataset.ar; });
   document.querySelectorAll('[data-arph]').forEach(el=>{ el.placeholder = l==='en' ? el.dataset.enph : el.dataset.arph; });
+  // القوائم المنسدلة: الأوبشن جواها مبيتحدّثش بـ textContent، فبنعيد بناءها هنا
+  if(typeof acctPaint === 'function') acctPaint();
+  document.querySelectorAll('option[data-ar]').forEach(op=>{
+    op.textContent = l==='en' ? op.dataset.en : op.dataset.ar;
+  });
   // إعادة رسم كل حاجة
   const view = document.querySelector('.tab[aria-selected="true"]');
   paintUpdBar();
@@ -696,9 +704,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.2",
+  "version": "6.3",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.3",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "مراجعة UX/UI شاملة بالصور الفعلية للشاشات في العربي والإنجليزي والوضع الليلي — مش قراءة كود بس",
+          "باگ اتلقط واتصلح: قائمة الحسابات المحفوظة وخيار «أخرى» كانوا بيفضلوا عربي في الوضع الإنجليزي — القوائم المنسدلة مبتتحدّثش زي باقي النصوص، دلوقتي بتتترجم مع تغيير اللغة",
+          "الشريط العلوي اتنضّف: فاصل بصري بين مجموعة الدخول ومجموعة الحساب، وعرض أدنى للقوائم عشان النص الإنجليزي ما يتقصّش",
+          "توحيد الحواف: كل الشارات والوسوم كانت حوافها مختلفة (٢px بينما الباقي ٣px) — اتوحّدوا على نفس المقاس",
+          "زر التصعيد كان برتقالي قوي كإجراء ثانوي — اتهدّى لحافة عادية مع إبقاء اللون في الهوفر، عشان الهرمية تبقى واضحة",
+          "حارس جديد بيمنع رجوع باگ القوائم: أي قائمة منسدلة مش بتتترجم مع اللغة بتوقّف البناء"
+        ],
+        "en": [
+          "A full UX/UI review from real screenshots of the screens in Arabic, English and dark mode — not just reading the code",
+          "A bug was caught and fixed: the saved-accounts list and the Other option stayed Arabic in English mode — dropdown options do not update like other text, and they now translate on language switch",
+          "The top bar was tidied: a visual separator between the sign-in group and the account group, and a minimum width on the dropdowns so English text is not clipped",
+          "Radii unified: every badge and tag had a different corner (2px while everything else was 3px) — they now match",
+          "The escalate button was a strong orange for a secondary action — softened to a normal border with the colour kept on hover, so the hierarchy reads clearly",
+          "A new guard prevents the dropdown bug from returning: any select that does not translate with the language stops the build"
+        ]
+      }
+    },
     {
       "v": "6.2",
       "date": "2026-08-05",
@@ -6574,7 +6604,7 @@ function userCard(u){
   }
   sensorsOf(u).slice(0,6).forEach(s2=>add(String(s2.name), String(s2.value)));
 
-  const badge = (txt, tone) => `<span style="display:inline-block; padding:2px 9px; border-radius:2px;
+  const badge = (txt, tone) => `<span style="display:inline-block; padding:2px 9px; border-radius:3px;
       font-size:11.5px; font-weight:600; background:${tone.bg}; color:${tone.fg}">${esc(txt)}</span>`;
   const OK={bg:'var(--ok-soft)',fg:'var(--ok)'}, BAD={bg:'var(--alert-soft)',fg:'var(--alert)'},
         MID={bg:'var(--signal-soft)',fg:'var(--signal-deep)'}, GREY={bg:'var(--panel-2)',fg:'var(--muted)'};

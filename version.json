@@ -1,16 +1,16 @@
 {
-  "version": "6.2",
+  "version": "6.3",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "مراجعة ختامية شاملة: الكود والنصين والفيتشرز — بعدسة مهاجم وعدسة مترجم وعدسة مستلم جديد",
-      "منفذ حقن اتقفل: اسم الحساس جاي من رد السيرفر وكان بيتحط في كارت العربية من غير تهريب — أي رد فيه وسوم كان هيتنفذ جوه الصفحة. اتهرّب صح، والتهريب المزدوج اللي كان بيبوّظ شكل القيم اتشال",
-      "أربع نصوص في صفحة الريكوست كانوا عربي ثابت في الوضع الإنجليزي — ملاحظة التوكن، تنبيه الفولدر المكرر بجزأيه، ووسم المعطّل"
+      "مراجعة UX/UI شاملة بالصور الفعلية للشاشات في العربي والإنجليزي والوضع الليلي — مش قراءة كود بس",
+      "باگ اتلقط واتصلح: قائمة الحسابات المحفوظة وخيار «أخرى» كانوا بيفضلوا عربي في الوضع الإنجليزي — القوائم المنسدلة مبتتحدّثش زي باقي النصوص، دلوقتي بتتترجم مع تغيير اللغة",
+      "الشريط العلوي اتنضّف: فاصل بصري بين مجموعة الدخول ومجموعة الحساب، وعرض أدنى للقوائم عشان النص الإنجليزي ما يتقصّش"
     ],
     "en": [
-      "A final full review of the code, both languages and every feature — through an attacker's lens, a translator's lens and a fresh reader's lens",
-      "An injection path is closed: sensor names come from the server response and were placed into the vehicle card unescaped, so a response carrying markup would have executed in the page. They are escaped once now, and the double-escaping that garbled values is gone",
-      "Four strings on the request page were fixed Arabic in English mode — the token note, both halves of the duplicated-folder warning, and the disabled tag"
+      "A full UX/UI review from real screenshots of the screens in Arabic, English and dark mode — not just reading the code",
+      "A bug was caught and fixed: the saved-accounts list and the Other option stayed Arabic in English mode — dropdown options do not update like other text, and they now translate on language switch",
+      "The top bar was tidied: a visual separator between the sign-in group and the account group, and a minimum width on the dropdowns so English text is not clipped"
     ]
   }
 }
