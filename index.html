@@ -728,9 +728,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.7",
+  "version": "6.8",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.8",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "فحص سلامة بيانات دائم اتضاف: كل ريكوست من الـ529 بتوع AVL بيتقارن بالأصل حقل بحقل مع كل بناء — أي تغيير مهما كان صغير بيوقّف النشر",
+          "الفحص بيتأكد كمان إن مفيش تسرّب في الاتجاهين: مفيش apiKey في ريكوست AVL، ومفيش توكن AVL في ريكوستات النظام التاني",
+          "وبيتأكد إن قاموس البحث بتاع AVL ما اتبهدلش، والأرقام والمسارات مفيش بينها تصادم",
+          "النتيجة على النسخة دي: 529 ريكوست AVL مطابقين للأصل حرفيًا، و37 ريكوست في النظام التاني كلهم من التوثيق الرسمي — صفر مفاتيح مخترعة"
+        ],
+        "en": [
+          "A permanent data-integrity check was added: each of AVL's 529 requests is compared against the original field by field on every build — any change at all stops the release",
+          "The check also confirms there is no leakage in either direction: no apiKey inside an AVL request, and no AVL token inside a second-system one",
+          "It further confirms AVL's search vocabulary was not disturbed, and that ids and paths do not collide between the systems",
+          "Result on this release: all 529 AVL requests are byte-identical to the original, and all 37 second-system requests come from the official documentation — zero invented keys"
+        ]
+      }
+    },
     {
       "v": "6.7",
       "date": "2026-08-05",

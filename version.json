@@ -1,16 +1,16 @@
 {
-  "version": "6.7",
+  "version": "6.8",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "لينك أفاقي إن اتضاف لقائمة Base URL — كان ناقص في النسخة اللي فاتت وده كان بيخلي النظام التاني صعب الوصول",
-      "اختيار البيئة بقى يبدّل النظام كله: تختار لينك أفاقي إن، الأداة توريك ريكوستاته هو بس، وترجع لـAVL توريك ريكوستات AVL",
-      "وسم جنب البيئة بيقولك انت في أنهي نظام وكام ريكوست فيه، عشان تبقى عارف من غير ما تسأل"
+      "فحص سلامة بيانات دائم اتضاف: كل ريكوست من الـ529 بتوع AVL بيتقارن بالأصل حقل بحقل مع كل بناء — أي تغيير مهما كان صغير بيوقّف النشر",
+      "الفحص بيتأكد كمان إن مفيش تسرّب في الاتجاهين: مفيش apiKey في ريكوست AVL، ومفيش توكن AVL في ريكوستات النظام التاني",
+      "وبيتأكد إن قاموس البحث بتاع AVL ما اتبهدلش، والأرقام والمسارات مفيش بينها تصادم"
     ],
     "en": [
-      "The Afaqy IN link was added to the Base URL list — it was missing in the previous release, which made the second system hard to reach",
-      "Choosing the environment now switches the whole system: pick the Afaqy IN link and the tool shows only its requests, switch back to AVL and you get AVL's",
-      "A badge beside the environment tells you which system you are in and how many requests it holds, so you know without asking"
+      "A permanent data-integrity check was added: each of AVL's 529 requests is compared against the original field by field on every build — any change at all stops the release",
+      "The check also confirms there is no leakage in either direction: no apiKey inside an AVL request, and no AVL token inside a second-system one",
+      "It further confirms AVL's search vocabulary was not disturbed, and that ids and paths do not collide between the systems"
     ]
   }
 }
