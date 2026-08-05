@@ -728,9 +728,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.9",
+  "version": "6.10",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.10",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "الحسابات المحفوظة بقت مربوطة ببيئتها: حساب متحفظ على البيتا مبقاش يظهر لما تختار API تاني — قبل كده كانوا كلهم بيظهروا على كل البيئات، وتختار واحد ويفشل الدخول من غير سبب واضح",
+          "لو البيئة مالهاش حسابات محفوظة، اللستة بتقول كده صراحة بدل ما تبان فاضية من غير تفسير",
+          "المسح بيشيل الحساب الصح بعد الفلترة — الأرقام الداخلية مربوطة باللستة الكاملة مش المعروضة",
+          "تغيير البيئة بقى يحدّث الشاشة الوسطى كمان وانت في وضع التصفح — كانت بتفضل بنص النظام القديم وعدد ريكوستاته"
+        ],
+        "en": [
+          "Saved accounts are now tied to their environment: an account saved on beta no longer appears when you pick a different API — before, they all showed everywhere, and picking one would fail to sign in with no clear reason",
+          "When an environment has no saved accounts, the list says so plainly instead of appearing empty without explanation",
+          "Deleting removes the right account after filtering — the internal indices stay bound to the full list rather than the displayed one",
+          "Switching environments now refreshes the middle panel while browsing too — it used to keep the previous system's text and request count"
+        ]
+      }
+    },
     {
       "v": "6.9",
       "date": "2026-08-05",
@@ -7429,11 +7447,12 @@ function onBaseChanged(){
   const sys = curSys();
   if(cur && sysOf(cur) !== sys){ cur = null; resetEmpty(); }
   else if(cur) renderDetail(cur, []);
-  if(MODE === 'mod') renderBrowse(lastQ || '');
+  if(MODE === 'mod'){ renderBrowse(lastQ || ''); if(!cur) resetEmpty(); }
   else if(lastQ) renderResults(search(lastQ));
   else resetEmpty();
   renderRecent();
   if(!$('v-faq').hidden) renderFaq();
+  acctPaint();          // حسابات البيئة الجديدة
   sysPaint();
 }
 /* عدّاد صغير جنب البيئة بيقول انت في أنهي نظام وكام ريكوست فيه */
@@ -7478,12 +7497,23 @@ function acctStore(list){
   try{ localStorage.setItem(ACCT_KEY, JSON.stringify(list.slice(0, 40))); return true; }
   catch(_){ return false; }
 }
+/* الحساب متسجّل ببيئته من ساعة ما اتحفظ. اللستة كانت بتعرض الكل مهما كانت
+   البيئة المختارة — يعني حساب بيتا يظهر وانت على نظام تاني خالص، وتختاره
+   ويفشل الدخول من غير سبب واضح. بنعرض حسابات البيئة الحالية بس.
+   الرقم في الأوبشن بيفضل رقم الحساب في اللستة الكاملة، عشان المسح
+   والاختيار يفضلوا مظبوطين بعد الفلترة. */
+function acctList(){
+  const b = baseUrl();
+  return acctLoad().map((a, i) => ({a, i})).filter(x => String(x.a.base || '') === b);
+}
 function acctPaint(){
   const sel = $('acctSel'); if(!sel) return;
-  const list = acctLoad(), keep = sel.value;
-  sel.innerHTML = `<option value="">${t('— حسابات محفوظة —','— saved accounts —')}</option>`
-    + list.map((a,i)=>`<option value="${i}">${esc(a.u)}${a.pw ? '' : ' ' + t('(من غير باسورد)','(no password)')}</option>`).join('');
-  sel.value = keep && Number(keep) < list.length ? keep : '';
+  const rows = acctList(), keep = sel.value;
+  sel.innerHTML = `<option value="">${rows.length
+      ? t('— حسابات محفوظة —','— saved accounts —')
+      : t('— مفيش حساب محفوظ للبيئة دي —','— no saved account for this environment —')}</option>`
+    + rows.map(x=>`<option value="${x.i}">${esc(x.a.u)}${x.a.pw ? '' : ' ' + t('(من غير باسورد)','(no password)')}</option>`).join('');
+  sel.value = rows.some(x => String(x.i) === keep) ? keep : '';
   $('acctDel').hidden = sel.value === '';
 }
 function acctPick(){

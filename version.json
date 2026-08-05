@@ -1,16 +1,16 @@
 {
-  "version": "6.9",
+  "version": "6.10",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "مراجعة QA نهائية لقت باگ خطير: كل مسارات التنفيذ الحي مبنية على AVL (توكن في الرابط وبودي POST). لو الموظف على النظام التاني وضغط «جرّب دلوقتي» كان هيتبعت شكل غلط ويفشل بطريقة غامضة",
-      "التنفيذ الحي بقى مقفول على النظام التاني بوضوح — الزرار بيختفي والسبب مكتوب، بدل فشل من غير تفسير",
-      "الاتصال بالنظام التاني بقى شغّال فعلًا: نداء GET بيجيب الـ apiKey ويحطه في الروابط أوتوماتيك — قبل كده كان الكود بيستخدم مفتاح محدش بيملاه"
+      "الحسابات المحفوظة بقت مربوطة ببيئتها: حساب متحفظ على البيتا مبقاش يظهر لما تختار API تاني — قبل كده كانوا كلهم بيظهروا على كل البيئات، وتختار واحد ويفشل الدخول من غير سبب واضح",
+      "لو البيئة مالهاش حسابات محفوظة، اللستة بتقول كده صراحة بدل ما تبان فاضية من غير تفسير",
+      "المسح بيشيل الحساب الصح بعد الفلترة — الأرقام الداخلية مربوطة باللستة الكاملة مش المعروضة"
     ],
     "en": [
-      "A final QA pass found a serious bug: every live-execution path is built on AVL (token in the URL, POST body). A support agent on the second system pressing Run it now would have sent the wrong shape and failed obscurely",
-      "Live execution is now clearly gated for the second system — the button hides and the reason is written out, instead of an unexplained failure",
-      "Connecting to the second system now genuinely works: a GET call fetches the apiKey and fills it into the URLs automatically — previously the code referenced a key nothing ever set"
+      "Saved accounts are now tied to their environment: an account saved on beta no longer appears when you pick a different API — before, they all showed everywhere, and picking one would fail to sign in with no clear reason",
+      "When an environment has no saved accounts, the list says so plainly instead of appearing empty without explanation",
+      "Deleting removes the right account after filtering — the internal indices stay bound to the full list rather than the displayed one"
     ]
   }
 }
