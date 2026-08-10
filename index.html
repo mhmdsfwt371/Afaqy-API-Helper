@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.23",
+  "version": "6.24",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.24",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "إصلاح حكم مهم: لما السيرفر بيقبل رقم التقرير ويرجّع رد فاضي، ده مش فشل — ده معناه إن الرقم والمسار صح والتقرير نفسه مفيهوش بيانات. الأداة كانت بتحسبها فشل وتقول «ولا رقم اشتغل» وتضيّع الإجابة",
+          "دلوقتي بتقول: «الرقم مظبوط والمسار مظبوط — التقرير فاضي»، وتشرح إن التقرير تعريف موجود لسه ما اتشغّلش على فترة",
+          "خريطة دورة حياة التقرير اتضافت على ريكوستات التقارير: إنشاء التقرير، هات رقمه، اقرا داتاه، صدّره — والريكوست اللي انت فيه متعلّم",
+          "أهم سطر فيها: قراءة الداتا مش بتعمل تقرير جديد. لو انت عايز تعمل تقرير، الخطوة الأولى ريكوست تاني — وفيه زرار بيفتحه",
+          "رسالة الفشل الكامل بقت أدق: «ولا رقم اترد عليه» بدل «ولا رقم اشتغل» — عشان الفرق بين الرفض والقبول الفاضي يبان"
+        ],
+        "en": [
+          "An important verdict fix: when the server accepts a report id and returns an empty response, that is not a failure — it means the id and the path are right and the report itself holds no data. The tool counted it as failure and said no id worked, discarding the real answer",
+          "It now says the id and the path are right and the report is empty, and explains that the report exists as a definition that has not been run over a period",
+          "A report lifecycle map was added to report requests: create the report, get its id, read its data, export it — with the request you are on marked",
+          "Its most important line: reading the data does not create a report. If you want to create one, that is a different first step — with a button that opens it",
+          "The total-failure message is now more precise: none of these ids were accepted, rather than none worked, so rejection reads differently from an accepted empty result"
+        ]
+      }
+    },
     {
       "v": "6.23",
       "date": "2026-08-05",
@@ -3098,6 +3118,7 @@ function _renderDetail(e, why){
 
     ${(e.h&&e.h.length) ? `<div class="sec"><h3>${t('هيدرز خاصة','Special headers')}</h3><table class="kv">${e.h.map(h=>`<tr><td>${esc(h.k)}</td><td>${esc(h.v)}</td></tr>`).join('')}</table></div>` : ''}
 
+    ${isReportEp(e) ? reportLifecycle(e) : ''}
     ${scopeBox(e)}
 
     ${b ? (()=>{ const pr=prepBody(e), u=SESSION.unit;
@@ -3199,6 +3220,11 @@ function _renderDetail(e, why){
   const liveOff = sysOf(e) === 'in';
   if($('tryIt'))  $('tryIt').hidden  = liveOff;
   if($('tryFix')) $('tryFix').hidden = liveOff;
+  /* أزرار دورة الحياة */
+  document.querySelectorAll('[data-goep]').forEach(b=>b.onclick=()=>{
+    const ep2 = EPS.find(x=>String(x.i)===b.dataset.goep);
+    if(ep2){ showView('search'); select(ep2, []); pushRecent(ep2); }
+  });
   wireScope(e);
   /* ريسيت: الجلسة بتفضل شايلة الرقم والنطاق من محاولة سابقة، والموظف
      مش لاقي طريقة يبدأ من نضيف. */
@@ -5343,6 +5369,36 @@ async function resolveImeis(text){
   return {uids, names, missing};
 }
 
+/* دورة حياة التقرير: أكتر لبس بيحصل هنا إن الموظف يفتح ريكوست القراءة
+   وهو عايز يعمل تقرير. الاتنين في نفس العائلة والأسماء متشابهة. */
+function reportLifecycle(cur){
+  const find = p => EPS.find(x => x.p === p && sysOf(x) === 'avl');
+  const steps = [
+    {p:'/user_reports/add',          k:'add',  ttl:{ar:'١) اعمل التقرير', en:'1) Create the report'},
+     d:{ar:'بتعرّف الأعمدة والفلاتر — ده اللي بينشئ التقرير أصلًا.', en:'Defines the columns and filters — this is what creates the report.'}},
+    {p:'/user_reports/lists',        k:'list', ttl:{ar:'٢) هات رقمه', en:'2) Get its id'},
+     d:{ar:'التقارير الموجودة في الحساب وأرقامها.', en:'The reports in the account and their ids.'}},
+    {p:'/user_reports/data-summary', k:'data', ttl:{ar:'٣) اقرا داتاه', en:'3) Read its data'},
+     d:{ar:'بترجّع صفوف التقرير — مش بتعمل تقرير جديد.', en:'Returns the report rows — it does not create a report.'}},
+    {p:'/user_reports/export',       k:'exp',  ttl:{ar:'٤) صدّره', en:'4) Export it'},
+     d:{ar:'اختياري — تصدير أو إرسال بالإيميل.', en:'Optional — export or send by email.'}}
+  ];
+  return `<div class="sec">
+    <h3>${t('دورة حياة التقرير','The report lifecycle')}</h3>
+    <div class="note" style="margin-bottom:8px">${t(
+      'الريكوست اللي انت فيه دلوقتي متعلّم بالأخضر. لو انت عايز <b>تعمل</b> تقرير، ده الخطوة الأولى مش دي.',
+      'The request you are on is marked. If you want to <b>create</b> a report, that is the first step, not this one.')}</div>
+    <table class="kv">${steps.map(st=>{
+      const ep = find(st.p), on = ep && cur && ep.i === cur.i;
+      return `<tr>
+        <td style="width:34%">${on ? '<b style="color:var(--signal-deep)">' : ''}${esc(dual(st.ttl))}${on ? ' ←</b>' : ''}</td>
+        <td><code style="font-size:11.5px">${esc(st.p)}</code><br>
+            <span style="font-size:12px; color:var(--ink-2)">${esc(dual(st.d))}</span>
+            ${ep && !on ? ` <button class="btn ghost" style="padding:2px 8px; font-size:11.5px" data-goep="${ep.i}">${t('افتحه','Open')}</button>` : ''}</td>
+      </tr>`;}).join('')}</table>
+  </div>`;
+}
+
 function scopeBox(e){
   if(!isReportEp(e)) return '';
   const on = RSCOPE.mode === 'imeis';
@@ -5515,6 +5571,31 @@ async function reportProbe(e){
       <td>${x.ok && x.n ? `<b style="color:var(--ok)">${t(`${x.n} سجل`,`${x.n} records`)}</b>`
             : (x.ok ? t('رد فاضي','empty') : `<span style="color:var(--alert)">${esc(x.why)}</span>`)}</td>
     </tr>`).join('')}</table>`;
+  /* «رد فاضي» معناه إن الرقم اتقبل والمسار صح — التقرير موجود بس مفيهوش
+     بيانات. ده مختلف تمامًا عن not_found، وحسابه فشل كان بيضيّع الإجابة. */
+  const accepted = rows.filter(x => x.ok);
+  const addEp = EPS.find(x => x.p === '/user_reports/add' && sysOf(x) === 'avl');
+  if(!win && accepted.length){
+    const a = accepted[0];
+    out.innerHTML = `<div class="note sig" style="margin-top:12px">
+      <b>${t('الرقم مظبوط والمسار مظبوط — التقرير فاضي.','The id and the path are right — the report is empty.')}</b><br>
+      ${t('التقرير','Report')} <b>${esc(a.c.name||a.c.id)}</b> ${t('من','from')} <code>${esc(a.c.src)}</code>
+      ${t('اترد عليه بنجاح من','answered successfully on')} <code>${esc(a.p)}</code> ${t('بس من غير سجلات.','but with no records.')}
+      <div style="margin-top:8px"><b>${t('يعني إيه:','What that means:')}</b>
+        ${t('التقرير ده تعريف موجود، ولسه ما اتشغّلش على فترة — أو اتشغّل على فترة مفيهاش حركة للعربيات اللي حددتها.',
+            'This report exists as a definition and has not been run over a period yet — or it was run over a period with no activity for the vehicles you picked.')}</div>
+      <div style="margin-top:8px"><b>${t('الخطوة الجاية:','Next step:')}</b>
+        ${t('لو انت عايز تعمل تقرير جديد، ده مسار تاني خالص: إنشاء التقرير الأول، وبعدين تقرا داتاه من هنا.',
+            'If you want to create a new report, that is a different path: create the report first, then read its data here.')}</div>
+      ${addEp ? `<div class="row" style="margin-top:10px">
+        <button class="btn ghost" data-goep="${addEp.i}">${t('افتح ريكوست إنشاء تقرير','Open the create-report request')}</button></div>` : ''}
+    </div>${tbl}`;
+    out.querySelectorAll('[data-goep]').forEach(b=>b.onclick=()=>{
+      const ep2 = EPS.find(x=>String(x.i)===b.dataset.goep);
+      if(ep2){ showView('search'); select(ep2, []); pushRecent(ep2); }
+    });
+    return;
+  }
   if(win){
     out.innerHTML = `<div class="note sig" style="margin-top:12px">
       <b>${t('لقيناها.','Found it.')}</b> ${t('التقرير','Report')} <b>${esc(win.c.name||win.c.id)}</b>
@@ -5525,7 +5606,7 @@ async function reportProbe(e){
     if(b) b.onclick = ()=>{ SESSION.deps.userReport = {id:win.c.id, name:win.c.name}; renderDetail(e, []); toast(t('اتظبط','Applied')); };
   } else {
     out.innerHTML = `<div class="note warn" style="margin-top:12px">
-      <b>${t('ولا رقم من دول اشتغل.','None of these ids worked.')}</b><br>
+      <b>${t('ولا رقم من دول اترد عليه.','None of these ids were accepted.')}</b><br>
       ${t('يعني المشكلة مش في الرقم: يا إما الريكوست ده بياخد رقم من مصدر تالت، يا إما الحساب مالوش صلاحية على التقارير. صعّدها بالجدول ده — فيه كل اللي اتجرب.',
           'So the id is not the problem: either this request takes an id from a third source, or the account has no access to reports. Escalate with this table — it shows everything that was tried.')}
       ${skipped ? `<br><small>${t(`جرّبنا أقرب ${TRY} من ${cands.length} تقرير — الترتيب على قرب الاسم من Summary.`,

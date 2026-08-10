@@ -1,16 +1,16 @@
 {
-  "version": "6.23",
+  "version": "6.24",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "إصلاح رقم غلط خطير: اللوحة كانت بتقول كل الأجهزة أوفلاين وما رسلتش ولا مرة، والمنصة بتقول مئات منها متحركة",
-      "السبب: قارئ آخر إشارة كان بيفهم شكل واحد بس من الرد، وأي شكل تاني بيتقرا كأنه مفيش وقت — والأداة تفسّره «الجهاز ساكت»",
-      "دلوقتي بيفهم كل الأشكال: نص مباشر، أو جوه أوبجكت بأي مفتاح معروف، أو توقيت بالثواني أو الملّي ثانية"
+      "إصلاح حكم مهم: لما السيرفر بيقبل رقم التقرير ويرجّع رد فاضي، ده مش فشل — ده معناه إن الرقم والمسار صح والتقرير نفسه مفيهوش بيانات. الأداة كانت بتحسبها فشل وتقول «ولا رقم اشتغل» وتضيّع الإجابة",
+      "دلوقتي بتقول: «الرقم مظبوط والمسار مظبوط — التقرير فاضي»، وتشرح إن التقرير تعريف موجود لسه ما اتشغّلش على فترة",
+      "خريطة دورة حياة التقرير اتضافت على ريكوستات التقارير: إنشاء التقرير، هات رقمه، اقرا داتاه، صدّره — والريكوست اللي انت فيه متعلّم"
     ],
     "en": [
-      "A dangerous wrong number fixed: the dashboard reported every device offline and never reporting, while the platform showed hundreds of them moving",
-      "The cause: the last-signal reader understood only one response shape, and any other shape read as no time at all — which the tool then presented as a silent device",
-      "It now understands every shape: a plain string, an object under any known key, or a timestamp in seconds or milliseconds"
+      "An important verdict fix: when the server accepts a report id and returns an empty response, that is not a failure — it means the id and the path are right and the report itself holds no data. The tool counted it as failure and said no id worked, discarding the real answer",
+      "It now says the id and the path are right and the report is empty, and explains that the report exists as a definition that has not been run over a period",
+      "A report lifecycle map was added to report requests: create the report, get its id, read its data, export it — with the request you are on marked"
     ]
   }
 }
