@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.15",
+  "version": "6.16",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.16",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "إصلاح: بودي لستة التقارير كان مكتوب بشكل مش موجود في الكولكشن أصلًا، فالسيرفر كان بيرفضه والنافذة تقول «ما قدرناش نجيب اللستة». الكولكشن فيه شكلين حقيقيين — الأداة بقت تبدأ بالبسيط وتجرّب التاني لو اترفض",
+          "لو كل الأشكال فشلت، بتظهر رسالة السيرفر نفسها مش رسالة عامة — عشان تعرف تصعّدها بمعلومة مفيدة",
+          "خانة الـ IMEIs بقت جوه نافذة «الريكوست محتاج حاجة قبله»: تحدد التقرير والعربيات من نفس المكان",
+          "سيبها فاضية = التقرير على كل العربيات. تلزق IMEIs = الأداة تجيب الـ IDs وتحطهم، وتقولك اللي مش موجود منهم",
+          "الاختبار بقى يتأكد إن كل شكل بودي مستخدم موجود فعلًا في الكولكشن — الفحص القديم كان بيفرض الشكل الغلط اللي كتبته أنا"
+        ],
+        "en": [
+          "Fix: the report-list body was written in a shape that does not exist in the collection at all, so the server rejected it and the modal said it could not fetch the list. The collection holds two real shapes — the tool now starts with the simple one and tries the other if it is refused",
+          "If every shape fails, the server's own message is shown rather than a generic one, so an escalation carries something useful",
+          "The IMEI box now lives inside the dependency modal: pick the report and the vehicles from the same place",
+          "Leave it empty and the report covers all vehicles. Paste IMEIs and the tool fetches their ids, inserts them, and names any that are missing",
+          "The test now verifies every body shape in use actually exists in the collection — the previous check enforced the wrong shape I had written"
+        ]
+      }
+    },
     {
       "v": "6.15",
       "date": "2026-08-05",
@@ -4507,10 +4527,20 @@ const DEP_CACHE = {};
 
 async function fetchDepList(r){
   if(DEP_CACHE[r.key]) return DEP_CACHE[r.key];
-  const res = await apiFetch(r.list.path, r.list.body, {method:'POST'});
-  if(!res.ok) throw new Error(diagnose(res.code, res.txt));
-  DEP_CACHE[r.key] = res.json;
-  return res.json;
+  /* بعض اللستات ليها أكتر من شكل بودي في الكولكشن، والسيرفر بيرفض الغلط.
+     بنجرّب بالترتيب وناخد أول شكل بيرجّع سجلات فعلًا — ولو كلهم فشلوا
+     بنطلّع رسالة السيرفر نفسها مش رسالة عامة. */
+  const shapes = [r.list.body].concat(r.list.alts || []);
+  let lastErr = '';
+  for(const body of shapes){
+    let res;
+    try{ res = await apiFetch(r.list.path, body, {method:'POST'}); }
+    catch(err){ lastErr = String(err && err.message || err); continue; }
+    if(res.ok && deepItems(res.json).length){ DEP_CACHE[r.key] = res.json; return res.json; }
+    if(res.ok) lastErr = t('الرد رجع من غير سجلات','The response came back with no records');
+    else lastErr = diagnose(res.code, res.txt);
+  }
+  throw new Error(lastErr || t('ما قدرناش نجيب اللستة','Could not fetch the list'));
 }
 
 function depSteps(r){
@@ -4563,7 +4593,38 @@ function openDepsModal(e, missing, cont){
           <div id="depOut_${n}"></div>
         </div>
       </div>`).join('')}
+    ${isReportEp(e) ? `
+      <div class="panel" style="margin-bottom:10px"><div class="sec" style="border-top:0">
+        <h3 style="font-family:var(--ar); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink)">
+          ${t('العربيات (اختياري)','Vehicles (optional)')}</h3>
+        <div class="note" style="margin-bottom:8px">${t('سيبها فاضية = التقرير على كل العربيات. أو الصق الـ IMEIs وأنا أجيب الـ IDs بتاعهم وأحطهم في الريكوست.',
+            'Leave it empty and the report covers all vehicles. Or paste the IMEIs and I will fetch their ids and put them into the request.')}</div>
+        <textarea id="depImeis" placeholder="${t('IMEI في كل سطر، أو مفصولين بفاصلة','One IMEI per line, or comma separated')}"
+          style="width:100%; min-height:80px; font-family:var(--mono); font-size:12.5px; padding:9px;
+                 border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)">${esc(RSCOPE.imeis.join('\n'))}</textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" id="depImeiGo">${t('هات الـ IDs بتاعهم','Fetch their ids')}</button>
+          <span id="depImeiState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+        </div>
+      </div></div>` : ''}
     <div class="row"><button class="btn ghost" id="depClose">${t('إغلاق','Close')}</button></div>`;
+  /* العربيات: الموظف بيحدد التقرير والنطاق من نفس النافذة */
+  const dig = $('depImeiGo');
+  if(dig) dig.onclick = async ()=>{
+    const txt = ($('depImeis').value||'').trim();
+    const st = $('depImeiState');
+    if(!txt){ RSCOPE.mode='all'; RSCOPE.uids=[]; RSCOPE.imeis=[]; RSCOPE.missing=[];
+              st.textContent = t('تمام — التقرير على كل العربيات','Fine — the report covers all vehicles'); return; }
+    dig.disabled = true; st.textContent = t('بيدوّر…','Resolving…');
+    try{
+      const {uids, names, missing} = await resolveImeis(txt);
+      RSCOPE.mode='imeis'; RSCOPE.uids=uids; RSCOPE.names=names; RSCOPE.missing=missing;
+      RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
+      st.textContent = t(`${uids.length} عربية جاهزة`, `${uids.length} vehicles ready`)
+        + (missing.length ? ' · ' + t('مش موجود','not found') + ': ' + missing.slice(0,3).join('، ') : '');
+    }catch(err){ st.textContent = String(err && err.message || err).slice(0,120); }
+    finally{ dig.disabled = false; }
+  };
   $('mask').hidden = false;
   $('depClose').onclick = ()=>{ $('mask').hidden = true; };
 
@@ -4773,10 +4834,10 @@ const RESOLVERS = [
  { key:'userReport', fields:['report_id'], path:/^\/user_reports\//i,
    label:{ar:'التقرير', en:'report'},
    ask:{ar:'اسم التقرير — مثلًا Summary', en:'Report name — for example Summary'},
-   /* الكولكشن بيوضّح إن اللستة دي بتاخد شكل مختلف: data مصفوفة جواها filters.
-      الشكل العادي {limit} كان بيرجّع حاجة مش لستة تقارير، فالرقم اللي بياخده
-      مش رقم تقرير صالح — وده اللي كان بيدّي not_found بعد ما نجيبه. */
-   list:{path:'/user_reports/lists', body:{data:[{filters:{}}]}},
+   /* الكولكشن فيه نسختين من نفس المسار ببوديين مختلفين — والسيرفر بيرفض
+      الشكل الغلط. بنبدأ بالبسيط، ولو رفض بنجرّب الشكل المتداخل. */
+   list:{path:'/user_reports/lists', body:{data:{limit:200}},
+         alts:[{data:{data:[{filters:{}}]}}, {data:{}}]},
    prefer:/^summary$/i,
    note:{ar:'الـ id اللي في العينة تبع حساب تاني، عشان كده بيرجع not_found. اكتب اسم التقرير من حساب العميل وأنا أجيب رقمه.',
          en:'The sample id belongs to another account, which is why it returns not_found. Type the report name from the customer account and I will fetch its id.'} },

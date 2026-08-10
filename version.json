@@ -1,16 +1,16 @@
 {
-  "version": "6.15",
+  "version": "6.16",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "تصحيح: الرد الجاهز كان بيدل على إندبوينت تنفيذ على دومين تقارير تاني — والصح إن حقول العميل موجودة بالحرف في قالب code:\"summary\" في الكولكشن، يعني هو شايف تقرير الـ Summary والقيم بتيجي من تشغيله",
-      "الرد بقى يدل على /user_reports/data-summary برقم تقرير الـ Summary من حساب العميل نفسه، ويقول إزاي يجيبه من /user_reports/lists ويفسّر سبب not_found",
-      "الرد بقى يذكر إن القالب نفسه فيه أعمدة تاريخ البداية والنهاية (sdt وedt) — وده اللي بيوضّح إن التشغيل محتاج نطاق زمني"
+      "إصلاح: بودي لستة التقارير كان مكتوب بشكل مش موجود في الكولكشن أصلًا، فالسيرفر كان بيرفضه والنافذة تقول «ما قدرناش نجيب اللستة». الكولكشن فيه شكلين حقيقيين — الأداة بقت تبدأ بالبسيط وتجرّب التاني لو اترفض",
+      "لو كل الأشكال فشلت، بتظهر رسالة السيرفر نفسها مش رسالة عامة — عشان تعرف تصعّدها بمعلومة مفيدة",
+      "خانة الـ IMEIs بقت جوه نافذة «الريكوست محتاج حاجة قبله»: تحدد التقرير والعربيات من نفس المكان"
     ],
     "en": [
-      "Correction: the drafted reply pointed at an execution endpoint on a separate reports domain. The evidence says otherwise — the customer's fields appear verbatim in the template whose code is \"summary\", so they are looking at the Summary report and the values come from running it",
-      "The reply now points at /user_reports/data-summary with the id of the Summary report in the customer's own account, explains how to list it from /user_reports/lists, and why a foreign id returns not_found",
-      "It now notes that the template itself carries start-date and end-date columns (sdt, edt), which is what shows a run needs a period"
+      "Fix: the report-list body was written in a shape that does not exist in the collection at all, so the server rejected it and the modal said it could not fetch the list. The collection holds two real shapes — the tool now starts with the simple one and tries the other if it is refused",
+      "If every shape fails, the server's own message is shown rather than a generic one, so an escalation carries something useful",
+      "The IMEI box now lives inside the dependency modal: pick the report and the vehicles from the same place"
     ]
   }
 }
