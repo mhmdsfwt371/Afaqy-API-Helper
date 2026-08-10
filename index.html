@@ -732,9 +732,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.27",
+  "version": "6.28",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.28",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "مولّد تقارير في ريكوست الإنشاء: تختار نوع التقرير والأداة تبنيلك البودي كامل بنفس شكل الكولكشن — الأعمدة والموارد والفترة",
+          "تلات أنواع جاهزة: ملخص العربيات، وملخص حسب السائق، وملخص بالوقود (١٩ عمود بالاستهلاك والتكلفة حسابي وبالحساس)",
+          "نقطة بتغلّط كتير واتوضّحت: نوع المورد بيتغيّر مع نوع التقرير — تقرير حسب السائق موارده سواقين مش عربيات، فالأداة مبتحطش أرقام عربيات فيه",
+          "والعربيات اللي اخترتها فوق بتتحط تلقائيًا في التقارير اللي موردها عربيات",
+          "الاختبار بيقارن كل بودي مبني بالبودي الحقيقي في الكولكشن: نفس المفاتيح ونفس شكل الحقل — وأي نقص بيوقّف البناء"
+        ],
+        "en": [
+          "A report generator on the create request: pick the report kind and the tool builds the whole body in the collection's shape — columns, resources and period",
+          "Three kinds ready: a units summary, a summary by driver, and a summary with fuel (19 columns covering consumption and cost, both computed and sensor based)",
+          "A point that trips people up, now made explicit: the resource type changes with the report kind — a by-driver report takes drivers, not vehicles, so the tool does not put vehicle ids in it",
+          "And the vehicles you picked above are filled in automatically for the kinds whose resource is units",
+          "The test compares every generated body against the real one in the collection — same keys, same field shape — and any gap stops the build"
+        ]
+      }
+    },
     {
       "v": "6.27",
       "date": "2026-08-05",
@@ -5580,59 +5600,102 @@ function bodyBroken(e){
 
 /* حقول قالب الـ Summary — من الكولكشن نفسه (code:"summary")، والمقصوص
    منها مكمّل بنفس الأكواد اللي العميل بعتها في حالته. */
-const SUMMARY_FIELDS = [
-  {name:'Name',                 code:'name',                   format:'label'},
-  {name:'Start Date',           code:'sdt',                    format:'date'},
-  {name:'End Date',             code:'edt',                    format:'date'},
-  {name:'Date',                 code:'date',                   format:'label'},
-  {name:'Route Length',         code:'route_length',           format:'distance'},
-  {name:'Engine Work Duration', code:'engine_work',            format:'duration'},
-  {name:'Engine Move Duration', code:'move_duration',          format:'duration'},
-  {name:'Engine Idle',          code:'engine_idle',            format:'duration'},
-  {name:'Stop Duration',        code:'stop_duration',          format:'duration'},
-  {name:'Max Speed',            code:'max_spd',                format:'speed'},
-  {name:'Average Speed',        code:'avg_spd',                format:'avgSpeed'}
+/* ============ بناء تقرير من الـ API ============
+   الأعمدة متاخدة بالحرف من بودي /user_reports/add في الكولكشن الأصلي.
+   نوع المورد بيتغيّر مع نوع التقرير: تقرير حسب السائق موارده drivers،
+   والعادي units — ودي نقطة بتغلط فيها كتير. */
+const RPT_COLS = {
+  base:    [{name:'Name',code:'name',format:'label'},
+            {name:'Start Date',code:'sdt',format:'date'},
+            {name:'End Date',code:'edt',format:'date'},
+            {name:'Date',code:'date',format:'label'}],
+  motion:  [{name:'Route Length',code:'route_length',format:'distance'},
+            {name:'Engine Work Duration',code:'engine_work',format:'duration'},
+            {name:'Engine Move Duration',code:'move_duration',format:'duration'},
+            {name:'Engine Idle',code:'engine_idle',format:'duration'},
+            {name:'Stop Duration',code:'stop_duration',format:'duration'}],
+  speed:   [{name:'Max Speed',code:'max_spd',format:'speed'},
+            {name:'Average Speed',code:'avg_spd',format:'avgSpeed'}],
+  fuel:    [{name:'Fuel Type',code:'fuel_type',format:'label'},
+            {name:'Fuel Price',code:'fuel_price',format:'label'},
+            {name:'Fuel Cons. (Math)',code:'fuel_consumption',format:'fuel'},
+            {name:'Fuel Cost (Math)',code:'fuel_cost',format:'fuel_cost'},
+            {name:'Fuel Efficiency (Math)',code:'rl_liter',format:'fuel'},
+            {name:'Fuel Cons. (Sensor)',code:'fuel_level_sensor',format:'fuel'},
+            {name:'Fuel Cost (Sensor)',code:'fuel_level_sensor_cost',format:'fuel_cost'},
+            {name:'Fuel Efficiency (Sensor)',code:'fuel_level_sensor_efficiency',format:'fuel_efficiency'}]
+};
+
+/* أنواع التقارير اللي الأداة تعرف تبنيها */
+const RPT_KINDS = [
+  {k:'summary', code:'summary', res:'units',
+   ttl:{ar:'ملخص العربيات', en:'Units summary'},
+   d:{ar:'الحركة والتشغيل لكل عربية — ده اللي عميلك سأل عنه.', en:'Motion and engine time per vehicle — what your customer asked about.'},
+   cols:['base','motion','speed']},
+  {k:'summary_by_driver', code:'summary_by_driver', res:'drivers',
+   ttl:{ar:'ملخص حسب السائق', en:'Summary by driver'},
+   d:{ar:'نفس الأعمدة بس الموارد سواقين مش عربيات.', en:'The same columns, but the resources are drivers rather than vehicles.'},
+   cols:['base','motion','speed']},
+  {k:'summary_fuel', code:'summary', res:'units',
+   ttl:{ar:'ملخص بالوقود', en:'Summary with fuel'},
+   d:{ar:'الحركة زائد استهلاك الوقود وتكلفته — حسابي وبالحساس.', en:'Motion plus fuel consumption and cost — computed and sensor based.'},
+   cols:['base','motion','speed','fuel']}
 ];
 
-function summaryBody(){
-  /* الشكل ده مطابق لبودي /user_reports/add الحقيقي في الكولكشن الأصلي:
-     نفس المفاتيح ونفس شكل الحقول. الفرق إن الأعمدة هنا حقول الملخص
-     (Summary) مش summary_by_driver. resources بتتملّى من نطاق العربيات
-     اللي اخترته فوق، وdate هي الفترة اللي التقرير هيشتغل عليها. */
+const SUMMARY_FIELDS = RPT_COLS.base.concat(RPT_COLS.motion, RPT_COLS.speed);
+
+/* بيبني بودي إنشاء تقرير كامل بنفس شكل الكولكشن بالحرف */
+function buildReportBody(kind){
+  const K = RPT_KINDS.find(x=>x.k===kind) || RPT_KINDS[0];
+  const cols = K.cols.reduce((a,c)=>a.concat(RPT_COLS[c]), []);
   const now = new Date(), from = new Date(now.getTime() - 7*864e5);
   const fmt = d => d.toISOString().slice(0,10);
+  /* الموارد: العربيات اللي اخترتها فوق — إلا لو التقرير موارده سواقين */
+  const res = (K.res === 'units' && RSCOPE.uids.length) ? RSCOPE.uids.slice()
+            : ['<' + (K.res === 'drivers' ? 'DRIVER_ID' : 'UNIT_ID') + '>'];
   return JSON.stringify({data:{
-    name:'Summary', code:'summary',
-    fields: SUMMARY_FIELDS.map((f,i)=>({
+    name: dual(K.ttl), code: K.code,
+    fields: cols.map((f,i)=>({
       name:f.name, code:f.code, format:f.format, order:i,
       selected:'', active:'', readonly:'', titles:'',
       aggregate:'None', minWidth:100, maxWidth:100
     })),
-    resources: (RSCOPE.uids.length ? RSCOPE.uids.slice() : ['<UNIT_ID>']),
-    selected_resource_type: 'units',
-    date: {interval:'interval', from: fmt(from)+' 00:00:00', to: fmt(now)+' 23:59:59',
-           interval_count:1, interval_unit:'days', including_current:true},
-    timelimit:'', trip_details:false, without_chunks:false, color_ranges:[],
-    user_id:'<USER_ID>', lang:'en'
+    resources: res,
+    selected_resource_type: K.res,
+    date:{interval:'interval', from: fmt(from)+' 00:00:00', to: fmt(now)+' 23:59:59',
+          interval_count:1, interval_unit:'days', including_current:true},
+    timelimit:{}, trip_details:'1', without_chunks:false, color_ranges:[],
+    user_id:'<USER_ID>', lang: (LANG==='en' ? 'en' : 'ar')
   }}, null, 4);
 }
+function summaryBody(){ return buildReportBody('summary'); }
 
 function summaryHelper(e){
   if(!/^\/user_reports\/add$|^\/user_report_templates\/(add|edit)$/.test(e.p||'')) return '';
   const cut = bodyTruncated(e), broke = bodyBroken(e);
   return `<div class="sec">
-    <h3>${t('عايز Summary مش Summary By Driver؟','Want Summary, not Summary By Driver?')}</h3>
+    <h3>${t('ابنيلي تقرير','Build me a report')}</h3>
     ${(cut||broke) ? `<div class="note warn" style="margin-bottom:8px">
-      <b>${t('خد بالك: البودي اللي تحت ناقص في الكولكشن نفسه.','Careful: the body below is incomplete in the collection itself.')}</b><br>
-      ${cut ? t('مكتوب فيه «مختصر» — يعني اتقص وقت التصدير. لو نسخته للعميل هيفشل.',
-                'It says truncated — it was cut when the collection was exported. Copying it to a customer will fail.') : ''}
-      ${broke ? ' ' + t('وكمان مش JSON صالح.','And it is not valid JSON.') : ''}</div>` : ''}
+      <b>${t('البودي اللي تحت ناقص في المصدر.','The body below is incomplete in the source.')}</b>
+      ${t('لو نسخته للعميل هيفشل — ابني واحد كامل من هنا.','Copying it to a customer will fail — build a complete one here.')}</div>` : ''}
+    <div class="note" style="margin-bottom:10px">${t(
+      'اختار نوع التقرير وأنا أبنيلك البودي كامل بنفس شكل الكولكشن: الأعمدة، والموارد، والفترة. راجعه وبعدين شغّله.',
+      'Pick the report kind and I will build the full body in the collection shape: columns, resources and period. Review it, then run it.')}</div>
+    <table class="kv" style="margin-bottom:10px">
+      ${RPT_KINDS.map(k=>`<tr>
+        <td style="width:30%"><b>${esc(dual(k.ttl))}</b><br>
+          <code style="font-size:11px">${esc(k.code)}</code>
+          <span style="font-size:11px; color:var(--ink-2)"> · ${esc(k.res)}</span></td>
+        <td>${esc(dual(k.d))}<br>
+          <button class="btn ghost" style="margin-top:6px; padding:3px 10px; font-size:12px"
+                  data-rptk="${esc(k.k)}">${t('ابنيه','Build it')}</button></td>
+      </tr>`).join('')}
+    </table>
     <div class="note" style="margin-bottom:8px">${t(
-      'العينة في الكولكشن اسمها Summary By Driver. لو عايز الملخص العادي، أنا أبنيلك بودي كامل بحقوله السبعة — نفس الأكواد اللي العميل بعتها.',
-      'The collection sample is Summary By Driver. For the plain summary, I can build you a complete body with its seven fields — the same codes the customer sent.')}</div>
+      '<b>خد بالك:</b> نوع المورد بيتغيّر مع نوع التقرير — تقرير حسب السائق موارده سواقين مش عربيات. والأداة بتحط العربيات اللي اخترتها فوق تلقائيًا في التقارير اللي موردها عربيات.',
+      '<b>Note:</b> the resource type changes with the report kind — a by-driver report takes drivers, not vehicles. The tool fills in the vehicles you picked above for the kinds whose resource is units.')}</div>
     <div class="row">
-      <button class="btn sig" id="sumBuild">${t('ابنيلي بودي Summary','Build me a Summary body')}</button>
-      <button class="btn ghost" id="sumFind">${t('دوّر عليه في حساب العميل','Find it in the customer account')}</button>
+      <button class="btn ghost" id="sumFind">${t('شوف تقارير الحساب','See the account reports')}</button>
       <span id="sumState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
     </div>
     <div id="sumOut"></div>
@@ -5640,12 +5703,11 @@ function summaryHelper(e){
 }
 
 function wireSummaryHelper(e){
-  const build = $('sumBuild');
-  if(build) build.onclick = ()=>{
-    OVERRIDES[e.i] = {body: JSON.parse(summaryBody())};
+  document.querySelectorAll('[data-rptk]').forEach(b=>b.onclick=()=>{
+    OVERRIDES[e.i] = {body: JSON.parse(buildReportBody(b.dataset.rptk))};
     renderDetail(e, []);
-    toast(t('البودي اتبنى — راجعه قبل ما تبعته','Body built — review it before sending'));
-  };
+    toast(t('البودي اتبنى — راجعه قبل ما تشغّله','Body built — review it before running'));
+  });
   const find = $('sumFind');
   if(find) find.onclick = async ()=>{
     if(!SESSION.token){ $('sumState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }

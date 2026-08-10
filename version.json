@@ -1,16 +1,16 @@
 {
-  "version": "6.27",
+  "version": "6.28",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "زرار «فحص شامل للـ APIs» في لوحة الأجهزة: بيشغّل سلسلة ريكوستات حقيقية على حساب العميل المتصل ويقولك كل واحد شغّال ولا لأ",
-      "السلسلة مترابطة: لستة العربيات تدّي رقم عربية لفحص الإشارات، ولستة التقارير تدّي رقم تقرير لفحص القراءة — فلو حلقة اتكسرت بيبان مكانها بالظبط",
-      "الفحص بيفرّق بين «السيرفر ردّ» و«الرد فيه اللي المفروض»: رد فيه عربيات من غير وقت آخر إشارة بيتعلّم «ردّ بس ناقص» مش «شغّال»"
+      "مولّد تقارير في ريكوست الإنشاء: تختار نوع التقرير والأداة تبنيلك البودي كامل بنفس شكل الكولكشن — الأعمدة والموارد والفترة",
+      "تلات أنواع جاهزة: ملخص العربيات، وملخص حسب السائق، وملخص بالوقود (١٩ عمود بالاستهلاك والتكلفة حسابي وبالحساس)",
+      "نقطة بتغلّط كتير واتوضّحت: نوع المورد بيتغيّر مع نوع التقرير — تقرير حسب السائق موارده سواقين مش عربيات، فالأداة مبتحطش أرقام عربيات فيه"
     ],
     "en": [
-      "A Full API check button on the device dashboard: it runs a chain of real requests against the connected customer account and tells you which are working",
-      "The chain is linked: the units list supplies a unit id for the signals check, and the reports list supplies a report id for the read check — so a broken link shows exactly where",
-      "It separates the server answering from the answer being right: a response with vehicles but no last-signal time is marked answered but incomplete rather than working"
+      "A report generator on the create request: pick the report kind and the tool builds the whole body in the collection's shape — columns, resources and period",
+      "Three kinds ready: a units summary, a summary by driver, and a summary with fuel (19 columns covering consumption and cost, both computed and sensor based)",
+      "A point that trips people up, now made explicit: the resource type changes with the report kind — a by-driver report takes drivers, not vehicles, so the tool does not put vehicle ids in it"
     ]
   }
 }
