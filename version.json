@@ -1,16 +1,16 @@
 {
-  "version": "6.30",
+  "version": "6.31",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "العميل قال الإندبوينت بالظبط — /reports/lists — والأداة بقت تميّزه: دي عائلة كتالوج أنواع التقارير، مش عائلة تقارير المستخدم اللي فيها الداتا",
-      "الفرق اللي بيلخبط: /reports/… بيرجّع أنواع التقارير المتاحة وتعريف أعمدة كل نوع، و/user_reports/… بيرجّع تقارير فيها صفوف. الأسماء متشابهة والمعنى مختلف",
-      "الرد الجاهز بقى يشرح السلسلة كاملة: خد الكود من الكتالوج، اعمل بيه تقرير بالعربيات والفترة، الرد يرجّع رقم، وبالرقم اقرا الصفوف"
+      "دورة الدعم بقت على مرحلتين في تبويب «حلّل رسالة عميل»: أول ما توصلك شكوى ناقصة، الأداة تقولك ناقص إيه وتطلّع رسالة بتطلبه بالظبط",
+      "الطلب محدد مش تشيك ليست عامة: بتطلب اللي مش موجود في الرسالة بس — ومعاه سبب كل طلب، عشان العميل يفهم ليه محتاجينه ويبعته",
+      "ولما الأدلة توصل، الطلب بيقل لوحده: رسالة فيها الرابط والتاريخ والعربية والحساب مبقاش يتطلب منها غير الناقص"
     ],
     "en": [
-      "The customer named the exact endpoint — /reports/lists — and the tool now recognises it: that is the report-type catalog family, not the user-reports family that carries the data",
-      "The confusing difference: /reports/… returns the available report types and each type's column definitions, while /user_reports/… returns reports with rows. Similar names, different meaning",
-      "The drafted reply now explains the whole sequence: take the code from the catalog, create a report with it giving vehicles and a period, the response returns an id, and the id reads the rows"
+      "The support cycle now has two stages in the Analyse a customer message tab: when a vague complaint arrives, the tool names what is missing and drafts a message asking for exactly that",
+      "The ask is specific rather than a generic checklist: it requests only what the message lacks, each with the reason it is needed, so the customer understands why and actually sends it",
+      "Once the evidence arrives the ask shrinks by itself: a message carrying the URL, the date, the vehicle and the account is no longer asked for those"
     ]
   }
 }

@@ -732,9 +732,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.30",
+  "version": "6.31",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.31",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "دورة الدعم بقت على مرحلتين في تبويب «حلّل رسالة عميل»: أول ما توصلك شكوى ناقصة، الأداة تقولك ناقص إيه وتطلّع رسالة بتطلبه بالظبط",
+          "الطلب محدد مش تشيك ليست عامة: بتطلب اللي مش موجود في الرسالة بس — ومعاه سبب كل طلب، عشان العميل يفهم ليه محتاجينه ويبعته",
+          "ولما الأدلة توصل، الطلب بيقل لوحده: رسالة فيها الرابط والتاريخ والعربية والحساب مبقاش يتطلب منها غير الناقص",
+          "قسم جديد «غلطة العميل فين»: بيقول عمل إيه غلط، وليه سهل يغلط فيها، والحل اللي تقوله له",
+          "ومكتوب فيه تنبيه للنبرة: دي مش غلطة إهمال — أسماء الإندبوينتس نفسها بتوقّع. اشرح الفرق من غير ما تحمّله المسؤولية",
+          "الرسالة بتنبّه العميل يشيل التوكن والباسورد قبل ما يبعت"
+        ],
+        "en": [
+          "The support cycle now has two stages in the Analyse a customer message tab: when a vague complaint arrives, the tool names what is missing and drafts a message asking for exactly that",
+          "The ask is specific rather than a generic checklist: it requests only what the message lacks, each with the reason it is needed, so the customer understands why and actually sends it",
+          "Once the evidence arrives the ask shrinks by itself: a message carrying the URL, the date, the vehicle and the account is no longer asked for those",
+          "A new section, Where the customer went wrong: what they did, why it is an easy mistake, and the fix to tell them",
+          "It carries a note on tone: this is not carelessness — the endpoint naming itself misleads. Explain the difference without laying blame",
+          "The drafted message reminds the customer to strip tokens and passwords before sending"
+        ]
+      }
+    },
     {
       "v": "6.30",
       "date": "2026-08-05",
@@ -8317,6 +8339,122 @@ function caseReply(a){
   return null;
 }
 
+/* ============ دورة الدعم على مرحلتين ============
+   مرحلة ١: العميل بعت شكوى ناقصة الأدلة — الأداة بتطلّع رسالة بتطلب
+            اللي ناقص بالظبط، مش تشيك ليست عامة.
+   مرحلة ٢: العميل بعت الأدلة — الأداة بتقول غلطته فين والحل.
+   الفكرة إن معظم دورات الدعم بتضيع في رايح جاي على معلومة ناقصة. */
+
+/* إيه الأدلة الناقصة في الرسالة دي؟ */
+function caseNeeds(a){
+  const w = String(a.words || '');
+  const all = String(a.words || '') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
+  const need = [];
+
+  if(!a.paths.length && !/https?:\/\//i.test(w))
+    need.push({k:'endpoint',
+      ttl:{ar:'الرابط الكامل للريكوست', en:'The full request URL'},
+      why:{ar:'من غيره مش هنعرف هو نادى أنهي إندبوينت — وفي إندبوينتس أسماؤها متشابهة ومعناها مختلف.',
+           en:'Without it we cannot tell which endpoint was called — and some endpoints have similar names but different meanings.'}});
+
+  if(!(a.blocks||[]).some(b=>b.kind==='request'))
+    need.push({k:'request',
+      ttl:{ar:'البودي اللي بعته (من غير التوكن)', en:'The request body they sent, with the token removed'},
+      why:{ar:'الباراميترات اللي بعتها بتحدد شكل الرد. من غيرها بنخمّن.',
+           en:'The parameters sent shape the response. Without them we are guessing.'}});
+
+  const hasResp = (a.blocks||[]).some(b=>['error','definition','fieldDef','wantedShape','other'].indexOf(b.kind)>=0);
+  if(!hasResp)
+    need.push({k:'response',
+      ttl:{ar:'الرد كامل زي ما هو', en:'The full response exactly as received'},
+      why:{ar:'الوصف بالكلام بيضيّع تفاصيل. الرد الخام بيقول الحقيقة.',
+           en:'A description in words loses detail. The raw response tells the truth.'}});
+
+  if(!/\b\d{4}-\d{2}-\d{2}|\d{2}[-\/]\d{2}[-\/]\d{4}/.test(all))
+    need.push({k:'when',
+      ttl:{ar:'وقت المحاولة وتاريخها', en:'The date and time of the attempt'},
+      why:{ar:'عشان نلاقيها في اللوجات، ونعرف كانت فترة التقرير إيه.',
+           en:'So we can find it in the logs, and know what period the report covered.'}});
+
+  if(!/\b\d{15,17}\b/.test(all) && !/unit|vehicle|imei|عربية|جهاز/i.test(w))
+    need.push({k:'unit',
+      ttl:{ar:'الـ IMEI أو رقم العربية اللي جرّب عليها', en:'The IMEI or unit id they tried with'},
+      why:{ar:'عشان نجرّب نفس الحالة على نفس العربية بدل حالة تانية.',
+           en:'So we reproduce the same case on the same vehicle rather than a different one.'}});
+
+  if(!/account|username|user|حساب|مستخدم/i.test(w))
+    need.push({k:'account',
+      ttl:{ar:'اسم الحساب اللي بيجرّب بيه', en:'The account they are testing with'},
+      why:{ar:'الصلاحيات والبيانات بتختلف من حساب لحساب — نفس الريكوست بيرد مختلف.',
+           en:'Permissions and data differ per account — the same request answers differently.'}});
+
+  return need;
+}
+
+/* رسالة بتطلب الناقص — بلغة العميل، ومحددة مش عامة */
+function askReply(a, needs){
+  if(!needs.length) return null;
+  const L = ['Hello,', '',
+    'Thank you for reporting this. To pin the cause down quickly rather than trading messages, could you send us the following:', ''];
+  needs.forEach((n,i)=>{
+    L.push(`${i+1}) ${n.ttl.en}`);
+    L.push(`   Why: ${n.why.en}`);
+  });
+  L.push('');
+  L.push('Please remove any token or password before sending.');
+  L.push('');
+  L.push('With those in hand we can reproduce the exact call on our side and come back with the fix rather than a question.');
+  L.push('');
+  L.push('Best regards,');
+  return L.join('\n');
+}
+
+/* غلطة العميل فين — مربوطة بالنمط اللي اتشخّص */
+const CASE_FAULTS = {
+  reports_catalog: {
+    what:{ar:'نادى كتالوج أنواع التقارير وهو عايز داتا تقرير.',
+          en:'They called the catalog of report types while wanting a report\u2019s data.'},
+    why:{ar:'العائلتين اسمهم متقارب: <code>/reports/…</code> كتالوج، و<code>/user_reports/…</code> تقارير فيها صفوف. سهل جدًا يتلخبطوا.',
+         en:'The two families read alike: <code>/reports/…</code> is a catalog, <code>/user_reports/…</code> holds reports with rows. They are easy to confuse.'},
+    fix:{ar:'يفضل يستخدم الكتالوج لبناء عناوين الأعمدة، ويضيف إنشاء تقرير ثم قراءته للداتا.',
+         en:'Keep the catalog for building the column headers, and add create-then-read for the data itself.'},
+    blame:false
+  },
+  report_template: {
+    what:{ar:'قرا تعريف التقرير وافتكره نتيجته.',
+          en:'They read the report definition and took it for its result.'},
+    why:{ar:'الرد بيرجع 200 وfields مليانة، فشكله سليم — والحقول موصوفة بأسماء مفهومة، فسهل تفتكرها بيانات.',
+         en:'The response returns 200 with a full fields array, so it looks right — and the fields carry readable names, so they read like data.'},
+    fix:{ar:'التعريف بيدي الأعمدة، والتشغيل بيدي الصفوف، والـ code هو اللي بيربطهم.',
+         en:'The definition gives the columns, the run gives the rows, and the code joins them.'},
+    blame:false
+  },
+  list_meta_only: {
+    what:{ar:'فسّر النتيجة الفاضية على إنها حساب فاضي.',
+          en:'They read an empty result as an empty account.'},
+    why:{ar:'العداد الكلي في الرد كان أكبر من صفر — يعني في بيانات، والفلتر هو اللي صفّر النتيجة.',
+         en:'The total count in the response was above zero — the data exists and the filter emptied the result.'},
+    fix:{ar:'يوسّع الفترة أو يشيل الفلاتر واحدة واحدة لحد ما يعرف أنهي واحدة بتصفّر.',
+         en:'Widen the period or drop the filters one at a time to find which one empties it.'},
+    blame:false
+  }
+};
+
+function caseFault(a){
+  for(const p of PATTERNS){
+    let ok=false;
+    try{ ok = p.hit(a._json || {}, a._raw || ''); }catch(_){ ok=false; }
+    if(ok && CASE_FAULTS[p.k]) return {k:p.k, ...CASE_FAULTS[p.k]};
+  }
+  /* لو التشخيص من تحليل الرسالة مش من الرد */
+  if(a.reportCase){
+    const onCatalog = (a.paths||[]).some(p=>/^\/reports\/(lists|view)/.test(p));
+    return {k: onCatalog ? 'reports_catalog' : 'report_template',
+            ...(CASE_FAULTS[onCatalog ? 'reports_catalog' : 'report_template'])};
+  }
+  return null;
+}
+
 /* ============ تشخيص أنماط الردود ============
    في ردود بتبان سليمة (200 و success) والعميل مش لاقي بياناته فيها،
    لأنها أصلًا نوع تاني من الرد. الموظف بيضيّع ساعات، والعميل بيفتكر
@@ -8803,6 +8941,10 @@ function renderCase(text){
   const out = $('caseOut');
   if(!String(text||'').trim()){ out.innerHTML=''; return; }
   const a = analyzeCase(text);
+  /* أكبر بلوك في الرسالة هو غالبًا الرد — بنديه للقواعد عشان تشخّص عليه */
+  const biggest = (a.blocks||[]).slice().sort((x,y)=>y.raw.length-x.raw.length)[0];
+  a._json = biggest ? biggest.json : {};
+  a._raw  = text;
   const L = [];
 
   /* ١) العميل عمل إيه */
@@ -8825,7 +8967,40 @@ function renderCase(text){
       ${a.qs.map(q=>`<li style="margin-bottom:3px">${esc(q)}</li>`).join('')}</ol></div>` : ''}
   </div></div>`);
 
-  /* ٢) الغلط فين + التوجيه */
+  /* ٢) ناقص إيه — ورسالة بتطلبه */
+  const needs = caseNeeds(a);
+  if(needs.length){
+    const ask = askReply(a, needs);
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('ناقص أدلة عشان نحسمها','Evidence still missing')}</h3>
+      <div class="note warn" style="margin-bottom:8px">${t(
+        `فيه ${needs.length} حاجة لو جت هتقصّر الدورة. الرسالة تحت بتطلبهم بالظبط — من غير تشيك ليست عامة.`,
+        `There are ${needs.length} items that would shorten this. The message below asks for exactly those — not a generic checklist.`)}</div>
+      <table class="kv">${needs.map((n,i)=>`<tr>
+        <td style="width:38%"><b>${i+1}) ${esc(dual(n.ttl))}</b></td>
+        <td style="font-size:12.5px; color:var(--ink-2)">${esc(dual(n.why))}</td></tr>`).join('')}</table>
+      <div style="margin-top:10px"><b>${t('رسالة جاهزة تطلبهم','A ready message asking for them')}:</b></div>
+      <pre id="caseAskTxt" style="white-space:pre-wrap; font-family:var(--ar); font-size:13px; background:var(--panel-2);
+        padding:12px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left; margin-top:6px">${esc(ask)}</pre>
+      <div class="row" style="margin-top:8px"><button class="btn sig" id="caseAskCopy">${t('انسخ رسالة الطلب','Copy the request message')}</button></div>
+    </div></div>`);
+  }
+
+  /* ٣) غلطة العميل فين */
+  const fault = caseFault(a);
+  if(fault){
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('غلطة العميل فين','Where the customer went wrong')}</h3>
+      <div class="note warn"><b>${esc(dual(fault.what))}</b></div>
+      <div style="margin-top:8px"><b>${t('وليه سهل يغلط فيها:','And why it is an easy mistake:')}</b> ${dual(fault.why)}</div>
+      <div class="note sig" style="margin-top:8px"><b>${t('الحل اللي تقوله له:','The fix to tell them:')}</b> ${dual(fault.fix)}</div>
+      <div class="note" style="margin-top:8px">${t(
+        'خد بالك في الرد: دي مش غلطة إهمال — الأسماء نفسها بتوقّع. اشرح الفرق من غير ما تحمّله المسؤولية.',
+        'A note on tone: this is not carelessness — the naming itself misleads. Explain the difference without laying blame.')}</div>
+    </div></div>`);
+  }
+
+  /* ٤) الغلط فين + التوجيه */
   if(a.reportCase){
     const dataEp2 = EPS.find(e => e.p === '/user_reports/data-summary' && sysOf(e) === 'avl');
     L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
@@ -8870,6 +9045,8 @@ function renderCase(text){
   });
   const cp = $('caseCopy');
   if(cp) cp.onclick = ()=>{ copy(reply); toast(t('الرد اتنسخ','Reply copied')); };
+  const ak = $('caseAskCopy');
+  if(ak) ak.onclick = ()=>{ copy(askReply(a, caseNeeds(a)) || '', t('رسالة الطلب اتنسخت','Request message copied')); };
 }
 
 function paintInspect(){
