@@ -1,16 +1,16 @@
 {
-  "version": "6.10",
+  "version": "6.11",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الحسابات المحفوظة بقت مربوطة ببيئتها: حساب متحفظ على البيتا مبقاش يظهر لما تختار API تاني — قبل كده كانوا كلهم بيظهروا على كل البيئات، وتختار واحد ويفشل الدخول من غير سبب واضح",
-      "لو البيئة مالهاش حسابات محفوظة، اللستة بتقول كده صراحة بدل ما تبان فاضية من غير تفسير",
-      "المسح بيشيل الحساب الصح بعد الفلترة — الأرقام الداخلية مربوطة باللستة الكاملة مش المعروضة"
+      "محرك تشخيص للردود اتضاف لتبويب «افحص رد»: بيمسك الردود اللي بتبان سليمة (200 و success) والعميل مش لاقي بياناته فيها",
+      "أول قاعدة من حالة دعم حقيقية: رد فيه fields بأسماء وأكواد من غير قيم — ده تعريف التقرير مش نتيجته، والأداة بتدل على إندبوينت التنفيذ وبتفتحه بضغطة",
+      "قاعدة تانية بتفرّق بين حساب فاضي فعلًا وفلتر ضيّق: لو العدّاد الكلي أكبر من صفر يبقى في بيانات والفلتر هو المشكلة"
     ],
     "en": [
-      "Saved accounts are now tied to their environment: an account saved on beta no longer appears when you pick a different API — before, they all showed everywhere, and picking one would fail to sign in with no clear reason",
-      "When an environment has no saved accounts, the list says so plainly instead of appearing empty without explanation",
-      "Deleting removes the right account after filtering — the internal indices stay bound to the full list rather than the displayed one"
+      "A response-diagnosis engine was added to the Inspect tab: it catches responses that look fine — 200 and success — while the customer still cannot find their data in them",
+      "The first rule comes from a real support case: a response whose fields carry names and codes but no values is the report definition, not its result. The tool names the execution endpoint and opens it in one press",
+      "A second rule separates a genuinely empty account from a narrow filter: if the total count is above zero the data exists and the filter is the problem"
     ]
   }
 }
