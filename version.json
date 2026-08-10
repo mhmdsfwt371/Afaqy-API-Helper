@@ -1,16 +1,16 @@
 {
-  "version": "6.19",
+  "version": "6.20",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "زرار «جرّب وصحّح» على ريكوستات التقارير بقى مسبار: بيجيب كل أرقام التقارير المتاحة — من تقارير المستخدم ومن القوالب — ويجرّبها على المسارين لحد ما يلاقي اللي بيرد ببيانات",
-      "بيوريك جدول بكل اللي اتجرّب: اسم التقرير، ومصدر الرقم، والمسار، والنتيجة — فتعرف بالظبط إيه اللي اترفض وإيه اللي نجح",
-      "أول ما يلاقي الصح بيديك زرار «استخدم الرقم ده» فيتحط في الريكوست على طول"
+      "لو كتبت IMEI في خانة اسم التقرير بالغلط، الأداة بتكتشفه فورًا وتقولك «ده رقم جهاز مش اسم تقرير» وتديك زرار ينقله لخانة العربيات — بدل ما تدوّر عليه بين مئات التقارير وتقول مش موجود",
+      "لستة اختيار التقرير بقى فوقها خانة فلترة لما تكون طويلة: حساب فيه 325 تقرير اللستة فيه كانت مالهاش فايدة",
+      "المسبار بقى يرتّب المرشحين بقرب الاسم من Summary: المطابق تمامًا الأول، بعده اللي بيبدأ بيها، بعده اللي فيه الكلمة"
     ],
     "en": [
-      "The Try and auto-fix button on report requests is now a probe: it collects every available report id — from user reports and from templates — and tries them across both paths until one answers with data",
-      "It shows a table of everything tried: report name, id source, path and outcome, so you can see exactly what was rejected and what worked",
-      "Once it finds the right one it offers a Use this id button that applies it to the request"
+      "If you type an IMEI into the report-name box by mistake, the tool spots it immediately, says it is a device number rather than a report name, and offers a button to move it to the Vehicles box — instead of hunting for it among hundreds of reports and reporting it missing",
+      "The report picker now has a filter box when the list is long: on an account with 325 reports the plain list was unusable",
+      "The probe now ranks candidates by name proximity to Summary — exact match first, then names starting with it, then names containing it"
     ]
   }
 }

@@ -730,9 +730,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.19",
+  "version": "6.20",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.20",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "لو كتبت IMEI في خانة اسم التقرير بالغلط، الأداة بتكتشفه فورًا وتقولك «ده رقم جهاز مش اسم تقرير» وتديك زرار ينقله لخانة العربيات — بدل ما تدوّر عليه بين مئات التقارير وتقول مش موجود",
+          "لستة اختيار التقرير بقى فوقها خانة فلترة لما تكون طويلة: حساب فيه 325 تقرير اللستة فيه كانت مالهاش فايدة",
+          "المسبار بقى يرتّب المرشحين بقرب الاسم من Summary: المطابق تمامًا الأول، بعده اللي بيبدأ بيها، بعده اللي فيه الكلمة",
+          "وبيقولك جرّب كام من كام: «جرّبنا أقرب 6 من 325» — عشان تعرف إنه ما جرّبش الكل ومش ياخد نتيجته على إنها نهائية"
+        ],
+        "en": [
+          "If you type an IMEI into the report-name box by mistake, the tool spots it immediately, says it is a device number rather than a report name, and offers a button to move it to the Vehicles box — instead of hunting for it among hundreds of reports and reporting it missing",
+          "The report picker now has a filter box when the list is long: on an account with 325 reports the plain list was unusable",
+          "The probe now ranks candidates by name proximity to Summary — exact match first, then names starting with it, then names containing it",
+          "And it tells you how many it tried out of how many: we tried the closest 6 of 325, so you know the result is not exhaustive"
+        ]
+      }
+    },
     {
       "v": "6.19",
       "date": "2026-08-05",
@@ -4699,6 +4717,26 @@ function openDepsModal(e, missing, cont){
     const n=+b.dataset.auto, r=missing[n], out=$('depOut_'+n);
     const key=($('dep_'+n).value||'').trim();
     if(!key){ out.innerHTML=`<div class="note warn" style="margin-top:8px">${t('اكتب الاسم الأول','Type the name first')}</div>`; return; }
+    /* خانتين جنب بعض: واحدة لاسم التقرير وواحدة للعربيات. لو المكتوب رقم
+       طويل كله أرقام، ده IMEI اتحط في الخانة الغلط — بندله عليها بدل
+       ما ندوّر عليه بين مئات التقارير ونقول مش موجود. */
+    if(/^\d{14,17}$/.test(key) && $('depImeis')){
+      out.innerHTML = `<div class="note warn" style="margin-top:8px">
+        <b>${t('ده رقم جهاز، مش اسم تقرير.','That is a device number, not a report name.')}</b><br>
+        ${t('مكانه خانة «العربيات» تحت. اكتب هنا اسم التقرير زي Summary.',
+            'It belongs in the Vehicles box below. Type the report name here — for example Summary.')}
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" id="mvImei_${n}">${t('انقله لخانة العربيات','Move it to Vehicles')}</button>
+        </div></div>`;
+      const mv = $('mvImei_'+n);
+      if(mv) mv.onclick = ()=>{
+        const box = $('depImeis');
+        box.value = (box.value ? box.value.trim() + '\n' : '') + key;
+        $('dep_'+n).value = 'Summary';
+        out.innerHTML = `<div class="note sig" style="margin-top:8px">${t('اتنقل. دوس «هات الـ IDs بتاعهم» تحت، وسيب اسم التقرير هنا.','Moved. Press Fetch their ids below, and leave the report name here.')}</div>`;
+      };
+      return;
+    }
     b.disabled=true; const old=b.textContent; b.textContent=t('بيدوّر…','Looking…');
     out.innerHTML=`<div class="note" style="margin-top:8px">${t('بنجيب اللستة ونطابق…','Fetching the list and matching…')}</div>`;
     try{
@@ -4714,11 +4752,25 @@ function openDepsModal(e, missing, cont){
           return A - B;
         }) : items;
         const near = sorted.slice(0,200);
+        const many = items.length > 25;
         out.innerHTML = `<div class="note warn" style="margin-top:8px">
           ${t(`ما لقيناش «${esc(key)}» بين ${items.length}. اختار من اللستة:`,`No match for "${esc(key)}" among ${items.length}. Pick one:`)}</div>
-          <select id="depSel_${n}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:3px">
+          ${many ? `<input id="depFind_${n}" placeholder="${t('اكتب جزء من الاسم عشان تفلتر','Type part of the name to filter')}"
+            style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:var(--r)">` : ''}
+          <select id="depSel_${n}" size="${many ? 8 : 1}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:3px">
             <option value="">${t('— اختار —','— choose —')}</option>
             ${near.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select>`;
+        /* 325 تقرير في لستة واحدة مالهاش فايدة — الفلتر بيخليها قابلة للاستخدام */
+        const find = $('depFind_'+n);
+        if(find) find.oninput = ()=>{
+          const q = norm(find.value||'');
+          const hits = q ? near.filter(x=>norm(String(x.name||'')).includes(q)) : near;
+          const sl = $('depSel_'+n);
+          sl.innerHTML = `<option value="">${hits.length
+            ? t(`— اختار (${hits.length}) —`, `— choose (${hits.length}) —`)
+            : t('— مفيش نتيجة —','— no match —')}</option>`
+            + hits.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+        };
         const sel=$('depSel_'+n);
         if(sel) sel.onchange=()=>{ if(!sel.value) return;
           const it=near.find(x=>x.id===sel.value);
@@ -5222,12 +5274,16 @@ async function reportIdCandidates(){
     const r = await apiFetch('/user_report_templates/lists', {data:{limit:1000}}, {method:'POST', timeout:60000});
     if(r.ok) for(const it of deepItems(r.json)) push(it.id, it.name, '/user_report_templates/lists');
   }catch(_){}
-  /* الـ Summary الأول */
-  out.sort((a,b)=>{
-    const A = /^summary$/i.test(String(a.name||'')) ? 0 : 1;
-    const B = /^summary$/i.test(String(b.name||'')) ? 0 : 1;
-    return A - B;
-  });
+  /* الترتيب: المطابق تمامًا لـ Summary الأول، بعده اللي فيه الكلمة،
+     بعده الباقي. حساب فيه 325 تقرير مش هنجرّبهم كلهم — بنجرّب الأقرب. */
+  const rank = x => {
+    const nm = String(x.name||'');
+    if(/^summary$/i.test(nm)) return 0;
+    if(/^summary\b/i.test(nm)) return 1;
+    if(/summary/i.test(nm)) return 2;
+    return 3;
+  };
+  out.sort((a,b)=>rank(a)-rank(b));
   return out;
 }
 
@@ -5246,10 +5302,12 @@ async function reportProbe(e){
   }
   const paths = ['/user_reports/data-summary','/user_reports/data'];
   const rows = [];
+  const TRY = 6;                       // سقف المحاولات — بنجرّب الأقرب مش الكل
+  const skipped = Math.max(0, cands.length - TRY);
   let win = null;
   const scope = (RSCOPE.mode === 'imeis' && RSCOPE.uids.length) ? RSCOPE.uids.slice() : null;
   outer:
-  for(const c of cands.slice(0, 6)){
+  for(const c of cands.slice(0, TRY)){
     for(const p of paths){
       const body = {data: Object.assign({id: c.id}, scope ? {units: scope} : {})};
       out.innerHTML = `<div class="note" style="margin-top:12px">${t(
@@ -5285,6 +5343,8 @@ async function reportProbe(e){
       <b>${t('ولا رقم من دول اشتغل.','None of these ids worked.')}</b><br>
       ${t('يعني المشكلة مش في الرقم: يا إما الريكوست ده بياخد رقم من مصدر تالت، يا إما الحساب مالوش صلاحية على التقارير. صعّدها بالجدول ده — فيه كل اللي اتجرب.',
           'So the id is not the problem: either this request takes an id from a third source, or the account has no access to reports. Escalate with this table — it shows everything that was tried.')}
+      ${skipped ? `<br><small>${t(`جرّبنا أقرب ${TRY} من ${cands.length} تقرير — الترتيب على قرب الاسم من Summary.`,
+          `We tried the closest ${TRY} of ${cands.length} reports, ranked by name proximity to Summary.`)}</small>` : ''}
       </div>${tbl}`;
   }
 }
