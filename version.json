@@ -1,16 +1,16 @@
 {
-  "version": "6.20",
+  "version": "6.21",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "لو كتبت IMEI في خانة اسم التقرير بالغلط، الأداة بتكتشفه فورًا وتقولك «ده رقم جهاز مش اسم تقرير» وتديك زرار ينقله لخانة العربيات — بدل ما تدوّر عليه بين مئات التقارير وتقول مش موجود",
-      "لستة اختيار التقرير بقى فوقها خانة فلترة لما تكون طويلة: حساب فيه 325 تقرير اللستة فيه كانت مالهاش فايدة",
-      "المسبار بقى يرتّب المرشحين بقرب الاسم من Summary: المطابق تمامًا الأول، بعده اللي بيبدأ بيها، بعده اللي فيه الكلمة"
+      "إصلاح جذري: مسبار التقارير ما كانش بيشتغل أصلًا — متغيّر النطاق كان متعرّف بعد أول استخدام له، فالنداء كان بيرمي خطأ صامت والسلّم القديم يشتغل مكانه ويجرّب أشكال بودي بدل مصادر الرقم",
+      "زرار «ابدأ من نضيف» اتضاف: بيمسح رقم التقرير والنطاق ونتيجة آخر تشغيل ويرجّع البودي لأصله",
+      "الأداة بقت تقولك إن الرقم اللي في البودي جه من اختيارك مش من دماغها، وإزاي ترجّع العينة"
     ],
     "en": [
-      "If you type an IMEI into the report-name box by mistake, the tool spots it immediately, says it is a device number rather than a report name, and offers a button to move it to the Vehicles box — instead of hunting for it among hundreds of reports and reporting it missing",
-      "The report picker now has a filter box when the list is long: on an account with 325 reports the plain list was unusable",
-      "The probe now ranks candidates by name proximity to Summary — exact match first, then names starting with it, then names containing it"
+      "A root fix: the report probe was never running — the scope variable was declared after its first use, so the call threw a silent error and the old ladder ran instead, trying body shapes rather than id sources",
+      "A Start fresh button was added: it clears the report id, the scope and the last run, and restores the original body",
+      "The tool now states that the id in the body came from your own selection rather than out of nowhere, and how to restore the sample"
     ]
   }
 }

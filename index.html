@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.20",
+  "version": "6.21",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.21",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "إصلاح جذري: مسبار التقارير ما كانش بيشتغل أصلًا — متغيّر النطاق كان متعرّف بعد أول استخدام له، فالنداء كان بيرمي خطأ صامت والسلّم القديم يشتغل مكانه ويجرّب أشكال بودي بدل مصادر الرقم",
+          "زرار «ابدأ من نضيف» اتضاف: بيمسح رقم التقرير والنطاق ونتيجة آخر تشغيل ويرجّع البودي لأصله",
+          "الأداة بقت تقولك إن الرقم اللي في البودي جه من اختيارك مش من دماغها، وإزاي ترجّع العينة",
+          "«كل العربيات» بقى ليه معنيين منفصلين: تسيبه من غير تحديد (السيستم يقرر)، أو تدوس «هات كل عربيات الحساب» فالأداة تجيبهم كلهم وتحط أرقامهم في الريكوست صراحة",
+          "و«عربيات محددة» بالـ IMEIs زي ما هي — الخيارين مستقلين تمامًا"
+        ],
+        "en": [
+          "A root fix: the report probe was never running — the scope variable was declared after its first use, so the call threw a silent error and the old ladder ran instead, trying body shapes rather than id sources",
+          "A Start fresh button was added: it clears the report id, the scope and the last run, and restores the original body",
+          "The tool now states that the id in the body came from your own selection rather than out of nowhere, and how to restore the sample",
+          "All vehicles now has two distinct meanings: leave it unset and the platform decides, or press Fetch every vehicle in the account and the tool collects them all and names their ids in the request",
+          "Specific vehicles by IMEI stays as it was — the two options are fully independent"
+        ]
+      }
+    },
     {
       "v": "6.20",
       "date": "2026-08-05",
@@ -3093,6 +3113,7 @@ function _renderDetail(e, why){
       <div class="row" style="margin-top:2px; padding-top:10px; border-top:1px dashed var(--line-soft)">
         <button class="btn ghost" id="tryIt" ${KIND==='danger'?'disabled':''}>${t('جرّب مرة واحدة','Run once')}</button>
         <button class="btn sig" id="tryFix" ${noFix?'disabled':''}>${t('جرّب وصحّح لوحدك','Try &amp; auto-fix')}</button>
+        <button class="btn ghost" id="tryReset">${t('ابدأ من نضيف','Start fresh')}</button>
         <span style="font-size:12.5px; color:var(--muted); align-self:center">
           ${KIND==='danger' ? t('التنفيذ مقفول على الريكوست ده — حساس على حساب العميل نفسه.','Running this request is locked — it touches the customer account itself.')
              : isLogin ? t('التصحيح التلقائي مقفول هنا — إعادة محاولات الدخول بتقفل حسابات العملاء. استخدم شريط الاتصال فوق.',
@@ -3141,6 +3162,17 @@ function _renderDetail(e, why){
   if($('tryIt'))  $('tryIt').hidden  = liveOff;
   if($('tryFix')) $('tryFix').hidden = liveOff;
   wireScope(e);
+  /* ريسيت: الجلسة بتفضل شايلة الرقم والنطاق من محاولة سابقة، والموظف
+     مش لاقي طريقة يبدأ من نضيف. */
+  const rs = $('tryReset');
+  if(rs) rs.onclick = ()=>{
+    if(SESSION.deps) delete SESSION.deps.userReport;
+    RSCOPE.mode='all'; RSCOPE.uids=[]; RSCOPE.names=[]; RSCOPE.imeis=[]; RSCOPE.missing=[];
+    LAST_RUN = null;
+    const o = $('tryout'); if(o) o.innerHTML = '';
+    renderDetail(e, []);
+    toast(t('اترجّع للأصل','Reset to the original'));
+  };
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };
 }
@@ -4889,20 +4921,24 @@ function prepBody(e){
   const pathRes = RESOLVERS.find(r=>r.key!=='unit' && r.path.test(e.p||''));
   /* نطاق التقرير جزء من الريكوست الفعلي، فلازم يبان في البودي المعروض:
      اللي الموظف شايفه هو اللي هيتبعت لما يدوس جرّب. */
-  if(isReportEp(e) && RSCOPE.mode === 'imeis' && RSCOPE.uids.length){
+  if(isReportEp(e) && (RSCOPE.mode === 'imeis' || RSCOPE.mode === 'allExplicit') && RSCOPE.uids.length){
     next.data = next.data || {};
     next.data.units = RSCOPE.uids.slice();
-    changes.push(RSCOPE.names.length
-      ? t(`النطاق: ${RSCOPE.uids.length} عربية — ${RSCOPE.names.slice(0,3).join('، ')}${RSCOPE.names.length>3?' …':''}`,
-          `Scope: ${RSCOPE.uids.length} vehicles — ${RSCOPE.names.slice(0,3).join(', ')}${RSCOPE.names.length>3?' …':''}`)
-      : t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`));
+    changes.push(RSCOPE.mode === 'allExplicit'
+      ? t(`النطاق: كل عربيات الحساب — ${RSCOPE.uids.length} عربية`,
+          `Scope: every vehicle in the account — ${RSCOPE.uids.length}`)
+      : (RSCOPE.names.length
+        ? t(`النطاق: ${RSCOPE.uids.length} عربية — ${RSCOPE.names.slice(0,3).join('، ')}${RSCOPE.names.length>3?' …':''}`,
+            `Scope: ${RSCOPE.uids.length} vehicles — ${RSCOPE.names.slice(0,3).join(', ')}${RSCOPE.names.length>3?' …':''}`)
+        : t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`)));
   }
   const before = JSON.stringify(next);
   next = injectUid(next, u?u.uid:null, null, null, scoped && !!u, pathRes);
   if(JSON.stringify(next)!==before){
     const names = depsOf(e).map(r=>{ const d=depValue(r); return d?`${dual(r.label)}: ${d.name}`:null; }).filter(Boolean);
     changes.unshift(names.length
-      ? t(`الأرقام اتحطت من اللي حددته — ${names.join('، ')}`, `Ids filled from your selection — ${names.join(', ')}`)
+      ? t(`الأرقام اتحطت من اللي حددته — ${names.join('، ')} · دوس «ابدأ من نضيف» لو عايز ترجّع العينة`,
+          `Ids filled from your selection — ${names.join(', ')} · press Start fresh to restore the sample`)
       : t('الأرقام اتحطت من اللي حددته','Ids filled from your selection'));
   }
   return {text: JSON.stringify(next, null, 4), applied: changes.length>0, scoped, changes};
@@ -5248,6 +5284,108 @@ async function ladderCore(e, override, onStep){
     if(ok) return {net:true, tried, win:{v, code, pretty, json}};
   }
   return {net:true, tried, win:null};
+}
+
+/* ============ نطاق التقرير: كل العربيات أو IMEIs محددة ============
+   التقرير من غير نطاق بيرجع فاضي أو بيتقل على الحسابات الكبيرة.
+   الموظف بيختار: الكل، أو يلزق IMEIs — والأداة بتحوّلهم لـ UIDs. */
+const RSCOPE = { mode:'all', imeis:[], uids:[], names:[], missing:[] };
+
+function isReportEp(e){ return /^\/user_reports\/(data|data-summary|data-new)$/.test(e && e.p || ''); }
+
+/* بيحوّل لستة IMEIs لـ UIDs من لستة عربيات الحساب */
+async function resolveImeis(text){
+  const keys = String(text||'').split(/[\s,;\n]+/).map(x=>x.trim()).filter(Boolean);
+  const uniq = [...new Set(keys)];
+  if(!uniq.length) return {uids:[], names:[], missing:[]};
+  if(!UNITS_CACHE){
+    const got = await fetchAllUnits(['basic']);
+    UNITS_CACHE = {data: got.units};
+  }
+  const uids=[], names=[], missing=[];
+  for(const k of uniq){
+    const {hit} = matchByName(UNITS_CACHE, k);
+    if(hit){ uids.push(hit.id); names.push(hit.name || k); }
+    else missing.push(k);
+  }
+  return {uids, names, missing};
+}
+
+function scopeBox(e){
+  if(!isReportEp(e)) return '';
+  const on = RSCOPE.mode === 'imeis';
+  return `<div class="sec">
+    <h3>${t('نطاق التقرير','Report scope')}</h3>
+    <div class="row">
+      <button class="ct" id="rsAll"   aria-selected="${!on}">${t('كل العربيات','All vehicles')}</button>
+      <button class="ct" id="rsPick"  aria-selected="${on}">${t('عربيات محددة','Specific vehicles')}</button>
+    </div>
+    ${!on ? `<div style="margin-top:10px">
+      <div class="note" style="margin-bottom:8px">${t('التقرير هيتبعت من غير تحديد عربيات — يعني السيستم هو اللي يقرر النطاق. لو عايز تبعت كل عربيات الحساب صراحة، دوس تحت.',
+          'The report goes out without naming vehicles, so the platform decides the scope. To send every vehicle in the account explicitly, press below.')}</div>
+      <div class="row">
+        <button class="btn ghost" id="rsAllGo">${t('هات كل عربيات الحساب','Fetch every vehicle in the account')}</button>
+        <span id="rsAllState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+      </div>
+      ${RSCOPE.mode==='allExplicit' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
+        ${t(`جاهز: ${RSCOPE.uids.length} عربية هتتبعت في الريكوست`, `Ready: ${RSCOPE.uids.length} vehicles will be sent in the request`)}</div>` : ''}
+    </div>` : ''}
+    <div id="rsBody" style="margin-top:10px" ${on?'':'hidden'}>
+      <textarea id="rsImeis" placeholder="${t('الصق الـ IMEIs — واحد في كل سطر أو مفصولين بفاصلة','Paste the IMEIs — one per line or comma separated')}"
+        style="width:100%; min-height:90px; font-family:var(--mono); font-size:12.5px; padding:10px;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)">${esc(RSCOPE.imeis.join('\n'))}</textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="rsGo">${t('هات الـ IDs بتاعهم','Fetch their ids')}</button>
+        <span id="rsState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+      </div>
+    </div>
+    ${RSCOPE.mode==='imeis' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
+      ${t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`)}
+      ${RSCOPE.names.length ? ' — ' + esc(RSCOPE.names.slice(0,5).join('، ')) + (RSCOPE.names.length>5 ? ` +${RSCOPE.names.length-5}` : '') : ''}
+    </div>` : ''}
+    ${RSCOPE.missing.length ? `<div class="note warn" style="margin-top:8px">
+      ${t('مش موجودين في الحساب ده','Not in this account')}: ${esc(RSCOPE.missing.slice(0,8).join('، '))}</div>` : ''}
+  </div>`;
+}
+
+function wireScope(e){
+  if(!isReportEp(e)) return;
+  const all=$('rsAll'), pick=$('rsPick');
+  if(!all || !pick) return;
+  all.onclick  = ()=>{ RSCOPE.mode='all'; RSCOPE.uids=[]; RSCOPE.names=[]; renderDetail(e, []); };
+  const allGo = $('rsAllGo');
+  if(allGo) allGo.onclick = async ()=>{
+    if(!SESSION.token){ $('rsAllState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
+    allGo.disabled = true;
+    try{
+      const got = await fetchAllUnits(['basic'], (n, tot)=>{
+        $('rsAllState').textContent = tot ? t(`بيجيب… ${n} من ${tot}`, `Fetching… ${n} of ${tot}`) : t(`بيجيب… ${n}`, `Fetching… ${n}`);
+      });
+      UNITS_CACHE = {data: got.units};
+      RSCOPE.mode = 'allExplicit';
+      RSCOPE.uids = got.units.map(u=>String(u.id || u._id)).filter(Boolean);
+      RSCOPE.names = got.units.slice(0,3).map(u=>String(u.name||''));
+      RSCOPE.missing = [];
+      renderDetail(e, []);
+    }catch(err){ $('rsAllState').textContent = String(err && err.message || err).slice(0,120); }
+    finally{ allGo.disabled = false; }
+  };
+  pick.onclick = ()=>{ RSCOPE.mode='imeis'; renderDetail(e, []); };
+  const go = $('rsGo');
+  if(go) go.onclick = async ()=>{
+    const txt = ($('rsImeis').value||'').trim();
+    if(!txt){ $('rsState').textContent = t('الصق الـ IMEIs الأول','Paste the IMEIs first'); return; }
+    if(!SESSION.token){ $('rsState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
+    go.disabled=true; $('rsState').textContent = t('بيدوّر…','Resolving…');
+    try{
+      const {uids, names, missing} = await resolveImeis(txt);
+      RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
+      RSCOPE.uids = uids; RSCOPE.names = names; RSCOPE.missing = missing;
+      renderDetail(e, []);
+    }catch(err){
+      $('rsState').textContent = String(err.message||err).slice(0,120);
+    }finally{ go.disabled=false; }
+  };
 }
 
 /* ============ سلّم التقارير ============
@@ -7374,81 +7512,6 @@ function userPlain(json){
 }
 
 
-
-/* ============ نطاق التقرير: كل العربيات أو IMEIs محددة ============
-   التقرير من غير نطاق بيرجع فاضي أو بيتقل على الحسابات الكبيرة.
-   الموظف بيختار: الكل، أو يلزق IMEIs — والأداة بتحوّلهم لـ UIDs. */
-const RSCOPE = { mode:'all', imeis:[], uids:[], names:[], missing:[] };
-
-function isReportEp(e){ return /^\/user_reports\/(data|data-summary|data-new)$/.test(e && e.p || ''); }
-
-/* بيحوّل لستة IMEIs لـ UIDs من لستة عربيات الحساب */
-async function resolveImeis(text){
-  const keys = String(text||'').split(/[\s,;\n]+/).map(x=>x.trim()).filter(Boolean);
-  const uniq = [...new Set(keys)];
-  if(!uniq.length) return {uids:[], names:[], missing:[]};
-  if(!UNITS_CACHE){
-    const got = await fetchAllUnits(['basic']);
-    UNITS_CACHE = {data: got.units};
-  }
-  const uids=[], names=[], missing=[];
-  for(const k of uniq){
-    const {hit} = matchByName(UNITS_CACHE, k);
-    if(hit){ uids.push(hit.id); names.push(hit.name || k); }
-    else missing.push(k);
-  }
-  return {uids, names, missing};
-}
-
-function scopeBox(e){
-  if(!isReportEp(e)) return '';
-  const on = RSCOPE.mode === 'imeis';
-  return `<div class="sec">
-    <h3>${t('نطاق التقرير','Report scope')}</h3>
-    <div class="row">
-      <button class="ct" id="rsAll"   aria-selected="${!on}">${t('كل العربيات','All vehicles')}</button>
-      <button class="ct" id="rsPick"  aria-selected="${on}">${t('عربيات محددة','Specific vehicles')}</button>
-    </div>
-    <div id="rsBody" style="margin-top:10px" ${on?'':'hidden'}>
-      <textarea id="rsImeis" placeholder="${t('الصق الـ IMEIs — واحد في كل سطر أو مفصولين بفاصلة','Paste the IMEIs — one per line or comma separated')}"
-        style="width:100%; min-height:90px; font-family:var(--mono); font-size:12.5px; padding:10px;
-               border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)">${esc(RSCOPE.imeis.join('\n'))}</textarea>
-      <div class="row" style="margin-top:8px">
-        <button class="btn ghost" id="rsGo">${t('هات الـ IDs بتاعهم','Fetch their ids')}</button>
-        <span id="rsState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
-      </div>
-    </div>
-    ${RSCOPE.mode==='imeis' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
-      ${t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`)}
-      ${RSCOPE.names.length ? ' — ' + esc(RSCOPE.names.slice(0,5).join('، ')) + (RSCOPE.names.length>5 ? ` +${RSCOPE.names.length-5}` : '') : ''}
-    </div>` : ''}
-    ${RSCOPE.missing.length ? `<div class="note warn" style="margin-top:8px">
-      ${t('مش موجودين في الحساب ده','Not in this account')}: ${esc(RSCOPE.missing.slice(0,8).join('، '))}</div>` : ''}
-  </div>`;
-}
-
-function wireScope(e){
-  if(!isReportEp(e)) return;
-  const all=$('rsAll'), pick=$('rsPick');
-  if(!all || !pick) return;
-  all.onclick  = ()=>{ RSCOPE.mode='all';   renderDetail(e, []); };
-  pick.onclick = ()=>{ RSCOPE.mode='imeis'; renderDetail(e, []); };
-  const go = $('rsGo');
-  if(go) go.onclick = async ()=>{
-    const txt = ($('rsImeis').value||'').trim();
-    if(!txt){ $('rsState').textContent = t('الصق الـ IMEIs الأول','Paste the IMEIs first'); return; }
-    if(!SESSION.token){ $('rsState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
-    go.disabled=true; $('rsState').textContent = t('بيدوّر…','Resolving…');
-    try{
-      const {uids, names, missing} = await resolveImeis(txt);
-      RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
-      RSCOPE.uids = uids; RSCOPE.names = names; RSCOPE.missing = missing;
-      renderDetail(e, []);
-    }catch(err){
-      $('rsState').textContent = String(err.message||err).slice(0,120);
-    }finally{ go.disabled=false; }
-  };
-}
 
 /* ============ تحليل رسالة العميل ============
    الموظف بيوصله إيميل فيه كلام وأكواد مخلوطة: الرد اللي اشتكى منه،
