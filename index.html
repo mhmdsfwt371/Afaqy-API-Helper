@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.22",
+  "version": "6.23",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.23",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "إصلاح رقم غلط خطير: اللوحة كانت بتقول كل الأجهزة أوفلاين وما رسلتش ولا مرة، والمنصة بتقول مئات منها متحركة",
+          "السبب: قارئ آخر إشارة كان بيفهم شكل واحد بس من الرد، وأي شكل تاني بيتقرا كأنه مفيش وقت — والأداة تفسّره «الجهاز ساكت»",
+          "دلوقتي بيفهم كل الأشكال: نص مباشر، أو جوه أوبجكت بأي مفتاح معروف، أو توقيت بالثواني أو الملّي ثانية",
+          "والأهم: الأداة بقت تفرّق بين «الحقل مش راجع في الرد» و«الجهاز ما رسلش». الأولى مشكلة في الطلب، والتانية مشكلة في الجهاز — وخلطهم بيدّي رقم مخيف وغلط",
+          "لو الحقل مش راجع، بيظهر بند بأعلى خطورة بيقول إن الأرقام دي عن الرد مش عن الأجهزة، ومعاه سبب التصعيد جاهز"
+        ],
+        "en": [
+          "A dangerous wrong number fixed: the dashboard reported every device offline and never reporting, while the platform showed hundreds of them moving",
+          "The cause: the last-signal reader understood only one response shape, and any other shape read as no time at all — which the tool then presented as a silent device",
+          "It now understands every shape: a plain string, an object under any known key, or a timestamp in seconds or milliseconds",
+          "More importantly, the tool now separates the field being absent from the response and the device never reporting. The first is a request problem, the second a device problem — conflating them produces an alarming and false number",
+          "When the field is absent, a top-severity item states that these numbers describe the response rather than the devices, with the escalation reason ready"
+        ]
+      }
+    },
     {
       "v": "6.22",
       "date": "2026-08-05",
@@ -6373,12 +6393,36 @@ function dashColumns(rows){
 }
 
 /* آخر مرة الجهاز رسل فيها */
+/* آخر إشارة ممكن ترجع بأشكال كتير حسب الـ projection والإصدار.
+   كنا بنقرا شكل واحد، وأي شكل تاني بيتقرا null — والأداة تفسّره
+   «ما رسلتش ولا مرة»، فتقول 3700 جهاز ساكت وهم شغالين. */
 function unitLastSeen(u){
-  const lu = (u && u.last_update) || {};
-  const raw = lu.time || lu.datetime || u.last_time || null;
-  if(!raw) return null;
+  if(!u || typeof u !== 'object') return null;
+  const pick = v => {
+    if(!v) return null;
+    if(typeof v === 'string' || typeof v === 'number') return v;
+    if(typeof v === 'object') return v.time || v.datetime || v.dt || v.date || v.timestamp || null;
+    return null;
+  };
+  const raw = pick(u.last_update) || pick(u.lastUpdate) || pick(u.last_time) ||
+              pick(u.lastTime)    || pick(u.pos)        || pick(u.position)  ||
+              pick(u.last_message)|| pick(u.lastMessage)|| null;
+  if(raw === null || raw === '') return null;
+  /* التوقيت ممكن يرجع كثواني أو ملّي ثانية */
+  if(typeof raw === 'number' || /^\d{9,13}$/.test(String(raw))){
+    const n = Number(raw), ms = n < 1e11 ? n * 1000 : n;
+    const d1 = new Date(ms);
+    return isFinite(d1.getTime()) ? d1 : null;
+  }
   const d = new Date(String(raw).replace(' ','T'));
   return isFinite(d.getTime()) ? d : null;
+}
+/* الفرق اللي كان ضايع: الحقل مش موجود في الرد ≠ الجهاز ما رسلش */
+function lastSeenMissing(u){
+  if(!u || typeof u !== 'object') return true;
+  for(const k of ['last_update','lastUpdate','last_time','lastTime','pos','position','last_message','lastMessage'])
+    if(k in u) return false;
+  return true;
 }
 function hoursSince(d){ return d ? (Date.now()-d.getTime())/36e5 : null; }
 
@@ -6455,7 +6499,9 @@ function dashInsights(){
   const U = DASH.units;
   const silent1 = U.filter(u=>{ const h=hoursSince(unitLastSeen(u)); return h!==null && h>24; });
   const silent7 = U.filter(u=>{ const h=hoursSince(unitLastSeen(u)); return h!==null && h>168; });
-  const noTime  = U.filter(u=>unitLastSeen(u)===null);
+  /* الحقل غايب من الرد كله؟ يبقى مشكلة projection مش مشكلة أجهزة. */
+  const noField = U.filter(u=>lastSeenMissing(u));
+  const noTime  = U.filter(u=>!lastSeenMissing(u) && unitLastSeen(u)===null);
   const noImei  = U.filter(u=>!u.imei && !u.device_serial);
   const inactive= U.filter(u=>u.active===false);
   const waslIds = new Set(WASL.rows.map(w=>String(w.imei||'')).filter(Boolean));
@@ -6476,6 +6522,12 @@ function dashInsights(){
     {k:'noTime',   n:noTime.length,   set:noTime,   sev:'low',
      ttl:{ar:'ما رسلتش ولا مرة', en:'Never reported'},
      why:{ar:'اتضافت في النظام ومحصلش تركيب أو تفعيل.', en:'Added to the platform but never installed or activated.'}},
+    /* أهم بند هنا: لو الحقل نفسه مش راجع، الأرقام اللي فوق مالهاش معنى.
+       أول ما اتضاف، طلع إن 3700 «ساكتة» كانوا في الحقيقة رد ناقص. */
+    {k:'noField',  n:noField.length,  set:noField,  sev:'high',
+     ttl:{ar:'وقت آخر إشارة مش راجع في الرد', en:'The last-signal time is absent from the response'},
+     why:{ar:'الحقل مش موجود في اللي رجع من السيرفر — يعني مقدرش أحكم على أونلاين ولا أوفلاين. الأرقام دي مش عن الأجهزة، دي عن الرد نفسه. صعّدها لتيم مصر: الـ projection مش راجع فيه last_update.',
+          en:'The field is not present in what the server returned, so online or offline cannot be judged. These numbers are about the response, not the devices. Escalate: the projection is not returning last_update.'}},
     ...(()=>{  /* بتظهر بس لو في أجهزة MDVR فعلًا */
       const mdvr = U.filter(u=>/mdvr/i.test(typeOf(u)));
       if(!mdvr.length) return [];

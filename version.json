@@ -1,16 +1,16 @@
 {
-  "version": "6.22",
+  "version": "6.23",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "بوابة «الريكوست ده محتاج حاجة قبله» اتشالت من ريكوستات التقارير: كانت بتوقفك وتطلب اسم تقرير، وتجيب رقم، والسيرفر يرفضه — يعني بتعطّل من غير ما تحل",
-      "مكانها صندوق «شغّل التقرير»: تدّي الـ IMEI وبس، والأداة تحوّله لرقم العربية، وتدوّر على رقم التقرير الشغّال بنفسها، وتشغّل — كل ده من زرار واحد",
-      "لو الـ IMEIs مش في الحساب، بتقولك على طول بدل ما تكمّل وتفشل بعدين"
+      "إصلاح رقم غلط خطير: اللوحة كانت بتقول كل الأجهزة أوفلاين وما رسلتش ولا مرة، والمنصة بتقول مئات منها متحركة",
+      "السبب: قارئ آخر إشارة كان بيفهم شكل واحد بس من الرد، وأي شكل تاني بيتقرا كأنه مفيش وقت — والأداة تفسّره «الجهاز ساكت»",
+      "دلوقتي بيفهم كل الأشكال: نص مباشر، أو جوه أوبجكت بأي مفتاح معروف، أو توقيت بالثواني أو الملّي ثانية"
     ],
     "en": [
-      "The dependency gate was removed from report requests: it stopped you to ask for a report name, fetched an id, and the server rejected it — blocking without solving",
-      "In its place is a Run the report box: you give the IMEI and nothing else, and the tool resolves the vehicle id, finds a working report id by itself, and runs — all from one button",
-      "If the IMEIs are not in the account it tells you immediately instead of continuing and failing later"
+      "A dangerous wrong number fixed: the dashboard reported every device offline and never reporting, while the platform showed hundreds of them moving",
+      "The cause: the last-signal reader understood only one response shape, and any other shape read as no time at all — which the tool then presented as a silent device",
+      "It now understands every shape: a plain string, an object under any known key, or a timestamp in seconds or milliseconds"
     ]
   }
 }
