@@ -744,9 +744,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.36",
+  "version": "6.37",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.37",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "التشخيص بقى جدول أنماط بدل حالة واحدة. كانت الأداة فيها حالة متشخّصة واحدة (التقارير) مربوطة في ثمن مواضع بـ if، وأي رسالة تانية بتروح على «ناقص أدلة».",
+          "ست قواعد دلوقتي: كتالوج مكان تنفيذ، قرا قبل ما التوليد يخلص، IMEI مكان رقم العربية، ناقص خطوة قبله، ٢٠٠ وجواه خطأ، وفاضي مش عطلان. وحالة التقارير بقت القاعدة الأولى في الجدول مش الأساس.",
+          "كل قاعدة بتقرا دليلها من الرسالة وبتعرضه للموظف — عشان يشوف الأداة اتكلت على إيه ويقدر يكذّبها بدل ما ياخد الحكم على عماه.",
+          "السلسلة الصح في كل قاعدة بتغذّي الرد والكولكشن من نفس المصدر، فمستحيل يختلفوا.",
+          "لو مفيش قاعدة اتحققت بثقة كافية، الأداة بتفضل بتطلب أدلة زي الأول — ما بتخترعش تشخيص."
+        ],
+        "en": [
+          "Diagnosis is now a table of patterns rather than one case. The tool had a single diagnosed case (reports) wired through eight if branches, and every other message fell through to asking for evidence.",
+          "Six rules now: a catalog where execution was needed, reading before generation finished, an IMEI where a unit id belongs, a missing prerequisite step, a 200 carrying an error, and empty rather than broken. The report case is the first rule in the table rather than the foundation.",
+          "Each rule reads its evidence from the message and shows it, so the engineer can see what the tool relied on and contradict it rather than accepting a verdict blindly.",
+          "The correct sequence in each rule feeds the reply and the collection from one source, so the two cannot disagree.",
+          "When no rule matches with enough confidence the tool still asks for evidence as before — it does not invent a diagnosis."
+        ]
+      }
+    },
     {
       "v": "6.36",
       "date": "2026-08-10",
@@ -2708,6 +2728,37 @@ const DOCS = {
       }
     },
     {
+      "since": "6.37",
+      "t": {
+        "ar": "التشخيص — جدول أنماط مش حالة واحدة",
+        "en": "Diagnosis — a table of patterns, not one case"
+      },
+      "b": {
+        "ar": [
+          "الأداة بتقرا رسالة العميل وبتدوّر على النمط اللي فيها، مش على حالة واحدة محفوظة. الأنماط دلوقتي ستة وبتزيد.",
+          "كتالوج مكان تنفيذ: نادى إندبوينت بيرجّع تعريفات وهو عايز نتيجة تنفيذ — دي حالة التقارير وأشباهها.",
+          "قرا قبل ما يخلص: قرا الداتا والتوليد لسه شغّال فرجعت فاضية بـ ٢٠٠ وsuccess.",
+          "IMEI مكان رقم العربية: بعت رقم الجهاز في خانة بتاخد UID. الأداة بتمسك أي رقم ١٥ خانة وتشوف الريكوست محتاج إيه.",
+          "ناقص خطوة قبله: الريكوست بياخد معرّفات بتيجي من نداءات قبله والعميل بيملاها من عنده.",
+          "٢٠٠ وجواه خطأ: كود العميل بيعتبر ٢٠٠ نجاح والمنصة بتبعت أخطاء جوه ٢٠٠.",
+          "فاضي مش عطلان: الرد سليم والداتا فاضية — صلاحيات أو مفيش موارد مربوطة، مش عطل.",
+          "تحت كل حكم في «التحليل» بيبان الدليل اللي الأداة اتكلت عليه. اقراه — لو الدليل غلط، الحكم غلط، وإنت اللي بتقرر.",
+          "لو مفيش نمط اتحقق بثقة كافية، الأداة بتطلب الأدلة الناقصة بدل ما تخترع تشخيص."
+        ],
+        "en": [
+          "The tool reads the customer message and looks for the pattern in it rather than for one memorised case. There are six patterns today and the list grows.",
+          "A catalog where execution was needed: called an endpoint that returns definitions while wanting an execution result — the report case and its relatives.",
+          "Read before it was ready: read the data while generation was still running, so it returned empty with 200 and success.",
+          "An IMEI where a unit id belongs: sent the device number where a UID is required. The tool catches any 15-digit number and checks what the request actually takes.",
+          "A prerequisite step is missing: the request takes identifiers produced by earlier calls and the customer is filling them in by hand.",
+          "A 200 carrying an error: the integration treats 200 as success while the platform returns errors inside a 200.",
+          "Empty rather than broken: the response is valid and the data is empty — permissions or no assigned resources, not a fault.",
+          "Under every verdict the analysis shows the evidence the tool relied on. Read it: if the evidence is wrong the verdict is wrong, and the decision is yours.",
+          "When no pattern matches with enough confidence the tool asks for the missing evidence instead of inventing a diagnosis."
+        ]
+      }
+    },
+    {
       "since": "6.35",
       "t": {
         "ar": "كولكشن Postman من الأداة — تبعته للعميل على طول",
@@ -2944,7 +2995,409 @@ const KB = {"endpoints":[{"i":0,"g":"Auth","n":"Login","m":"POST","p":"/auth/log
    Afaqy IN 1.6: GET، apiKey جوه الداتا، العربية بالـ IMEI مباشرة.
    الاتنين موجودين هنا عشان الدعم بيجيله تذاكر عن الاتنين — والفرق
    بينهم متعلّم على كل ريكوست عشان محدش يبعت شكل نظام لعميل التاني. */
-const KB_IN = {"endpoints":[{"i":901,"g":"Auth (IN)","n":"Login","m":"GET","p":"/?r=users/login","t":0,"b":"{\n    \"r\": \"users/login\",\n    \"data\": {\n        \"username\": \"<USERNAME>\",\n        \"password\": \"<PASSWORD>\",\n        \"device\": {\n            \"token\": \"<DEVICE_TOKEN>\",\n            \"type\": \"Android\"\n        }\n    }\n}","sys":"in","d":"بيرجّع api_key — ده اللي بيتحط في كل نداء تاني. وبيرجّع كمان server وtimezone."},{"i":919,"g":"Auth (IN)","n":"Change Password","m":"GET","p":"/?r=users/changePassword","t":0,"b":"{\n    \"r\": \"users/changePassword\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"password\": \"<OLD_PASSWORD>\",\n        \"newPassword\": \"<NEW_PASSWORD>\"\n    }\n}","sys":"in","s":1,"d":"بيغيّر كلمة السر، والـ api_key بيتغيّر معاها فبيرجع بيانات الحساب من جديد."},{"i":920,"g":"Auth (IN)","n":"Update Profile","m":"GET","p":"/?r=users/updateProfile","t":0,"b":"{\n    \"r\": \"users/updateProfile\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"email\": \"<EMAIL>\",\n        \"fname\": \"<FIRST_NAME>\",\n        \"lname\": \"<LAST_NAME>\"\n    }\n}","sys":"in"},{"i":921,"g":"Auth (IN)","n":"Update Settings","m":"GET","p":"/?r=users/updateSettings","t":0,"b":"{\n    \"r\": \"users/updateSettings\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"unites\": \"km,l,c\",\n        \"timezone\": \"+ 3 hour\",\n        \"mapIcon\": \"arrow\",\n        \"rememberMapPosition\": false\n    }\n}","sys":"in"},{"i":902,"g":"Trackers (IN)","n":"Last Update","m":"GET","p":"/?r=userTrackers/lastUpdate","t":0,"b":"{\n    \"r\": \"userTrackers/lastUpdate\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}","sys":"in","d":"آخر تحديث للجهاز. من غير تواريخ بيرجّع العداد من أول ما الجهاز اتضاف."},{"i":903,"g":"Trackers (IN)","n":"Events","m":"GET","p":"/?r=userTrackers/events","t":0,"b":"{\n    \"r\": \"userTrackers/events\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}","sys":"in","d":"أحداث جهاز واحد في فترة. التواريخ مطلوبة هنا."},{"i":904,"g":"Trackers (IN)","n":"List","m":"GET","p":"/?r=userTrackers/list","t":0,"b":"{\n    \"r\": \"userTrackers/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10\n    }\n}","sys":"in","d":"لستة الأجهزة. بترجّع imei وsimNumber وlastUpdate وonAcc (حالة الكونتاكت)."},{"i":905,"g":"Trackers (IN)","n":"Search","m":"GET","p":"/?r=userTrackers/search","t":0,"b":"{\n    \"r\": \"userTrackers/search\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10,\n        \"searchKey\": \"<SEARCH>\"\n    }\n}","sys":"in","d":"بحث بالاسم أو الـ IMEI أو رقم الشريحة."},{"i":908,"g":"Trackers (IN)","n":"History","m":"GET","p":"/?r=userTrackers/history","t":0,"b":"{\n    \"r\": \"userTrackers/history\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\",\n        \"minStop\": 1\n    }\n}","sys":"in","d":"مسار الجهاز: route وstops وevents وطول المسار."},{"i":916,"g":"Trackers (IN)","n":"Update","m":"GET","p":"/?r=userTrackers/update","t":0,"b":"{\n    \"r\": \"userTrackers/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"name\": \"<NAME>\",\n        \"groupIds\": [\n            1,\n            2,\n            3\n        ]\n    }\n}","sys":"in","s":1,"d":"بيغيّر اسم الجهاز والمجموعات بتاعته."},{"i":909,"g":"Trackers (IN)","n":"Groups List","m":"GET","p":"/?r=userTrackerGroups/list","t":0,"b":"{\n    \"r\": \"userTrackerGroups/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":910,"g":"Trackers (IN)","n":"List Icons","m":"GET","p":"/?r=trackers/listIcons","t":0,"b":"{\n    \"r\": \"trackers/listIcons\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":938,"g":"Trackers (IN)","n":"Statuses List","m":"GET","p":"/?r=trackerStatuses/list","t":0,"b":"{\n    \"r\": \"trackerStatuses/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in","d":"حالات الجهاز لحل الخرسانة: At Plant / Charging / Left Site …"},{"i":912,"g":"Sensors (IN)","n":"List","m":"GET","p":"/?r=trackerSensors/list","t":0,"b":"{\n    \"r\": \"trackerSensors/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":922,"g":"Sensors (IN)","n":"Get Value","m":"GET","p":"/?r=trackerSensors/getValue","t":0,"b":"{\n    \"r\": \"trackerSensors/getValue\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"sensorId\": 233,\n        \"min\": 5,\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}","sys":"in","d":"من غير min والتواريخ بيرجّع قيمة آخر إشارة بس."},{"i":906,"g":"Events (IN)","n":"Data List","m":"GET","p":"/?r=userEventsData/list","t":0,"b":"{\n    \"r\": \"userEventsData/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"eventId\": 157,\n        \"imeis\": [],\n        \"offset\": 0,\n        \"limit\": 10\n    }\n}","sys":"in"},{"i":907,"g":"Events (IN)","n":"Data Search","m":"GET","p":"/?r=userEventsData/search","t":0,"b":"{\n    \"r\": \"userEventsData/search\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10,\n        \"searchKey\": \"<SEARCH>\"\n    }\n}","sys":"in"},{"i":913,"g":"Events (IN)","n":"User Events List","m":"GET","p":"/?r=userEvents/list","t":0,"b":"{\n    \"r\": \"userEvents/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in","d":"إعدادات الأحداث: التفعيل والإشعارات بالإيميل والرسايل والأجهزة المرتبطة."},{"i":914,"g":"Zones (IN)","n":"List","m":"GET","p":"/?r=userZones/list","t":0,"b":"{\n    \"r\": \"userZones/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":923,"g":"Zones (IN)","n":"Add","m":"GET","p":"/?r=userZones/add","t":0,"b":"{\n    \"r\": \"userZones/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"name\": \"<ZONE_NAME>\",\n        \"color\": \"#4D4DFF\",\n        \"visible\": true,\n        \"visibleName\": true,\n        \"vertices\": [\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ]\n        ],\n        \"type\": \"polygon\",\n        \"diagonal\": 0,\n        \"plant\": 0\n    }\n}","sys":"in","s":1,"d":"plant: 0 عادية · 1 مصنع · 2 محطة خلط · 3 غسيل · 4 ورشة · 5 موقف. الدايرة محتاجة diagonal."},{"i":924,"g":"Zones (IN)","n":"Update","m":"GET","p":"/?r=userZones/update","t":0,"b":"{\n    \"r\": \"userZones/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"name\": \"<ZONE_NAME>\",\n        \"color\": \"#4D4DFF\",\n        \"visible\": true,\n        \"visibleName\": true,\n        \"vertices\": [\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ]\n        ],\n        \"type\": \"polygon\",\n        \"diagonal\": 0,\n        \"plant\": 0\n    }\n}","sys":"in","s":1},{"i":925,"g":"Zones (IN)","n":"Delete","m":"GET","p":"/?r=userZones/delete","t":0,"b":"{\n    \"r\": \"userZones/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93\n    }\n}","sys":"in","s":2},{"i":926,"g":"Routes (IN)","n":"List","m":"GET","p":"/?r=userRoutes/list","t":0,"b":"{\n    \"r\": \"userRoutes/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":927,"g":"Routes (IN)","n":"View","m":"GET","p":"/?r=userRoutes/view","t":0,"b":"{\n    \"r\": \"userRoutes/view\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 136\n    }\n}","sys":"in"},{"i":928,"g":"Routes (IN)","n":"Add","m":"GET","p":"/?r=userRoutes/add","t":0,"b":"{\n    \"r\": \"userRoutes/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"name\": \"<ROUTE_NAME>\",\n        \"imei\": \"<IMEI>\",\n        \"provider\": \"osm\",\n        \"optimized\": true,\n        \"desc\": \"<DESC>\",\n        \"startTime\": \"2016-08-01 08:00:00\",\n        \"points\": [\n            {\n                \"name\": \"Node1\",\n                \"lat\": \"24.659042\",\n                \"lng\": \"46.812979\",\n                \"diagonal\": 50\n            },\n            {\n                \"name\": \"Node2\",\n                \"lat\": \"24.6768\",\n                \"lng\": \"46.7777\",\n                \"diagonal\": 50\n            }\n        ]\n    }\n}","sys":"in","s":1,"d":"provider: osm الافتراضي أو google. optimized بيرتّب النقط لأحسن مسار."},{"i":929,"g":"Routes (IN)","n":"Update","m":"GET","p":"/?r=userRoutes/update","t":0,"b":"{\n    \"r\": \"userRoutes/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"name\": \"<ROUTE_NAME>\",\n        \"imei\": \"<IMEI>\",\n        \"desc\": \"<DESC>\",\n        \"startTime\": \"2016-08-01 08:00:00\"\n    }\n}","sys":"in","s":1},{"i":930,"g":"Routes (IN)","n":"Delete","m":"GET","p":"/?r=userRoutes/delete","t":0,"b":"{\n    \"r\": \"userRoutes/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93\n    }\n}","sys":"in","s":2},{"i":911,"g":"Routes (IN)","n":"Generate Route","m":"GET","p":"/?r=trackers/generateRoute","t":0,"b":"{\n    \"r\": \"trackers/generateRoute\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"points\": [\n            \"24.6938715,46.6857516\",\n            \"24.599928,46.822208\"\n        ]\n    }\n}","sys":"in","d":"بيرجّع المسافة بالمتر والمدة بالثواني وpolyline بين نقطتين."},{"i":915,"g":"Customers (IN)","n":"List","m":"GET","p":"/?r=customers/list","t":0,"b":"{\n    \"r\": \"customers/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":931,"g":"Orders (IN)","n":"List","m":"GET","p":"/?r=customerOrders/list","t":0,"b":"{\n    \"r\": \"customerOrders/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}","sys":"in"},{"i":932,"g":"Orders (IN)","n":"Add","m":"GET","p":"/?r=customerOrders/add","t":0,"b":"{\n    \"r\": \"customerOrders/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"customerId\": 196,\n        \"addressId\": 37,\n        \"zoneId\": 357,\n        \"lat\": \"24.6249026\",\n        \"lng\": \"46.6970698\",\n        \"diagonal\": 50,\n        \"capacity\": 17,\n        \"comments\": \"<COMMENTS>\",\n        \"imei\": \"<IMEI>\",\n        \"driverId\": 5,\n        \"ticket\": \"<TICKET>\",\n        \"jobOrder\": \"<JOB_ORDER>\",\n        \"requestDate\": \"2018-05-13 15:40:22\",\n        \"extraData\": {}\n    }\n}","sys":"in","s":1,"d":"addressId مطلوب، أو ابعت lat/lng عشان يتعمل عنوان جديد."},{"i":933,"g":"Orders (IN)","n":"Update","m":"GET","p":"/?r=customerOrders/update","t":0,"b":"{\n    \"r\": \"customerOrders/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"addressId\": 37,\n        \"capacity\": 17,\n        \"comments\": \"<COMMENTS>\",\n        \"imei\": \"<IMEI>\",\n        \"driverId\": 5,\n        \"requestDate\": \"2018-05-13 15:40:22\"\n    }\n}","sys":"in","s":1},{"i":934,"g":"Orders (IN)","n":"Change Status","m":"GET","p":"/?r=customerOrders/changeStatus","t":0,"b":"{\n    \"r\": \"customerOrders/changeStatus\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"status\": 37\n    }\n}","sys":"in","s":1},{"i":935,"g":"Orders (IN)","n":"Delete","m":"GET","p":"/?r=customerOrders/delete","t":0,"b":"{\n    \"r\": \"customerOrders/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 29\n    }\n}","sys":"in","s":2},{"i":917,"g":"Reports (IN)","n":"Get Settings","m":"GET","p":"/?r=reports/getSettings","t":0,"b":"{\n    \"r\": \"reports/getSettings\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"lang\": \"english\"\n    }\n}","sys":"in","d":"بيرجّع التقارير المتاحة وحقول كل تقرير — منها بتبني نداء التوليد."},{"i":918,"g":"Reports (IN)","n":"Generate","m":"GET","p":"/?r=reports/generate","t":0,"b":"{\n    \"r\": \"reports/generate\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"reportCriteria\": {\n            \"sdt\": \"2016-02-06 00:00:00\",\n            \"edt\": \"2016-02-06 23:59:59\",\n            \"events\": [],\n            \"objects\": [\n                \"<IMEI>\"\n            ],\n            \"sensors\": [],\n            \"zones\": [],\n            \"customers\": 0,\n            \"fillingsOption\": 0,\n            \"sensorsPeriod\": 0,\n            \"speed\": 0\n        },\n        \"reportFields\": [\n            \"Last_update\",\n            \"Object\",\n            \"Name\",\n            \"loc\"\n        ],\n        \"reportName\": \"latest_update\"\n    }\n}","sys":"in","d":"التقرير بيتبعت على إيميل الحساب — مش بيرجع في الرد."},{"i":937,"g":"Reports (IN)","n":"Concrete Trips Report","m":"GET","p":"/?r=reports/getConcreteTripsReport","t":0,"b":"{\n    \"r\": \"reports/getConcreteTripsReport\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2018-01-13 00:00:00\",\n        \"dateTo\": \"2018-01-13 23:59:59\"\n    }\n}","sys":"in"}]};
+const KB_IN = {
+  "endpoints": [
+    {
+      "i": 901,
+      "g": "Auth (IN)",
+      "n": "Login",
+      "m": "GET",
+      "p": "/?r=users/login",
+      "t": 0,
+      "b": "{\n    \"r\": \"users/login\",\n    \"data\": {\n        \"username\": \"<USERNAME>\",\n        \"password\": \"<PASSWORD>\",\n        \"device\": {\n            \"token\": \"<DEVICE_TOKEN>\",\n            \"type\": \"Android\"\n        }\n    }\n}",
+      "sys": "in",
+      "d": "بيرجّع api_key — ده اللي بيتحط في كل نداء تاني. وبيرجّع كمان server وtimezone."
+    },
+    {
+      "i": 919,
+      "g": "Auth (IN)",
+      "n": "Change Password",
+      "m": "GET",
+      "p": "/?r=users/changePassword",
+      "t": 0,
+      "b": "{\n    \"r\": \"users/changePassword\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"password\": \"<OLD_PASSWORD>\",\n        \"newPassword\": \"<NEW_PASSWORD>\"\n    }\n}",
+      "sys": "in",
+      "s": 1,
+      "d": "بيغيّر كلمة السر، والـ api_key بيتغيّر معاها فبيرجع بيانات الحساب من جديد."
+    },
+    {
+      "i": 920,
+      "g": "Auth (IN)",
+      "n": "Update Profile",
+      "m": "GET",
+      "p": "/?r=users/updateProfile",
+      "t": 0,
+      "b": "{\n    \"r\": \"users/updateProfile\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"email\": \"<EMAIL>\",\n        \"fname\": \"<FIRST_NAME>\",\n        \"lname\": \"<LAST_NAME>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 921,
+      "g": "Auth (IN)",
+      "n": "Update Settings",
+      "m": "GET",
+      "p": "/?r=users/updateSettings",
+      "t": 0,
+      "b": "{\n    \"r\": \"users/updateSettings\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"unites\": \"km,l,c\",\n        \"timezone\": \"+ 3 hour\",\n        \"mapIcon\": \"arrow\",\n        \"rememberMapPosition\": false\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 902,
+      "g": "Trackers (IN)",
+      "n": "Last Update",
+      "m": "GET",
+      "p": "/?r=userTrackers/lastUpdate",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/lastUpdate\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}",
+      "sys": "in",
+      "d": "آخر تحديث للجهاز. من غير تواريخ بيرجّع العداد من أول ما الجهاز اتضاف."
+    },
+    {
+      "i": 903,
+      "g": "Trackers (IN)",
+      "n": "Events",
+      "m": "GET",
+      "p": "/?r=userTrackers/events",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/events\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}",
+      "sys": "in",
+      "d": "أحداث جهاز واحد في فترة. التواريخ مطلوبة هنا."
+    },
+    {
+      "i": 904,
+      "g": "Trackers (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=userTrackers/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10\n    }\n}",
+      "sys": "in",
+      "d": "لستة الأجهزة. بترجّع imei وsimNumber وlastUpdate وonAcc (حالة الكونتاكت)."
+    },
+    {
+      "i": 905,
+      "g": "Trackers (IN)",
+      "n": "Search",
+      "m": "GET",
+      "p": "/?r=userTrackers/search",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/search\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10,\n        \"searchKey\": \"<SEARCH>\"\n    }\n}",
+      "sys": "in",
+      "d": "بحث بالاسم أو الـ IMEI أو رقم الشريحة."
+    },
+    {
+      "i": 908,
+      "g": "Trackers (IN)",
+      "n": "History",
+      "m": "GET",
+      "p": "/?r=userTrackers/history",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/history\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\",\n        \"minStop\": 1\n    }\n}",
+      "sys": "in",
+      "d": "مسار الجهاز: route وstops وevents وطول المسار."
+    },
+    {
+      "i": 916,
+      "g": "Trackers (IN)",
+      "n": "Update",
+      "m": "GET",
+      "p": "/?r=userTrackers/update",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackers/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"name\": \"<NAME>\",\n        \"groupIds\": [\n            1,\n            2,\n            3\n        ]\n    }\n}",
+      "sys": "in",
+      "s": 1,
+      "d": "بيغيّر اسم الجهاز والمجموعات بتاعته."
+    },
+    {
+      "i": 909,
+      "g": "Trackers (IN)",
+      "n": "Groups List",
+      "m": "GET",
+      "p": "/?r=userTrackerGroups/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userTrackerGroups/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 910,
+      "g": "Trackers (IN)",
+      "n": "List Icons",
+      "m": "GET",
+      "p": "/?r=trackers/listIcons",
+      "t": 0,
+      "b": "{\n    \"r\": \"trackers/listIcons\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 938,
+      "g": "Trackers (IN)",
+      "n": "Statuses List",
+      "m": "GET",
+      "p": "/?r=trackerStatuses/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"trackerStatuses/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in",
+      "d": "حالات الجهاز لحل الخرسانة: At Plant / Charging / Left Site …"
+    },
+    {
+      "i": 912,
+      "g": "Sensors (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=trackerSensors/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"trackerSensors/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 922,
+      "g": "Sensors (IN)",
+      "n": "Get Value",
+      "m": "GET",
+      "p": "/?r=trackerSensors/getValue",
+      "t": 0,
+      "b": "{\n    \"r\": \"trackerSensors/getValue\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"imei\": \"<IMEI>\",\n        \"sensorId\": 233,\n        \"min\": 5,\n        \"dateFrom\": \"2015-11-23 00:00:00\",\n        \"dateTo\": \"2015-11-23 23:59:59\"\n    }\n}",
+      "sys": "in",
+      "d": "من غير min والتواريخ بيرجّع قيمة آخر إشارة بس."
+    },
+    {
+      "i": 906,
+      "g": "Events (IN)",
+      "n": "Data List",
+      "m": "GET",
+      "p": "/?r=userEventsData/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userEventsData/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"eventId\": 157,\n        \"imeis\": [],\n        \"offset\": 0,\n        \"limit\": 10\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 907,
+      "g": "Events (IN)",
+      "n": "Data Search",
+      "m": "GET",
+      "p": "/?r=userEventsData/search",
+      "t": 0,
+      "b": "{\n    \"r\": \"userEventsData/search\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"offset\": 0,\n        \"limit\": 10,\n        \"searchKey\": \"<SEARCH>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 913,
+      "g": "Events (IN)",
+      "n": "User Events List",
+      "m": "GET",
+      "p": "/?r=userEvents/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userEvents/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in",
+      "d": "إعدادات الأحداث: التفعيل والإشعارات بالإيميل والرسايل والأجهزة المرتبطة."
+    },
+    {
+      "i": 914,
+      "g": "Zones (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=userZones/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userZones/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 923,
+      "g": "Zones (IN)",
+      "n": "Add",
+      "m": "GET",
+      "p": "/?r=userZones/add",
+      "t": 0,
+      "b": "{\n    \"r\": \"userZones/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"name\": \"<ZONE_NAME>\",\n        \"color\": \"#4D4DFF\",\n        \"visible\": true,\n        \"visibleName\": true,\n        \"vertices\": [\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ]\n        ],\n        \"type\": \"polygon\",\n        \"diagonal\": 0,\n        \"plant\": 0\n    }\n}",
+      "sys": "in",
+      "s": 1,
+      "d": "plant: 0 عادية · 1 مصنع · 2 محطة خلط · 3 غسيل · 4 ورشة · 5 موقف. الدايرة محتاجة diagonal."
+    },
+    {
+      "i": 924,
+      "g": "Zones (IN)",
+      "n": "Update",
+      "m": "GET",
+      "p": "/?r=userZones/update",
+      "t": 0,
+      "b": "{\n    \"r\": \"userZones/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"name\": \"<ZONE_NAME>\",\n        \"color\": \"#4D4DFF\",\n        \"visible\": true,\n        \"visibleName\": true,\n        \"vertices\": [\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ],\n            [\n                24.694468,\n                45.685586\n            ]\n        ],\n        \"type\": \"polygon\",\n        \"diagonal\": 0,\n        \"plant\": 0\n    }\n}",
+      "sys": "in",
+      "s": 1
+    },
+    {
+      "i": 925,
+      "g": "Zones (IN)",
+      "n": "Delete",
+      "m": "GET",
+      "p": "/?r=userZones/delete",
+      "t": 0,
+      "b": "{\n    \"r\": \"userZones/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93\n    }\n}",
+      "sys": "in",
+      "s": 2
+    },
+    {
+      "i": 926,
+      "g": "Routes (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=userRoutes/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"userRoutes/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 927,
+      "g": "Routes (IN)",
+      "n": "View",
+      "m": "GET",
+      "p": "/?r=userRoutes/view",
+      "t": 0,
+      "b": "{\n    \"r\": \"userRoutes/view\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 136\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 928,
+      "g": "Routes (IN)",
+      "n": "Add",
+      "m": "GET",
+      "p": "/?r=userRoutes/add",
+      "t": 0,
+      "b": "{\n    \"r\": \"userRoutes/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"name\": \"<ROUTE_NAME>\",\n        \"imei\": \"<IMEI>\",\n        \"provider\": \"osm\",\n        \"optimized\": true,\n        \"desc\": \"<DESC>\",\n        \"startTime\": \"2016-08-01 08:00:00\",\n        \"points\": [\n            {\n                \"name\": \"Node1\",\n                \"lat\": \"24.659042\",\n                \"lng\": \"46.812979\",\n                \"diagonal\": 50\n            },\n            {\n                \"name\": \"Node2\",\n                \"lat\": \"24.6768\",\n                \"lng\": \"46.7777\",\n                \"diagonal\": 50\n            }\n        ]\n    }\n}",
+      "sys": "in",
+      "s": 1,
+      "d": "provider: osm الافتراضي أو google. optimized بيرتّب النقط لأحسن مسار."
+    },
+    {
+      "i": 929,
+      "g": "Routes (IN)",
+      "n": "Update",
+      "m": "GET",
+      "p": "/?r=userRoutes/update",
+      "t": 0,
+      "b": "{\n    \"r\": \"userRoutes/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"name\": \"<ROUTE_NAME>\",\n        \"imei\": \"<IMEI>\",\n        \"desc\": \"<DESC>\",\n        \"startTime\": \"2016-08-01 08:00:00\"\n    }\n}",
+      "sys": "in",
+      "s": 1
+    },
+    {
+      "i": 930,
+      "g": "Routes (IN)",
+      "n": "Delete",
+      "m": "GET",
+      "p": "/?r=userRoutes/delete",
+      "t": 0,
+      "b": "{\n    \"r\": \"userRoutes/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93\n    }\n}",
+      "sys": "in",
+      "s": 2
+    },
+    {
+      "i": 911,
+      "g": "Routes (IN)",
+      "n": "Generate Route",
+      "m": "GET",
+      "p": "/?r=trackers/generateRoute",
+      "t": 0,
+      "b": "{\n    \"r\": \"trackers/generateRoute\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"points\": [\n            \"24.6938715,46.6857516\",\n            \"24.599928,46.822208\"\n        ]\n    }\n}",
+      "sys": "in",
+      "d": "بيرجّع المسافة بالمتر والمدة بالثواني وpolyline بين نقطتين."
+    },
+    {
+      "i": 915,
+      "g": "Customers (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=customers/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"customers/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 931,
+      "g": "Orders (IN)",
+      "n": "List",
+      "m": "GET",
+      "p": "/?r=customerOrders/list",
+      "t": 0,
+      "b": "{\n    \"r\": \"customerOrders/list\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\"\n    }\n}",
+      "sys": "in"
+    },
+    {
+      "i": 932,
+      "g": "Orders (IN)",
+      "n": "Add",
+      "m": "GET",
+      "p": "/?r=customerOrders/add",
+      "t": 0,
+      "b": "{\n    \"r\": \"customerOrders/add\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"customerId\": 196,\n        \"addressId\": 37,\n        \"zoneId\": 357,\n        \"lat\": \"24.6249026\",\n        \"lng\": \"46.6970698\",\n        \"diagonal\": 50,\n        \"capacity\": 17,\n        \"comments\": \"<COMMENTS>\",\n        \"imei\": \"<IMEI>\",\n        \"driverId\": 5,\n        \"ticket\": \"<TICKET>\",\n        \"jobOrder\": \"<JOB_ORDER>\",\n        \"requestDate\": \"2018-05-13 15:40:22\",\n        \"extraData\": {}\n    }\n}",
+      "sys": "in",
+      "s": 1,
+      "d": "addressId مطلوب، أو ابعت lat/lng عشان يتعمل عنوان جديد."
+    },
+    {
+      "i": 933,
+      "g": "Orders (IN)",
+      "n": "Update",
+      "m": "GET",
+      "p": "/?r=customerOrders/update",
+      "t": 0,
+      "b": "{\n    \"r\": \"customerOrders/update\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"addressId\": 37,\n        \"capacity\": 17,\n        \"comments\": \"<COMMENTS>\",\n        \"imei\": \"<IMEI>\",\n        \"driverId\": 5,\n        \"requestDate\": \"2018-05-13 15:40:22\"\n    }\n}",
+      "sys": "in",
+      "s": 1
+    },
+    {
+      "i": 934,
+      "g": "Orders (IN)",
+      "n": "Change Status",
+      "m": "GET",
+      "p": "/?r=customerOrders/changeStatus",
+      "t": 0,
+      "b": "{\n    \"r\": \"customerOrders/changeStatus\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 93,\n        \"status\": 37\n    }\n}",
+      "sys": "in",
+      "s": 1
+    },
+    {
+      "i": 935,
+      "g": "Orders (IN)",
+      "n": "Delete",
+      "m": "GET",
+      "p": "/?r=customerOrders/delete",
+      "t": 0,
+      "b": "{\n    \"r\": \"customerOrders/delete\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"id\": 29\n    }\n}",
+      "sys": "in",
+      "s": 2
+    },
+    {
+      "i": 917,
+      "g": "Reports (IN)",
+      "n": "Get Settings",
+      "m": "GET",
+      "p": "/?r=reports/getSettings",
+      "t": 0,
+      "b": "{\n    \"r\": \"reports/getSettings\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"lang\": \"english\"\n    }\n}",
+      "sys": "in",
+      "d": "بيرجّع التقارير المتاحة وحقول كل تقرير — منها بتبني نداء التوليد."
+    },
+    {
+      "i": 918,
+      "g": "Reports (IN)",
+      "n": "Generate",
+      "m": "GET",
+      "p": "/?r=reports/generate",
+      "t": 0,
+      "b": "{\n    \"r\": \"reports/generate\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"reportCriteria\": {\n            \"sdt\": \"2016-02-06 00:00:00\",\n            \"edt\": \"2016-02-06 23:59:59\",\n            \"events\": [],\n            \"objects\": [\n                \"<IMEI>\"\n            ],\n            \"sensors\": [],\n            \"zones\": [],\n            \"customers\": 0,\n            \"fillingsOption\": 0,\n            \"sensorsPeriod\": 0,\n            \"speed\": 0\n        },\n        \"reportFields\": [\n            \"Last_update\",\n            \"Object\",\n            \"Name\",\n            \"loc\"\n        ],\n        \"reportName\": \"latest_update\"\n    }\n}",
+      "sys": "in",
+      "d": "التقرير بيتبعت على إيميل الحساب — مش بيرجع في الرد."
+    },
+    {
+      "i": 937,
+      "g": "Reports (IN)",
+      "n": "Concrete Trips Report",
+      "m": "GET",
+      "p": "/?r=reports/getConcreteTripsReport",
+      "t": 0,
+      "b": "{\n    \"r\": \"reports/getConcreteTripsReport\",\n    \"data\": {\n        \"apiKey\": \"<API_KEY>\",\n        \"serverId\": 1,\n        \"imei\": \"<IMEI>\",\n        \"dateFrom\": \"2018-01-13 00:00:00\",\n        \"dateTo\": \"2018-01-13 23:59:59\"\n    }\n}",
+      "sys": "in"
+    }
+  ]
+};
 const EPS = KB.endpoints.map(e => (e.sys ? e : Object.assign({sys:'avl'}, e)))
                         .concat(KB_IN.endpoints);
 const SYSNAME = { avl:{ar:'AVL', en:'AVL'}, in:{ar:'أفاقي إن', en:'Afaqy IN'} };
@@ -9356,7 +9809,12 @@ function caseReply(a){
   /* الدليل من الكولكشن: حقول العميل (route_length, engine_work, engine_idle,
      move_duration, stop_duration) موجودة بالحرف في قالب الـ Summary.
      يعني هو شايف تعريف التقرير — والقيم بتيجي من إنشاء التقرير وقراءته. */
-  if(!a.reportCase) return null;
+  if(!a.reportCase){
+    /* مش حالة التقارير — نشوف الجدول. الرد المولّد أضعف من المكتوب
+       بالإيد، بس أنفع بكتير من «ابعتلنا أدلة». */
+    const m = caseMatch(a);
+    return (m && m.h.score >= CASE_SURE) ? ruleReply(a, m) : null;
+  }
 
   const code    = a.reportCode || 'summary';
   const onCat   = /\/reports\/(lists|view)/.test(String(a.words||'') + JSON.stringify(a.paths||[]));
@@ -9447,10 +9905,259 @@ function caseReply(a){
    الفكرة إن معظم دورات الدعم بتضيع في رايح جاي على معلومة ناقصة. */
 
 /* إيه الأدلة الناقصة في الرسالة دي؟ */
+/* ═══════════ محرّك تشخيص رسايل العملاء ═══════════
+   كل قاعدة = نمط بيتكرر في رسايل التكامل، مش حالة واحدة.
+
+   hit(a)   بتقرا الدليل من الرسالة وترجّع {score, ev[]} أو null.
+            الدليل نص بيتعرض للموظف — عشان يشوف الأداة اتكلت على إيه
+            ويقدر يكذّبها، مش ياخد الحكم على عماه.
+   chain(a) السلسلة الصح. بتغذّي الرد والكولكشن الاتنين من نفس المصدر،
+            فمستحيل يختلفوا.
+
+   القاعدة اللي score بتاعها أعلى هي اللي بتتعرض. الترتيب في الجدول
+   ما بيفرقش — النتيجة هي اللي بتحكم. */
+
+/* هل الرسالة بتشتكي إن الرد رجع سليم بس من غير قيمة مفيدة؟ */
+function _saysEmpty(a){
+  return /empty|no data|no record|not return|nothing|returns \[\]|فاضي|فاضية|مرجعش|ما رجع|مفيش داتا/i
+    .test(String(a.words||''));
+}
+function _saysOk(a){
+  const raw = (a.blocks||[]).map(b=>b.raw).join(' ') + ' ' + String(a.words||'');
+  return /200|success|successful|ناجح|سليم/i.test(raw);
+}
+/* الأرقام اللي شكلها IMEI: ١٥ رقم متتالية */
+function _imeis(a){
+  const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
+  return (all.match(/\b\d{15}\b/g) || []).slice(0, 6);
+}
+/* المسارات اللي اتذكرت في الرسالة، منضّفة */
+function _paths(a){
+  return (a.paths||[]).map(p => String(p).replace(/\?.*$/, '').replace(/^https?:\/\/[^/]+/, ''))
+                      .filter(Boolean);
+}
+/* بيدوّر على الإندبوينت في قاعدة المعرفة */
+function _ep(path){
+  if(!path) return null;
+  const want = String(path).toLowerCase();
+  return (typeof EPS !== 'undefined' ? EPS : []).find(e => String(e.p||'').toLowerCase() === want) || null;
+}
+
+/* تحت العتبة دي الأداة ما بتردّش — بتقول ناقص أدلة. رقم واحد في
+   مكان واحد، عشان ما يحصلش إن الرد يطلع والأداة بتقول ناقصة أدلة. */
+const CASE_SURE = 55;
+
+const CASE_RULES = [
+
+/* ①  كتالوج مكان تنفيذ — حالة التقارير نموذج منه، مش استثناء */
+{ id:'catalog-vs-data',
+  name:{ar:'كتالوج مكان تنفيذ', en:'A catalog where execution was needed'},
+  hit(a){
+    const ps = _paths(a);
+    const cat = ps.filter(p => /\/(lists|view|templates)$/.test(p) || /\/reports\/lists/.test(p));
+    const wantsValues = /value|values|actual|real data|records|قيم|قيمة|بيانات فعلية/i.test(String(a.words||''));
+    if(a.reportCase) return {score:100, ev:[
+      t('الرسالة فيها أسماء حقول وأكوادها من غير قيم','The message carries field names and codes without values'),
+      t('والعميل طالب القيم الفعلية صراحة','and the customer explicitly asks for the actual values')]};
+    if(!cat.length || !wantsValues) return null;
+    return {score:70, ev:[
+      t(`نادى ${cat[0]} وده إندبوينت لستة`, `Called ${cat[0]}, which is a listing endpoint`),
+      t('وطالب قيم فعلية','and asked for actual values')]};
+  },
+  mistake:{ar:'نادى إندبوينت بيرجّع تعريفات وهو عايز نتيجة تنفيذ.',
+           en:'Called an endpoint that returns definitions while wanting an execution result.'},
+  why:{ar:'العائلتين اسمهم متقارب، واللستة بترجّع ٢٠٠ فمفيش حاجة توحي إن في غلط.',
+       en:'The two families are named alike, and the listing answers 200, so nothing signals a mistake.'},
+  chain(a){ return null; } },   /* التقارير ليها سلسلتها الخاصة تحت */
+
+/* ②  قرا قبل ما التوليد يخلص */
+{ id:'read-before-ready',
+  name:{ar:'قرا قبل ما يخلص', en:'Read before it was ready'},
+  hit(a){
+    const ps = _paths(a);
+    const reads = ps.filter(p => /(data-summary|data-new|\/data$|charts\/data)/.test(p));
+    if(!reads.length) return null;
+    if(!_saysEmpty(a)) return null;
+    const ev = [t(`بيقرا من ${reads[0]}`, `Reading from ${reads[0]}`),
+                t('والنتيجة راجعة فاضية','and the result comes back empty')];
+    if(_saysOk(a)) ev.push(t('والرد نفسه ٢٠٠ وناجح','while the response itself is 200 and successful'));
+    const polled = ps.some(p => /percentage/.test(p));
+    if(polled) return null;                         /* بيتابع أصلاً — النمط مش ده */
+    ev.push(t('ومفيش أي نداء على percentage في الرسالة','and no percentage call appears anywhere in the message'));
+    return {score:85, ev};
+  },
+  mistake:{ar:'قرا الداتا والتوليد لسه شغّال، فرجعت فاضية ومعاها رد سليم.',
+           en:'Read the data while generation was still running, so it came back empty with a valid response.'},
+  why:{ar:'التوليد بيحصل على السيرفر بعد الإنشاء. الرد الفاضي بييجي بـ ٢٠٠ وmessage success، فشكله نجاح مش انتظار.',
+       en:'Generation happens server-side after creation. The empty answer arrives as 200 with message success, so it reads as success rather than as waiting.'},
+  chain(a){
+    const isChart = _paths(a).some(p => /charts/.test(p));
+    const fam = isChart ? 'charts' : 'user_reports';
+    return [
+      {m:'POST', p:'/'+fam+'/percentage', body:{data:{ids:['{{report_id}}']}},
+       note:{ar:'كرّرها كل تلات ثواني لحد ما percentage توصل ١٠٠. قبل كده الصفوف مش موجودة.', en:'Repeat every few seconds until percentage reaches 100. Before that the rows do not exist.'}},
+      {m:'POST', p:'/user_reports/data-summary', body:{data:{id:'{{report_id}}'}},
+       note:{ar:'دلوقتي بس الصفوف جاهزة.', en:'Only now are the rows ready.'}}
+    ];
+  } },
+
+/* ③  IMEI مكان UID */
+{ id:'imei-vs-uid',
+  name:{ar:'IMEI مكان رقم العربية', en:'An IMEI where a unit id belongs'},
+  hit(a){
+    const ims = _imeis(a);
+    if(!ims.length) return null;
+    const ps = _paths(a);
+    const needsUid = ps.some(p => {
+      const e = _ep(p); const b = e ? String(e.b||'') : '';
+      return /unit_id|"resources"|resource_id|unitId/.test(b);
+    }) || /resources|unit_id|resource_id/i.test(String(a.words||''));
+    const err = (a.errs||[]).length || /not_found|not found|invalid|غير موجود/i.test(String(a.words||''));
+    if(!needsUid && !err) return null;
+    const ev = [t(`في الرسالة رقم من ١٥ خانة (${ims[0]}) — ده شكل IMEI`,
+                  `The message carries a 15-digit number (${ims[0]}), which is an IMEI`)];
+    if(needsUid) ev.push(t('والريكوست بياخد رقم عربية مش رقم جهاز','and the request takes a unit id, not a device id'));
+    if(err) ev.push(t('والرد رجع مش لاقي','and the response came back not-found'));
+    return {score: needsUid && err ? 80 : 60, ev};
+  },
+  mistake:{ar:'بعت رقم الجهاز (IMEI) في خانة بتاخد رقم العربية (UID).',
+           en:'Sent the device number (IMEI) where the unit id (UID) belongs.'},
+  why:{ar:'الاتنين أرقام طويلة، والـ IMEI هو اللي مكتوب على الجهاز فطبيعي حد يفتكره المعرّف. الـ UID بيتجاب من نداء تاني.',
+       en:'Both are long numbers, and the IMEI is the one printed on the device, so it is natural to assume it is the identifier. The UID comes from a separate call.'},
+  chain(a){
+    return [
+      {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
+       note:{ar:'دوّر على العربية اللي imei بتاعها = بتاعك، وخد id بتاعها.', en:'Find the unit whose imei matches yours and take its id.'}},
+      {m:'POST', p:(_paths(a)[0] || '/units/view'), body:{data:{id:'{{unit_id}}'}},
+       note:{ar:'وبعدين نفس الريكوست بس بالـ id.', en:'Then the same request, this time with the id.'}}
+    ];
+  } },
+
+/* ④  ريكوست محتاج حاجة قبله */
+{ id:'needs-prereq',
+  name:{ar:'ناقص خطوة قبله', en:'A prerequisite step is missing'},
+  hit(a){
+    const ps = _paths(a);
+    for(const p of ps){
+      const e = _ep(p);
+      if(!e) continue;
+      const b = String(e.b || '');
+      /* الحقول اللي قيمتها لازم تيجي من نداء تاني */
+      const refs = (b.match(/"(unit_id|user_id|driver_id|group_id|report_id|resource_id|template_id)"/g) || [])
+                     .map(x => x.replace(/"/g, ''));
+      if(refs.length && !/lists/.test(p)){
+        return {score:55, ev:[
+          t(`${p} بياخد ${refs.slice(0,3).join(' و')}`, `${p} takes ${refs.slice(0,3).join(', ')}`),
+          t('والقيم دي بتيجي من نداءات تانية مش من عند العميل','and those values come from other calls, not from the customer')]};
+      }
+    }
+    return null;
+  },
+  mistake:{ar:'الريكوست بياخد معرّفات بتيجي من نداءات قبله، والعميل بيملاها من عنده.',
+           en:'The request takes identifiers produced by earlier calls, and the customer is filling them in by hand.'},
+  why:{ar:'شكل البودي ما بيقولش المعرّف ده بيتجاب منين، فطبيعي حد يفتكره حاجة عنده.',
+       en:'The body shape does not say where each identifier comes from, so it is natural to assume it is something you already hold.'},
+  chain(a){
+    const p = _paths(a)[0] || '';
+    return [
+      {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
+       note:{ar:'منها بتاخد رقم العربية.', en:'This gives you the unit id.'}},
+      {m:'POST', p: p || '/units/view', body:{data:{id:'{{unit_id}}'}},
+       note:{ar:'وبعدين الريكوست الأصلي بالمعرّف الصح.', en:'Then the original request with the correct identifier.'}}
+    ];
+  } },
+
+/* ⑤  ٢٠٠ وجواه خطأ */
+{ id:'ok-with-error',
+  name:{ar:'٢٠٠ وجواه خطأ', en:'A 200 carrying an error'},
+  hit(a){
+    if(!(a.errs||[]).length) return null;
+    if(!_saysOk(a)) return null;
+    return {score:75, ev:[
+      t('الرد رجع بحالة نجاح','The response came back with a success status'),
+      t('وجواه رسالة خطأ في نفس الوقت','and carries an error message at the same time')]};
+  },
+  mistake:{ar:'الكود بيعتبر ٢٠٠ نجاح، والمنصة بتبعت أخطاء جوه ٢٠٠.',
+           en:'The integration treats 200 as success, while the platform returns errors inside a 200.'},
+  why:{ar:'ده سلوك المنصة نفسها مش غلطة العميل. أي تكامل بيقيس على الـ status code لوحده هيعدّي الخطأ ده.',
+       en:'This is the platform behaviour, not a customer mistake. Any integration that checks the status code alone will let this through.'},
+  chain(a){ return null; },
+  extra:{ar:'اقرا حقل message و status_code اللي جوه البودي، مش كود الـ HTTP بس.',
+         en:'Read the message and status_code fields inside the body, not only the HTTP code.'} },
+
+/* ⑥  فاضي مش عطلان */
+{ id:'empty-not-broken',
+  name:{ar:'فاضي مش عطلان', en:'Empty, not broken'},
+  hit(a){
+    if(!_saysEmpty(a) || !_saysOk(a)) return null;
+    if((a.errs||[]).length) return null;
+    const ps = _paths(a);
+    if(ps.some(p => /(data-summary|data-new|charts\/data)/.test(p))) return null;  /* ده نمط ② */
+    return {score:60, ev:[
+      t('الرد ٢٠٠ وناجح','The response is 200 and successful'),
+      t('والداتا راجعة فاضية من غير رسالة خطأ','and the data comes back empty with no error message')]};
+  },
+  mistake:{ar:'الرد سليم والداتا فاضية — وده مش عطل.',
+           en:'The response is valid and the data is empty — and that is not a fault.'},
+  why:{ar:'الفاضي هنا معناه إن الحساب مش شايف حاجة: يا الصلاحيات، يا مفيش موارد مربوطة، يا الفلتر ما طابقش.',
+       en:'Empty here means the account sees nothing: either permissions, or no resources assigned, or a filter that matched nothing.'},
+  chain(a){
+    return [
+      {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
+       note:{ar:'لو دي كمان رجعت فاضية، المشكلة صلاحيات مش الإندبوينت اللي بتسأل عنه.', en:'If this comes back empty too, the problem is permissions rather than the endpoint you are asking about.'}}
+    ];
+  } }
+
+];
+
+/* أعلى قاعدة اتحققت. بنرجّع الدليل كمان عشان الموظف يقدر يكذّبنا. */
+function caseMatch(a){
+  if(!a) return null;
+  let best = null;
+  CASE_RULES.forEach(r => {
+    let h = null;
+    try { h = r.hit(a); } catch(e){ h = null; }
+    if(h && h.score && (!best || h.score > best.h.score)) best = {r, h};
+  });
+  return best;
+}
+
+/* الرد المولّد من قاعدة — للحالات اللي مالهاش رد مكتوب بالإيد */
+function ruleReply(a, m){
+  const r = m.r, ch = r.chain(a);
+  const L = [];
+  L.push('Hello,');
+  L.push('');
+  L.push('Thank you for the detail. ' + (r.mistake.en));
+  L.push('');
+  L.push((r.why.en));
+  if(r.extra){ L.push(''); L.push((r.extra.en)); }
+  if(ch && ch.length){
+    L.push('');
+    L.push('The sequence that returns what you need:');
+    L.push('');
+    ch.forEach((s, i) => {
+      L.push('  ' + String(i + 1) + '. ' + s.m + ' ' + s.p);
+      L.push('     ' + JSON.stringify(s.body));
+      if(s.note) L.push('     ' + (s.note.en || s.note.ar || String(s.note)));
+      L.push('');
+    });
+    L.push('A Postman collection with these requests is attached; the identifiers move between the steps on their own.');
+  }
+  L.push('');
+  L.push('Please try this and tell us what comes back if anything differs.');
+  L.push('');
+  L.push('Best regards,');
+  return L.join('\n');
+}
+
 function caseNeeds(a){
   /* لو الحالة اتشخّصت من الرسالة نفسها، مفيش أدلة ناقصة — الإجابة كاملة تحت.
      كان بيطلب بودي ورد وحساب وهو قارى التشخيص أصلاً. */
   if(a && a.reportCase) return [];
+  /* أي قاعدة اتحققت بدليل كافي = الحالة اتشخّصت، مش ناقصة أدلة */
+  const _m = caseMatch(a);
+  if(_m && _m.h.score >= CASE_SURE) return [];
   const w = String(a.words || '');
   const all = String(a.words || '') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
   const need = [];
@@ -10046,6 +10753,10 @@ function paintCase(){
    هيبعت ولا هيسأل، من غير ما يقرا ستة بلوكات. */
 function caseVerdict(a){
   const missing = caseNeeds(a).length;
+  const m = caseMatch(a);
+  if(m && !(a && a.reportCase) && m.h.score >= CASE_SURE) return {ok:true,
+    tag: dual(m.r.name),
+    line: dual(m.r.mistake) + ' ' + t('الرد تحت فيه السلسلة الصح.','The reply below carries the correct sequence.')};
   if(a && a.reportCase) return {ok:true,
     tag:t('محسومة','Resolved'),
     line:t('العميل نادى كتالوج التقارير وهو عايز داتا التقرير. الرد تحت فيه السلسلة الصح كاملة.',

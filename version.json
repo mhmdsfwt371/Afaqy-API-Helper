@@ -1,16 +1,16 @@
 {
-  "version": "6.36",
+  "version": "6.37",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "شاشة «حلّل رسالة عميل» كانت بتفرد ستة بلوكات فوق بعض، والرد — اللي هو سبب فتح الشاشة أصلاً — كان آخر واحد تحت. اتقلبت: سطر حكم واحد فوق، بعده الرد على طول.",
-      "سطر الحكم بيقول الحالة في جملة: محسومة ولا ناقصة أدلة، والغلطة اسمها إيه. تعرف هتبعت ولا هتسأل من غير ما تقرا حاجة تانية.",
-      "التحليل كله — اللي في الرسالة، والتشخيص، وغلطة العميل، والتحقّق اللايف — اتلمّ في سطر واحد مطوي بيتفتح لما تحتاجه."
+      "التشخيص بقى جدول أنماط بدل حالة واحدة. كانت الأداة فيها حالة متشخّصة واحدة (التقارير) مربوطة في ثمن مواضع بـ if، وأي رسالة تانية بتروح على «ناقص أدلة».",
+      "ست قواعد دلوقتي: كتالوج مكان تنفيذ، قرا قبل ما التوليد يخلص، IMEI مكان رقم العربية، ناقص خطوة قبله، ٢٠٠ وجواه خطأ، وفاضي مش عطلان. وحالة التقارير بقت القاعدة الأولى في الجدول مش الأساس.",
+      "كل قاعدة بتقرا دليلها من الرسالة وبتعرضه للموظف — عشان يشوف الأداة اتكلت على إيه ويقدر يكذّبها بدل ما ياخد الحكم على عماه."
     ],
     "en": [
-      "The Analyse a customer message screen used to stack six blocks, with the reply — the reason the screen is opened at all — last. That is inverted now: a one-line verdict on top, the reply immediately under it.",
-      "The verdict states the case in a sentence: settled or missing evidence, and what the mistake is called. You know whether to send or to ask without reading anything else.",
-      "The whole analysis — what the message contained, the diagnosis, where the customer went wrong, the live verification — is gathered into one collapsed row that opens when needed."
+      "Diagnosis is now a table of patterns rather than one case. The tool had a single diagnosed case (reports) wired through eight if branches, and every other message fell through to asking for evidence.",
+      "Six rules now: a catalog where execution was needed, reading before generation finished, an IMEI where a unit id belongs, a missing prerequisite step, a 200 carrying an error, and empty rather than broken. The report case is the first rule in the table rather than the foundation.",
+      "Each rule reads its evidence from the message and shows it, so the engineer can see what the tool relied on and contradict it rather than accepting a verdict blindly."
     ]
   }
 }
