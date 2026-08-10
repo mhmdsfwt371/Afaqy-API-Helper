@@ -447,8 +447,10 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
       <button class="btn sig" id="dashLoad"></button>
       <button class="btn ghost" id="dashCsv" hidden></button>
       <button class="btn ghost" id="dashPdf" hidden></button>
+      <button class="btn ghost" id="healthGo"></button>
       <span id="dashState" style="font-size:12.5px; color:var(--muted); align-self:center"></span>
     </div>
+    <div id="healthOut"></div>
   </div></div>
   <div class="panel" style="margin-bottom:14px" id="dashBarWasl" hidden><div class="sec" style="border-top:0">
     <div class="row">
@@ -730,9 +732,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.26",
+  "version": "6.27",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.27",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "زرار «فحص شامل للـ APIs» في لوحة الأجهزة: بيشغّل سلسلة ريكوستات حقيقية على حساب العميل المتصل ويقولك كل واحد شغّال ولا لأ",
+          "السلسلة مترابطة: لستة العربيات تدّي رقم عربية لفحص الإشارات، ولستة التقارير تدّي رقم تقرير لفحص القراءة — فلو حلقة اتكسرت بيبان مكانها بالظبط",
+          "الفحص بيفرّق بين «السيرفر ردّ» و«الرد فيه اللي المفروض»: رد فيه عربيات من غير وقت آخر إشارة بيتعلّم «ردّ بس ناقص» مش «شغّال»",
+          "إنشاء التقرير ريكوست كتابة — مش بيتنفّذ إلا لما تدوس «نفّذه» وتأكّد، لأنه بيعمل تقرير فعلي في حساب العميل",
+          "في الآخر زرار بينسخ التقرير كنص جاهز للتصعيد",
+          "ملاحظة: التجربة بتشتغل من متصفحك مش من بيئة التطوير — دي مقفولة على دومينات أفاقي"
+        ],
+        "en": [
+          "A Full API check button on the device dashboard: it runs a chain of real requests against the connected customer account and tells you which are working",
+          "The chain is linked: the units list supplies a unit id for the signals check, and the reports list supplies a report id for the read check — so a broken link shows exactly where",
+          "It separates the server answering from the answer being right: a response with vehicles but no last-signal time is marked answered but incomplete rather than working",
+          "Creating a report is a write request — it runs only when you press Run it and confirm, because it creates a real report in the customer account",
+          "At the end a button copies the result as text ready to escalate with",
+          "Note: the run happens in your browser, not in the development environment, which has no access to the Afaqy domains"
+        ]
+      }
+    },
     {
       "v": "6.26",
       "date": "2026-08-05",
@@ -5651,6 +5675,194 @@ function wireSummaryHelper(e){
   };
 }
 
+/* ============ الفحص الشامل ============
+   بيشغّل سلسلة ريكوستات حقيقية على حساب العميل المتصل، ويتأكد إن كل
+   واحد بيرد ورده فيه اللي المفروض يكون فيه. كل خطوة بتاخد من اللي
+   قبلها — فلو حلقة اتكسرت، بيبان مكانها بالظبط.
+   بيشتغل من متصفح الموظف لأنه هو اللي واصل للسيرفر. */
+const HEALTH = { rows: [], busy: false, at: null };
+
+function hStep(name, path, note){ return {name, path, note, ok:null, ms:0, why:'', got:''}; }
+
+async function healthRun(){
+  if(HEALTH.busy) return;
+  if(!SESSION.token){ toast(t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first')); return; }
+  HEALTH.busy = true; HEALTH.rows = []; HEALTH.at = new Date();
+  const paint = () => { const o=$('healthOut'); if(o) o.innerHTML = healthTable(); };
+
+  const run = async (row, path, body, check) => {
+    HEALTH.rows.push(row); paint();
+    const t0 = Date.now();
+    try{
+      const r = await apiFetch(path, body, {method:'POST', timeout:120000});
+      row.ms = Date.now() - t0;
+      if(!r.ok){ row.ok=false; row.why = diagnose(r.code, r.txt) || ('HTTP ' + r.code); paint(); return null; }
+      const v = check(r.json);
+      /* «رد» مش معناه «مظبوط». warn = السيرفر ردّ بس الرد ناقص حاجة
+         المفروض تكون فيه — ودي أخطر من الفشل الصريح لأنها بتعدي. */
+      row.ok = v.ok; row.warn = v.warn || false;
+      row.why = v.why || ''; row.got = v.got || '';
+      paint();
+      return v.ok ? r.json : null;
+    }catch(err){
+      row.ms = Date.now() - t0; row.ok = false;
+      row.why = /abort/i.test(String(err)) ? t('المهلة خلصت','timed out') : t('ما وصلش للسيرفر','did not reach the server');
+      paint(); return null;
+    }
+  };
+
+  /* ١) لستة العربيات — الأساس اللي كل حاجة بعده بيبني عليه */
+  let firstUnit = null;
+  const rUnits = await run(
+    hStep(t('لستة العربيات','Units list'), '/units/lists',
+          t('الأساس — منها بناخد رقم عربية للخطوات اللي بعدها','The base — a unit id for the next steps')),
+    '/units/lists',
+    {data:{offset:0, limit:50, simplify:0, projection:['basic','last_update']}},
+    j => {
+      const items = deepItems(j);
+      if(!items.length) return {ok:false, why:t('الرد سليم بس مفيش عربيات','valid response but no vehicles')};
+      firstUnit = items[0];
+      const withTime = items.filter(x=>unitLastSeen(x.raw)).length;
+      const noField  = items.filter(x=>lastSeenMissing(x.raw)).length;
+      if(noField === items.length)
+        return {ok:true, warn:true,
+                got:t(`${items.length} عربية — بس وقت آخر إشارة مش راجع في أي واحدة`,
+                      `${items.length} vehicles — but no last-signal time in any of them`),
+                why:t('الـ projection مش راجع فيه last_update، فمينفعش تحكم أونلاين ولا أوفلاين. صعّدها لتيم مصر.',
+                      'The projection is not returning last_update, so online/offline cannot be judged. Escalate this.')};
+      return {ok:true, got:t(`${items.length} عربية · ${withTime} منهم وقت آخر إشارة راجع`,
+                             `${items.length} vehicles · ${withTime} with a last-signal time`)};
+    });
+
+  /* ٢) إشارات العربية — بتاخد رقم العربية من الخطوة اللي فاتت */
+  if(firstUnit){
+    const now = new Date(), from = new Date(now.getTime() - 7*864e5);
+    const fmt = d => d.toISOString().slice(0,19).replace('T',' ');
+    await run(
+      hStep(t('إشارات العربية','Unit signals'), '/units/signals',
+            t('آخر ٧ أيام لأول عربية في اللستة','Last 7 days for the first vehicle')),
+      '/units/signals',
+      {data:{unit_id:firstUnit.id, date:{interval:'interval', from:fmt(from), to:fmt(now),
+             interval_count:1, interval_unit:'days', including_current:true},
+             message_type:'data_messages', limit:'50', offset:'0', sensors:true, address:false}},
+      j => {
+        const n = countRows(j);
+        return n ? {ok:true, got:t(`${n} إشارة`, `${n} signals`)}
+                 : {ok:true, warn:true,
+                    got:t('رد سليم — صفر إشارات في آخر ٧ أيام','valid — zero signals in the last 7 days'),
+                    why:t('العربية دي ساكتة أسبوع، أو الإشارات مش بترجع من الإندبوينت ده. اتأكد من عربية تانية.',
+                          'Either this vehicle has been silent for a week, or signals are not returned here. Try another vehicle.')};
+      });
+  } else {
+    const r = hStep(t('إشارات العربية','Unit signals'), '/units/signals', '');
+    r.ok=false; r.why=t('اتخطّت — محتاجة رقم عربية من الخطوة اللي فاتت','skipped — needs a unit id from the previous step');
+    HEALTH.rows.push(r); paint();
+  }
+
+  /* ٣) لستة التقارير */
+  let firstReport = null;
+  await run(
+    hStep(t('لستة التقارير','Reports list'), '/user_reports/lists',
+          t('منها بناخد رقم تقرير للقراءة','A report id for the read step')),
+    '/user_reports/lists', {data:{limit:200}},
+    j => {
+      const items = deepItems(j);
+      if(!items.length) return {ok:false, why:t('مفيش تقارير في الحساب','no reports in the account')};
+      firstReport = items.find(x=>/^summary$/i.test(String(x.name||''))) || items[0];
+      return {ok:true, got:t(`${items.length} تقرير · هنجرّب على «${firstReport.name}»`,
+                             `${items.length} reports · will use "${firstReport.name}"`)};
+    });
+
+  /* ٤) قراءة داتا التقرير */
+  if(firstReport){
+    await run(
+      hStep(t('قراءة داتا التقرير','Read report data'), '/user_reports/data-summary',
+            t('برقم تقرير حقيقي من الحساب','With a real report id from the account')),
+      '/user_reports/data-summary', {data:{id:firstReport.id}},
+      j => {
+        const n = countRows(j);
+        return n ? {ok:true, got:t(`${n} صف`, `${n} rows`)}
+                 : {ok:true, warn:true,
+                    got:t('الرقم اتقبل — بس التقرير رجع فاضي','id accepted — but the report came back empty'),
+                    why:t('التقرير موجود كتعريف ولسه ما اتشغّلش على فترة، أو الفترة مفيهاش حركة.',
+                          'The report exists as a definition and has not been run over a period, or the period has no activity.')};
+      });
+  }
+
+  /* ٥) إنشاء تقرير — كتابة، فبنسأل الأول */
+  const wr = hStep(t('إنشاء تقرير','Create a report'), '/user_reports/add',
+                   t('ريكوست كتابة — بيتنفّذ بإذنك بس','A write request — runs only with your permission'));
+  wr.ok = null; wr.why = t('محتاج إذن','needs permission'); wr.write = true;
+  HEALTH.rows.push(wr); paint();
+
+  HEALTH.busy = false; paint();
+}
+
+async function healthCreateReport(){
+  const row = HEALTH.rows.find(r=>r.write);
+  if(!row) return;
+  if(!confirm(t('ده هيعمل تقرير جديد فعلًا في حساب العميل. تكمّل؟',
+                'This will actually create a new report in the customer account. Continue?'))) return;
+  row.ok = null; row.why = t('بينفّذ…','running…');
+  const o=$('healthOut'); if(o) o.innerHTML = healthTable();
+  const t0 = Date.now();
+  try{
+    const body = JSON.parse(summaryBody());
+    body.data.name = 'Summary (health check ' + new Date().toISOString().slice(0,16) + ')';
+    const r = await apiFetch('/user_reports/add', body, {method:'POST', timeout:120000});
+    row.ms = Date.now() - t0;
+    if(!r.ok){ row.ok=false; row.why = diagnose(r.code, r.txt) || ('HTTP ' + r.code); }
+    else {
+      const id = deepFindKey(r.json, 'id') || deepFindKey(r.json, '_id');
+      row.ok = true; row.got = id ? t(`اتعمل — رقمه ${String(id).slice(0,24)}`, `created — id ${String(id).slice(0,24)}`)
+                                  : t('اتعمل','created');
+    }
+  }catch(err){ row.ok=false; row.why = t('ما وصلش للسيرفر','did not reach the server'); }
+  if(o) o.innerHTML = healthTable();
+}
+
+function healthTable(){
+  if(!HEALTH.rows.length) return '';
+  const icon = r => r.ok===true ? (r.warn ? '<b style="color:var(--alert)">!</b>' : '<b style="color:var(--ok)">✓</b>')
+                  : r.ok===false ? '<b style="color:var(--alert)">✗</b>'
+                  : '<span style="color:var(--ink-2)">…</span>';
+  const okN  = HEALTH.rows.filter(r=>r.ok===true && !r.warn).length;
+  const warnN= HEALTH.rows.filter(r=>r.ok===true && r.warn).length;
+  const badN = HEALTH.rows.filter(r=>r.ok===false).length;
+  return `<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+    <h3>${t('نتيجة الفحص','Check result')}</h3>
+    <div class="note ${badN?'warn':'sig'}" style="margin-bottom:10px">
+      ${t(`${okN} مظبوط · ${warnN} ردّ بس ناقص · ${badN} فيه مشكلة`,
+          `${okN} correct · ${warnN} answered but incomplete · ${badN} failing`)}
+      ${HEALTH.busy ? ' — ' + t('لسه بيشتغل…','still running…') : ''}</div>
+    <table class="kv">
+      <tr><th style="width:6%"></th><th>${t('الخطوة','Step')}</th><th>${t('النتيجة','Outcome')}</th><th style="width:12%">${t('الوقت','Time')}</th></tr>
+      ${HEALTH.rows.map(r=>`<tr>
+        <td>${icon(r)}</td>
+        <td><b>${esc(r.name)}</b><br><code style="font-size:11px">${esc(r.path)}</code>
+            ${r.note?`<br><span style="font-size:11.5px; color:var(--ink-2)">${esc(r.note)}</span>`:''}</td>
+        <td>${r.ok===true
+              ? esc(r.got||'') + (r.warn && r.why ? `<br><span style="color:var(--alert); font-size:12px">${esc(r.why)}</span>` : '')
+              : `<span style="color:var(--alert)">${esc(r.why||'')}</span>`}
+            ${r.write && r.ok===null ? `<br><button class="btn ghost" id="hCreate" style="margin-top:6px; padding:3px 10px; font-size:12px">${t('نفّذه','Run it')}</button>` : ''}</td>
+        <td style="font-size:12px; color:var(--ink-2)">${r.ms?r.ms+'ms':''}</td>
+      </tr>`).join('')}
+    </table>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="hCopy">${t('انسخ التقرير','Copy the report')}</button>
+    </div>
+  </div></div>`;
+}
+
+function healthText(){
+  const L = [t('فحص شامل — مساعد الإنتجريشن','Health check — Integration Assistant'),
+             (HEALTH.at ? HEALTH.at.toISOString().slice(0,16).replace('T',' ') : ''), baseUrl(), ''];
+  for(const r of HEALTH.rows)
+    L.push(`${r.ok===true?(r.warn?'[ناقص]':'[مظبوط]'):r.ok===false?'[مشكلة]':'[لم ينفذ]'} ${r.name} — ${r.path}`
+         + (r.got?`\n    ${r.got}`:'') + (r.why?`\n    ${r.why}`:'') + (r.ms?`  (${r.ms}ms)`:''));
+  return L.join('\n');
+}
+
 async function reportIdCandidates(){
   const out = [];
   const push = (id, name, src) => { if(id && !out.some(x=>x.id===id)) out.push({id, name, src}); };
@@ -8825,6 +9037,17 @@ $('wsStop').onclick = ()=>{ WASL.stop = true; };
 $('wsCsv').onclick  = waslExport;
 let wsDeb; $('wsQ').addEventListener('input', ev=>{ clearTimeout(wsDeb);
   wsDeb=setTimeout(()=>{ WASL.q=ev.target.value; waslRender(); }, 140); });
+$('healthGo').textContent = t('فحص شامل للـ APIs','Full API check');
+$('healthGo').title = t('بيشغّل سلسلة ريكوستات حقيقية على الحساب المتصل ويتأكد إن ردودها مظبوطة',
+                        'Runs a chain of real requests on the connected account and checks their responses');
+$('healthGo').onclick = healthRun;
+/* أزرار جدول الفحص بتتبني مع كل رسم */
+document.addEventListener('click', ev=>{
+  const b = ev.target && ev.target.closest && ev.target.closest('#hCopy, #hCreate');
+  if(!b) return;
+  if(b.id === 'hCopy'){ copy(healthText(), t('التقرير اتنسخ','Report copied')); }
+  else healthCreateReport();
+});
 $('dashLoad').onclick = dashLoadUnits;
 $('dashCsv').onclick  = dashExport;
 $('dashPdf').onclick  = dashPrint;

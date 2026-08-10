@@ -1,16 +1,16 @@
 {
-  "version": "6.26",
+  "version": "6.27",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "تصحيح لازم أقوله: قلت إن الكولكشن نفسه فيه بوديز مقصوصة — ده كان غلط. الكولكشن الأصلي سليم، والقص كان في قاعدة المعرفة اللي الأداة اتبنت منها",
-      "اتصلح من الملف الأصلي: 22 ريكوست رجعت بوديها كاملة، و28,667 حرف كانوا ضايعين رجعوا",
-      "أكبرهم إنشاء التقرير: كان 1,636 حرف وبقى 8,749 — من 6 حقول لـ19 حقل، ومعاهم مفاتيح كانت ضايعة خالص: resources (العربيات) وdate (الفترة) وuser_id"
+      "زرار «فحص شامل للـ APIs» في لوحة الأجهزة: بيشغّل سلسلة ريكوستات حقيقية على حساب العميل المتصل ويقولك كل واحد شغّال ولا لأ",
+      "السلسلة مترابطة: لستة العربيات تدّي رقم عربية لفحص الإشارات، ولستة التقارير تدّي رقم تقرير لفحص القراءة — فلو حلقة اتكسرت بيبان مكانها بالظبط",
+      "الفحص بيفرّق بين «السيرفر ردّ» و«الرد فيه اللي المفروض»: رد فيه عربيات من غير وقت آخر إشارة بيتعلّم «ردّ بس ناقص» مش «شغّال»"
     ],
     "en": [
-      "A correction I owe you: I said the collection itself contained truncated bodies — that was wrong. The original collection is intact; the truncation was in the knowledge base the tool was built from",
-      "Repaired from the original file: 22 requests recovered their full bodies, and 28,667 characters that had been lost came back",
-      "The largest is the create-report request: it went from 1,636 characters to 8,749 — from 6 fields to 19, along with keys that were missing entirely: resources (the vehicles), date (the period) and user_id"
+      "A Full API check button on the device dashboard: it runs a chain of real requests against the connected customer account and tells you which are working",
+      "The chain is linked: the units list supplies a unit id for the signals check, and the reports list supplies a report id for the read check — so a broken link shows exactly where",
+      "It separates the server answering from the answer being right: a response with vehicles but no last-signal time is marked answered but incomplete rather than working"
     ]
   }
 }
