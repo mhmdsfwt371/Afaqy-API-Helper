@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.24",
+  "version": "6.25",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.25",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "اكتشاف مهم: عشر ريكوستات في الكولكشن بودياها مقصوص فعلًا — مكتوب جواه «مختصر» — و١٦ ريكوست بودياهم مش JSON صالح. اللي ينسخهم للعميل هيفشل وهو مش عارف ليه",
+          "الأداة بقت تكشفهم وتحذّرك قبل ما تنسخ، بدل ما تكتشفها من رد العميل",
+          "زرار «ابنيلي بودي Summary» على ريكوست إنشاء التقرير: بيبني بودي كامل وصالح بحقوله السبعة — نفس الأكواد اللي العميل بعتها بالحرف",
+          "وزرار «دوّر عليه في حساب العميل»: بيدوّر على أي تقرير أو قالب اسمه Summary أو الملخص، ويوريك أرقامهم — ولو مفيش بيقولك إنه محتاج يتعمل",
+          "العينة في الكولكشن اسمها Summary By Driver، ودي مش اللي العميل عايزه — الفرق بقى مكتوب صراحة"
+        ],
+        "en": [
+          "An important discovery: ten requests in the collection have genuinely truncated bodies — the word truncated sits inside them — and sixteen carry bodies that are not valid JSON. Copying those to a customer fails with no visible reason",
+          "The tool now detects them and warns before you copy, rather than letting you find out from the customer's reply",
+          "A Build me a Summary body button on the create-report request: it produces a complete, valid body with its seven fields — the exact codes the customer sent",
+          "And a Find it in the customer account button: it searches for any report or template named Summary, shows their ids, and tells you it needs creating when there is none",
+          "The collection sample is named Summary By Driver, which is not what the customer wants — that difference is now stated plainly"
+        ]
+      }
+    },
     {
       "v": "6.24",
       "date": "2026-08-05",
@@ -3119,6 +3139,7 @@ function _renderDetail(e, why){
     ${(e.h&&e.h.length) ? `<div class="sec"><h3>${t('هيدرز خاصة','Special headers')}</h3><table class="kv">${e.h.map(h=>`<tr><td>${esc(h.k)}</td><td>${esc(h.v)}</td></tr>`).join('')}</table></div>` : ''}
 
     ${isReportEp(e) ? reportLifecycle(e) : ''}
+    ${summaryHelper(e)}
     ${scopeBox(e)}
 
     ${b ? (()=>{ const pr=prepBody(e), u=SESSION.unit;
@@ -3225,6 +3246,7 @@ function _renderDetail(e, why){
     const ep2 = EPS.find(x=>String(x.i)===b.dataset.goep);
     if(ep2){ showView('search'); select(ep2, []); pushRecent(ep2); }
   });
+  wireSummaryHelper(e);
   wireScope(e);
   /* ريسيت: الجلسة بتفضل شايلة الرقم والنطاق من محاولة سابقة، والموظف
      مش لاقي طريقة يبدأ من نضيف. */
@@ -5497,6 +5519,105 @@ function wireScope(e){
 }
 
 /* بيجمع كل الأرقام اللي ممكن تكون رقم التقرير — من مصادرها المختلفة */
+/* ============ بودي مقصوص أو مكسور في الكولكشن ============
+   عشر ريكوستات في الكولكشن بودياها مقصوص («… مختصر»)، و16 مش JSON
+   صالح. اللي ينسخهم للعميل هيفشل. بنكشفهم ونقول للموظف قبل ما ينسخ. */
+function bodyTruncated(e){
+  const b = (e && e.b) || '';
+  return /\.\.\.\s*\(|مختصر|truncated/i.test(b);
+}
+function bodyBroken(e){
+  const b = ((e && e.b) || '').trim();
+  if(!b.startsWith('{')) return false;
+  try{ JSON.parse(b); return false; }catch(_){ return true; }
+}
+
+/* حقول قالب الـ Summary — من الكولكشن نفسه (code:"summary")، والمقصوص
+   منها مكمّل بنفس الأكواد اللي العميل بعتها في حالته. */
+const SUMMARY_FIELDS = [
+  {name:'Date',                  code:'date',                   format:'date'},
+  {name:'Route Length',          code:'route_length',           format:'distance'},
+  {name:'Engine Work Duration',  code:'engine_work',            format:'duration'},
+  {name:'Engine Move Duration',  code:'move_duration',          format:'duration'},
+  {name:'Engine Idle',           code:'engine_idle',            format:'duration'},
+  {name:'Stop Duration',         code:'stop_duration',          format:'duration'},
+  {name:'Engine Work Percentage',code:'engine_work_percentage', format:'label'}
+];
+
+function summaryBody(){
+  return JSON.stringify({data:{
+    name:'Summary', code:'summary',
+    fields: SUMMARY_FIELDS.map((f,i)=>({
+      name:f.name, code:f.code, format:f.format, order:i,
+      selected:true, active:true, readonly:'',
+      titles:{ar:f.name, en:f.name}, aggregate:'None', minWidth:100, maxWidth:100
+    })),
+    options:['date'],
+    titles:{ar:'الملخص', en:'Summary'},
+    resources_type:'units',
+    grouping:[], filtering:[],
+    exports:{data:true, pdf:true, excel:true}
+  }}, null, 4);
+}
+
+function summaryHelper(e){
+  if(!/^\/user_reports\/add$|^\/user_report_templates\/(add|edit)$/.test(e.p||'')) return '';
+  const cut = bodyTruncated(e), broke = bodyBroken(e);
+  return `<div class="sec">
+    <h3>${t('عايز Summary مش Summary By Driver؟','Want Summary, not Summary By Driver?')}</h3>
+    ${(cut||broke) ? `<div class="note warn" style="margin-bottom:8px">
+      <b>${t('خد بالك: البودي اللي تحت ناقص في الكولكشن نفسه.','Careful: the body below is incomplete in the collection itself.')}</b><br>
+      ${cut ? t('مكتوب فيه «مختصر» — يعني اتقص وقت التصدير. لو نسخته للعميل هيفشل.',
+                'It says truncated — it was cut when the collection was exported. Copying it to a customer will fail.') : ''}
+      ${broke ? ' ' + t('وكمان مش JSON صالح.','And it is not valid JSON.') : ''}</div>` : ''}
+    <div class="note" style="margin-bottom:8px">${t(
+      'العينة في الكولكشن اسمها Summary By Driver. لو عايز الملخص العادي، أنا أبنيلك بودي كامل بحقوله السبعة — نفس الأكواد اللي العميل بعتها.',
+      'The collection sample is Summary By Driver. For the plain summary, I can build you a complete body with its seven fields — the same codes the customer sent.')}</div>
+    <div class="row">
+      <button class="btn sig" id="sumBuild">${t('ابنيلي بودي Summary','Build me a Summary body')}</button>
+      <button class="btn ghost" id="sumFind">${t('دوّر عليه في حساب العميل','Find it in the customer account')}</button>
+      <span id="sumState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+    </div>
+    <div id="sumOut"></div>
+  </div>`;
+}
+
+function wireSummaryHelper(e){
+  const build = $('sumBuild');
+  if(build) build.onclick = ()=>{
+    OVERRIDES[e.i] = {body: JSON.parse(summaryBody())};
+    renderDetail(e, []);
+    toast(t('البودي اتبنى — راجعه قبل ما تبعته','Body built — review it before sending'));
+  };
+  const find = $('sumFind');
+  if(find) find.onclick = async ()=>{
+    if(!SESSION.token){ $('sumState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
+    find.disabled = true; $('sumState').textContent = t('بيدوّر…','Searching…');
+    const hits = [];
+    const look = async (path, body, label) => {
+      try{
+        const r = await apiFetch(path, body, {method:'POST', timeout:60000});
+        if(!r.ok) return;
+        for(const it of deepItems(r.json))
+          if(/summary|ملخص/i.test(String(it.name||''))) hits.push({name:it.name, id:it.id, src:label});
+      }catch(_){}
+    };
+    await look('/user_report_templates/lists', {data:{limit:1000}}, '/user_report_templates/lists');
+    await look('/user_reports/lists', {data:{limit:200}}, '/user_reports/lists');
+    $('sumState').textContent = '';
+    find.disabled = false;
+    $('sumOut').innerHTML = hits.length
+      ? `<div class="note sig" style="margin-top:10px"><b>${t(`لقينا ${hits.length}:`, `Found ${hits.length}:`)}</b></div>
+         <table class="kv" style="margin-top:6px">${hits.slice(0,20).map(h=>`<tr>
+           <td>${esc(h.name)}</td><td><code style="font-size:11.5px">${esc(h.id)}</code></td>
+           <td style="font-size:11.5px; color:var(--ink-2)">${esc(h.src)}</td></tr>`).join('')}</table>`
+      : `<div class="note warn" style="margin-top:10px">
+          <b>${t('مفيش تقرير اسمه Summary في الحساب ده.','No report named Summary in this account.')}</b><br>
+          ${t('يبقى محتاج يتعمل — دوس «ابنيلي بودي Summary» فوق، راجعه، وبعدين شغّل الريكوست.',
+              'So it needs creating — press Build me a Summary body above, review it, then run the request.')}</div>`;
+  };
+}
+
 async function reportIdCandidates(){
   const out = [];
   const push = (id, name, src) => { if(id && !out.some(x=>x.id===id)) out.push({id, name, src}); };

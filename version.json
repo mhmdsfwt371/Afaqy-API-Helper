@@ -1,16 +1,16 @@
 {
-  "version": "6.24",
+  "version": "6.25",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "إصلاح حكم مهم: لما السيرفر بيقبل رقم التقرير ويرجّع رد فاضي، ده مش فشل — ده معناه إن الرقم والمسار صح والتقرير نفسه مفيهوش بيانات. الأداة كانت بتحسبها فشل وتقول «ولا رقم اشتغل» وتضيّع الإجابة",
-      "دلوقتي بتقول: «الرقم مظبوط والمسار مظبوط — التقرير فاضي»، وتشرح إن التقرير تعريف موجود لسه ما اتشغّلش على فترة",
-      "خريطة دورة حياة التقرير اتضافت على ريكوستات التقارير: إنشاء التقرير، هات رقمه، اقرا داتاه، صدّره — والريكوست اللي انت فيه متعلّم"
+      "اكتشاف مهم: عشر ريكوستات في الكولكشن بودياها مقصوص فعلًا — مكتوب جواه «مختصر» — و١٦ ريكوست بودياهم مش JSON صالح. اللي ينسخهم للعميل هيفشل وهو مش عارف ليه",
+      "الأداة بقت تكشفهم وتحذّرك قبل ما تنسخ، بدل ما تكتشفها من رد العميل",
+      "زرار «ابنيلي بودي Summary» على ريكوست إنشاء التقرير: بيبني بودي كامل وصالح بحقوله السبعة — نفس الأكواد اللي العميل بعتها بالحرف"
     ],
     "en": [
-      "An important verdict fix: when the server accepts a report id and returns an empty response, that is not a failure — it means the id and the path are right and the report itself holds no data. The tool counted it as failure and said no id worked, discarding the real answer",
-      "It now says the id and the path are right and the report is empty, and explains that the report exists as a definition that has not been run over a period",
-      "A report lifecycle map was added to report requests: create the report, get its id, read its data, export it — with the request you are on marked"
+      "An important discovery: ten requests in the collection have genuinely truncated bodies — the word truncated sits inside them — and sixteen carry bodies that are not valid JSON. Copying those to a customer fails with no visible reason",
+      "The tool now detects them and warns before you copy, rather than letting you find out from the customer's reply",
+      "A Build me a Summary body button on the create-report request: it produces a complete, valid body with its seven fields — the exact codes the customer sent"
     ]
   }
 }
