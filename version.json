@@ -1,16 +1,16 @@
 {
-  "version": "6.14",
+  "version": "6.15",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "نطاق التقرير: تختار «كل العربيات» أو «عربيات محددة» وتلزق الـ IMEIs — والأداة بتروح تجيب الـ UIDs بتاعهم وتحطهم في الريكوست",
-      "اللي مش موجود في الحساب بيتقالك بالاسم بدل ما التقرير يرجع ناقص من غير سبب",
-      "بودي لستة التقارير اتصلح: كان بيتبعت بشكل عادي {limit} والكولكشن بيقول data مصفوفة جواها filters — وده كان بيخلي رقم التقرير اللي بنجيبه مش صالح ويرجع not_found"
+      "تصحيح: الرد الجاهز كان بيدل على إندبوينت تنفيذ على دومين تقارير تاني — والصح إن حقول العميل موجودة بالحرف في قالب code:\"summary\" في الكولكشن، يعني هو شايف تقرير الـ Summary والقيم بتيجي من تشغيله",
+      "الرد بقى يدل على /user_reports/data-summary برقم تقرير الـ Summary من حساب العميل نفسه، ويقول إزاي يجيبه من /user_reports/lists ويفسّر سبب not_found",
+      "الرد بقى يذكر إن القالب نفسه فيه أعمدة تاريخ البداية والنهاية (sdt وedt) — وده اللي بيوضّح إن التشغيل محتاج نطاق زمني"
     ],
     "en": [
-      "Report scope: choose All vehicles or Specific vehicles and paste the IMEIs — the tool fetches their UIDs and puts them into the request",
-      "Anything not present in the account is named back to you, instead of the report silently coming back incomplete",
-      "The report-list body was corrected: it was being sent as a plain {limit} while the collection shows data as an array carrying filters — which is why the report id we fetched was not valid and came back not_found"
+      "Correction: the drafted reply pointed at an execution endpoint on a separate reports domain. The evidence says otherwise — the customer's fields appear verbatim in the template whose code is \"summary\", so they are looking at the Summary report and the values come from running it",
+      "The reply now points at /user_reports/data-summary with the id of the Summary report in the customer's own account, explains how to list it from /user_reports/lists, and why a foreign id returns not_found",
+      "It now notes that the template itself carries start-date and end-date columns (sdt, edt), which is what shows a run needs a period"
     ]
   }
 }

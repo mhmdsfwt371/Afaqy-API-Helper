@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.14",
+  "version": "6.15",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.15",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "تصحيح: الرد الجاهز كان بيدل على إندبوينت تنفيذ على دومين تقارير تاني — والصح إن حقول العميل موجودة بالحرف في قالب code:\"summary\" في الكولكشن، يعني هو شايف تقرير الـ Summary والقيم بتيجي من تشغيله",
+          "الرد بقى يدل على /user_reports/data-summary برقم تقرير الـ Summary من حساب العميل نفسه، ويقول إزاي يجيبه من /user_reports/lists ويفسّر سبب not_found",
+          "الرد بقى يذكر إن القالب نفسه فيه أعمدة تاريخ البداية والنهاية (sdt وedt) — وده اللي بيوضّح إن التشغيل محتاج نطاق زمني",
+          "وبيسأل العميل سؤال فاصل: هو عايز تقرير مُجمَّع ولا إشارات أجهزة خام؟ لأن دول مسارين مختلفين",
+          "الاختبار بقى يحرس الإجابة بالدليل: لازم الحقول تكون في القالب، ولازم الرد يدل على داتا الـ Summary، وممنوع يرجع يدل على دومين التنفيذ التاني"
+        ],
+        "en": [
+          "Correction: the drafted reply pointed at an execution endpoint on a separate reports domain. The evidence says otherwise — the customer's fields appear verbatim in the template whose code is \"summary\", so they are looking at the Summary report and the values come from running it",
+          "The reply now points at /user_reports/data-summary with the id of the Summary report in the customer's own account, explains how to list it from /user_reports/lists, and why a foreign id returns not_found",
+          "It now notes that the template itself carries start-date and end-date columns (sdt, edt), which is what shows a run needs a period",
+          "And it asks the customer a decisive question: do they want a summarised report or raw device signals? Those are two different paths",
+          "The test now guards the answer with evidence: the fields must exist in the template, the reply must point at the Summary data endpoint, and pointing back at the other execution domain fails the build"
+        ]
+      }
+    },
     {
       "v": "6.14",
       "date": "2026-08-05",
@@ -7231,25 +7251,29 @@ function analyzeCase(text){
 
 /* الرد الجاهز للعميل — بلغة رسالته */
 function caseReply(a){
-  const gen = EPS.find(e => e.n === 'EXCE BETA REPORTS');
-  const url = gen ? gen.p : 'https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID';
+  /* الدليل من الكولكشن: حقول العميل (route_length, engine_work, engine_idle,
+     move_duration, stop_duration) موجودة بالحرف في قالب code:"summary".
+     يعني هو شايف قالب تقرير الـ Summary — والقيم بتيجي من تشغيل التقرير
+     على نطاق زمني وعربيات، مش من نداء تاني على القالب. */
+  const dataEp = EPS.find(e => e.p === '/user_reports/data-summary' && sysOf(e) === 'avl');
+  const listEp = EPS.find(e => e.p === '/user_reports/lists' && sysOf(e) === 'avl');
   if(a.reportCase){
     return [
       'Hello,',
       '',
-      'Thank you for the detailed report — your reading of the response is correct.',
+      'Thank you for the detailed write-up — your reading of the response is correct, and the fields you listed identify exactly which report you are looking at.',
       '',
-      '1) Yes. The endpoint you called returns the report definition: the list of columns, their codes, their order and how each one aggregates. It is the report configuration, not its output, so it carries no values by design.',
+      '1) Yes. What you received is the report definition. The fields you quoted — date, route_length, engine_work, engine_work_percentage, move_duration, engine_idle, stop_duration — are the columns of the Summary report template. The object describes each column: its label, its code, its order and how it aggregates. It is the report configuration, so it carries no values by design.',
       '',
-      '2) To get the values, execute the report:',
-      '   POST ' + url,
-      '   REPORT_ID is the id of the report you already received in that response, and USER_ID is the user the report runs as.',
+      '2) The values come from running that report against a period, not from another call on the template. Use the report data endpoint:',
+      '   POST ' + (dataEp ? dataEp.p : '/user_reports/data-summary'),
+      '   The id in the body is the id of your Summary report in your own account. Ids from another account or from documentation samples return not_found — you can list yours with ' + (listEp ? listEp.p : '/user_reports/lists') + '.',
       '',
-      '3) The execution call is where the run scope belongs — the date range and the vehicles or resources you want the report to cover. Please confirm the exact body with us for your report type before you build against it.',
+      '3) A report run needs a scope: the date range and the vehicles it should cover. The template itself carries start-date and end-date columns (sdt, edt), which is how each row is stamped. Please confirm the exact body for your report type with us before you build against it, so you send the range and the vehicle list in the shape the platform expects.',
       '',
-      '4) On the mapping: the execution response returns the rows, and each value is keyed by the same field code you already have from the definition — date, route_length, engine_work, and the rest. So the definition gives you the columns and the labels, the execution gives you the rows, and the field code is what joins them.',
+      '4) On the mapping: the run returns rows, and each value is keyed by the same field code you already hold from the definition — date, route_length, engine_work, and the rest. The definition gives you the columns and the labels, the run gives you the rows, and the field code joins them.',
       '',
-      'In short: keep the call you have for building the table header, and add the execution call for the data.',
+      'One note that may save you time: if what you actually need is raw device signals over a period rather than a summarised report, that is a different call and we can point you to it — tell us which of the two you are building.',
       '',
       'Best regards,'
     ].join('\n');
@@ -7743,17 +7767,19 @@ function renderCase(text){
 
   /* ٢) الغلط فين + التوجيه */
   if(a.reportCase){
-    const gen = EPS.find(e => e.n === 'EXCE BETA REPORTS');
+    const dataEp2 = EPS.find(e => e.p === '/user_reports/data-summary' && sysOf(e) === 'avl');
     L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
       <h3>${t('التشخيص','The diagnosis')}</h3>
       <div class="note warn"><b>${t('العميل نادى الإندبوينت الغلط للغرض ده.','The customer called the wrong endpoint for what they want.')}</b><br>
         ${t('اللي معاه تعريف التقرير: أسماء الأعمدة وأكوادها وترتيبها وطريقة تجميعها. ده إعداد التقرير مش نتيجته، فطبيعي ما فيهوش قيم.',
             'What they have is the report definition: column names, codes, order and aggregation. That is the report configuration, not its output, so it carries no values.')}</div>
       <div class="note sig" style="margin-top:8px"><b>${t('الصح','The right call')}:</b>
-        <code>POST ${esc(gen ? gen.p : 'https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID')}</code><br>
-        ${t('الـ REPORT_ID هو id التقرير اللي معاه أصلًا، والـ USER_ID المستخدم اللي هيتشغّل باسمه. الربط بين الاتنين بيتم بالـ code بتاع كل حقل.',
-            'REPORT_ID is the report id they already have, USER_ID is the user it runs as. The two join on each field code.')}</div>
-      ${gen ? `<div class="row" style="margin-top:10px"><button class="btn ghost" data-goep="${gen.i}">${t('افتح الريكوست ده','Open that request')}</button></div>` : ''}
+        <code>POST ${esc(dataEp2 ? dataEp2.p : '/user_reports/data-summary')}</code><br>
+        ${t('الـ id في البودي هو رقم تقرير الـ Summary في حساب العميل نفسه — أرقام حساب تاني بترجع not_found. اللستة من /user_reports/lists.',
+            'The id in the body is the id of the Summary report in the customer own account — ids from another account return not_found. List them from /user_reports/lists.')}<br>
+        ${t('الحقول اللي بعتها (route_length و engine_work و stop_duration…) موجودة بالحرف في قالب code:"summary" — فده تقرير الـ Summary مش غيره.',
+            'The fields they sent — route_length, engine_work, stop_duration — appear verbatim in the template with code "summary", so this is the Summary report.')}</div>
+      ${dataEp2 ? `<div class="row" style="margin-top:10px"><button class="btn ghost" data-goep="${dataEp2.i}">${t('افتح الريكوست ده','Open that request')}</button></div>` : ''}
       <div class="note" style="margin-top:8px">${t('محتاج تأكيد قبل ما تبعت: بودي التنفيذ (نطاق التواريخ والعربيات) مش متسجّل في الكولكشن — اسأل تيم التقارير.',
             'Confirm before sending: the execution body — date range and vehicles — is not recorded in the collection. Ask the reports team.')}</div>
     </div></div>`);
