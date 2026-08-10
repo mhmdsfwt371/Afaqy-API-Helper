@@ -1,0 +1,98 @@
+Dear <customer first name>,
+
+Thank you for the detail — your reading of the response is correct, and the
+endpoint you named tells us exactly what is happening. Attached is a Postman
+collection that runs the whole sequence end to end. Taking your four questions
+in order:
+
+
+1) Which endpoint returns the actual data for summary_beta
+
+/reports/lists is the catalog of report types. It returns each type and the
+definition of its columns — name, code, order, aggregation. A catalog has no
+values by design; it describes the report, it does not run it. That is why the
+response looks like metadata: it is metadata.
+
+The values live in a different family — /user_reports/… rather than /reports/…
+— and reading them is a chain of four calls:
+
+  a. POST /user_reports/add           creates the run, returns the report id
+  b. POST /user_reports/percentage    generation progress; repeat until it is 100
+  c. POST /user_reports/data-summary  the aggregated summary, one row per vehicle
+  d. POST /user_reports/data-new      the detail behind one vehicle, by resource_id
+
+Steps c and d answer different needs. Use c for the summary table you described,
+and d when you need the breakdown behind a single vehicle. /user_reports/export
+returns the same result as a file.
+
+Step b is the one that is easy to miss, and it is the reason most integrations
+stall here. The report is generated asynchronously, so immediately after step a
+the rows do not exist yet. Reading them at that moment returns an empty data
+array with status_code 200 and message "success" — a completely valid response
+that looks like a failure. Poll the percentage until it reaches 100, then read.
+
+
+2) The parameters required
+
+  code                    the report code you already have from the catalog
+  fields                  the columns you want, in the same shape the catalog
+                          gives them (name, code, format, order, aggregate)
+  resources               the vehicle ids — not IMEIs. If you hold IMEIs,
+                          resolve them first with POST /units/lists and take
+                          the id of each unit
+  selected_resource_type  "units", or "drivers" for the by-driver variants
+  date                    from and to as YYYY-MM-DD HH:MM:SS, together with
+                          interval, interval_count and interval_unit
+  user_id                 the account the report is filed under; the login
+                          response returns it in data.user.id
+
+
+3) Is another call needed after /reports/lists
+
+Yes — the chain above. /reports/lists on its own can never return values,
+however the parameters are varied. Keep it for building your column headers and
+for letting your user pick a report type.
+
+
+4) A sample request and response
+
+The attached collection contains all of it as runnable requests, in order, with
+every body filled in. Open the collection Variables tab, put in your username
+and password (or paste a token directly), optionally set an IMEI to target one
+vehicle, set the date range, and run it from top to bottom. The token, user id,
+unit id and report id are carried between the requests automatically, and the
+progress request loops on its own until generation completes.
+
+In outline:
+
+  POST {{base_url}}/user_reports/add?token=...
+  → { "data": { "id": "<REPORT_ID>" } }
+
+  POST {{base_url}}/user_reports/percentage?token=...
+  { "data": { "ids": ["<REPORT_ID>"] } }
+  → { "data": [ { "reportId": "<REPORT_ID>", "percentage": 100 } ] }
+
+  POST {{base_url}}/user_reports/data-summary?token=...
+  { "data": { "id": "<REPORT_ID>" } }
+
+  POST {{base_url}}/user_reports/data-new?token=...
+  { "data": { "id": "<REPORT_ID>", "resource_id": "<UNIT_ID>" } }
+
+The keys in the last two responses are the same field codes you already hold —
+date, route_length, engine_work, move_duration, engine_idle, stop_duration —
+so that is where your Date: 10-08-2026 and Route Length: 70 km appear with
+their values rather than their definitions.
+
+One note on housekeeping: every create call stores a report on the account.
+While you are testing, remove it afterwards with POST /user_reports/delete and
+the same id. The last request in the collection does this.
+
+In short: /reports/lists gives you the column headers, add plus percentage
+produce the run, data-summary gives the summary table, and data-new gives the
+per-vehicle detail. If a read comes back empty, check the percentage before
+anything else — nine times out of ten the report had simply not finished.
+
+Please try the attached collection and let us know if anything does not behave
+as described.
+
+Best regards,
