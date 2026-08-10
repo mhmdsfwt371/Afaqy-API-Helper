@@ -732,9 +732,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.33",
+  "version": "6.34",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.34",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "سيناريو جديد: «تقرير Summary — الحساب كله أو مجموعة». تحدد النطاق، يعمل التقرير، يتابع التوليد لحد ١٠٠٪، يقرا الصفوف، ويصدّر — بالترتيب اللي الشاشة نفسها بتمشي بيه.",
+          "متابعة التوليد بقت خطوة صريحة على /user_reports/percentage بشريط تقدّم. من غيرها بتقرا داتا لسه ما اتولدتش فترجع فاضية والرد سليم — وده أشهر سبب لبلاغ «التقرير مش راجع».",
+          "الرد الفاضي بقى متفرّق: يا التوليد لسه شغّال يا العربيات فعلاً ما تحركتش في الفترة. الأداة بتقول أنهي واحدة فيهم بدل ما تسيبك تخمّن.",
+          "جنب كل عربية في نتيجة التقرير زرار «تفاصيل» بيجيب صفوفها لوحدها من /user_reports/data-new بـ resource_id — الفرق بينها وبين data-summary اتوضّح.",
+          "التصدير بقى من جوه السيناريو باختيار نوع الملف، ومكتوب فيه الفرق بين /user_reports/export الموثّق و/user_reports/request-export اللي الشاشة الجديدة بتستخدمه.",
+          "«حلّل رسالة عميل» بقى يطلّع السلسلة الأربعة كاملة: add ثم percentage ثم data-summary للملخص المجمّع ثم data-new بـ resource_id لتفاصيل عربية واحدة — بدل ما كان بيدي القراءة الأولى بس."
+        ],
+        "en": [
+          "New scenario: Summary report for the whole account or one group. Choose the scope, create the report, follow generation to 100%, read the rows, export — in the order the platform itself uses.",
+          "Following generation is now an explicit step on /user_reports/percentage with a progress bar. Without it you read data that has not been generated yet, so the rows come back empty with a perfectly valid response — the most common cause of a report is not returning report.",
+          "An empty result is now told apart: either generation is still running, or the vehicles genuinely did not move in the period. The tool says which, instead of leaving you to guess.",
+          "Beside each vehicle in the result is a detail button that pulls its own rows from /user_reports/data-new using resource_id — the difference from data-summary is spelled out.",
+          "Export now runs inside the scenario with a file-type picker, and states the difference between the documented /user_reports/export and the /user_reports/request-export the newer screen uses.",
+          "Analyse a customer message now produces the full four-call chain: add, then percentage, then data-summary for the aggregated view, then data-new with resource_id for a single vehicle — instead of only the first read."
+        ]
+      }
+    },
     {
       "v": "6.33",
       "date": "2026-08-10",
@@ -2580,6 +2602,37 @@ const DOCS = {
           "The difference from the main platform: it shows the same checkbox list (car battery, device battery, SOS, temperature, humidity, weight) for every device alike. This tool does not guess — if a device has no such sensor, it simply will not appear.",
           "A plain GPS unit with no extra sensors returns an empty result, and the panel makes clear that is a valid server response rather than a gap in the tool — entirely normal for a simple tracker.",
           "Clicking the same row again closes the panel. Loading vehicles again (Fetch vehicles) clears the selection."
+        ]
+      }
+    },
+    {
+      "since": "6.34",
+      "t": {
+        "ar": "تقرير Summary — على الحساب كله أو على مجموعة",
+        "en": "Summary report — for the whole account or one group"
+      },
+      "b": {
+        "ar": [
+          "من تبويب «سيناريوهات جاهزة» اختار «تقرير Summary — الحساب كله أو مجموعة». حدّد الفترة، وبعدها اختار النطاق: كل عربيات الحساب، أو مجموعة واحدة من مجموعات الحساب.",
+          "الأداة بتاخد الأعمدة وكود التقرير من قالب موجود عند العميل نفسه — ما بتخترعش أعمدة، وما بتبعتش أرقام العينة اللي في الكولكشن.",
+          "أهم خطوة هي «متابعة التوليد». بعد ما التقرير يتعمل، الرد بيرجّع رقم التقرير بس — الصفوف لسه ما اتولدتش. الأداة بتسأل /user_reports/percentage كل تلات ثواني وتوريك شريط تقدّم لحد ١٠٠٪.",
+          "من غير الخطوة دي، لو قريت الداتا على طول بترجع فاضية والرد status_code 200 وmessage success. ده مش عطل ولا نقص صلاحية — التقرير ببساطة لسه بيتجهّز. ده أشهر سبب لبلاغ «عملت التقرير وما رجعش داتا».",
+          "لما التوليد يخلص، بتقرا الصفوف من /user_reports/data-summary — نفس الأرقام اللي بتظهر في شاشة التقارير: المسافة، ومدة تشغيل المحرك، ومدة التحرك والتوقف، وأعلى سرعة.",
+          "لو الصفوف رجعت فاضية بعد ١٠٠٪، يبقى العربيات دي فعلاً ما تحركتش في الفترة — وده رد نهائي للعميل مش تخمين.",
+          "جنب كل عربية زرار «تفاصيل» بيجيب صفوفها لوحدها من /user_reports/data-new بـ resource_id. الفرق: data-summary بترجع صف مجمّع لكل عربية، وdata-new بترجع تفاصيل عربية واحدة.",
+          "آخر خطوة هي التصدير: بتختار PDF أو Excel أو HTML، والأداة بتنده /user_reports/export بنفس رقم التقرير. لو شفت في شبكة الشاشة الجديدة /user_reports/request-export بحقل format بدل type — ده نفس الغرض بإصدار أحدث، والأداة بتستخدم الموثّق في الكولكشن.",
+          "نفس السلسلة دي هي اللي تبويب «حلّل رسالة عميل» بيحطها في الرد الجاهز لما تلزق إيميل العميل — فمش محتاج تكتبها بإيدك."
+        ],
+        "en": [
+          "From the ready-scenarios tab pick Summary report — the whole account or one group. Set the period, then choose the scope: every vehicle on the account, or a single group.",
+          "The tool takes the columns and the report code from a template that already exists on the customer account — it invents no columns and sends none of the sample ids from the collection.",
+          "The step that matters most is following the generation. Once the report is created the response returns only the report id; the rows have not been generated yet. The tool asks /user_reports/percentage every three seconds and shows a progress bar up to 100%.",
+          "Without that step, reading the data immediately returns an empty result with status_code 200 and message success. That is not a fault or a permissions gap — the report is simply still being prepared. It is the most common cause of a report returned no data complaint.",
+          "Once generation finishes, the rows are read from /user_reports/data-summary — the same figures the reports screen shows: distance, engine work duration, moving and stopped duration, and top speed.",
+          "If the rows are still empty after 100%, those vehicles genuinely did not move in the period — a definitive answer for the customer, not a guess.",
+          "Beside each vehicle is a detail button that pulls its own rows from /user_reports/data-new using resource_id. The difference: data-summary returns one aggregated row per vehicle, while data-new returns the breakdown for a single vehicle.",
+          "The last step is the export: choose PDF, Excel or HTML and the tool calls /user_reports/export with the same report id. If you see /user_reports/request-export with a format field instead of type in the newer screen's network log, that serves the same purpose in a later release; the tool uses the one documented in the collection.",
+          "The same chain is what the Analyse a customer message tab puts into the ready reply when you paste the customer email, so you never have to write it out by hand."
         ]
       }
     },
@@ -4485,7 +4538,53 @@ const RECIPES = [
   steps:[{ t:{ar:'جلب اللستة', en:'Fetch the list'}, kind:'call', m:'POST', path:'/units/lists',
     body:()=>({data:{offset:0,limit:50,projection:['basic','last_update']}}), extract:()=>({}),
     hint:{ar:'رجع فاضي مع 200؟ يبقى الحساب مفيهوش عربيات مُعيَّنة — دي مشكلة صلاحيات مش مشكلة سيستم.',
-          en:'Empty with a 200 means no vehicles are assigned to the account — a permissions issue, not a platform issue.'} }]}
+          en:'Empty with a 200 means no vehicles are assigned to the account — a permissions issue, not a platform issue.'} }]},
+
+/* السلسلة دي متاخدة من الشاشة نفسها وهي شغالة، مش من الكولكشن.
+   الكولكشن فيه add وفيه percentage وفيه data-summary — بس مربوطينش كسلسلة،
+   فالناس بتعمل التقرير وتقرا داتاه على طول فترجع فاضية وتفتكر السيستم عطلان. */
+{ id:'summary-report', icon:'\u2469',
+  title:{ar:'تقرير Summary — الحساب كله أو مجموعة', en:'Summary report — the whole account or one group'},
+  desc:{ar:'السلسلة زي ما الشاشة بتمشيها بالظبط: تحدد النطاق، تعمل التقرير، تتابع التوليد لحد ١٠٠٪، تقرا الصفوف، وتصدّر. الخطوة اللي بتضيع من الناس هي متابعة التوليد.',
+        en:'The chain exactly as the platform itself runs it: choose the scope, create the report, follow generation to 100%, read the rows, export. The step people miss is following the generation.'},
+  inputs:[{k:'from',t:'date',l:{ar:'من يوم', en:'From'}},
+          {k:'to',t:'date',l:{ar:'لحد يوم', en:'To'}}],
+  steps:[
+   { t:{ar:'جلب مجموعات العربيات', en:'Fetch vehicle groups'}, kind:'call', m:'POST', path:'/unit_groups/lists',
+     body:()=>({data:{projection:['name','unitsList']}}), extract:()=>({}),
+     hint:{ar:'اللستة دي عشان تختار مجموعة. لو التقرير على الحساب كله، الاختيار ده موجود في الخطوة اللي بعدها بردو.',
+           en:'This list is so you can pick a group. If the report covers the whole account, that choice is in the next step too.'} },
+   { t:{ar:'تحديد نطاق التقرير', en:'Choose the report scope'}, kind:'rscope',
+     hint:{ar:'التقرير بياخد العربيات في حقل resources. مجموعة يعني عربياتها، والحساب كله يعني كل الـ UIDs.',
+           en:'The report takes its vehicles in the resources field. A group means its vehicles; the whole account means every UID.'} },
+   { t:{ar:'جلب قوالب التقارير', en:'Fetch report templates'}, kind:'call', m:'POST', path:'/user_report_templates/lists',
+     body:()=>({data:{limit:1000}}), extract:()=>({}),
+     hint:{ar:'الأعمدة والكود بيتاخدوا من قالب موجود في الحساب — الأداة ما بتخترعش أعمدة.',
+           en:'Columns and code come from a template that exists on the account — the tool invents nothing.'} },
+   { t:{ar:'اختيار قالب Summary', en:'Pick the Summary template'}, kind:'choose', into:'tplId',
+     hint:{ar:'اختار القالب اللي كوده summary. لو مش في اللستة، اعمله من الشاشة الأول وارجع.',
+           en:'Pick the template whose code is summary. If it is not listed, create it from the platform first and come back.'} },
+   { t:{ar:'إنشاء التقرير', en:'Create the report'}, kind:'call', m:'POST', path:'/user_reports/add',
+     body:v=>{ const tpl = v._tplRaw || {};
+       return {data:{ name:'API Helper \u2014 ' + (v.scopeLabel||'summary') + ' \u2014 ' + (v.from||today()),
+         code: tpl.code || 'summary', fields: tpl.fields || [],
+         resources: (v.resources || []), selected_resource_type:'units',
+         date:{interval:'interval', from:(v.from||today())+' 00:00:00', to:(v.to||today())+' 23:59:59',
+               interval_count:1, interval_unit:'days', including_current:false},
+         timelimit:{}, trip_details:'1', without_chunks:false, color_ranges:[],
+         lang: LANG==='en' ? 'en' : 'ar' }}; },
+     extract:r=>({reportId: deepFindKey(r,'id') || deepFindKey(r,'_id')}),
+     hint:{ar:'الرد بيرجّع رقم التقرير بس — مش الصفوف. ده مش عطل: التقرير لسه بيتولّد على السيرفر.',
+           en:'The response returns the report id only, not the rows. That is not a fault: the report is still being generated on the server.'} },
+   { t:{ar:'متابعة التوليد لحد ١٠٠٪', en:'Follow generation to 100%'}, kind:'poll',
+     hint:{ar:'هنا بيقع أغلب الناس. بيقروا الداتا على طول، فترجع فاضية، فيفتكروا إن في مشكلة. التوليد بياخد وقت والنسبة بتتقري من user_reports/percentage.',
+           en:'This is where most people go wrong: they read the data immediately, get an empty result, and conclude something is broken. Generation takes time and its progress is read from user_reports/percentage.'} },
+   { t:{ar:'قراءة صفوف التقرير', en:'Read the report rows'}, kind:'rows',
+     hint:{ar:'دي نفس الأرقام اللي بتظهر في شاشة التقارير. وجنب كل عربية زرار بيجيب تفاصيلها لوحدها من data-new.',
+           en:'These are the same figures the reports screen shows. Beside each vehicle is a button that pulls its own detail from data-new.'} },
+   { t:{ar:'تصدير التقرير ملف', en:'Export the report as a file'}, kind:'rexport',
+     hint:{ar:'التصدير بياخد نفس رقم التقرير ونوع الملف.',
+           en:'Export takes the same report id plus the file type.'} }]}
 ];
 
 let RC = null;   // {r, vars, results[], idx}
@@ -4683,6 +4782,10 @@ async function runStep(i){
   if(st.kind==='uid') return doUid(i);
   if(st.kind==='speednow') return doSpeedNow(i);
   if(st.kind==='speedstats') return doSpeedStats(i);
+  if(st.kind==='rscope') return doRScope(i);
+  if(st.kind==='poll') return doPoll(i);
+  if(st.kind==='rows') return doRows(i);
+  if(st.kind==='rexport') return doRExport(i);
   const box=$('out_'+i);
   const needsLogin = /^\/auth\/(login|send_login_otp|verify_login_otp)/.test(st.path||'');
   if(st.auth!==false && !SESSION.token){
@@ -4779,6 +4882,298 @@ function doSpeedStats(i){
       [t('نقط وهي واقفة','Stationary points'), `${sp.length-moving}`]],
       t('القيم زي ما رجعت من السيستم بالظبط، مفيش أي تحويل. الشاشة بتعرضها كم/س.',
         'Values exactly as returned by the platform, with no conversion. The dashboard displays them as km/h.'))};
+  renderSteps();
+}
+
+/* ============ تقرير Summary: النطاق، التوليد، الصفوف، التصدير ============
+   الترتيب ده متاخد من الشاشة وهي شغالة: add بيرجّع رقم بس، وبعدها
+   percentage بتتنده كل شوية لحد ١٠٠، وبعدين بس data-summary بترجع صفوف.
+   من غير الخطوة الوسطانية دي، الصفوف بترجع فاضية والتقرير سليم. */
+
+/* بندوّر على النسبة مهما كان شكل الرد: مصفوفة فيها reportId، أو رقم سايب. */
+function pollPct(json, id){
+  let found = null;
+  const walk = (o, d) => {
+    if(o == null || d > 6 || found !== null) return;
+    if(Array.isArray(o)){ o.forEach(x => walk(x, d+1)); return; }
+    if(typeof o === 'object'){
+      const rid = o.reportId || o.report_id || o.id || o._id;
+      const pc  = (o.percentage !== undefined) ? o.percentage
+                : (o.percent !== undefined ? o.percent : undefined);
+      if(pc !== undefined && (!id || !rid || String(rid) === String(id))){
+        const n = Number(pc);
+        if(isFinite(n)){ found = n; return; }
+      }
+      Object.values(o).forEach(v => walk(v, d+1));
+    }
+  };
+  walk(json, 0);
+  return found;
+}
+
+/* أكبر مصفوفة كائنات في الرد = صفوف التقرير، من غير ما نفترض شكل ثابت */
+function reportRows(json){
+  let best = [];
+  const walk = (o, d) => {
+    if(o == null || d > 7) return;
+    if(Array.isArray(o)){
+      if(o.length && typeof o[0] === 'object' && !Array.isArray(o[0]) && o.length > best.length) best = o;
+      o.forEach(x => walk(x, d+1));
+      return;
+    }
+    if(typeof o === 'object') Object.values(o).forEach(v => walk(v, d+1));
+  };
+  walk(json, 0);
+  return best;
+}
+/* رقم العربية جوه صف التقرير — بيختلف اسمه حسب الإصدار */
+function rowUnitId(r){
+  if(!r || typeof r !== 'object') return '';
+  for(const k of ['resource_id','resourceId','unit_id','unitId','id','_id']){
+    const v = r[k];
+    if(v != null && typeof v !== 'object' && String(v)) return String(v);
+  }
+  return '';
+}
+
+async function doRScope(i){
+  const prev = RC.results[i-1];
+  const groups = (prev && prev.json) ? deepItems(prev.json) : [];
+  const opts = [`<option value="">${t('— اختار —','— choose —')}</option>`,
+    `<option value="__all__">${t('كل عربيات الحساب','Every vehicle in the account')}</option>`]
+    .concat(groups.slice(0,300).map((g,n)=>`<option value="${n}">${esc(g.name)}</option>`)).join('');
+
+  RC.results[i] = {ok:false,
+    msg: groups.length
+      ? t(`التقرير على إيه؟ (${groups.length} مجموعة في الحساب)`, `What should the report cover? (${groups.length} groups on the account)`)
+      : t('التقرير على إيه؟ الحساب مفيهوش مجموعات، فمتاح الحساب كله بس.',
+          'What should the report cover? The account has no groups, so only the whole account is available.'),
+    picker:`<select id="rs_${i}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--field-line, var(--line)); border-radius:3px">${opts}</select>`,
+    pickerWire: ()=>{
+      const sel = $('rs_'+i); if(!sel) return;
+      sel.onchange = async ()=>{
+        if(sel.value === '') return;
+        sel.disabled = true;
+        const box = $('out_'+i);
+        try{
+          if(sel.value === '__all__'){
+            if(box) box.innerHTML = `<div class="note">${t('بيجيب كل عربيات الحساب…','Fetching every vehicle on the account…')}</div>`;
+            const got = await fetchAllUnits(['basic'], (n, tot)=>{
+              if(box) box.innerHTML = `<div class="note">${t(`بيجيب… ${n}`, `Fetching… ${n}`)}${tot ? ' / '+tot : ''}</div>`;
+            });
+            RC.vars.resources  = got.units.map(u=>String(u.id || u._id || '')).filter(Boolean);
+            RC.vars.scopeLabel = t('كل الحساب','the whole account');
+            RC.vars._unitNames = {};
+            got.units.forEach(u=>{ const k = String(u.id || u._id || ''); if(k) RC.vars._unitNames[k] = String(u.name || k); });
+          } else {
+            const g = groups[+sel.value];
+            const list = groupUnitIds(g.raw);
+            RC.vars.resources  = list.map(x=>String(x.id)).filter(Boolean);
+            RC.vars.scopeLabel = String(g.name || '');
+            RC.vars._unitNames = {};
+            list.forEach(x=>{ RC.vars._unitNames[String(x.id)] = String(x.name || x.id); });
+          }
+          if(!RC.vars.resources.length){
+            RC.results[i] = {ok:false,
+              msg: t('النطاق ده مفيهوش عربيات. اختار غيره — والمجموعة الفاضية دي حاجة تتقال للعميل.',
+                     'This scope contains no vehicles. Pick another — and an empty group is itself worth telling the customer.')};
+          } else {
+            RC.results[i] = {ok:true,
+              msg: `${t('النطاق','Scope')}: <b>${esc(RC.vars.scopeLabel)}</b> — ${RC.vars.resources.length} ${t('عربية','vehicles')}`,
+              html: RC.vars.resources.length > 500
+                ? `<div class="note warn" style="margin-top:8px">${t(
+                    'العدد كبير: التوليد هياخد وقت أطول، وخطوة المتابعة هتفضل بتسأل لحد ما يخلص. ده طبيعي مش تعليق.',
+                    'A large count: generation will take longer and the polling step keeps asking until it finishes. That is normal, not a hang.')}</div>`
+                : '',
+              vars:{scope: RC.vars.scopeLabel + ' · ' + RC.vars.resources.length}};
+          }
+        }catch(err){
+          RC.results[i] = {ok:false,
+            msg: t('ما قدرناش نجيب العربيات: ','Could not fetch the vehicles: ') + esc(String(err && err.message || err).slice(0,160))};
+        }
+        renderSteps();
+      };
+    }};
+  renderSteps();
+}
+
+async function doPoll(i){
+  const id = RC.vars.reportId;
+  if(!id){
+    RC.results[i] = {ok:false, msg:t('محتاج رقم التقرير من الخطوة اللي قبلها.','The report id from the previous step is required.')};
+    return renderSteps();
+  }
+  const box = $('out_'+i);
+  const bar = (pct, tries) => `<div class="note">${t('التوليد','Generating')}: <b>${pct}%</b>
+      — ${t('سؤال رقم','poll')} ${tries}</div>
+    <div style="height:9px; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:99px; overflow:hidden; margin-top:8px">
+      <div style="height:100%; width:${Math.max(2, Math.min(100, pct))}%; background:var(--signal)"></div></div>`;
+  let pct = 0, tries = 0, unknown = 0;
+  const MAX = 60;                       /* ٦٠ × ٣ ثواني = ٣ دقايق قبل ما نسيب اليد للموظف */
+  try{
+    while(tries < MAX){
+      tries++;
+      const r = await apiFetch('/user_reports/percentage', {data:{ids:[String(id)]}}, {timeout:60000});
+      if(!r.ok) throw new Error(diagnose(r.code, r.txt));
+      const n = pollPct(r.json, id);
+      if(n === null) unknown++; else { pct = n; unknown = 0; }
+      if(box) box.innerHTML = bar(pct, tries);
+      if(pct >= 100) break;
+      if(unknown >= 3) break;           /* الرد مفيهوش نسبة أصلاً — مش هنفضل نسأل الفاضي */
+      await new Promise(res=>setTimeout(res, 3000));
+    }
+  }catch(err){
+    RC.results[i] = {ok:false,
+      msg: t('متابعة التوليد وقفت: ','Polling stopped: ') + esc(String(err && err.message || err).slice(0,160)),
+      html:`<div class="note warn" style="margin-top:8px">${t(
+        'تقدر تعدّي للخطوة اللي بعدها وتشوف الصفوف — بس لو رجعت فاضية يبقى التقرير لسه ما خلصش.',
+        'You can move to the next step and read the rows — but an empty result means the report has not finished.')}</div>`};
+    return renderSteps();
+  }
+  if(unknown >= 3){
+    RC.results[i] = {ok:true,
+      msg: t('الرد مفيهوش نسبة تقدّم.','The response carries no progress percentage.'),
+      html:`<div class="note warn" style="margin-top:8px">${t(
+        'الإندبوينت رد تمام بس من غير حقل percentage. كمّل للخطوة اللي بعدها؛ ولو الصفوف رجعت فاضية استنى شوية وجرّب تاني، وصعّدها لتيم مصر إن الحقل مش راجع.',
+        'The endpoint answered fine but without a percentage field. Continue to the next step; if the rows come back empty, wait a moment and retry, and escalate that the field is missing.')}</div>`};
+    return renderSteps();
+  }
+  RC.results[i] = pct >= 100
+    ? {ok:true, msg:`${t('التوليد خلص','Generation finished')} — <b>100%</b> ${t('بعد','after')} ${tries} ${t('سؤال','polls')}`,
+       html:`<div class="note sig" style="margin-top:8px">${t(
+         'دلوقتي بس الصفوف بقت جاهزة. لو قريتها قبل كده كانت هترجع فاضية — والرد كان هيبقى سليم ١٠٠٪، وده بالظبط اللي بيلخبط العملاء.',
+         'Only now are the rows ready. Reading them earlier would have returned empty — with a perfectly valid response, which is exactly what confuses customers.')}</div>`}
+    : {ok:false, msg:`${t('لسه بيتولّد','Still generating')} — <b>${pct}%</b> ${t('بعد','after')} ${tries} ${t('سؤال','polls')}`,
+       html:`<div class="note warn" style="margin-top:8px">${t(
+         'نطاق كبير أو فترة طويلة. دوس «نفّذ» تاني عشان يكمّل من مكانه — التقرير محفوظ على السيرفر ومش بيضيع.',
+         'A large scope or a long period. Press Run again to continue from where it left off — the report is stored on the server and is not lost.')}</div>`};
+  renderSteps();
+}
+
+async function doRows(i){
+  const id = RC.vars.reportId;
+  if(!id){
+    RC.results[i] = {ok:false, msg:t('محتاج رقم التقرير من خطوة الإنشاء.','The report id from the creation step is required.')};
+    return renderSteps();
+  }
+  const box = $('out_'+i);
+  if(box) box.innerHTML = `<div class="note">${t('بيقرا الصفوف…','Reading the rows…')}</div>`;
+  let r;
+  try{
+    r = await apiFetch('/user_reports/data-summary', {data:{id:String(id)}}, {timeout:120000});
+  }catch(err){
+    RC.results[i] = {ok:false, msg:t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')};
+    return renderSteps();
+  }
+  if(!r.ok){
+    RC.results[i] = {ok:false, msg:`${t('الرد','Response')}: <b>${r.code}</b><br>${diagnose(r.code, r.txt)}`};
+    return renderSteps();
+  }
+  const rows = reportRows(r.json);
+  if(!rows.length){
+    RC.results[i] = {ok:false,
+      msg: t('الرد رجع سليم بس من غير صفوف.','The response is valid but carries no rows.'),
+      html:`<div class="note warn" style="margin-top:8px">${t(
+        'ده مش خطأ. يا التوليد لسه ما خلصش — ارجع لخطوة المتابعة ونفّذها تاني — يا العربيات دي فعلاً ما تحرّكتش في الفترة اللي اخترتها.',
+        'This is not an error. Either generation has not finished — go back to the polling step and run it again — or these vehicles genuinely did not move in the period you chose.')}</div>`,
+      text: (r.pretty || '').slice(0, 1200)};
+    return renderSteps();
+  }
+  const cols = Object.keys(rows[0]).filter(k => typeof rows[0][k] !== 'object').slice(0, 9);
+  const cell = v => (v === null || v === undefined || v === '') ? '—' : esc(String(v).slice(0, 30));
+  const nm = RC.vars._unitNames || {};
+  const body = rows.slice(0, 200).map(rw=>{
+    const uid = rowUnitId(rw);
+    return `<tr>
+      ${cols.map(c=>`<td style="white-space:nowrap">${cell(rw[c])}</td>`).join('')}
+      <td>${uid ? `<button class="chip" data-rowdet="${esc(uid)}" style="padding:2px 9px">${t('تفاصيل','detail')}</button>` : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  RC.results[i] = {ok:true,
+    msg: `${t('رجعت','Returned')} <b>${rows.length}</b> ${t('صف','rows')} — ${t('النطاق','scope')}: ${esc(RC.vars.scopeLabel || '—')}`,
+    html: `<div style="overflow-x:auto; margin-top:10px">
+        <table class="kv" style="min-width:100%">
+          <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(c)}</td>`).join('')}
+            <td style="font-family:var(--ar); color:var(--ink); font-weight:600">${t('عربية واحدة','one vehicle')}</td></tr>
+          ${body}
+        </table></div>
+      ${rows.length > 200 ? `<div class="note" style="margin-top:8px">${t('بنعرض أول ٢٠٠ صف. التصدير في الخطوة اللي بعدها بينزّل الكل.','Showing the first 200 rows. The export in the next step downloads all of them.')}</div>` : ''}
+      <div class="note" style="margin-top:8px">${t(
+        'زرار «تفاصيل» بيجيب صفوف العربية دي لوحدها من <code>/user_reports/data-new</code> بـ <code>resource_id</code> — ده الريكوست اللي العميل بيدوّر عليه لما يقول «عايز تفاصيل عربية واحدة».',
+        'The detail button pulls that one vehicle from <code>/user_reports/data-new</code> using <code>resource_id</code> — the request customers are looking for when they ask for a single vehicle breakdown.')}</div>
+      <div id="rowDet_${i}" style="margin-top:10px"></div>`,
+    json: r.json};
+  renderSteps();
+  const out = $('out_'+i);
+  if(out) out.querySelectorAll('[data-rowdet]').forEach(b=>{
+    b.onclick = ()=>rowDetail(i, b.dataset.rowdet, b);
+  });
+}
+
+/* تفاصيل عربية واحدة — ده الفرق بين data-summary و data-new */
+async function rowDetail(i, unitId, btn){
+  const holder = $('rowDet_'+i);
+  const id = RC.vars.reportId;
+  const nm = (RC.vars._unitNames || {})[unitId] || unitId;
+  const old = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = t('…','…'); }
+  if(holder) holder.innerHTML = `<div class="note">${t('بيجيب تفاصيل','Fetching detail for')} <b>${esc(nm)}</b>…</div>`;
+  try{
+    const r = await apiFetch('/user_reports/data-new',
+      {data:{id:String(id), resource_id:String(unitId)}}, {timeout:120000});
+    if(!r.ok) throw new Error(diagnose(r.code, r.txt));
+    const rows = reportRows(r.json);
+    if(holder) holder.innerHTML = `<div class="note sig"><b>${esc(nm)}</b> — ${
+        rows.length ? t(`${rows.length} صف`, `${rows.length} rows`)
+                    : t('رجع سليم من غير صفوف — العربية دي ما تحركتش في الفترة دي.',
+                        'Valid but with no rows — this vehicle did not move in that period.')}</div>
+      <pre class="pre" style="margin-top:8px">${esc((r.pretty || '').slice(0, 2200))}</pre>`;
+  }catch(err){
+    if(holder) holder.innerHTML = `<div class="note warn">${
+      t('ما قدرناش نجيب التفاصيل: ','Could not fetch the detail: ')}${esc(String(err && err.message || err).slice(0,160))}</div>`;
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = old; }
+  }
+}
+
+function doRExport(i){
+  const id = RC.vars.reportId;
+  if(!id){
+    RC.results[i] = {ok:false, msg:t('محتاج رقم التقرير من خطوة الإنشاء.','The report id from the creation step is required.')};
+    return renderSteps();
+  }
+  const types = [['pdf','PDF'], ['excel','Excel'], ['html','HTML']];
+  RC.results[i] = {ok:false, msg:t('اختار نوع الملف:','Choose the file type:'),
+    picker:`<select id="rx_${i}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--field-line, var(--line)); border-radius:3px">
+        <option value="">${t('— اختار —','— choose —')}</option>
+        ${types.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select>
+      <div class="note" style="margin-top:8px">${t(
+        'الكولكشن بيوثّق <code>/user_reports/export</code> بحقل <code>type</code>. الشاشة الجديدة بتنده <code>/user_reports/request-export</code> بحقل <code>format</code> — الاتنين على نفس رقم التقرير، والأداة بتستخدم الموثّق.',
+        'The collection documents <code>/user_reports/export</code> with a <code>type</code> field. The newer screen calls <code>/user_reports/request-export</code> with a <code>format</code> field — both against the same report id, and the tool uses the documented one.')}</div>`,
+    pickerWire: ()=>{
+      const sel = $('rx_'+i); if(!sel) return;
+      sel.onchange = async ()=>{
+        if(sel.value === '') return;
+        sel.disabled = true;
+        const box = $('out_'+i);
+        if(box) box.innerHTML = `<div class="note">${t('بيطلب التصدير…','Requesting the export…')}</div>`;
+        try{
+          const r = await apiFetch('/user_reports/export',
+            {data:{id:String(id), type:sel.value}}, {timeout:120000});
+          RC.results[i] = r.ok
+            ? {ok:true, msg:`${t('التصدير اتطلب','Export requested')} — <b>${esc(sel.value)}</b>`,
+               html:`<div class="note sig" style="margin-top:8px">${t(
+                 'الرد تحت زي ما رجع بالظبط. حسب الإصدار، يا بيرجّع لينك الملف يا بيرجّع تأكيد إن الطلب اتسجّل والملف بيتجهّز — اقرا الرد نفسه، ما تفترضش.',
+                 'The response below is exactly as returned. Depending on the version it either carries the file link or confirms the request was queued and the file is being prepared — read the response itself rather than assuming.')}</div>`,
+               text: r.pretty}
+            : {ok:false, msg:`${t('الرد','Response')}: <b>${r.code}</b><br>${diagnose(r.code, r.txt)}`, text:r.pretty};
+        }catch(err){
+          RC.results[i] = {ok:false, msg:t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')};
+        }
+        renderSteps();
+      };
+    }};
   renderSteps();
 }
 
@@ -8599,10 +8994,13 @@ function caseReply(a){
     '   ' + (onCat
       ? 'The endpoint you are calling, /reports/lists, is the catalog of report types available in the platform. It returns each type and the definition of its columns — name, code, order, aggregation. A catalog has no values by design; it is the menu, not the meal.'
       : 'What you received is a report definition: the columns and how they aggregate, not the output of a run.'),
-    '   The values live in a different family — /user_reports/… rather than /reports/… — and they take two calls:',
-    '     a. POST /user_reports/add            → creates the report, returns the report id',
-    '     b. POST /user_reports/data-summary   → returns the rows for that id',
-    '   /user_reports/data and /user_reports/data-new return the same rows in fuller shapes, and /user_reports/export returns the same result as a file.',
+    '   The values live in a different family — /user_reports/… rather than /reports/… — and reading them is a chain of four calls:',
+    '     a. POST /user_reports/add           → creates the report, returns the report id',
+    '     b. POST /user_reports/percentage    → generation progress for that id; repeat until it reaches 100',
+    '     c. POST /user_reports/data-summary  → the aggregated summary: one row per vehicle',
+    '     d. POST /user_reports/data-new      → the detailed rows for a single vehicle, keyed by resource_id',
+    '   Steps c and d serve different needs. Use c for the summary table you described, and d when you need the breakdown behind one vehicle. /user_reports/export returns the same result as a file.',
+    '   Step b is the one that is easy to miss. The report is generated asynchronously, so immediately after step a the rows do not exist yet. Reading them at that moment returns an empty data array with status_code 200 and message success — a valid response that looks like a failure. Poll until the percentage is 100, then read.',
     '',
     '2) The parameters required',
     '   - code: the report code you already have from the catalog — ' + code + '.',
@@ -8613,7 +9011,7 @@ function caseReply(a){
     '   - user_id: the account the report is filed under. The login response returns it in data.user.id.',
     '',
     '3) Is another call needed after /reports/lists',
-    '   Yes — the two above. /reports/lists on its own can never return values, however the parameters are varied.',
+    '   Yes — the chain above. /reports/lists on its own can never return values, however the parameters are varied. Keep it for the column headers and for letting your user pick a report type.',
     '',
     '4) A sample request and response',
     '',
@@ -8624,9 +9022,21 @@ function caseReply(a){
     '   The response carries the id of the report just created:',
     '   { "data": { "id": "<REPORT_ID>" } }',
     '',
-    '   Step 2 — read its rows:',
+    '   Step 2 — wait for it to finish generating:',
+    '   POST https://api.afaqy.sa/user_reports/percentage?token=<YOUR_TOKEN>',
+    '   { "data": { "ids": ["<REPORT_ID>"] } }',
+    '',
+    '   → { "data": [ { "reportId": "<REPORT_ID>", "percentage": 100 } ] }',
+    '   Repeat this call every few seconds until percentage reaches 100. Only then do the rows exist.',
+    '',
+    '   Step 3 — read the aggregated summary (one row per vehicle):',
     '   POST https://api.afaqy.sa/user_reports/data-summary?token=<YOUR_TOKEN>',
     '   { "data": { "id": "<REPORT_ID>" } }',
+    '',
+    '   Step 4 — read the detail behind a single vehicle:',
+    '   POST https://api.afaqy.sa/user_reports/data-new?token=<YOUR_TOKEN>',
+    '   { "data": { "id": "<REPORT_ID>", "resource_id": "<UNIT_ID>" } }',
+    '   The resource_id here is the unit id, the same value you passed in resources when creating the report.',
     ''
   ];
 
@@ -8644,7 +9054,7 @@ function caseReply(a){
   L.push('');
   L.push('One note on housekeeping: every create call stores a report on the account. While you are testing, remove it afterwards with POST /user_reports/delete and the same id.');
   L.push('');
-  L.push('So: keep /reports/lists for building the column headers and letting the user pick a report type, and add the create-then-read pair for the data itself.');
+  L.push('In short: /reports/lists gives you the column headers, /user_reports/add plus /user_reports/percentage produce the run, /user_reports/data-summary gives the summary table, and /user_reports/data-new gives the per-vehicle detail. If a read comes back empty, check the percentage before anything else — nine times out of ten the report simply had not finished.');
   L.push('');
   L.push('Best regards,');
   return L.join('\n');
@@ -9346,8 +9756,12 @@ function renderCase(text){
       ${dataEp2 ? `<div class="row" style="margin-top:10px"><button class="btn ghost" data-goep="${dataEp2.i}">${t('افتح الريكوست ده','Open that request')}</button></div>` : ''}
       <div class="note" style="margin-top:8px"><b>${t('السلسلة كاملة','The full sequence')}:</b>
         <code>POST /user_reports/add</code> → ${t('بيرجّع رقم التقرير','returns the report id')} →
-        <code>POST /user_reports/data-summary</code> → ${t('بيرجّع الصفوف','returns the rows')} →
+        <code>POST /user_reports/percentage</code> → ${t('استنى لحد ١٠٠٪','wait until it reaches 100%')} →
+        <code>POST /user_reports/data-summary</code> → ${t('الملخص المجمّع','the aggregated summary')} →
+        <code>POST /user_reports/data-new</code> → ${t('تفاصيل عربية واحدة بـ resource_id','one vehicle in detail, by resource_id')} →
         <code>POST /user_reports/delete</code> ${t('للتنضيف بعد التجربة','to clean up after testing')}.<br>
+        ${t('لو قريت الصفوف قبل ما النسبة توصل ١٠٠٪ بترجع فاضية والرد سليم — ده أشهر سبب للبلاغ ده. جرّب السلسلة كاملة من تبويب «سيناريوهات جاهزة».',
+            'Reading the rows before the percentage reaches 100 returns an empty result with a valid response — the most common cause of this complaint. Run the whole chain from the ready-scenarios tab.')}<br>
         ${t('بودي التنفيذ متسجّل بالكامل في الكولكشن: الحقول والعربيات والفترة و user_id — والرد الجاهز تحت مبني منه بالحرف.',
             'The execution body is recorded in full in the collection — fields, vehicles, period and user_id — and the reply below is built from it verbatim.')}</div>
     </div></div>`);

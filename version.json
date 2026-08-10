@@ -1,16 +1,16 @@
 {
-  "version": "6.33",
+  "version": "6.34",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "لوحة الأجهزة: دوسة على أي صف في جدول العربيات بتفتح «حساسات الجهاز» — بيتصل لايف بـ /unit_sensors/lists مفلتر على الجهاز ده بالظبط، مش قايمة عامة",
-      "زي ما بيصلح: بيوري بس الحساسات المسجّلة فعلًا على الجهاز — اسمها ونوعها والباراميتر — مش قايمة تشيك بوكس ثابتة زي المنصة الرئيسية بتوريها لكل الأجهزة",
-      "جهاز GPS بسيط من غير حساسات إضافية بيرجّع رد فاضي، والأداة بتوضّح إنه رد صحيح من السيرفر مش نقص فيها"
+      "سيناريو جديد: «تقرير Summary — الحساب كله أو مجموعة». تحدد النطاق، يعمل التقرير، يتابع التوليد لحد ١٠٠٪، يقرا الصفوف، ويصدّر — بالترتيب اللي الشاشة نفسها بتمشي بيه.",
+      "متابعة التوليد بقت خطوة صريحة على /user_reports/percentage بشريط تقدّم. من غيرها بتقرا داتا لسه ما اتولدتش فترجع فاضية والرد سليم — وده أشهر سبب لبلاغ «التقرير مش راجع».",
+      "الرد الفاضي بقى متفرّق: يا التوليد لسه شغّال يا العربيات فعلاً ما تحركتش في الفترة. الأداة بتقول أنهي واحدة فيهم بدل ما تسيبك تخمّن."
     ],
     "en": [
-      "Device dashboard: click any row in the vehicles table to open Device sensors — it calls /unit_sensors/lists live, filtered to that exact device, not a generic list",
-      "Unlike the main platform, it shows only sensors actually registered on the device — name, type and param — instead of a fixed checkbox list shown for every device",
-      "A plain GPS unit with no extra sensors returns an empty result, and the tool makes clear that is a valid server response, not a gap in the tool"
+      "New scenario: Summary report for the whole account or one group. Choose the scope, create the report, follow generation to 100%, read the rows, export — in the order the platform itself uses.",
+      "Following generation is now an explicit step on /user_reports/percentage with a progress bar. Without it you read data that has not been generated yet, so the rows come back empty with a perfectly valid response — the most common cause of a report is not returning report.",
+      "An empty result is now told apart: either generation is still running, or the vehicles genuinely did not move in the period. The tool says which, instead of leaving you to guess."
     ]
   }
 }
