@@ -1,16 +1,16 @@
 {
-  "version": "6.12",
+  "version": "6.13",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "ريكوستات تقارير المستخدم (data-summary وdata وdata-new) بقت تطلب رقم التقرير من حساب العميل قبل ما تتنفذ — قبل كده كانت بتتبعت برقم العينة وترجع 405 وnot_found",
-      "التجربة الأساسية بقت على تقرير Summary: خانة الاسم بتتعبّى بيه لوحدها، ولو اخترت من اللستة بيبقى أول واحد فيها مش Summary By Driver",
-      "الأداة بتقول السبب صراحة: الرقم اللي في العينة تبع حساب تاني، عشان كده الرد بيقول not_found"
+      "وضع جديد في تبويب الفحص: «حلّل رسالة عميل» — بيقرا الإيميل كامل بكلامه وأكواده وأسئلته، مش بس رد API",
+      "بيفصل بلوكات الأكواد ويصنّفها: الرد اللي العميل اشتكى منه، والمثال اللي هو عايزه، وأي خطأ — قبل كده لزق الإيميل في «افحص رد» كان بياخد آخر بلوك يعني المثال المرغوب بدل الرد الفعلي",
+      "بيلقط أسئلة العميل المرقّمة ويرد عليها واحدة واحدة بترتيبها"
     ],
     "en": [
-      "The user-report requests — data-summary, data and data-new — now ask for the report id from the customer account before running; they used to go out with the sample id and come back 405 not_found",
-      "The default trial is now the Summary report: the name box is prefilled with it, and if you pick from the list it comes first rather than Summary By Driver",
-      "The tool states the cause plainly: the sample id belongs to another account, which is why the response says not_found"
+      "A new mode in the Inspect tab: Analyse a customer message — it reads the whole email with its prose, code blocks and questions, not just an API response",
+      "It separates the code blocks and classifies them: the response the customer complained about, the shape they want, and any error — pasting the email into the response tab used to grab the last block, meaning the desired example instead of the actual response",
+      "It picks up the customer's numbered questions and answers them one by one in their order"
     ]
   }
 }

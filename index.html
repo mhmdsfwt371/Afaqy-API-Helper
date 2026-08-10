@@ -471,10 +471,12 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 <section class="view" id="v-inspect" hidden>
   <div class="row" style="margin-bottom:12px">
     <button class="ct" id="ivResp" aria-selected="true"></button>
+    <button class="ct" id="ivCase" aria-selected="false"></button>
     <button class="ct" id="ivReq" aria-selected="false"></button>
   </div>
   <div class="note sig" style="margin-bottom:14px" id="inIntro"></div>
   <div id="capBox" hidden></div>
+  <div id="caseBox" hidden></div>
   <div class="panel" style="margin-bottom:14px" id="inPanel"><div class="sec" style="border-top:0">
     <h3 id="inH1"></h3>
     <textarea id="inText" style="width:100%; min-height:150px; font-family:var(--mono); font-size:12.5px;
@@ -728,9 +730,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.12",
+  "version": "6.13",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.13",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "وضع جديد في تبويب الفحص: «حلّل رسالة عميل» — بيقرا الإيميل كامل بكلامه وأكواده وأسئلته، مش بس رد API",
+          "بيفصل بلوكات الأكواد ويصنّفها: الرد اللي العميل اشتكى منه، والمثال اللي هو عايزه، وأي خطأ — قبل كده لزق الإيميل في «افحص رد» كان بياخد آخر بلوك يعني المثال المرغوب بدل الرد الفعلي",
+          "بيلقط أسئلة العميل المرقّمة ويرد عليها واحدة واحدة بترتيبها",
+          "بيقولك التشخيص: العميل نادى إندبوينت غلط للغرض ده، وإيه الصح، وبيفتحهولك بضغطة",
+          "وبيطلّع رد جاهز بلغة رسالة العميل تنسخه وتبعته — ومكتوب فوقه إيه اللي محتاج تأكيد قبل الإرسال",
+          "محروس باختبار على رسالة عميل حقيقية: لازم يفصل البلوكات صح، ويرد على الأربع أسئلة، وما يطلّعش رد جاهز لرسالة مالهاش قاعدة"
+        ],
+        "en": [
+          "A new mode in the Inspect tab: Analyse a customer message — it reads the whole email with its prose, code blocks and questions, not just an API response",
+          "It separates the code blocks and classifies them: the response the customer complained about, the shape they want, and any error — pasting the email into the response tab used to grab the last block, meaning the desired example instead of the actual response",
+          "It picks up the customer's numbered questions and answers them one by one in their order",
+          "It states the diagnosis: the customer called the wrong endpoint for this purpose, here is the right one, and it opens it in one press",
+          "It drafts a reply in the language of the customer's message, ready to copy and send — with a note above it saying what still needs confirming",
+          "Guarded by a test on a real customer message: it must split the blocks correctly, answer all four questions, and draft nothing for a message with no matching rule"
+        ]
+      }
+    },
     {
       "v": "6.12",
       "date": "2026-08-05",
@@ -2015,7 +2039,8 @@ const DOCS = {
           "**اللغة:** زرار `EN` بيقلب الأداة كلها للإنجليزي — الشاشات والنوافذ والرسايل والأمثلة. في الوضع الإنجليزي كلمة تأكيد التنفيذ بتبقى `RUN` بدل «نفّذ».",
           "**الشريط العلوي:** بعد ما تتصل، خانات اسم المستخدم وكلمة السر بتختفي عشان تفضّي مكان للحالة والجهاز — والشريط بيفضل سطر واحد. زرار «قطع» بيرجّعهم.",
           "**نظامين مختلفين:** الأداة فيها كولكشن AVL (529 ريكوست، POST، العربية بالـ UID) وكمان API أفاقي إن 1.6 (37 ريكوست، GET، العربية بالـ IMEI مباشرة، والمصادقة بـ apiKey مش توكن). اختار لينك النظام من قائمة Base URL فوق، والأداة هتوريك ريكوستات النظام ده بس — والوسم جنب اللينك بيقولك انت في أنهي نظام وكام ريكوست فيه.",
-          "**التشخيص التلقائي:** الزق رد العميل في «افحص رد»، ولو الرد من نوع بيلخبط (تعريف تقرير بدل نتيجته، أو فلتر مصفّر النتيجة على حساب فيه بيانات) الأداة بتقولك ده إيه، وإيه الخطوة الجاية، وبتفتحلك الريكوست الصح بضغطة."
+          "**التشخيص التلقائي:** الزق رد العميل في «افحص رد»، ولو الرد من نوع بيلخبط (تعريف تقرير بدل نتيجته، أو فلتر مصفّر النتيجة على حساب فيه بيانات) الأداة بتقولك ده إيه، وإيه الخطوة الجاية، وبتفتحلك الريكوست الصح بضغطة.",
+          "**حلّل رسالة عميل:** الصق الإيميل كامل — كلام وأكواد وأسئلة. الأداة بتفصل الرد اللي اشتكى منه عن المثال اللي عايزه، وتقولك عمل إيه وإيه الغلط والريكوست الصح، وتطلّعلك رد جاهز بلغة رسالته. اقرا الرد قبل ما تبعته."
         ],
         "en": [
           "1) Connect — enter the customer account username and password in the top bar and press Connect. The tool fetches the token and refreshes it if it expires.",
@@ -2027,7 +2052,8 @@ const DOCS = {
           "**Language:** the `EN` button switches the whole tool — screens, dialogs, messages and examples. In English the confirmation word is `RUN`.",
           "**The top bar:** once you connect, the username and password boxes disappear to make room for the status and the selected device, keeping the bar on one line. Disconnect brings them back.",
           "**Two different systems:** the tool carries the AVL collection (529 requests, POST, vehicles by UID) and also the Afaqy IN 1.6 API (37 requests, GET, vehicles by IMEI directly, authenticated with an apiKey rather than a token). Pick the system's link from the Base URL list above and the tool shows only that system's requests — the badge beside the link tells you which system you are in and how many requests it holds.",
-          "**Automatic diagnosis:** paste the customer response into Inspect a response. If it is a shape that misleads — a report definition instead of its result, or a filter emptying the result on an account that does have data — the tool names it, gives the next step, and opens the right request for you."
+          "**Automatic diagnosis:** paste the customer response into Inspect a response. If it is a shape that misleads — a report definition instead of its result, or a filter emptying the result on an account that does have data — the tool names it, gives the next step, and opens the right request for you.",
+          "**Analyse a customer message:** paste the whole email — prose, code blocks and questions. The tool separates the response they complained about from the shape they want, names what went wrong and the right request, and drafts a reply in the language of their message. Read it before sending."
         ]
       }
     },
@@ -6978,6 +7004,132 @@ function userPlain(json){
   </table></div>`;
 }
 
+
+/* ============ تحليل رسالة العميل ============
+   الموظف بيوصله إيميل فيه كلام وأكواد مخلوطة: الرد اللي اشتكى منه،
+   والمثال اللي هو عايزه، وأسئلة مرقّمة. لزقه في «افحص رد» كان بيخلي
+   الأداة تصلّحه وتاخد آخر بلوك — اللي هو المثال المرغوب مش الرد الفعلي.
+   المحرك ده بيفصلهم، ويحدد العميل عمل إيه، وإيه الغلط، وبيطلّع
+   رد جاهز يتبعت. */
+
+/* بيطلّع كل بلوكات الـ JSON المتوازنة من نص مخلوط */
+function jsonBlocks(text){
+  const out = [], str = String(text || '');
+  for(let i = 0; i < str.length; i++){
+    if(str[i] !== '{') continue;
+    let depth = 0, inStr = false, esc = false;
+    for(let j = i; j < str.length; j++){
+      const c = str[j];
+      if(inStr){
+        if(esc) esc = false;
+        else if(c === '\\') esc = true;
+        else if(c === '"') inStr = false;
+        continue;
+      }
+      if(c === '"') inStr = true;
+      else if(c === '{') depth++;
+      else if(c === '}'){
+        depth--;
+        if(depth === 0){
+          const raw = str.slice(i, j + 1);
+          let j2 = null;
+          try{ j2 = JSON.parse(raw); }
+          catch(_){ const r = repairJson(raw); j2 = r.json; }
+          if(j2 && typeof j2 === 'object') out.push({raw, json: j2, at: i});
+          i = j;
+          break;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/* بيحكم على البلوك: تعريف حقول؟ نتيجة فيها قيم؟ خطأ؟ ريكوست؟ */
+function blockKind(j){
+  const flat = o => o && typeof o === 'object' && !Array.isArray(o);
+  const code = j.status_code || j.code;
+  if(j.errors || (code && Number(code) >= 400)) return 'error';
+  if(flat(j) && ('name' in j) && ('code' in j) && !('value' in j)) return 'fieldDef';
+  const fields = deepFindNode(j, 'fields');
+  if(Array.isArray(fields) && fields.length && fields[0] && 'code' in fields[0] && !('value' in fields[0]))
+    return 'definition';
+  if(flat(j) && j.data && (j.data.id || j.data.username)) return 'request';
+  const vals = flat(j) ? Object.keys(j).filter(k => {
+    const v = j[k];
+    return typeof v === 'string' || typeof v === 'number';
+  }) : [];
+  if(vals.length >= 3 && !('message' in j)) return 'wantedShape';
+  return 'other';
+}
+
+/* الأسئلة المرقّمة في الرسالة */
+function askedQuestions(text){
+  const out = [];
+  const lines = String(text || '').split(/\n+/);
+  for(const ln of lines){
+    const m = /^\s*(\d+)[.)]\s+(.{8,200})$/.exec(ln.trim());
+    if(m && /\?|which|what|how|is this|could you/i.test(m[2])) out.push(m[2].trim());
+  }
+  return out;
+}
+
+/* المسارات اللي العميل ذكرها بالنص */
+function mentionedPaths(text){
+  const hits = new Set();
+  for(const m of String(text||'').matchAll(/\/[a-z_]+\/[a-z_\-]+/gi)) hits.add(m[0]);
+  return [...hits];
+}
+
+function analyzeCase(text){
+  const blocks = jsonBlocks(text);
+  const kinds  = blocks.map(b => ({...b, kind: blockKind(b.json)}));
+  const words  = String(text||'').replace(/\{[\s\S]*?\}/g, ' ').trim();
+  const isMsg  = words.length > 120;
+  const arabic = /[\u0600-\u06FF]/.test(words);
+
+  const defs   = kinds.filter(b => b.kind === 'definition' || b.kind === 'fieldDef');
+  const wanted = kinds.filter(b => b.kind === 'wantedShape');
+  const errs   = kinds.filter(b => b.kind === 'error');
+  const qs     = askedQuestions(text);
+  const paths  = mentionedPaths(text);
+
+  /* الحالة: بيشتكي إن الحقول من غير قيم */
+  const reportCase = defs.length > 0 &&
+    /value|values|actual|قيم|قيمة/i.test(words) &&
+    /report|تقرير/i.test(words);
+
+  return {isMsg, arabic, blocks: kinds, defs, wanted, errs, qs, paths, reportCase, words};
+}
+
+/* الرد الجاهز للعميل — بلغة رسالته */
+function caseReply(a){
+  const gen = EPS.find(e => e.n === 'EXCE BETA REPORTS');
+  const url = gen ? gen.p : 'https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID';
+  if(a.reportCase){
+    return [
+      'Hello,',
+      '',
+      'Thank you for the detailed report — your reading of the response is correct.',
+      '',
+      '1) Yes. The endpoint you called returns the report definition: the list of columns, their codes, their order and how each one aggregates. It is the report configuration, not its output, so it carries no values by design.',
+      '',
+      '2) To get the values, execute the report:',
+      '   POST ' + url,
+      '   REPORT_ID is the id of the report you already received in that response, and USER_ID is the user the report runs as.',
+      '',
+      '3) The execution call is where the run scope belongs — the date range and the vehicles or resources you want the report to cover. Please confirm the exact body with us for your report type before you build against it.',
+      '',
+      '4) On the mapping: the execution response returns the rows, and each value is keyed by the same field code you already have from the definition — date, route_length, engine_work, and the rest. So the definition gives you the columns and the labels, the execution gives you the rows, and the field code is what joins them.',
+      '',
+      'In short: keep the call you have for building the table header, and add the execution call for the data.',
+      '',
+      'Best regards,'
+    ].join('\n');
+  }
+  return null;
+}
+
 /* ============ تشخيص أنماط الردود ============
    في ردود بتبان سليمة (200 و success) والعميل مش لاقي بياناته فيها،
    لأنها أصلًا نوع تاني من الرد. الموظف بيضيّع ساعات، والعميل بيفتكر
@@ -7396,18 +7548,115 @@ function paintCapture(){
 let INSPVIEW = 'resp';
 function paintInspSwitch(){
   $('ivResp').textContent = t('افحص رد','Inspect a response');
+  $('ivCase').textContent = t('حلّل رسالة عميل','Analyse a customer message');
   $('ivReq').textContent  = t('ارصد ريكوست من المنصة','Capture a request');
   $('ivResp').setAttribute('aria-selected', INSPVIEW==='resp');
+  $('ivCase').setAttribute('aria-selected', INSPVIEW==='case');
   $('ivReq').setAttribute('aria-selected', INSPVIEW==='req');
   $('inPanel').hidden = INSPVIEW!=='resp';
   $('inOut').hidden   = INSPVIEW!=='resp';
   $('capBox').hidden  = INSPVIEW!=='req';
+  $('caseBox').hidden = INSPVIEW!=='case';
+  if(INSPVIEW==='case'){
+    $('inIntro').innerHTML = t(
+      'الصق رسالة العميل كاملة — كلام وأكواد وأسئلة. الأداة بتفصل الرد اللي اشتكى منه عن المثال اللي عايزه، وتقولك عمل إيه وإيه الغلط، وتطلّعلك رد جاهز تبعته.',
+      'Paste the whole customer message — prose, code blocks and questions. The tool separates the response they complained about from the shape they want, tells you what they did and what went wrong, and drafts a reply you can send.');
+    if(!$('caseBox').innerHTML) paintCase();
+  }
   if(INSPVIEW==='req'){
     $('inIntro').innerHTML = t(
       'لما المنصة بتعمل حاجة والكولكشن بيقول غيرها، الرصد بيكشف الفرق. الصق الريكوست كـ cURL والأداة تقارنه وتقولك الفرق — وبضغطة تطبّقه.',
       'When the platform does something the collection does not describe, capturing reveals the difference. Paste the request as cURL and the tool compares it and tells you what differs — and applies it with one click.');
     if(!$('capBox').innerHTML) paintCapture();
   }
+}
+
+function paintCase(){
+  $('caseBox').innerHTML = `
+    <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+      <h3>${t('الصق رسالة العميل','Paste the customer message')}</h3>
+      <textarea id="caseText" style="width:100%; min-height:190px; font-family:var(--mono); font-size:12.5px;
+        padding:12px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)"
+        placeholder="${t('الصق الإيميل كامل — الكلام والأكواد والأسئلة','Paste the full email — prose, code blocks and questions')}"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sig" id="caseGo">${t('حلّل','Analyse')}</button>
+        <button class="btn ghost" id="caseClear">${t('مسح','Clear')}</button>
+      </div>
+    </div></div>
+    <div id="caseOut"></div>`;
+  $('caseGo').onclick = ()=>renderCase($('caseText').value);
+  $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; };
+}
+
+function renderCase(text){
+  const out = $('caseOut');
+  if(!String(text||'').trim()){ out.innerHTML=''; return; }
+  const a = analyzeCase(text);
+  const L = [];
+
+  /* ١) العميل عمل إيه */
+  const kindName = {
+    definition:  t('تعريف تقرير (حقول من غير قيم)','a report definition — fields without values'),
+    fieldDef:    t('حقل من تعريف تقرير','a single field from a report definition'),
+    wantedShape: t('الشكل اللي العميل عايزه (مش رد فعلي)','the shape the customer wants — not an actual response'),
+    error:       t('رد فيه خطأ','an error response'),
+    request:     t('بودي ريكوست','a request body'),
+    other:       t('بلوك تاني','another block')
+  };
+  L.push(`<div class="panel"><div class="sec" style="border-top:0">
+    <h3>${t('اللي العميل بعته','What the customer sent')}</h3>
+    ${a.blocks.length ? `<table style="width:100%; font-size:13px">${a.blocks.map((b,i)=>`
+      <tr><td style="padding:4px 0; width:34%; color:var(--ink-2)">${t('بلوك','Block')} ${i+1}</td>
+      <td style="padding:4px 0"><b>${esc(kindName[b.kind]||b.kind)}</b></td></tr>`).join('')}</table>`
+      : `<div class="note">${t('مفيش أكواد في الرسالة — كلام بس.','No code blocks in the message — prose only.')}</div>`}
+    ${a.paths.length ? `<div class="note" style="margin-top:8px">${t('مسارات مذكورة','Paths mentioned')}: ${a.paths.map(p=>`<code>${esc(p)}</code>`).join(' · ')}</div>` : ''}
+    ${a.qs.length ? `<div style="margin-top:10px"><b>${t('أسئلته','Their questions')}:</b><ol style="margin:6px 0 0; padding-inline-start:20px; font-size:13px">
+      ${a.qs.map(q=>`<li style="margin-bottom:3px">${esc(q)}</li>`).join('')}</ol></div>` : ''}
+  </div></div>`);
+
+  /* ٢) الغلط فين + التوجيه */
+  if(a.reportCase){
+    const gen = EPS.find(e => e.n === 'EXCE BETA REPORTS');
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('التشخيص','The diagnosis')}</h3>
+      <div class="note warn"><b>${t('العميل نادى الإندبوينت الغلط للغرض ده.','The customer called the wrong endpoint for what they want.')}</b><br>
+        ${t('اللي معاه تعريف التقرير: أسماء الأعمدة وأكوادها وترتيبها وطريقة تجميعها. ده إعداد التقرير مش نتيجته، فطبيعي ما فيهوش قيم.',
+            'What they have is the report definition: column names, codes, order and aggregation. That is the report configuration, not its output, so it carries no values.')}</div>
+      <div class="note sig" style="margin-top:8px"><b>${t('الصح','The right call')}:</b>
+        <code>POST ${esc(gen ? gen.p : 'https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID')}</code><br>
+        ${t('الـ REPORT_ID هو id التقرير اللي معاه أصلًا، والـ USER_ID المستخدم اللي هيتشغّل باسمه. الربط بين الاتنين بيتم بالـ code بتاع كل حقل.',
+            'REPORT_ID is the report id they already have, USER_ID is the user it runs as. The two join on each field code.')}</div>
+      ${gen ? `<div class="row" style="margin-top:10px"><button class="btn ghost" data-goep="${gen.i}">${t('افتح الريكوست ده','Open that request')}</button></div>` : ''}
+      <div class="note" style="margin-top:8px">${t('محتاج تأكيد قبل ما تبعت: بودي التنفيذ (نطاق التواريخ والعربيات) مش متسجّل في الكولكشن — اسأل تيم التقارير.',
+            'Confirm before sending: the execution body — date range and vehicles — is not recorded in the collection. Ask the reports team.')}</div>
+    </div></div>`);
+  } else {
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('التشخيص','The diagnosis')}</h3>
+      <div class="note">${t('مفيش نمط معروف في الرسالة دي. افحص الرد نفسه من تبويب «افحص رد»، ولو الحالة اتكررت ابعتهالي عشان تتضاف كقاعدة.',
+          'No known pattern in this message. Inspect the response itself in the response tab, and if this case recurs, send it in so it becomes a rule.')}</div>
+    </div></div>`);
+  }
+
+  /* ٣) رد جاهز */
+  const reply = caseReply(a);
+  if(reply){
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('رد جاهز للعميل','A reply ready to send')}</h3>
+      <div class="note" style="margin-bottom:8px">${t('مكتوب بلغة رسالته. اقراه قبل ما تبعته — وعدّل الجزء بتاع بودي التنفيذ لو تيم التقارير أكّدلك شكله.',
+          'Written in the language of their message. Read it before sending, and adjust the execution-body part once the reports team confirms its shape.')}</div>
+      <pre id="caseReplyTxt" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
+      <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button></div>
+    </div></div>`);
+  }
+
+  out.innerHTML = L.join('');
+  out.querySelectorAll('[data-goep]').forEach(b => b.onclick = ()=>{
+    const e = EPS.find(x => String(x.i) === b.dataset.goep);
+    if(e){ showView('search'); select(e, []); pushRecent(e); }
+  });
+  const cp = $('caseCopy');
+  if(cp) cp.onclick = ()=>{ copy(reply); toast(t('الرد اتنسخ','Reply copied')); };
 }
 
 function paintInspect(){
@@ -7753,6 +8002,7 @@ $('dashCsv').onclick  = dashExport;
 $('dashPdf').onclick  = dashPrint;
 $('wsPdf').onclick    = waslPrint;
 $('ivResp').onclick = ()=>{ INSPVIEW='resp'; paintInspect(); };
+$('ivCase').onclick = ()=>{ INSPVIEW='case'; paintInspect(); };
 $('ivReq').onclick  = ()=>{ INSPVIEW='req';  paintInspect(); };
 $('inGo').onclick = renderInspect;
 $('inClear').onclick = ()=>{ $('inText').value=''; renderInspect(); };
