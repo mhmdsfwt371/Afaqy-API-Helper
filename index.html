@@ -732,9 +732,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.28",
+  "version": "6.29",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.29",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "الأداة كانت بتسألك «محتاج: المستخدم» وهي معاها الرقم أصلًا من رد تسجيل الدخول — وتروح تدوّر في لستة المستخدمين وترجع من غير سجلات",
+          "دلوقتي بتلتقط رقم المستخدم من رد الدخول وتحطه في البودي لوحدها، ومبقاش فيه سؤال",
+          "معنى user_id في إنشاء التقرير: صاحب الريكوست — الحساب اللي التقرير هيتسجّل عليه. مش اسم الدخول، رقم المستخدم في المنصة",
+          "لو لأي سبب رد الدخول ما رجّعش رقم، بتسأل — ومكتوب جنبها المقصود إيه بالظبط عشان ما تدوّرش في الحتة الغلط",
+          "وقطع الاتصال بيمسح الرقم، فما ينفعش تقرير يتسجّل على حساب عميل وانت متصل بعميل تاني"
+        ],
+        "en": [
+          "The tool was asking you for the user while it already held the id from the login response — then searching the users list and coming back empty",
+          "It now captures the user id from the login response and fills it into the body itself, with no question asked",
+          "What user_id means when creating a report: the owner of the request — the account the report is filed under. Not the login name, but the platform user id",
+          "If the login response returns no id for any reason, it asks — with a note explaining exactly what is meant, so you do not search in the wrong place",
+          "Disconnecting clears the id, so a report cannot be filed under one customer while you are connected to another"
+        ]
+      }
+    },
     {
       "v": "6.28",
       "date": "2026-08-05",
@@ -4984,7 +5004,7 @@ function openDepsModal(e, missing, cont){
 }
 
 /* ================= الجلسة: التوكن بيتجاب لوحده ================= */
-const SESSION = { user:'', pass:'', token:'', apiKey:'', at:null, unit:null };
+const SESSION = { user:'', pass:'', token:'', apiKey:'', userId:'', at:null, unit:null };
 let UNITS_CACHE = null;          // لستة العربيات بتتجاب مرة واحدة في الجلسة
 
 function unitPaint(msg, bad){
@@ -5071,6 +5091,15 @@ function prepBody(e){
   let next = fixSamples(obj, changes);
   const u = SESSION.unit, scoped = unitScopedEp(e);
   const pathRes = RESOLVERS.find(r=>r.key!=='unit' && r.path.test(e.p||''));
+  /* رقم المستخدم من الدخول — بدل ما نسأل الموظف عن حاجة معانا */
+  if(SESSION.userId && next && next.data && typeof next.data === 'object'
+     && ('user_id' in next.data) && typeof next.data.user_id !== 'object'){
+    if(next.data.user_id !== SESSION.userId){
+      next.data.user_id = SESSION.userId;
+      changes.push(t(`رقم المستخدم اتحط من الحساب المتصل (${SESSION.user})`,
+                     `The user id was filled from the connected account (${SESSION.user})`));
+    }
+  }
   /* نطاق التقرير جزء من الريكوست الفعلي، فلازم يبان في البودي المعروض:
      اللي الموظف شايفه هو اللي هيتبعت لما يدوس جرّب. */
   if(isReportEp(e) && (RSCOPE.mode === 'imeis' || RSCOPE.mode === 'allExplicit') && RSCOPE.uids.length){
@@ -5129,7 +5158,9 @@ const RESOLVERS = [
    list:{path:'/unit_groups/lists', body:{data:{projection:['name','unitsList']}}} },
  { key:'user', fields:['user_id','user_ids'], path:/^\/user\//i,
    label:{ar:'المستخدم', en:'user'},
-   ask:{ar:'اسم المستخدم', en:'Username'},
+   ask:{ar:'اسم المستخدم في المنصة — مش اسم الدخول بالضرورة', en:'The username in the platform — not necessarily the login name'},
+   note:{ar:'المقصود صاحب الريكوست: الحساب اللي التقرير هيتسجّل عليه. عادةً بياخد من الدخول لوحده — لو بيسأل هنا يبقى رد الدخول ما رجّعش رقم المستخدم.',
+         en:'This means the owner of the request: the account the report is filed under. It is normally taken from the login — if it is asking here, the login response did not return a user id.'},
    list:{path:'/user/lists', body:{data:{limit:5000}}} },
  { key:'sensor', fields:['sensor_id'], path:/^\/unit_sensors\//i,
    label:{ar:'الحساس', en:'sensor'},
@@ -5175,7 +5206,13 @@ function setDep(r, v){
   if(r.key==='unit') SESSION.unit = {uid:v.id, name:v.name, imei:v.imei, serial:v.serial, plate:v.plate, by:v.by};
   else SESSION.deps[r.key] = v;
 }
-function missingDeps(e){ return depsOf(e).filter(r=>!depValue(r)); }
+function missingDeps(e){
+  return depsOf(e).filter(r => {
+    /* رقم المستخدم جاي من الدخول — مالوش لازمة نسأل عنه */
+    if(r.key === 'user' && SESSION.userId) return false;
+    return !depValue(r);
+  });
+}
 
 /* الريكوست ده محتاج عربية؟ */
 function needsUnit(e){
@@ -5230,6 +5267,21 @@ async function connectIn(u, pw, silent){
     return false;
   }
 }
+/* رقم المستخدم في رد الدخول: بيتحط في user.id غالبًا، وأحيانًا _id أو
+   user_id. بندوّر عليه في مكانه الصح الأول عشان ما ناخدش رقم حاجة تانية. */
+function userIdFrom(json){
+  if(!json || typeof json !== 'object') return '';
+  const d = json.data || json;
+  const u = d.user || d.User || null;
+  const pick = o => {
+    if(!o || typeof o !== 'object') return '';
+    for(const k of ['id','_id','user_id','userId'])
+      if(o[k] && typeof o[k] !== 'object') return String(o[k]);
+    return '';
+  };
+  return pick(u) || pick(d) || '';
+}
+
 async function connect(silent){
   const u=$('sesU').value.trim(), pw=$('sesP').value;
   if(!u || !pw){ sesPaint(t('اكتب اسم المستخدم وكلمة السر','Enter username and password'), true); return false; }
@@ -5246,6 +5298,9 @@ async function connect(silent){
     const tok = (res.ok && !(inner && Number(inner)>=400)) ? deepFindKey(json,'token') : null;
     if(tok){
       SESSION.user=u; SESSION.pass=pw; SESSION.token=tok; SESSION.at=Date.now(); checkTick();
+      /* رد الدخول جواه بيانات المستخدم — ومنها رقمه. كنا بناخد التوكن
+         وبس، والأداة تفضل تسأل الموظف عن رقم هي معاها أصلًا. */
+      SESSION.userId = userIdFrom(json);
       /* حساب جديد = كل اللي اتخزّن عن الحساب القديم يروح.
          من غير كده هتشوف عربيات عميل وانت متصل بعميل تاني. */
       SESSION.unit=null; SESSION.deps={}; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
@@ -5269,7 +5324,7 @@ async function connect(silent){
 let LAST_LOGIN_FAIL = null;
 
 function disconnect(){
-  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.apiKey=''; SESSION.at=null; SESSION.unit=null; checkTick();
+  SESSION.user=''; SESSION.pass=''; SESSION.token=''; SESSION.apiKey=''; SESSION.userId=''; SESSION.at=null; SESSION.unit=null; checkTick();
   SESSION.deps={}; TOKEN_MEM=''; UNITS_CACHE=null; LAST_RUN=null; SHOW_TOKEN=false;
   Object.keys(DEP_CACHE).forEach(k=>delete DEP_CACHE[k]);
   $('sesU').value=''; $('sesP').value=''; $('unitIn').value=''; unitPaint(t('—','—'));
@@ -5665,7 +5720,7 @@ function buildReportBody(kind){
     date:{interval:'interval', from: fmt(from)+' 00:00:00', to: fmt(now)+' 23:59:59',
           interval_count:1, interval_unit:'days', including_current:true},
     timelimit:{}, trip_details:'1', without_chunks:false, color_ranges:[],
-    user_id:'<USER_ID>', lang: (LANG==='en' ? 'en' : 'ar')
+    user_id: (SESSION.userId || '<USER_ID>'), lang: (LANG==='en' ? 'en' : 'ar')
   }}, null, 4);
 }
 function summaryBody(){ return buildReportBody('summary'); }

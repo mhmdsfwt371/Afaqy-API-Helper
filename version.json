@@ -1,16 +1,16 @@
 {
-  "version": "6.28",
+  "version": "6.29",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "مولّد تقارير في ريكوست الإنشاء: تختار نوع التقرير والأداة تبنيلك البودي كامل بنفس شكل الكولكشن — الأعمدة والموارد والفترة",
-      "تلات أنواع جاهزة: ملخص العربيات، وملخص حسب السائق، وملخص بالوقود (١٩ عمود بالاستهلاك والتكلفة حسابي وبالحساس)",
-      "نقطة بتغلّط كتير واتوضّحت: نوع المورد بيتغيّر مع نوع التقرير — تقرير حسب السائق موارده سواقين مش عربيات، فالأداة مبتحطش أرقام عربيات فيه"
+      "الأداة كانت بتسألك «محتاج: المستخدم» وهي معاها الرقم أصلًا من رد تسجيل الدخول — وتروح تدوّر في لستة المستخدمين وترجع من غير سجلات",
+      "دلوقتي بتلتقط رقم المستخدم من رد الدخول وتحطه في البودي لوحدها، ومبقاش فيه سؤال",
+      "معنى user_id في إنشاء التقرير: صاحب الريكوست — الحساب اللي التقرير هيتسجّل عليه. مش اسم الدخول، رقم المستخدم في المنصة"
     ],
     "en": [
-      "A report generator on the create request: pick the report kind and the tool builds the whole body in the collection's shape — columns, resources and period",
-      "Three kinds ready: a units summary, a summary by driver, and a summary with fuel (19 columns covering consumption and cost, both computed and sensor based)",
-      "A point that trips people up, now made explicit: the resource type changes with the report kind — a by-driver report takes drivers, not vehicles, so the tool does not put vehicle ids in it"
+      "The tool was asking you for the user while it already held the id from the login response — then searching the users list and coming back empty",
+      "It now captures the user id from the login response and fills it into the body itself, with no question asked",
+      "What user_id means when creating a report: the owner of the request — the account the report is filed under. Not the login name, but the platform user id"
     ]
   }
 }
