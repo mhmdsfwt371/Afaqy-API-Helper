@@ -732,9 +732,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.34",
+  "version": "6.35",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.35",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "زرار «نزّل كولكشن Postman» في كل سيناريو جاهز: بينزّل ملف .postman_collection.json فيه السلسلة كاملة، تبعته أتاشمنت للعميل على طول من غير ما تكتبه بإيدك.",
+          "ونفس الزرار تحت الرد الجاهز في «حلّل رسالة عميل»: الكولكشن بيتبني بأكواد حقول العميل اللي كتبها في رسالته هو، مش عينة عامة.",
+          "الملف بيمشي لوحده: التوكن ورقم المستخدم ورقم العربية ورقم التقرير بيتنقلوا بين الخطوات، وخطوة الانتظار بتلف على نفسها كل ٣ ثواني لحد ١٠٠٪ لما تشغّله بالـ Runner.",
+          "أمان: القيم بتتحوّل لعلامات مكان — مفيش توكن ولا رقم مستخدم ولا رقم عربية من حسابك بيخرج في الملف اللي بيروح للعميل. وكل الأسماء والشروح إنجليزي مهما كانت لغة واجهتك."
+        ],
+        "en": [
+          "A Download Postman collection button on every ready scenario: it saves a .postman_collection.json carrying the whole chain, ready to attach to a customer email without writing it by hand.",
+          "The same button sits under the ready reply in Analyse a customer message, and there the collection is built from the field codes the customer wrote in their own message rather than a generic sample.",
+          "The file runs itself: the token, user id, unit id and report id are carried between the requests, and the wait request loops on itself every 3 seconds until 100% when run with the Postman Runner.",
+          "Safety: values become placeholders — no token, user id or vehicle id from your account ever leaves in the file the customer receives. Every name and description is in English regardless of your interface language."
+        ]
+      }
+    },
     {
       "v": "6.34",
       "date": "2026-08-10",
@@ -2633,6 +2651,31 @@ const DOCS = {
           "Beside each vehicle is a detail button that pulls its own rows from /user_reports/data-new using resource_id. The difference: data-summary returns one aggregated row per vehicle, while data-new returns the breakdown for a single vehicle.",
           "The last step is the export: choose PDF, Excel or HTML and the tool calls /user_reports/export with the same report id. If you see /user_reports/request-export with a format field instead of type in the newer screen's network log, that serves the same purpose in a later release; the tool uses the one documented in the collection.",
           "The same chain is what the Analyse a customer message tab puts into the ready reply when you paste the customer email, so you never have to write it out by hand."
+        ]
+      }
+    },
+    {
+      "since": "6.35",
+      "t": {
+        "ar": "كولكشن Postman من الأداة — تبعته للعميل على طول",
+        "en": "A Postman collection from the tool — ready to send"
+      },
+      "b": {
+        "ar": [
+          "في كل سيناريو جاهز، جنب «نسخ السلسلة كاملة»، فيه زرار «نزّل كولكشن Postman». بيديك ملف .postman_collection.json فيه خطوات السيناريو كلها كريكوستات جاهزة.",
+          "وتحت الرد الجاهز في تبويب «حلّل رسالة عميل» نفس الزرار — والفرق إن الكولكشن هنا بيتبني بأكواد حقول العميل اللي كتبها في رسالته، فمفاتيح الرد اللي هيشوفها تطابق اللي هو مستنيه.",
+          "الملف مربوط من جواه: ريكوست الدخول بيلتقط التوكن ورقم المستخدم، وريكوست العربيات بيلتقط رقم العربية من الـ IMEI، وريكوست الإنشاء بيلتقط رقم التقرير — كلهم بيتنقلوا للخطوات اللي بعدهم لوحدهم.",
+          "خطوة الانتظار فيها سكربت بيرجّع لنفس الريكوست كل ٣ ثواني لحد ما النسبة توصل ١٠٠٪، بسقف ٤٠ محاولة. لو شغّلته بالـ Runner بيمشي لوحده؛ ولو بتبعت بإيدك دوس Send تاني لحد ما تشوف ١٠٠.",
+          "أمان: قيم حسابك ما بتخرجش في الملف. التوكن ورقم المستخدم ورقم العربية ورقم التقرير كلهم بيتحطوا كعلامات مكان زي {{token}} و{{unit_id}}، والعميل بيملاهم من حسابه هو.",
+          "أسماء الريكوستات وشروحها بالإنجليزي دايمًا حتى لو واجهتك عربي — لأن الملف بيروح لعميل مش ليك."
+        ],
+        "en": [
+          "On every ready scenario, next to Copy full chain, there is a Download Postman collection button. It gives you a .postman_collection.json holding the scenario's steps as runnable requests.",
+          "The same button sits under the ready reply in the Analyse a customer message tab. The difference is that this collection is built from the field codes the customer wrote in their own message, so the response keys they see match what they expect.",
+          "The file is wired internally: the login request captures the token and user id, the vehicles request captures the unit id from the IMEI, and the create request captures the report id — each is carried into the following steps automatically.",
+          "The wait step carries a script that returns to the same request every 3 seconds until the percentage reaches 100, capped at 40 attempts. With the Postman Runner it advances on its own; sending by hand, press Send again until you see 100.",
+          "Safety: none of your account values leave in the file. The token, user id, unit id and report id are written as placeholders such as {{token}} and {{unit_id}}, and the customer fills them from their own account.",
+          "Request names and descriptions are always in English even when your interface is Arabic, because the file goes to a customer rather than to you."
         ]
       }
     },
@@ -4555,6 +4598,25 @@ const RECIPES = [
      hint:{ar:'اللستة دي عشان تختار مجموعة. لو التقرير على الحساب كله، الاختيار ده موجود في الخطوة اللي بعدها بردو.',
            en:'This list is so you can pick a group. If the report covers the whole account, that choice is in the next step too.'} },
    { t:{ar:'تحديد نطاق التقرير', en:'Choose the report scope'}, kind:'rscope',
+     pm:[{ name:'Resolve IMEI to unit id',
+           path:'/units/lists', body:{data:{offset:0, limit:1000, simplify:0, projection:['basic']}},
+           desc:'The report takes vehicle ids, NOT IMEIs. This call lists the vehicles so you can map '
+              + 'an IMEI to its id.\n\n'
+              + 'The Tests script picks the unit whose imei equals {{imei}} and stores its id in '
+              + '{{unit_id}}. If {{imei}} is left empty it takes the first unit, so the rest of the '
+              + 'chain still runs.\n\n'
+              + 'Raise limit or page with offset if the account holds more than 1000 vehicles.',
+           test:['const j = pm.response.json();',
+                 'const arr = (j?.data?.items || j?.data || []);',
+                 'const list = Array.isArray(arr) ? arr : [];',
+                 'const wanted = String(pm.collectionVariables.get("imei") || "").trim();',
+                 'let hit = null;',
+                 'if (wanted) hit = list.find(u => String(u.imei || "") === wanted);',
+                 'if (!hit) hit = list[0];',
+                 'if (hit) { pm.collectionVariables.set("unit_id", String(hit.id || hit._id));',
+                 '           console.log("unit_id: " + (hit.id || hit._id) + "  (" + (hit.name || "") + ")"); }',
+                 'pm.test("At least one vehicle is visible", () => pm.expect(list.length).to.be.above(0));',
+                 'if (wanted) pm.test("The requested IMEI was found", () => pm.expect(hit && String(hit.imei)).to.eql(wanted));']}],
      hint:{ar:'التقرير بياخد العربيات في حقل resources. مجموعة يعني عربياتها، والحساب كله يعني كل الـ UIDs.',
            en:'The report takes its vehicles in the resources field. A group means its vehicles; the whole account means every UID.'} },
    { t:{ar:'جلب قوالب التقارير', en:'Fetch report templates'}, kind:'call', m:'POST', path:'/user_report_templates/lists',
@@ -4577,12 +4639,80 @@ const RECIPES = [
      hint:{ar:'الرد بيرجّع رقم التقرير بس — مش الصفوف. ده مش عطل: التقرير لسه بيتولّد على السيرفر.',
            en:'The response returns the report id only, not the rows. That is not a fault: the report is still being generated on the server.'} },
    { t:{ar:'متابعة التوليد لحد ١٠٠٪', en:'Follow generation to 100%'}, kind:'poll',
+     pm:[{ name:'Wait for generation  (repeat until percentage = 100)',
+           path:'/user_reports/percentage', body:{data:{ids:['{{report_id}}']}},
+           desc:'THIS IS THE STEP THAT IS EASY TO MISS.\n\n'
+              + 'Returns how far the report has been generated:\n'
+              + '  { "data": [ { "reportId": "...", "percentage": 100 } ] }\n\n'
+              + 'Call it repeatedly until percentage reaches 100. Only then do the rows exist.\n\n'
+              + 'If you read the data before that, /user_reports/data-summary answers with an empty '
+              + 'data array, status_code 200 and message "success" — a completely valid response that '
+              + 'looks like a failure. That is the single most common cause of "the report returns no data".\n\n'
+              + 'Run this collection with the Postman Runner and this request loops on itself, waiting '
+              + '3 seconds between attempts, up to 40 attempts. Sending it by hand performs one check — '
+              + 'press it again until you see 100.',
+           prereq:['// wait 3 seconds between attempts when run by the Runner',
+                   'const n = Number(pm.collectionVariables.get("poll_count") || 0);',
+                   'if (n > 0) { const t = Date.now() + 3000; while (Date.now() < t) {} }'],
+           test:['const j = pm.response.json();',
+                 'const rows = Array.isArray(j?.data) ? j.data : [];',
+                 'const id = String(pm.collectionVariables.get("report_id") || "");',
+                 'const row = rows.find(r => String(r.reportId || r.report_id || r.id || "") === id) || rows[0];',
+                 'const pct = row ? Number(row.percentage ?? row.percent) : null;',
+                 'let n = Number(pm.collectionVariables.get("poll_count") || 0) + 1;',
+                 'pm.collectionVariables.set("poll_count", String(n));',
+                 'console.log("attempt " + n + " -> " + (pct === null ? "no percentage field" : pct + "%"));',
+                 'pm.test("The progress endpoint answered", () => pm.response.to.have.status(200));',
+                 'if (pct === null) { console.warn("No percentage field — continuing."); }',
+                 'else if (pct < 100 && n < 40) {',
+                 '  const nm = "Wait for generation  (repeat until percentage = 100)";',
+                 '  if (pm.execution && pm.execution.setNextRequest) pm.execution.setNextRequest(nm);',
+                 '  else if (typeof postman !== "undefined") postman.setNextRequest(nm);',
+                 '} else { pm.test("Generation finished", () => pm.expect(pct).to.eql(100)); }']}],
      hint:{ar:'هنا بيقع أغلب الناس. بيقروا الداتا على طول، فترجع فاضية، فيفتكروا إن في مشكلة. التوليد بياخد وقت والنسبة بتتقري من user_reports/percentage.',
            en:'This is where most people go wrong: they read the data immediately, get an empty result, and conclude something is broken. Generation takes time and its progress is read from user_reports/percentage.'} },
    { t:{ar:'قراءة صفوف التقرير', en:'Read the report rows'}, kind:'rows',
+     pm:[{ name:'Report Summary  ->  aggregated, one row per vehicle',
+           path:'/user_reports/data-summary', body:{data:{id:'{{report_id}}'}},
+           desc:'The aggregated summary: one row per vehicle for the whole period.\n\n'
+              + 'The keys are the same field codes from the catalog — date, route_length, engine_work, '
+              + 'move_duration, engine_idle, stop_duration, max_spd — so this is where Route Length: 70 km '
+              + 'appears with its value rather than its definition.\n\n'
+              + 'An empty data array here means exactly one of two things:\n'
+              + '  1. The previous step has not reached 100 yet. Go back and keep polling.\n'
+              + '  2. The vehicles genuinely did not move during the period you asked for.\n'
+              + 'It does not mean the request or the permissions are wrong.',
+           test:['const j = pm.response.json();',
+                 'const rows = Array.isArray(j?.data) ? j.data : (j?.data?.items || []);',
+                 'console.log("summary rows: " + rows.length);',
+                 'if (rows.length) console.log(JSON.stringify(rows[0], null, 2));',
+                 'pm.test("Request succeeded", () => pm.response.to.have.status(200));',
+                 'if (!rows.length) console.warn("Empty: either generation is unfinished, or the vehicles did not move.");']},
+         { name:'Report Data  ->  the detail behind ONE vehicle',
+           path:'/user_reports/data-new', body:{data:{id:'{{report_id}}', resource_id:'{{unit_id}}'}},
+           desc:'The detailed rows for a single vehicle inside the report.\n\n'
+              + 'resource_id is the unit id — the same value you put in resources when creating the report.\n\n'
+              + 'This is not the previous response in a different shape. The previous request gives one '
+              + 'aggregated row per vehicle; this gives the breakdown behind one of them.\n\n'
+              + 'Optional: the endpoint also accepts a filters object, e.g. { "filters": { "is_stream": false } }.',
+           test:['const j = pm.response.json();',
+                 'const rows = Array.isArray(j?.data) ? j.data : (j?.data?.items || []);',
+                 'console.log("detail rows: " + rows.length);',
+                 'pm.test("Request succeeded", () => pm.response.to.have.status(200));']}],
      hint:{ar:'دي نفس الأرقام اللي بتظهر في شاشة التقارير. وجنب كل عربية زرار بيجيب تفاصيلها لوحدها من data-new.',
            en:'These are the same figures the reports screen shows. Beside each vehicle is a button that pulls its own detail from data-new.'} },
    { t:{ar:'تصدير التقرير ملف', en:'Export the report as a file'}, kind:'rexport',
+     pm:[{ name:'Export the same report to a file',
+           path:'/user_reports/export', body:{data:{id:'{{report_id}}', type:'pdf'}},
+           desc:'Returns the same result as a file. type accepts pdf, excel or html.\n\n'
+              + 'Note: newer builds of the web application call /user_reports/request-export with a '
+              + 'format field instead of type, against the same report id. Both serve the same purpose; '
+              + 'this collection uses the documented one.'},
+         { name:'Delete the test report  (housekeeping)',
+           path:'/user_reports/delete', body:{data:{id:'{{report_id}}'}},
+           desc:'Every create stores a report on the account. While testing, remove it afterwards so '
+              + "the customer's report list stays clean.\n\n"
+              + 'Skip this if the report is one the customer actually wants to keep.'}],
      hint:{ar:'التصدير بياخد نفس رقم التقرير ونوع الملف.',
            en:'Export takes the same report id plus the file type.'} }]}
 ];
@@ -4628,6 +4758,7 @@ function renderRecipe(){
     <div class="sec"><div class="row">
       <button class="btn sig" id="rcAll">${t('شغّل كل الخطوات','Run all steps')}</button>
       <button class="btn ghost" id="rcCurl">${t('نسخ السلسلة كاملة','Copy full chain')}</button>
+      <button class="btn ghost" id="rcPm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>
       <button class="btn warn" id="rcEsc">${t('تصعيد لتيم مصر','Escalate')}</button>
     </div></div>
   </div>`;
@@ -4637,6 +4768,8 @@ function renderRecipe(){
   $('rcCurl').onclick = ()=>openModal(t('السلسلة كاملة','Full chain'), r.steps.map((st,i)=>
     st.kind!=='call' ? `# ${i+1}: ${dual(st.t)} (${t('بتتم داخل الأداة','handled inside the tool')})` :
     `# ${i+1}: ${dual(st.t)}\ncurl -X ${st.m} "${stepUrl(st)}" \\\n  -H "Content-Type: application/json" \\\n  -d '${stepBody(st)}'`).join('\n\n'), false);
+  $('rcPm').onclick = ()=>pmSave(pmFromRecipe(r),
+    'afaqy-' + r.id + '.postman_collection.json');
   $('rcEsc').onclick = ()=>openEscalation(dual(r.title));
   $('rcAll').onclick = async ()=>{
     const b=$('rcAll'), old=b.textContent; b.disabled=true;
@@ -5175,6 +5308,200 @@ function doRExport(i){
       };
     }};
   renderSteps();
+}
+
+/* ============ مولّد كولكشن Postman ============
+   الموظف كان بياخد السلسلة من الشاشة ويكتبها بإيده في Postman عشان
+   يبعتها للعميل. دلوقتي زرار واحد بينزّل الملف جاهز.
+
+   المبدأ: القيم بتتحوّل لـ {{placeholders}} — مش قيم الحساب المتصل.
+   الملف بيروح للعميل فيشتغل على حسابه هو، ومفيهوش توكن ولا أرقام
+   عربيات حد تاني. */
+
+/* بديل RC.vars وقت التوليد: بيرجّع علامات مكان بدل القيم الحقيقية */
+function pmVars(){
+  return { token:'{{token}}', uid:'{{unit_id}}', unitId:'{{unit_id}}',
+           imei:'{{imei}}', reportId:'{{report_id}}', groupId:'{{group_id}}',
+           driverId:'{{driver_id}}', from:'{{date_from}}', to:'{{date_to}}',
+           resources:['{{unit_id}}'], scopeLabel:'selected scope',
+           _tplRaw:{ code:'{{report_code}}', fields:[] }, _unitNames:{} };
+}
+
+function pmUrl(path){
+  return { raw:'{{base_url}}' + path + '?token={{token}}',
+           host:['{{base_url}}'], path:path.replace(/^\//,'').split('/'),
+           query:[{key:'token', value:'{{token}}'}] };
+}
+
+/* ريكوست واحد بشكل Postman v2.1 */
+function pmReq(o){
+  const it = { name:o.name,
+    request:{ method:o.method || 'POST',
+      header:[{key:'Content-Type', value:'application/json'},
+              {key:'Accept',       value:'application/json'}],
+      body:{ mode:'raw', raw:JSON.stringify(o.body || {}, null, 2),
+             options:{raw:{language:'json'}} },
+      url:pmUrl(o.path), description:o.desc || '' },
+    response:[] };
+  const ev = [];
+  if(o.prereq) ev.push({listen:'prerequest', script:{type:'text/javascript', exec:o.prereq}});
+  if(o.test)   ev.push({listen:'test',       script:{type:'text/javascript', exec:o.test}});
+  if(ev.length) it.event = ev;
+  return it;
+}
+
+/* ريكوست الدخول — أول خطوة في أي كولكشن بنطلّعه */
+function pmLogin(){
+  return pmReq({ name:'Login  (optional — skip if you already hold a token)',
+    path:'/auth/login', body:{data:{username:'{{username}}', password:'{{password}}'}},
+    desc:'Returns the access token and the account id.\n\n'
+       + 'Two values from this response are needed later:\n'
+       + '  data.token    the token used on every other call\n'
+       + '  data.user.id  the user_id sent when creating a report\n\n'
+       + 'Both are captured into collection variables automatically.\n\n'
+       + 'If you already have a token, skip this request and set {{token}} in the '
+       + 'collection variables instead.',
+    test:['const j = pm.response.json();',
+          'const tok = j?.data?.token || j?.token;',
+          'const uid = j?.data?.user?.id || j?.data?.user_id;',
+          'if (tok) pm.collectionVariables.set("token", tok);',
+          'if (uid) pm.collectionVariables.set("user_id", uid);',
+          'pm.test("Login returned a token", () => pm.expect(tok).to.be.a("string"));'] });
+}
+
+/* الغلاف: المتغيّرات والشرح العام */
+function pmWrap(name, desc, items, extraVars){
+  const v = [
+    {key:'base_url',    value:baseUrl(),      type:'string'},
+    {key:'username',    value:'',             type:'string'},
+    {key:'password',    value:'',             type:'string'},
+    {key:'token',       value:'',             type:'string'},
+    {key:'user_id',     value:'',             type:'string'},
+    {key:'imei',        value:'',             type:'string'},
+    {key:'unit_id',     value:'',             type:'string'},
+    {key:'date_from',   value:today(),        type:'string'},
+    {key:'date_to',     value:today(),        type:'string'}
+  ].concat(extraVars || []);
+  /* ما نحطش متغيّر مكرر ولا متغيّر محدش بيستعمله */
+  const used = JSON.stringify(items);
+  const seen = {};
+  const vars = v.filter(x=>{
+    if(seen[x.key]) return false; seen[x.key] = 1;
+    return ['base_url','username','password','token'].indexOf(x.key) > -1
+        || used.indexOf('{{' + x.key + '}}') > -1;
+  });
+  return { info:{ name:name, description:desc,
+                  schema:'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' },
+           item:items, variable:vars };
+}
+
+/* بينزّل الملف */
+function pmSave(col, file){
+  const blob = new Blob([JSON.stringify(col, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = file;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast(t('الكولكشن اتنزّل','Collection downloaded'));
+}
+
+/* سيناريو → كولكشن. خطوة call بتتحوّل لوحدها، والخطوات التانية
+   بتتحوّل من وصف pm المكتوب جنبها في تعريف السيناريو. */
+function pmFromRecipe(r){
+  const V = pmVars();
+  const items = [pmLogin()];
+  r.steps.forEach(st=>{
+    if(Array.isArray(st.pm)){
+      st.pm.forEach(d=>items.push(pmReq({name:d.name, path:d.path, body:d.body,
+                                         desc:d.desc, test:d.test, prereq:d.prereq})));
+      return;
+    }
+    if(st.kind !== 'call' || !st.path) return;
+    let body = {};
+    try{ body = st.body ? st.body(V) : {}; }catch(_){ body = {}; }
+    /* رقم المستخدم بيتحط من رد الدخول زي ما الأداة بتعمل */
+    if(body && body.data && typeof body.data === 'object' && !Array.isArray(body.data)
+       && st.path === '/user_reports/add') body.data.user_id = '{{user_id}}';
+    /* الملف بيروح لعميل — فأسماء وشروح الريكوستات بالإنجليزي دايمًا،
+       مهما كانت لغة الواجهة عند الموظف */
+    const it = pmReq({ name:(st.t && st.t.en) || dual(st.t), path:st.path, body:body,
+                       method:st.m || 'POST',
+                       desc:(st.hint && st.hint.en) || dual(st.hint || {ar:'',en:''}) });
+    /* أول ريكوست بيرجّع رقم تقرير: نلتقطه للخطوات اللي بعده */
+    if(st.extract && /user_reports\/add/.test(st.path))
+      it.event = [{listen:'test', script:{type:'text/javascript', exec:[
+        'const j = pm.response.json();',
+        'const id = j?.data?.id || j?.data?._id || j?.id;',
+        'if (id) { pm.collectionVariables.set("report_id", String(id));',
+        '          pm.collectionVariables.set("poll_count", "0"); }',
+        'pm.test("A report id came back", () => pm.expect(id).to.be.a("string"));',
+        'pm.test("No rows are returned here — that is expected", () => pm.expect(true).to.be.true);']}}];
+    items.push(it);
+  });
+  const desc = ((r.title && r.title.en) || dual(r.title)) + '\n\n'
+    + ((r.desc && r.desc.en) || dual(r.desc)) + '\n\n'
+    + 'Generated by the Afaqy integration helper. Fill in the collection variables, '
+    + 'then run the requests in order or use the Postman Runner — the token, user id, '
+    + 'unit id and report id are carried between requests automatically.';
+  return pmWrap('AFAQY — ' + ((r.title && r.title.en) || dual(r.title)), desc, items,
+    [{key:'report_code', value:'summary', type:'string'},
+     {key:'report_id',   value:'',        type:'string'},
+     {key:'group_id',    value:'',        type:'string'},
+     {key:'driver_id',   value:'',        type:'string'},
+     {key:'poll_count',  value:'0',       type:'string'}]);
+}
+
+/* رسالة عميل مشخّصة → كولكشن. بنستخدم بودي الإنشاء المبني من
+   أكواد حقول العميل نفسه، مش عينة عامة. */
+function pmFromCase(a){
+  if(!a || !a.reportCase) return null;
+  const r = RECIPES.find(x=>x.id === 'summary-report');
+  const col = r ? pmFromRecipe(r) : pmWrap('AFAQY — Report data', '', [pmLogin()], []);
+  /* نستبدل بودي الإنشاء ببودي مبني من حقول العميل */
+  let add = null;
+  try{ add = caseSampleBody(a); }catch(_){ add = null; }
+  if(add && add.data){
+    add.data.resources = ['{{unit_id}}'];
+    add.data.user_id   = '{{user_id}}';
+    if(add.data.date){ add.data.date.from = '{{date_from}} 00:00:00';
+                       add.data.date.to   = '{{date_to}} 23:59:59'; }
+    const it = col.item.find(x=>x.request.url.raw.indexOf('/user_reports/add') > -1);
+    if(it){
+      it.request.body.raw = JSON.stringify(add, null, 2);
+      it.request.description =
+        'Runs the report and returns its id. It does NOT return rows.\n\n'
+      + 'The fields array below carries the same column codes that appear in the '
+      + "customer's own message, so the response keys will match what they expect.\n\n"
+      + 'IMPORTANT: at this moment the rows do not exist yet. The report is generated '
+      + 'asynchronously. Go to the next request before reading anything.';
+    }
+  }
+  col.info.name = 'AFAQY — Report Data (full chain)';
+  col.info.description =
+    'Retrieving actual report values from the AFAQY API, end to end.\n\n'
+  + 'WHY THE CATALOG HAS NO VALUES\n'
+  + '/reports/lists and /user_report_templates/lists return report definitions: the '
+  + 'column names, codes, formats and aggregation. They describe the report; they never '
+  + 'run it. That is why the response looks like metadata — it is.\n\n'
+  + 'THE CALLS THAT PRODUCE VALUES\n'
+  + '  1. POST /user_reports/add          creates the run, returns the report id\n'
+  + '  2. POST /user_reports/percentage   generation progress — poll until it is 100\n'
+  + '  3. POST /user_reports/data-summary the aggregated summary, one row per vehicle\n'
+  + '  4. POST /user_reports/data-new     the detail behind one vehicle, by resource_id\n\n'
+  + 'STEP 2 IS THE ONE PEOPLE MISS\n'
+  + 'The report is generated asynchronously. Reading the rows immediately after creating '
+  + 'it returns an empty data array with status_code 200 and message "success" — a valid '
+  + 'response that looks like a failure. Poll the percentage first; nine times out of ten '
+  + 'an empty report simply had not finished.\n\n'
+  + 'HOW TO USE THIS COLLECTION\n'
+  + '  - Open the Variables tab and fill in username and password, or paste a token.\n'
+  + '  - Optionally put an IMEI in the imei variable to target a specific vehicle.\n'
+  + '  - Set date_from and date_to (YYYY-MM-DD).\n'
+  + '  - Run in order, or use the Postman Runner: the token, user id, unit id and report '
+  + 'id are captured automatically between steps, and the progress request loops until '
+  + 'generation completes.';
+  return col;
 }
 
 function doUid(i){
@@ -9801,7 +10128,11 @@ function renderCase(text){
       <div class="note" style="margin-bottom:8px">${t('مكتوب بلغة رسالته. اقراه قبل ما تبعته — وعدّل الجزء بتاع بودي التنفيذ لو تيم التقارير أكّدلك شكله.',
           'Written in the language of their message. Read it before sending, and adjust the execution-body part once the reports team confirms its shape.')}</div>
       <pre id="caseReplyTxt" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
-      <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button></div>
+      <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
+        ${a.reportCase ? `<button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>` : ''}</div>
+      ${a.reportCase ? `<div class="note" style="margin-top:8px">${t(
+        'الكولكشن بيتبعت أتاشمنت مع الرد. فيه السلسلة كاملة بأكواد حقول العميل نفسه، وبيمشي لوحده: التوكن ورقم العربية ورقم التقرير بيتنقلوا بين الخطوات، وخطوة الانتظار بتلف لحد ١٠٠٪.',
+        'Attach the collection to the reply. It carries the whole chain using the customer\'s own field codes and runs itself: the token, unit id and report id move between the steps, and the wait request loops until 100%.')}</div>` : ''}
     </div></div>`);
   }
 
@@ -9812,6 +10143,12 @@ function renderCase(text){
   });
   const cp = $('caseCopy');
   if(cp) cp.onclick = ()=>{ copy(reply); toast(t('الرد اتنسخ','Reply copied')); };
+  const pmb = $('casePm');
+  if(pmb) pmb.onclick = ()=>{
+    const col = pmFromCase(a);
+    if(!col){ toast(t('الحالة دي مش محتاجة كولكشن','This case does not need a collection')); return; }
+    pmSave(col, 'AFAQY_Report_Data_Full_Chain.postman_collection.json');
+  };
   const ak = $('caseAskCopy');
   if(ak) ak.onclick = ()=>{ copy(askReply(a, caseNeeds(a)) || '', t('رسالة الطلب اتنسخت','Request message copied')); };
   const lvb = $('caseLive');

@@ -1,16 +1,16 @@
 {
-  "version": "6.34",
+  "version": "6.35",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "سيناريو جديد: «تقرير Summary — الحساب كله أو مجموعة». تحدد النطاق، يعمل التقرير، يتابع التوليد لحد ١٠٠٪، يقرا الصفوف، ويصدّر — بالترتيب اللي الشاشة نفسها بتمشي بيه.",
-      "متابعة التوليد بقت خطوة صريحة على /user_reports/percentage بشريط تقدّم. من غيرها بتقرا داتا لسه ما اتولدتش فترجع فاضية والرد سليم — وده أشهر سبب لبلاغ «التقرير مش راجع».",
-      "الرد الفاضي بقى متفرّق: يا التوليد لسه شغّال يا العربيات فعلاً ما تحركتش في الفترة. الأداة بتقول أنهي واحدة فيهم بدل ما تسيبك تخمّن."
+      "زرار «نزّل كولكشن Postman» في كل سيناريو جاهز: بينزّل ملف .postman_collection.json فيه السلسلة كاملة، تبعته أتاشمنت للعميل على طول من غير ما تكتبه بإيدك.",
+      "ونفس الزرار تحت الرد الجاهز في «حلّل رسالة عميل»: الكولكشن بيتبني بأكواد حقول العميل اللي كتبها في رسالته هو، مش عينة عامة.",
+      "الملف بيمشي لوحده: التوكن ورقم المستخدم ورقم العربية ورقم التقرير بيتنقلوا بين الخطوات، وخطوة الانتظار بتلف على نفسها كل ٣ ثواني لحد ١٠٠٪ لما تشغّله بالـ Runner."
     ],
     "en": [
-      "New scenario: Summary report for the whole account or one group. Choose the scope, create the report, follow generation to 100%, read the rows, export — in the order the platform itself uses.",
-      "Following generation is now an explicit step on /user_reports/percentage with a progress bar. Without it you read data that has not been generated yet, so the rows come back empty with a perfectly valid response — the most common cause of a report is not returning report.",
-      "An empty result is now told apart: either generation is still running, or the vehicles genuinely did not move in the period. The tool says which, instead of leaving you to guess."
+      "A Download Postman collection button on every ready scenario: it saves a .postman_collection.json carrying the whole chain, ready to attach to a customer email without writing it by hand.",
+      "The same button sits under the ready reply in Analyse a customer message, and there the collection is built from the field codes the customer wrote in their own message rather than a generic sample.",
+      "The file runs itself: the token, user id, unit id and report id are carried between the requests, and the wait request loops on itself every 3 seconds until 100% when run with the Postman Runner."
     ]
   }
 }
