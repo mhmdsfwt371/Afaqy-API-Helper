@@ -1,16 +1,16 @@
 {
-  "version": "6.32",
+  "version": "6.33",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "«حلّل رسالة عميل» بقى يجاوب بدل ما يسأل: لو الرسالة فيها اللي يكفي للحسم، الأداة تقولك الصح على طول وتطلّع رد جاهز تبعته من غير ما تطلب من العميل حاجة",
-      "بقى يقرا أكواد الحقول من كلام العميل مش من بلوكات الـ JSON بس — رسالة بتقول «Route Length — code: route_length» بقت تتشخّص، وقبل كده كانت بتعدّي وتطلب أدلة إحنا قاريينها",
-      "طلب الأدلة بقى واعي بالحالة: لو التشخيص محسوم مبيطلبش حاجة، ولو إنت متصل بحساب مبيطلبش منك اسم الحساب — بيجرّب بنفسه"
+      "لوحة الأجهزة: دوسة على أي صف في جدول العربيات بتفتح «حساسات الجهاز» — بيتصل لايف بـ /unit_sensors/lists مفلتر على الجهاز ده بالظبط، مش قايمة عامة",
+      "زي ما بيصلح: بيوري بس الحساسات المسجّلة فعلًا على الجهاز — اسمها ونوعها والباراميتر — مش قايمة تشيك بوكس ثابتة زي المنصة الرئيسية بتوريها لكل الأجهزة",
+      "جهاز GPS بسيط من غير حساسات إضافية بيرجّع رد فاضي، والأداة بتوضّح إنه رد صحيح من السيرفر مش نقص فيها"
     ],
     "en": [
-      "Analyse a customer message now answers instead of asking: when the message carries enough to settle it, the tool states the correct call and drafts a reply you can send without going back to the customer",
-      "It reads field codes from the customer's prose, not only from JSON blocks — a message saying \"Route Length — code: route_length\" is now diagnosed, where before it passed through and asked for evidence already in front of us",
-      "The evidence request is now aware of the diagnosis: it asks for nothing once the case is settled, and never asks you for the account name while you are connected — it runs the check itself"
+      "Device dashboard: click any row in the vehicles table to open Device sensors — it calls /unit_sensors/lists live, filtered to that exact device, not a generic list",
+      "Unlike the main platform, it shows only sensors actually registered on the device — name, type and param — instead of a fixed checkbox list shown for every device",
+      "A plain GPS unit with no extra sensors returns an empty result, and the tool makes clear that is a valid server response, not a gap in the tool"
     ]
   }
 }

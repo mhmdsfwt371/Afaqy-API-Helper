@@ -732,9 +732,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.32",
+  "version": "6.33",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.33",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "لوحة الأجهزة: دوسة على أي صف في جدول العربيات بتفتح «حساسات الجهاز» — بيتصل لايف بـ /unit_sensors/lists مفلتر على الجهاز ده بالظبط، مش قايمة عامة",
+          "زي ما بيصلح: بيوري بس الحساسات المسجّلة فعلًا على الجهاز — اسمها ونوعها والباراميتر — مش قايمة تشيك بوكس ثابتة زي المنصة الرئيسية بتوريها لكل الأجهزة",
+          "جهاز GPS بسيط من غير حساسات إضافية بيرجّع رد فاضي، والأداة بتوضّح إنه رد صحيح من السيرفر مش نقص فيها",
+          "التاج جنب اسم الجهاز في البانل بيوري نوعه (GPS / وحدة ثابتة / MDVR) من نفس منطق التصنيف الموجود في اللوحة"
+        ],
+        "en": [
+          "Device dashboard: click any row in the vehicles table to open Device sensors — it calls /unit_sensors/lists live, filtered to that exact device, not a generic list",
+          "Unlike the main platform, it shows only sensors actually registered on the device — name, type and param — instead of a fixed checkbox list shown for every device",
+          "A plain GPS unit with no extra sensors returns an empty result, and the tool makes clear that is a valid server response, not a gap in the tool",
+          "The tag next to the device name in the panel shows its type (GPS / Stationary / MDVR) from the same classification already used in the dashboard"
+        ]
+      }
+    },
     {
       "v": "6.32",
       "date": "2026-08-10",
@@ -2539,6 +2557,29 @@ const DOCS = {
           "While you are connected it never asks you for the account name — it runs the check itself. Verify live creates a temporary report on the first vehicle, reads its rows, then deletes it.",
           "The real response goes into the reply once the token, ids, IMEI and vehicle name are stripped — read it before sending, as with any message.",
           "Any code the customer named that is not in the collection is left out of the body and named for you — the tool sends nothing it cannot verify."
+        ]
+      }
+    },
+    {
+      "since": "6.33",
+      "t": {
+        "ar": "لوحة الأجهزة — حساسات الجهاز، حقيقة لا تخمين",
+        "en": "Devices dashboard — device sensors, real not guessed"
+      },
+      "b": {
+        "ar": [
+          "بعد ما تجيب العربيات في تبويب «لوحة الأجهزة»، دوس على أي صف في جدول «البيانات» تحت — بيفتح بانل «حساسات الجهاز» فوق الجدول.",
+          "دوس «تحقّق من حساساته الحقيقية» والأداة بتنادي /unit_sensors/lists مفلترة على الجهاز ده بالظبط، وبتوري بس اللي رجع: اسم الحساس ونوعه والباراميتر.",
+          "الفرق عن المنصة الرئيسية: هي بتوري نفس قايمة التشيك بوكس (بطارية السيارة، بطارية الجهاز، الاستغاثة، الحرارة، الرطوبة، الوزن) لكل الأجهزة زي بعض. الأداة دي مش بتخمّن — لو الجهاز مفيهوش حساس معيّن، مش هيظهر خالص.",
+          "جهاز GPS بسيط من غير حساسات إضافية هيرجّع رد فاضي، والبانل بيوضّح إن ده رد صحيح من السيرفر مش نقص في الأداة — عادي جدًا لجهاز تتبّع بسيط.",
+          "دوسة تانية على نفس الصف بتقفل البانل. لو جبت عربيات جديدة (زرار «جيب العربيات»)، الاختيار بيتصفّر لوحده."
+        ],
+        "en": [
+          "After loading vehicles in the Devices dashboard tab, click any row in the Data table below — a Device sensors panel opens above the table.",
+          "Press Check its real sensors and the tool calls /unit_sensors/lists filtered to that exact device, showing only what comes back: sensor name, type, and param.",
+          "The difference from the main platform: it shows the same checkbox list (car battery, device battery, SOS, temperature, humidity, weight) for every device alike. This tool does not guess — if a device has no such sensor, it simply will not appear.",
+          "A plain GPS unit with no extra sensors returns an empty result, and the panel makes clear that is a valid server response rather than a gap in the tool — entirely normal for a simple tracker.",
+          "Clicking the same row again closes the panel. Loading vehicles again (Fetch vehicles) clears the selection."
         ]
       }
     },
@@ -6941,7 +6982,8 @@ function renderDocs(){
 /* ================= لوحة الأجهزة =================
    بتجيب عربيات الحساب وتقسّمها بنوع الجهاز. الأنواع بتتاخد من الداتا نفسها
    مش من قايمة مكتوبة عندي — لو ظهر نوع جديد بكرة هيبان لوحده. */
-const DASH = { units:[], filter:null, flag:null, scope:null, state:null, at:null };
+const DASH = { units:[], filter:null, flag:null, scope:null, state:null, at:null,
+                sensorUnit:null, sensorResult:{}, sensorBusy:null };
 /* الافتراضي هو الرد نفسه. حطيت العرض المقروء مكانه في الأول وده كان غلط —
    الواحد بيلزق حاجة، ما ينفعش الأداة تخبّيها وتحط غيرها. */
 let INSP_MODE = 'raw';
@@ -7000,6 +7042,7 @@ async function dashLoadUnits(){
     DASH.units = got.units;
     DASH.total = got.total;
     DASH.filter = null; DASH.flag = null; DASH.scope = null; DASH.state = null; DASH.at = new Date();
+    DASH.sensorUnit = null; DASH.sensorResult = {}; DASH.sensorBusy = null;
     dashRender();
   }catch(err){
     $('dashState').textContent='';
@@ -7336,6 +7379,85 @@ function miniState(){
   return html;
 }
 
+/* ============ حساسات جهاز واحد — حقيقة لا تخمين ============
+   المنصة الحقيقية بتوري نفس قايمة التشيك بوكس (بطارية/استغاثة/حرارة/رطوبة/وزن)
+   لكل الأجهزة زي بعض، سواء الجهاز عليه الحساس ده ولا لأ. إحنا بندّي على
+   /unit_sensors/lists بفلتر unit_id — رد حقيقي عن الجهاز ده بالظبط،
+   مش قايمة عامة ولا تخمين من اسم حقل زي sensorsOf(). جهاز GPS بسيط
+   هيرجع مصفوفة فاضية، وده رد صح مش نقص في الأداة. */
+async function dashCheckSensors(id){
+  if(!id) return;
+  DASH.sensorBusy = id;
+  dashRender();
+  try{
+    const r = await apiFetch('/unit_sensors/lists',
+      {data:{filters:{unit_id:id, name:'', type:'', param:''}}},
+      {method:'POST', timeout:45000});
+    if(!r.ok) throw new Error(diagnose(r.code, r.txt));
+    const items = deepItems(r.json).map(x=>x.raw)
+      .filter(s2 => s2 && (s2.type || s2.param || s2.name));
+    DASH.sensorResult[id] = {ok:true, items, at:new Date()};
+  }catch(err){
+    DASH.sensorResult[id] = {ok:false, err:String((err && err.message) || err).slice(0,160)};
+  }finally{
+    DASH.sensorBusy = null;
+    dashRender();
+  }
+}
+
+/* بانل الجهاز المختار — بيظهر لما تدوس على أي صف في جدول البيانات تحت */
+function sensorPanel(rows){
+  if(!DASH.sensorUnit) return '';
+  const id = DASH.sensorUnit;
+  const u = rows.find(x => String(x.id||x._id||'')===id) ||
+            DASH.units.find(x => String(x.id||x._id||'')===id);
+  if(!u) return '';
+  const res  = DASH.sensorResult[id];
+  const busy = DASH.sensorBusy === id;
+  const nm   = u.name || u.imei || id;
+
+  let body;
+  if(busy){
+    body = `<div class="note">${t('بيجيب…','Loading…')}</div>`;
+  } else if(!res){
+    body = `<button class="btn sig" id="sensorGo">${t('تحقّق من حساساته الحقيقية','Check its real sensors')}</button>
+      <div class="note" style="margin-top:8px">${t(
+        'بينادي /unit_sensors/lists بفلتر الجهاز ده بس. مش قايمة عامة زي المنصة — ده اللي متسجّل عليه فعلًا.',
+        'Calls /unit_sensors/lists filtered to this device only. Not a generic list like the platform shows — this is what is actually registered on it.')}</div>`;
+  } else if(!res.ok){
+    body = `<div class="note warn">${t('الريكوست فشل: ','The request failed: ')}${esc(res.err)}</div>
+      <button class="btn ghost" id="sensorGo" style="margin-top:8px">${t('حاول تاني','Try again')}</button>`;
+  } else if(!res.items.length){
+    body = `<div class="note sig">${t(
+      'مفيش حساسات مسجّلة على الجهاز ده — ده رد حقيقي من السيرفر مش نقص في الأداة. عادي لجهاز GPS بسيط من غير حساسات إضافية.',
+      'No sensors are registered on this device — a real server response, not a gap in the tool. Normal for a plain GPS unit with no extra sensors.')}</div>
+      <button class="btn ghost" id="sensorGo" style="margin-top:8px">${t('حدّث','Refresh')}</button>`;
+  } else {
+    body = `<table class="kv" style="margin-top:4px">
+      <tr><td style="font-weight:600; width:40%">${t('الاسم','Name')}</td>
+          <td style="font-weight:600; width:30%">${t('النوع','Type')}</td>
+          <td style="font-weight:600">${t('الباراميتر','Param')}</td></tr>
+      ${res.items.map(s2=>`<tr>
+        <td>${esc(String(s2.name||'—'))}</td>
+        <td><code style="font-size:12px">${esc(String(s2.type||'—'))}</code></td>
+        <td><code style="font-size:12px">${esc(String(s2.param||'—'))}</code></td>
+      </tr>`).join('')}
+      </table>
+      <div class="note" style="margin-top:8px">${t(
+        `${res.items.length} حساس مسجّل على الجهاز ده بالظبط — مش قايمة عامة.`,
+        `${res.items.length} ${res.items.length===1?'sensor':'sensors'} registered on this exact device — not a generic list.`)}</div>
+      <button class="btn ghost" id="sensorGo" style="margin-top:8px">${t('حدّث','Refresh')}</button>`;
+  }
+
+  return `<div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    <h3 style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+      ${t('حساسات الجهاز','Device sensors')} — ${esc(String(nm))}
+      <span class="tagv">${esc(typeLabel(typeOf(u)))}</span>
+    </h3>
+    ${body}
+  </div></div>`;
+}
+
 function typePanel(){
   /* الحالة بقت جنب الرسم في miniState — هنا بس التفاصيل اللي مالهاش مكان فوق */
   if(DASH.flag) return '';
@@ -7422,13 +7544,21 @@ function dashRender(){
       ${WASL.rows.length ? '' : `<div class="note" style="margin-top:10px">${t('جيب لستة وصل من تبويب «وصل» عشان تشوف كام عربية مش مسجّلة.','Load the WASL list from the WASL board to see how many vehicles are unregistered.')}</div>`}
     </div></div>`; })()}
   ${(()=>{ const tp=typePanel(); return tp ? `<div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">${tp}</div></div>` : ''; })()}
+  ${sensorPanel(rows)}
   <div class="panel"><div class="sec" style="border-top:0">
     <h3>${t('البيانات','The data')} — ${rows.length} ${t('من','of')} ${total}
       ${DASH.flag?`<span class="tagv">${esc(dual((dashInsights().find(x=>x.k===DASH.flag)||{ttl:{ar:'',en:''}}).ttl))}</span>`:''}</h3>
+    <div class="note" style="margin-top:6px; margin-bottom:2px">${t(
+      'دوس على أي صف عشان تشوف حساساته الحقيقية.', 'Click any row to see its real sensors.')}</div>
     <div style="overflow-x:auto; margin-top:8px">
       <table class="kv" style="min-width:100%">
         <tr>${cols.map(c=>`<td style="font-family:var(--ar); color:var(--ink); font-weight:600; white-space:nowrap">${esc(c)}</td>`).join('')}</tr>
-        ${rows.slice(0,300).map(u=>`<tr>${cols.map(c=>`<td style="white-space:nowrap">${cell(u,c)}</td>`).join('')}</tr>`).join('')}
+        ${rows.slice(0,300).map(u=>{
+          const uid = String(u.id||u._id||'');
+          const sel = uid && uid===DASH.sensorUnit;
+          const attrs = uid ? `data-unit="${esc(uid)}" style="cursor:pointer; ${sel?'background:var(--signal-soft)':''}"` : '';
+          return `<tr ${attrs}>${cols.map(c=>`<td style="white-space:nowrap">${cell(u,c)}</td>`).join('')}</tr>`;
+        }).join('')}
       </table>
     </div>
     ${rows.length>300?`<div class="note" style="margin-top:8px">${t('بنعرض أول 300. التصدير بينزّل الكل.','Showing the first 300. Export downloads all of them.')}</div>`:''}
@@ -7461,6 +7591,12 @@ function dashRender(){
   });
   const ab=$('dashAll'); if(ab) ab.onclick=()=>{
     DASH.filter=null; DASH.flag=null; DASH.scope=null; DASH.state=null; dashRender(); };
+  out.querySelectorAll('[data-unit]').forEach(el2=>el2.onclick=()=>{
+    const id = el2.dataset.unit;
+    DASH.sensorUnit = (DASH.sensorUnit===id) ? null : id;
+    dashRender();
+  });
+  const sg = $('sensorGo'); if(sg) sg.onclick = ()=>dashCheckSensors(DASH.sensorUnit);
 }
 
 function dashLabel(){
