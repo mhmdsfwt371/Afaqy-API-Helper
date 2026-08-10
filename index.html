@@ -730,9 +730,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.16",
+  "version": "6.17",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.17",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "النطاق بقى يبان في البودي المعروض نفسه: أول ما تجيب الـ IDs، الـ units بتتحط في الجسون قدامك والعنوان يتغيّر لـ«البودي — اتظبط للتجربة»",
+          "اللي بتشوفه هو اللي بيتبعت بالحرف — قبل كده النطاق كان بيتحط وقت الإرسال بس، فكنت بتضغط جرّب وانت مش شايف اللي هيروح",
+          "الأداة بتقولك التغيير اللي عملته: «النطاق: كذا عربية — بأسمائها»، فتراجعه قبل ما تشغّل",
+          "اختبار جديد بيثبت التطابق: البودي المعروض لازم يساوي المتبعت حرفيًا، والنطاق ما يتحطش مرتين"
+        ],
+        "en": [
+          "The scope now appears in the previewed body itself: as soon as you fetch the ids, units lands in the JSON in front of you and the heading changes to Body — prepared for running",
+          "What you see is exactly what gets sent — previously the scope was applied only at send time, so you pressed Run without seeing what would go out",
+          "The tool names the change it made — Scope: N vehicles, with their names — so you can review it before running",
+          "A new test proves the match: the previewed body must equal the sent body verbatim, and the scope must not be applied twice"
+        ]
+      }
+    },
     {
       "v": "6.16",
       "date": "2026-08-05",
@@ -3124,9 +3142,9 @@ function echoReq(method, url, headers, bodyStr){
 
 /* الكولكشن فيه <USERNAME>/<PASSWORD> لأننا شيلنا بيانات الاختبار — نحط بيانات الجلسة وقت التنفيذ */
 function liveBody(e){
-  const raw0 = bodyOf(e);
-  /* ريكوستات التقارير بتاخد نطاقها من اختيار الموظف فوق */
-  const raw = isReportEp(e) ? withScope(raw0) : raw0;
+  /* النطاق بقى بيتحط جوه prepBody عشان المعروض = المتبعت، فمفيش داعي
+     نحطه تاني هنا — كان هيتكتب مرتين. */
+  const raw = bodyOf(e);
   if(!NO_RETRY.test(e.p||'') || !SESSION.user) return raw;
   try{
     const o = JSON.parse(raw);
@@ -4777,6 +4795,16 @@ function prepBody(e){
   let next = fixSamples(obj, changes);
   const u = SESSION.unit, scoped = unitScopedEp(e);
   const pathRes = RESOLVERS.find(r=>r.key!=='unit' && r.path.test(e.p||''));
+  /* نطاق التقرير جزء من الريكوست الفعلي، فلازم يبان في البودي المعروض:
+     اللي الموظف شايفه هو اللي هيتبعت لما يدوس جرّب. */
+  if(isReportEp(e) && RSCOPE.mode === 'imeis' && RSCOPE.uids.length){
+    next.data = next.data || {};
+    next.data.units = RSCOPE.uids.slice();
+    changes.push(RSCOPE.names.length
+      ? t(`النطاق: ${RSCOPE.uids.length} عربية — ${RSCOPE.names.slice(0,3).join('، ')}${RSCOPE.names.length>3?' …':''}`,
+          `Scope: ${RSCOPE.uids.length} vehicles — ${RSCOPE.names.slice(0,3).join(', ')}${RSCOPE.names.length>3?' …':''}`)
+      : t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`));
+  }
   const before = JSON.stringify(next);
   next = injectUid(next, u?u.uid:null, null, null, scoped && !!u, pathRes);
   if(JSON.stringify(next)!==before){
@@ -7150,17 +7178,6 @@ async function resolveImeis(text){
     else missing.push(k);
   }
   return {uids, names, missing};
-}
-
-/* بيركّب النطاق على بودي التقرير */
-function withScope(body){
-  let o;
-  try{ o = JSON.parse(typeof body === 'string' ? body : JSON.stringify(body)); }
-  catch(_){ return body; }
-  if(!o || !o.data) return body;
-  if(RSCOPE.mode === 'imeis' && RSCOPE.uids.length) o.data.units = RSCOPE.uids.slice();
-  else delete o.data.units;
-  return JSON.stringify(o, null, 4);
 }
 
 function scopeBox(e){
