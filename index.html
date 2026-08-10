@@ -728,9 +728,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.11",
+  "version": "6.12",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.12",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "ريكوستات تقارير المستخدم (data-summary وdata وdata-new) بقت تطلب رقم التقرير من حساب العميل قبل ما تتنفذ — قبل كده كانت بتتبعت برقم العينة وترجع 405 وnot_found",
+          "التجربة الأساسية بقت على تقرير Summary: خانة الاسم بتتعبّى بيه لوحدها، ولو اخترت من اللستة بيبقى أول واحد فيها مش Summary By Driver",
+          "الأداة بتقول السبب صراحة: الرقم اللي في العينة تبع حساب تاني، عشان كده الرد بيقول not_found"
+        ],
+        "en": [
+          "The user-report requests — data-summary, data and data-new — now ask for the report id from the customer account before running; they used to go out with the sample id and come back 405 not_found",
+          "The default trial is now the Summary report: the name box is prefilled with it, and if you pick from the list it comes first rather than Summary By Driver",
+          "The tool states the cause plainly: the sample id belongs to another account, which is why the response says not_found"
+        ]
+      }
+    },
     {
       "v": "6.11",
       "date": "2026-08-05",
@@ -4460,7 +4476,7 @@ function openDepsModal(e, missing, cont){
           <h3 style="font-family:var(--ar); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink)">
             ${t('محتاج','Needs')}: ${esc(dual(r.label))}</h3>
           ${r.note?`<div class="note" style="margin-bottom:8px">${esc(dual(r.note))}</div>`:''}
-          <input id="dep_${n}" placeholder="${esc(dual(r.ask))}"
+          <input id="dep_${n}" placeholder="${esc(dual(r.ask))}" value="${r.prefer ? esc(String(r.prefer).replace(/[/^$i]/g,'')) : ''}"
                  style="width:100%; padding:9px; border:1px solid var(--line); border-radius:3px">
           <div class="row">
             <button class="btn sig" data-auto="${n}">${t('اجيبهولك أنا','Fetch it for me')}</button>
@@ -4492,7 +4508,15 @@ function openDepsModal(e, missing, cont){
       const list = await fetchDepList(r);
       const {hit, items, by} = matchByName(list, key);
       if(!hit){
-        const near = items.slice(0,200);
+        /* المفضّل الأول في اللستة: التجربة الأساسية بتبقى على تقرير Summary،
+           مش على أول تقرير عشوائي في الحساب. */
+        const pref = r.prefer;
+        const sorted = pref ? items.slice().sort((a,b)=>{
+          const A = pref.test(String(a.name||'')) ? 0 : 1;
+          const B = pref.test(String(b.name||'')) ? 0 : 1;
+          return A - B;
+        }) : items;
+        const near = sorted.slice(0,200);
         out.innerHTML = `<div class="note warn" style="margin-top:8px">
           ${t(`ما لقيناش «${esc(key)}» بين ${items.length}. اختار من اللستة:`,`No match for "${esc(key)}" among ${items.length}. Pick one:`)}</div>
           <select id="depSel_${n}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:3px">
@@ -4668,6 +4692,13 @@ const RESOLVERS = [
    label:{ar:'قالب التقرير', en:'report template'},
    ask:{ar:'اسم القالب', en:'Template name'},
    list:{path:'/user_report_templates/lists', body:{data:{limit:1000}}} },
+ { key:'userReport', fields:['report_id'], path:/^\/user_reports\//i,
+   label:{ar:'التقرير', en:'report'},
+   ask:{ar:'اسم التقرير — مثلًا Summary', en:'Report name — for example Summary'},
+   list:{path:'/user_reports/lists', body:{data:{limit:1000}}},
+   prefer:/^summary$/i,
+   note:{ar:'الـ id اللي في العينة تبع حساب تاني، عشان كده بيرجع not_found. اكتب اسم التقرير من حساب العميل وأنا أجيب رقمه.',
+         en:'The sample id belongs to another account, which is why it returns not_found. Type the report name from the customer account and I will fetch its id.'} },
  { key:'customer', fields:['customer_id'], path:/^\/customers\//i,
    label:{ar:'العميل', en:'customer'},
    ask:{ar:'اسم العميل', en:'Customer name'},
