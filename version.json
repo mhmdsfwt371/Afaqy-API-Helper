@@ -1,16 +1,16 @@
 {
-  "version": "6.21",
+  "version": "6.22",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "إصلاح جذري: مسبار التقارير ما كانش بيشتغل أصلًا — متغيّر النطاق كان متعرّف بعد أول استخدام له، فالنداء كان بيرمي خطأ صامت والسلّم القديم يشتغل مكانه ويجرّب أشكال بودي بدل مصادر الرقم",
-      "زرار «ابدأ من نضيف» اتضاف: بيمسح رقم التقرير والنطاق ونتيجة آخر تشغيل ويرجّع البودي لأصله",
-      "الأداة بقت تقولك إن الرقم اللي في البودي جه من اختيارك مش من دماغها، وإزاي ترجّع العينة"
+      "بوابة «الريكوست ده محتاج حاجة قبله» اتشالت من ريكوستات التقارير: كانت بتوقفك وتطلب اسم تقرير، وتجيب رقم، والسيرفر يرفضه — يعني بتعطّل من غير ما تحل",
+      "مكانها صندوق «شغّل التقرير»: تدّي الـ IMEI وبس، والأداة تحوّله لرقم العربية، وتدوّر على رقم التقرير الشغّال بنفسها، وتشغّل — كل ده من زرار واحد",
+      "لو الـ IMEIs مش في الحساب، بتقولك على طول بدل ما تكمّل وتفشل بعدين"
     ],
     "en": [
-      "A root fix: the report probe was never running — the scope variable was declared after its first use, so the call threw a silent error and the old ladder ran instead, trying body shapes rather than id sources",
-      "A Start fresh button was added: it clears the report id, the scope and the last run, and restores the original body",
-      "The tool now states that the id in the body came from your own selection rather than out of nowhere, and how to restore the sample"
+      "The dependency gate was removed from report requests: it stopped you to ask for a report name, fetched an id, and the server rejected it — blocking without solving",
+      "In its place is a Run the report box: you give the IMEI and nothing else, and the tool resolves the vehicle id, finds a working report id by itself, and runs — all from one button",
+      "If the IMEIs are not in the account it tells you immediately instead of continuing and failing later"
     ]
   }
 }

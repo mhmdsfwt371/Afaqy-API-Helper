@@ -730,9 +730,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.21",
+  "version": "6.22",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.22",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "بوابة «الريكوست ده محتاج حاجة قبله» اتشالت من ريكوستات التقارير: كانت بتوقفك وتطلب اسم تقرير، وتجيب رقم، والسيرفر يرفضه — يعني بتعطّل من غير ما تحل",
+          "مكانها صندوق «شغّل التقرير»: تدّي الـ IMEI وبس، والأداة تحوّله لرقم العربية، وتدوّر على رقم التقرير الشغّال بنفسها، وتشغّل — كل ده من زرار واحد",
+          "لو الـ IMEIs مش في الحساب، بتقولك على طول بدل ما تكمّل وتفشل بعدين",
+          "«كل العربيات» و«عربيات محددة» خيارين مستقلين، والاتنين بيوصلوا لنفس زرار التشغيل"
+        ],
+        "en": [
+          "The dependency gate was removed from report requests: it stopped you to ask for a report name, fetched an id, and the server rejected it — blocking without solving",
+          "In its place is a Run the report box: you give the IMEI and nothing else, and the tool resolves the vehicle id, finds a working report id by itself, and runs — all from one button",
+          "If the IMEIs are not in the account it tells you immediately instead of continuing and failing later",
+          "All vehicles and Specific vehicles are independent options, and both lead to the same Run button"
+        ]
+      }
+    },
     {
       "v": "6.21",
       "date": "2026-08-05",
@@ -4987,16 +5005,10 @@ const RESOLVERS = [
    label:{ar:'قالب التقرير', en:'report template'},
    ask:{ar:'اسم القالب', en:'Template name'},
    list:{path:'/user_report_templates/lists', body:{data:{limit:1000}}} },
- { key:'userReport', fields:['report_id'], path:/^\/user_reports\//i,
-   label:{ar:'التقرير', en:'report'},
-   ask:{ar:'اسم التقرير — مثلًا Summary', en:'Report name — for example Summary'},
-   /* الكولكشن فيه نسختين من نفس المسار ببوديين مختلفين — والسيرفر بيرفض
-      الشكل الغلط. بنبدأ بالبسيط، ولو رفض بنجرّب الشكل المتداخل. */
-   list:{path:'/user_reports/lists', body:{data:{limit:200}},
-         alts:[{data:{data:[{filters:{}}]}}, {data:{}}]},
-   prefer:/^summary$/i,
-   note:{ar:'الـ id اللي في العينة تبع حساب تاني، عشان كده بيرجع not_found. اكتب اسم التقرير من حساب العميل وأنا أجيب رقمه.',
-         en:'The sample id belongs to another account, which is why it returns not_found. Type the report name from the customer account and I will fetch its id.'} },
+ /* اعتمادية رقم التقرير اتشالت: كانت بتوقف الموظف وتطلب اسم تقرير،
+    وتجيب رقم، والسيرفر يرفضه بـ not_found. يعني بوابة بتعطّل من غير
+    ما تحل. المسار الصح بقى: الموظف يدّي IMEI، والأداة تدوّر على الرقم
+    الشغّال بنفسها في «شغّل التقرير». */
  { key:'customer', fields:['customer_id'], path:/^\/customers\//i,
    label:{ar:'العميل', en:'customer'},
    ask:{ar:'اسم العميل', en:'Customer name'},
@@ -5315,34 +5327,37 @@ function scopeBox(e){
   if(!isReportEp(e)) return '';
   const on = RSCOPE.mode === 'imeis';
   return `<div class="sec">
-    <h3>${t('نطاق التقرير','Report scope')}</h3>
-    <div class="row">
-      <button class="ct" id="rsAll"   aria-selected="${!on}">${t('كل العربيات','All vehicles')}</button>
-      <button class="ct" id="rsPick"  aria-selected="${on}">${t('عربيات محددة','Specific vehicles')}</button>
+    <h3>${t('شغّل التقرير','Run the report')}</h3>
+    <div class="note" style="margin-bottom:10px">${t(
+      'إداني الـ IMEI بتاع العربية (أو سيبها فاضية للكل)، وأنا أجيب رقمها، وأدوّر على رقم التقرير الشغّال بنفسي، وأشغّله. مش محتاج تعرف أرقام.',
+      'Give me the vehicle IMEI — or leave it empty for all — and I will fetch its id, find a working report id myself, and run it. You do not need to know any ids.')}</div>
+
+    <div class="row" style="margin-bottom:8px">
+      <button class="ct" id="rsAll"  aria-selected="${!on}">${t('كل العربيات','All vehicles')}</button>
+      <button class="ct" id="rsPick" aria-selected="${on}">${t('عربيات محددة','Specific vehicles')}</button>
     </div>
-    ${!on ? `<div style="margin-top:10px">
-      <div class="note" style="margin-bottom:8px">${t('التقرير هيتبعت من غير تحديد عربيات — يعني السيستم هو اللي يقرر النطاق. لو عايز تبعت كل عربيات الحساب صراحة، دوس تحت.',
-          'The report goes out without naming vehicles, so the platform decides the scope. To send every vehicle in the account explicitly, press below.')}</div>
-      <div class="row">
-        <button class="btn ghost" id="rsAllGo">${t('هات كل عربيات الحساب','Fetch every vehicle in the account')}</button>
-        <span id="rsAllState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
-      </div>
-      ${RSCOPE.mode==='allExplicit' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
-        ${t(`جاهز: ${RSCOPE.uids.length} عربية هتتبعت في الريكوست`, `Ready: ${RSCOPE.uids.length} vehicles will be sent in the request`)}</div>` : ''}
-    </div>` : ''}
-    <div id="rsBody" style="margin-top:10px" ${on?'':'hidden'}>
-      <textarea id="rsImeis" placeholder="${t('الصق الـ IMEIs — واحد في كل سطر أو مفصولين بفاصلة','Paste the IMEIs — one per line or comma separated')}"
-        style="width:100%; min-height:90px; font-family:var(--mono); font-size:12.5px; padding:10px;
+
+    <div id="rsBody" ${on?'':'hidden'}>
+      <textarea id="rsImeis" placeholder="${t('IMEI في كل سطر، أو مفصولين بفاصلة','One IMEI per line, or comma separated')}"
+        style="width:100%; min-height:80px; font-family:var(--mono); font-size:12.5px; padding:10px;
                border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)">${esc(RSCOPE.imeis.join('\n'))}</textarea>
-      <div class="row" style="margin-top:8px">
-        <button class="btn ghost" id="rsGo">${t('هات الـ IDs بتاعهم','Fetch their ids')}</button>
-        <span id="rsState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
-      </div>
     </div>
-    ${RSCOPE.mode==='imeis' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
-      ${t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`)}
-      ${RSCOPE.names.length ? ' — ' + esc(RSCOPE.names.slice(0,5).join('، ')) + (RSCOPE.names.length>5 ? ` +${RSCOPE.names.length-5}` : '') : ''}
+
+    ${!on ? `<div class="row" style="margin-bottom:8px">
+      <button class="btn ghost" id="rsAllGo">${t('هات كل عربيات الحساب','Fetch every vehicle')}</button>
+      <span id="rsAllState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
     </div>` : ''}
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn sig" id="rsRun">${t('شغّل','Run')}</button>
+      <span id="rsState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+    </div>
+
+    ${RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
+      ${RSCOPE.mode==='allExplicit'
+        ? t(`جاهز: كل عربيات الحساب — ${RSCOPE.uids.length}`, `Ready: every vehicle — ${RSCOPE.uids.length}`)
+        : t(`جاهز: ${RSCOPE.uids.length} عربية${RSCOPE.names.length?' — '+esc(RSCOPE.names.slice(0,4).join('، ')):''}`,
+            `Ready: ${RSCOPE.uids.length} vehicles${RSCOPE.names.length?' — '+esc(RSCOPE.names.slice(0,4).join(', ')):''}`)}</div>` : ''}
     ${RSCOPE.missing.length ? `<div class="note warn" style="margin-top:8px">
       ${t('مش موجودين في الحساب ده','Not in this account')}: ${esc(RSCOPE.missing.slice(0,8).join('، '))}</div>` : ''}
   </div>`;
@@ -5352,7 +5367,10 @@ function wireScope(e){
   if(!isReportEp(e)) return;
   const all=$('rsAll'), pick=$('rsPick');
   if(!all || !pick) return;
-  all.onclick  = ()=>{ RSCOPE.mode='all'; RSCOPE.uids=[]; RSCOPE.names=[]; renderDetail(e, []); };
+
+  all.onclick  = ()=>{ RSCOPE.mode='all'; RSCOPE.uids=[]; RSCOPE.names=[]; RSCOPE.missing=[]; renderDetail(e, []); };
+  pick.onclick = ()=>{ RSCOPE.mode='imeis'; renderDetail(e, []); };
+
   const allGo = $('rsAllGo');
   if(allGo) allGo.onclick = async ()=>{
     if(!SESSION.token){ $('rsAllState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
@@ -5370,50 +5388,59 @@ function wireScope(e){
     }catch(err){ $('rsAllState').textContent = String(err && err.message || err).slice(0,120); }
     finally{ allGo.disabled = false; }
   };
-  pick.onclick = ()=>{ RSCOPE.mode='imeis'; renderDetail(e, []); };
-  const go = $('rsGo');
-  if(go) go.onclick = async ()=>{
-    const txt = ($('rsImeis').value||'').trim();
-    if(!txt){ $('rsState').textContent = t('الصق الـ IMEIs الأول','Paste the IMEIs first'); return; }
+
+  /* زرار واحد بيعمل السلسلة كلها: IMEI → رقم العربية → رقم التقرير
+     الشغّال → التشغيل. الموظف مش محتاج يعرف ولا رقم. */
+  const run = $('rsRun');
+  if(run) run.onclick = async ()=>{
     if(!SESSION.token){ $('rsState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
-    go.disabled=true; $('rsState').textContent = t('بيدوّر…','Resolving…');
+    run.disabled = true;
     try{
-      const {uids, names, missing} = await resolveImeis(txt);
-      RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
-      RSCOPE.uids = uids; RSCOPE.names = names; RSCOPE.missing = missing;
+      if(RSCOPE.mode === 'imeis'){
+        const txt = ($('rsImeis').value||'').trim();
+        if(!txt){ $('rsState').textContent = t('الصق الـ IMEIs الأول، أو اختار «كل العربيات»','Paste the IMEIs first, or choose All vehicles'); return; }
+        $('rsState').textContent = t('بحوّل الـ IMEIs لأرقام…','Resolving the IMEIs…');
+        const {uids, names, missing} = await resolveImeis(txt);
+        RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
+        RSCOPE.uids = uids; RSCOPE.names = names; RSCOPE.missing = missing;
+        if(!uids.length){
+          $('rsState').textContent = '';
+          $('tryout').innerHTML = `<div class="note warn" style="margin-top:12px">
+            <b>${t('ولا واحد من الـ IMEIs دول في الحساب.','None of those IMEIs are in this account.')}</b><br>
+            ${t('اتأكد إنك متصل بحساب العميل الصح، أو راجع الأرقام.','Check you are connected to the right customer account, or review the numbers.')}</div>`;
+          return;
+        }
+      }
+      $('rsState').textContent = '';
       renderDetail(e, []);
+      await reportProbe(e);
     }catch(err){
-      $('rsState').textContent = String(err.message||err).slice(0,120);
-    }finally{ go.disabled=false; }
+      $('rsState').textContent = String(err && err.message || err).slice(0,140);
+    }finally{ run.disabled = false; }
   };
 }
 
-/* ============ سلّم التقارير ============
-   الرقم بيرجع not_found حتى وهو من الحساب — يعني مش أي رقم ينفع هنا.
-   بدل ما نخمّن أنهي مصدر صح، بنجيب المرشحين ونجرّبهم بالترتيب
-   ونقول للموظف أنهي واحد ردّ ببيانات فعلًا. */
+/* بيجمع كل الأرقام اللي ممكن تكون رقم التقرير — من مصادرها المختلفة */
 async function reportIdCandidates(){
   const out = [];
   const push = (id, name, src) => { if(id && !out.some(x=>x.id===id)) out.push({id, name, src}); };
-  /* ١) اللي الموظف حدده من نافذة الاعتمادية */
   const picked = SESSION.deps && SESSION.deps.userReport;
   if(picked) push(picked.id, picked.name, t('اللي حددته','your pick'));
-  /* ٢) تقارير المستخدم */
   for(const body of [{data:{limit:200}}, {data:{data:[{filters:{}}]}}]){
     try{
       const r = await apiFetch('/user_reports/lists', body, {method:'POST', timeout:60000});
       if(!r.ok) continue;
-      for(const it of deepItems(r.json)) push(it.id, it.name, '/user_reports/lists');
-      if(deepItems(r.json).length) break;
+      const items = deepItems(r.json);
+      for(const it of items) push(it.id, it.name, '/user_reports/lists');
+      if(items.length) break;
     }catch(_){}
   }
-  /* ٣) قوالب التقارير — مصدر تاني محتمل للرقم */
   try{
     const r = await apiFetch('/user_report_templates/lists', {data:{limit:1000}}, {method:'POST', timeout:60000});
     if(r.ok) for(const it of deepItems(r.json)) push(it.id, it.name, '/user_report_templates/lists');
   }catch(_){}
-  /* الترتيب: المطابق تمامًا لـ Summary الأول، بعده اللي فيه الكلمة،
-     بعده الباقي. حساب فيه 325 تقرير مش هنجرّبهم كلهم — بنجرّب الأقرب. */
+  /* الترتيب: المطابق تمامًا لـ Summary الأول، بعده اللي بيبدأ بيها،
+     بعده اللي فيه الكلمة. حساب فيه 325 تقرير مش هنجرّبهم كلهم. */
   const rank = x => {
     const nm = String(x.name||'');
     if(/^summary$/i.test(nm)) return 0;
