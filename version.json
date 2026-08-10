@@ -1,16 +1,16 @@
 {
-  "version": "6.16",
+  "version": "6.17",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "إصلاح: بودي لستة التقارير كان مكتوب بشكل مش موجود في الكولكشن أصلًا، فالسيرفر كان بيرفضه والنافذة تقول «ما قدرناش نجيب اللستة». الكولكشن فيه شكلين حقيقيين — الأداة بقت تبدأ بالبسيط وتجرّب التاني لو اترفض",
-      "لو كل الأشكال فشلت، بتظهر رسالة السيرفر نفسها مش رسالة عامة — عشان تعرف تصعّدها بمعلومة مفيدة",
-      "خانة الـ IMEIs بقت جوه نافذة «الريكوست محتاج حاجة قبله»: تحدد التقرير والعربيات من نفس المكان"
+      "النطاق بقى يبان في البودي المعروض نفسه: أول ما تجيب الـ IDs، الـ units بتتحط في الجسون قدامك والعنوان يتغيّر لـ«البودي — اتظبط للتجربة»",
+      "اللي بتشوفه هو اللي بيتبعت بالحرف — قبل كده النطاق كان بيتحط وقت الإرسال بس، فكنت بتضغط جرّب وانت مش شايف اللي هيروح",
+      "الأداة بتقولك التغيير اللي عملته: «النطاق: كذا عربية — بأسمائها»، فتراجعه قبل ما تشغّل"
     ],
     "en": [
-      "Fix: the report-list body was written in a shape that does not exist in the collection at all, so the server rejected it and the modal said it could not fetch the list. The collection holds two real shapes — the tool now starts with the simple one and tries the other if it is refused",
-      "If every shape fails, the server's own message is shown rather than a generic one, so an escalation carries something useful",
-      "The IMEI box now lives inside the dependency modal: pick the report and the vehicles from the same place"
+      "The scope now appears in the previewed body itself: as soon as you fetch the ids, units lands in the JSON in front of you and the heading changes to Body — prepared for running",
+      "What you see is exactly what gets sent — previously the scope was applied only at send time, so you pressed Run without seeing what would go out",
+      "The tool names the change it made — Scope: N vehicles, with their names — so you can review it before running"
     ]
   }
 }
