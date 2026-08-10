@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.13",
+  "version": "6.14",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.14",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "نطاق التقرير: تختار «كل العربيات» أو «عربيات محددة» وتلزق الـ IMEIs — والأداة بتروح تجيب الـ UIDs بتاعهم وتحطهم في الريكوست",
+          "اللي مش موجود في الحساب بيتقالك بالاسم بدل ما التقرير يرجع ناقص من غير سبب",
+          "بودي لستة التقارير اتصلح: كان بيتبعت بشكل عادي {limit} والكولكشن بيقول data مصفوفة جواها filters — وده كان بيخلي رقم التقرير اللي بنجيبه مش صالح ويرجع not_found",
+          "لوحة الأجهزة كانت بتتخنق على الحسابات الكبيرة: كانت بتطلب 5000 عربية بكل التفاصيل في 45 ثانية. بقت 1500 ومهلتها دقيقتين",
+          "رسالة المهلة بقت تفرّق عن فشل الشبكة: «الطلب أخد وقت أطول من اللازم» مع نصيحة تصغير النطاق، بدل رسالة تقنية غامضة"
+        ],
+        "en": [
+          "Report scope: choose All vehicles or Specific vehicles and paste the IMEIs — the tool fetches their UIDs and puts them into the request",
+          "Anything not present in the account is named back to you, instead of the report silently coming back incomplete",
+          "The report-list body was corrected: it was being sent as a plain {limit} while the collection shows data as an array carrying filters — which is why the report id we fetched was not valid and came back not_found",
+          "The device dashboard choked on large accounts: it asked for 5000 vehicles with every projection inside 45 seconds. It now asks for 1500 with a two-minute allowance",
+          "A timeout is now told apart from a network failure: the request took too long, with advice to narrow the scope, instead of an opaque technical message"
+        ]
+      }
+    },
     {
       "v": "6.13",
       "date": "2026-08-05",
@@ -2904,6 +2924,8 @@ function _renderDetail(e, why){
 
     ${(e.h&&e.h.length) ? `<div class="sec"><h3>${t('هيدرز خاصة','Special headers')}</h3><table class="kv">${e.h.map(h=>`<tr><td>${esc(h.k)}</td><td>${esc(h.v)}</td></tr>`).join('')}</table></div>` : ''}
 
+    ${scopeBox(e)}
+
     ${b ? (()=>{ const pr=prepBody(e), u=SESSION.unit;
       const head = pr.applied
         ? t('البودي — اتظبط للتجربة','Body — prepared for running')
@@ -3002,6 +3024,7 @@ function _renderDetail(e, why){
   const liveOff = sysOf(e) === 'in';
   if($('tryIt'))  $('tryIt').hidden  = liveOff;
   if($('tryFix')) $('tryFix').hidden = liveOff;
+  wireScope(e);
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };
 }
@@ -3061,7 +3084,9 @@ function echoReq(method, url, headers, bodyStr){
 
 /* الكولكشن فيه <USERNAME>/<PASSWORD> لأننا شيلنا بيانات الاختبار — نحط بيانات الجلسة وقت التنفيذ */
 function liveBody(e){
-  const raw = bodyOf(e);
+  const raw0 = bodyOf(e);
+  /* ريكوستات التقارير بتاخد نطاقها من اختيار الموظف فوق */
+  const raw = isReportEp(e) ? withScope(raw0) : raw0;
   if(!NO_RETRY.test(e.p||'') || !SESSION.user) return raw;
   try{
     const o = JSON.parse(raw);
@@ -3184,9 +3209,16 @@ async function tryItSend(e, out){
     RUN_PAINT();
   }catch(err){
     if(myseq !== RUN_SEQ) return;
+    /* الفرق مهم للموظف: مهلة يعني السيرفر شغّال بس الطلب تقيل،
+       وفشل شبكة يعني ما وصلش أصلًا. الرسالة الواحدة كانت بتخلط الاتنين. */
+    const timedOut = /abort/i.test(String(err));
     out.innerHTML = `<div class="note warn" style="margin-top:12px">
-      <b>${t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')}</b><br>
-      ${t('اتأكد من النت ومن عنوان البيئة، أو انسخ مثال cURL وشغّله من الترمنال.','Check the connection and the environment URL, or copy the cURL example and run it from a terminal.')}<br>
+      <b>${timedOut ? t('الطلب أخد وقت أطول من اللازم واتلغى.','The request took too long and was cancelled.')
+                    : t('الريكوست ما وصلش للسيرفر.','The request did not reach the server.')}</b><br>
+      ${timedOut ? t('السيرفر شغّال بس الطلب تقيل — غالبًا الحساب فيه بيانات كتير. صغّر النطاق: قلّل الفترة الزمنية أو حدّد عربيات بعينها بدل الكل.',
+                     'The server is up but the request is heavy — usually a large account. Narrow the scope: shorten the date range or pick specific vehicles instead of all.')
+                 : t('اتأكد من النت ومن عنوان البيئة، أو انسخ مثال cURL وشغّله من الترمنال.',
+                     'Check the connection and the environment URL, or copy the cURL example and run it from a terminal.')}<br>
       <small>${esc(String(err).slice(0,180))}</small></div>`;
   }
 }
@@ -4721,7 +4753,10 @@ const RESOLVERS = [
  { key:'userReport', fields:['report_id'], path:/^\/user_reports\//i,
    label:{ar:'التقرير', en:'report'},
    ask:{ar:'اسم التقرير — مثلًا Summary', en:'Report name — for example Summary'},
-   list:{path:'/user_reports/lists', body:{data:{limit:1000}}},
+   /* الكولكشن بيوضّح إن اللستة دي بتاخد شكل مختلف: data مصفوفة جواها filters.
+      الشكل العادي {limit} كان بيرجّع حاجة مش لستة تقارير، فالرقم اللي بياخده
+      مش رقم تقرير صالح — وده اللي كان بيدّي not_found بعد ما نجيبه. */
+   list:{path:'/user_reports/lists', body:{data:[{filters:{}}]}},
    prefer:/^summary$/i,
    note:{ar:'الـ id اللي في العينة تبع حساب تاني، عشان كده بيرجع not_found. اكتب اسم التقرير من حساب العميل وأنا أجيب رقمه.',
          en:'The sample id belongs to another account, which is why it returns not_found. Type the report name from the customer account and I will fetch its id.'} },
@@ -4886,7 +4921,7 @@ async function apiFetch(path, body, opts){
   const send = async () => {
     /* من غير مهلة، ريكوست معلّق بيسيب «جاري الإرسال…» على الشاشة للأبد */
     const ctl = (typeof AbortController!=='undefined') ? new AbortController() : null;
-    const timer = ctl ? setTimeout(()=>ctl.abort(), 45000) : null;
+    const timer = ctl ? setTimeout(()=>ctl.abort(), opts.timeout || 45000) : null;
     try{
     const res = await fetch(build(), {signal: ctl?ctl.signal:undefined, method:opts.method||'POST',
       headers: opts.headers || {'Content-Type':'application/json','Accept':'application/json'},
@@ -5788,9 +5823,11 @@ async function dashLoadUnits(){
   if(!SESSION.token){ $('dashState').textContent = t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first'); return; }
   btn.disabled=true; btn.textContent=t('بيجيب…','Loading…');
   try{
+    /* حساب فيه آلاف العربيات كان بيتخنق: 5000 سجل بأربع بروجيكشنز في مهلة
+       واحدة. بنبدأ بطلب أخف، ولو الحساب كبير بنكمّل على دفعات. */
     const r = await apiFetch('/units/lists',
-      {data:{offset:0, limit:5000, simplify:0, projection:['basic','last_update','counters','groups']}},
-      {method:'POST'});
+      {data:{offset:0, limit:1500, simplify:0, projection:['basic','last_update','counters','groups']}},
+      {method:'POST', timeout:120000});
     if(!r.ok){ $('dashState').textContent=''; $('dashOut').innerHTML =
       `<div class="panel"><div class="sec"><div class="note warn">${diagnose(r.code, r.txt)}</div></div></div>`; return; }
     DASH.units = deepItems(r.json).map(x=>x.raw);
@@ -7004,6 +7041,96 @@ function userPlain(json){
   </table></div>`;
 }
 
+
+
+/* ============ نطاق التقرير: كل العربيات أو IMEIs محددة ============
+   التقرير من غير نطاق بيرجع فاضي أو بيتقل على الحسابات الكبيرة.
+   الموظف بيختار: الكل، أو يلزق IMEIs — والأداة بتحوّلهم لـ UIDs. */
+const RSCOPE = { mode:'all', imeis:[], uids:[], names:[], missing:[] };
+
+function isReportEp(e){ return /^\/user_reports\/(data|data-summary|data-new)$/.test(e && e.p || ''); }
+
+/* بيحوّل لستة IMEIs لـ UIDs من لستة عربيات الحساب */
+async function resolveImeis(text){
+  const keys = String(text||'').split(/[\s,;\n]+/).map(x=>x.trim()).filter(Boolean);
+  const uniq = [...new Set(keys)];
+  if(!uniq.length) return {uids:[], names:[], missing:[]};
+  if(!UNITS_CACHE){
+    const r = await apiFetch('/units/lists',
+      {data:{offset:0, limit:5000, simplify:0, projection:['basic']}},
+      {method:'POST', timeout:120000});
+    if(!r.ok) throw new Error(diagnose(r.code, r.txt));
+    UNITS_CACHE = r.json;
+  }
+  const uids=[], names=[], missing=[];
+  for(const k of uniq){
+    const {hit} = matchByName(UNITS_CACHE, k);
+    if(hit){ uids.push(hit.id); names.push(hit.name || k); }
+    else missing.push(k);
+  }
+  return {uids, names, missing};
+}
+
+/* بيركّب النطاق على بودي التقرير */
+function withScope(body){
+  let o;
+  try{ o = JSON.parse(typeof body === 'string' ? body : JSON.stringify(body)); }
+  catch(_){ return body; }
+  if(!o || !o.data) return body;
+  if(RSCOPE.mode === 'imeis' && RSCOPE.uids.length) o.data.units = RSCOPE.uids.slice();
+  else delete o.data.units;
+  return JSON.stringify(o, null, 4);
+}
+
+function scopeBox(e){
+  if(!isReportEp(e)) return '';
+  const on = RSCOPE.mode === 'imeis';
+  return `<div class="sec">
+    <h3>${t('نطاق التقرير','Report scope')}</h3>
+    <div class="row">
+      <button class="ct" id="rsAll"   aria-selected="${!on}">${t('كل العربيات','All vehicles')}</button>
+      <button class="ct" id="rsPick"  aria-selected="${on}">${t('عربيات محددة','Specific vehicles')}</button>
+    </div>
+    <div id="rsBody" style="margin-top:10px" ${on?'':'hidden'}>
+      <textarea id="rsImeis" placeholder="${t('الصق الـ IMEIs — واحد في كل سطر أو مفصولين بفاصلة','Paste the IMEIs — one per line or comma separated')}"
+        style="width:100%; min-height:90px; font-family:var(--mono); font-size:12.5px; padding:10px;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)">${esc(RSCOPE.imeis.join('\n'))}</textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="rsGo">${t('هات الـ IDs بتاعهم','Fetch their ids')}</button>
+        <span id="rsState" style="font-size:12.5px; color:var(--ink-2); align-self:center"></span>
+      </div>
+    </div>
+    ${RSCOPE.mode==='imeis' && RSCOPE.uids.length ? `<div class="note sig" style="margin-top:8px">
+      ${t(`النطاق: ${RSCOPE.uids.length} عربية`, `Scope: ${RSCOPE.uids.length} vehicles`)}
+      ${RSCOPE.names.length ? ' — ' + esc(RSCOPE.names.slice(0,5).join('، ')) + (RSCOPE.names.length>5 ? ` +${RSCOPE.names.length-5}` : '') : ''}
+    </div>` : ''}
+    ${RSCOPE.missing.length ? `<div class="note warn" style="margin-top:8px">
+      ${t('مش موجودين في الحساب ده','Not in this account')}: ${esc(RSCOPE.missing.slice(0,8).join('، '))}</div>` : ''}
+  </div>`;
+}
+
+function wireScope(e){
+  if(!isReportEp(e)) return;
+  const all=$('rsAll'), pick=$('rsPick');
+  if(!all || !pick) return;
+  all.onclick  = ()=>{ RSCOPE.mode='all';   renderDetail(e, []); };
+  pick.onclick = ()=>{ RSCOPE.mode='imeis'; renderDetail(e, []); };
+  const go = $('rsGo');
+  if(go) go.onclick = async ()=>{
+    const txt = ($('rsImeis').value||'').trim();
+    if(!txt){ $('rsState').textContent = t('الصق الـ IMEIs الأول','Paste the IMEIs first'); return; }
+    if(!SESSION.token){ $('rsState').textContent = t('اتصل بحساب العميل الأول','Connect to the customer account first'); return; }
+    go.disabled=true; $('rsState').textContent = t('بيدوّر…','Resolving…');
+    try{
+      const {uids, names, missing} = await resolveImeis(txt);
+      RSCOPE.imeis = txt.split(/[\s,;\n]+/).filter(Boolean);
+      RSCOPE.uids = uids; RSCOPE.names = names; RSCOPE.missing = missing;
+      renderDetail(e, []);
+    }catch(err){
+      $('rsState').textContent = String(err.message||err).slice(0,120);
+    }finally{ go.disabled=false; }
+  };
+}
 
 /* ============ تحليل رسالة العميل ============
    الموظف بيوصله إيميل فيه كلام وأكواد مخلوطة: الرد اللي اشتكى منه،

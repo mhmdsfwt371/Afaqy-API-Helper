@@ -1,16 +1,16 @@
 {
-  "version": "6.13",
+  "version": "6.14",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "وضع جديد في تبويب الفحص: «حلّل رسالة عميل» — بيقرا الإيميل كامل بكلامه وأكواده وأسئلته، مش بس رد API",
-      "بيفصل بلوكات الأكواد ويصنّفها: الرد اللي العميل اشتكى منه، والمثال اللي هو عايزه، وأي خطأ — قبل كده لزق الإيميل في «افحص رد» كان بياخد آخر بلوك يعني المثال المرغوب بدل الرد الفعلي",
-      "بيلقط أسئلة العميل المرقّمة ويرد عليها واحدة واحدة بترتيبها"
+      "نطاق التقرير: تختار «كل العربيات» أو «عربيات محددة» وتلزق الـ IMEIs — والأداة بتروح تجيب الـ UIDs بتاعهم وتحطهم في الريكوست",
+      "اللي مش موجود في الحساب بيتقالك بالاسم بدل ما التقرير يرجع ناقص من غير سبب",
+      "بودي لستة التقارير اتصلح: كان بيتبعت بشكل عادي {limit} والكولكشن بيقول data مصفوفة جواها filters — وده كان بيخلي رقم التقرير اللي بنجيبه مش صالح ويرجع not_found"
     ],
     "en": [
-      "A new mode in the Inspect tab: Analyse a customer message — it reads the whole email with its prose, code blocks and questions, not just an API response",
-      "It separates the code blocks and classifies them: the response the customer complained about, the shape they want, and any error — pasting the email into the response tab used to grab the last block, meaning the desired example instead of the actual response",
-      "It picks up the customer's numbered questions and answers them one by one in their order"
+      "Report scope: choose All vehicles or Specific vehicles and paste the IMEIs — the tool fetches their UIDs and puts them into the request",
+      "Anything not present in the account is named back to you, instead of the report silently coming back incomplete",
+      "The report-list body was corrected: it was being sent as a plain {limit} while the collection shows data as an array carrying filters — which is why the report id we fetched was not valid and came back not_found"
     ]
   }
 }
