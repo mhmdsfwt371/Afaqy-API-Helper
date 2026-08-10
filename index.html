@@ -195,6 +195,18 @@ body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)
   white-space:pre; margin:0; overflow-x:auto; overflow-y:visible
 }
 /* الطويل بيتقفل بتدريج بدل سكرول جوه سكرول */
+.caseMore{border:1px solid var(--line); border-radius:var(--r); background:var(--panel);
+  margin-top:12px; overflow:hidden}
+.caseMore>summary{cursor:pointer; padding:12px 16px; font-weight:600; font-size:14px;
+  color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px}
+.caseMore>summary::-webkit-details-marker{display:none}
+.caseMore>summary::before{content:'\25B8'; color:var(--muted); font-size:11px; transition:transform .15s}
+.caseMore[open]>summary::before{transform:rotate(90deg)}
+.caseMore>summary:hover{background:var(--panel-2)}
+.caseMore>summary .cnt{color:var(--muted); font-weight:400; font-size:12.5px}
+.caseMore .panel{border:0; border-top:1px solid var(--line-soft); border-radius:0; margin:0}
+.caseVerdict{display:flex; justify-content:space-between; align-items:flex-start;
+  gap:14px; flex-wrap:wrap}
 .preWrap{position:relative}
 .preWrap.clip .pre{max-height:300px; overflow:hidden}
 .preWrap.clip::after{content:''; position:absolute; inset-inline:0; bottom:34px; height:60px;
@@ -732,9 +744,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.35",
+  "version": "6.36",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.36",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "شاشة «حلّل رسالة عميل» كانت بتفرد ستة بلوكات فوق بعض، والرد — اللي هو سبب فتح الشاشة أصلاً — كان آخر واحد تحت. اتقلبت: سطر حكم واحد فوق، بعده الرد على طول.",
+          "سطر الحكم بيقول الحالة في جملة: محسومة ولا ناقصة أدلة، والغلطة اسمها إيه. تعرف هتبعت ولا هتسأل من غير ما تقرا حاجة تانية.",
+          "التحليل كله — اللي في الرسالة، والتشخيص، وغلطة العميل، والتحقّق اللايف — اتلمّ في سطر واحد مطوي بيتفتح لما تحتاجه.",
+          "الرد الطويل بقى بيتقص زي أي بلوك تاني في الأداة، بزرار «اعرض الكل»، فما بيمدّش الصفحة لتحت."
+        ],
+        "en": [
+          "The Analyse a customer message screen used to stack six blocks, with the reply — the reason the screen is opened at all — last. That is inverted now: a one-line verdict on top, the reply immediately under it.",
+          "The verdict states the case in a sentence: settled or missing evidence, and what the mistake is called. You know whether to send or to ask without reading anything else.",
+          "The whole analysis — what the message contained, the diagnosis, where the customer went wrong, the live verification — is gathered into one collapsed row that opens when needed.",
+          "A long reply is now clipped like every other block in the tool, with a Show all control, so it no longer stretches the page."
+        ]
+      }
+    },
     {
       "v": "6.35",
       "date": "2026-08-10",
@@ -2651,6 +2681,29 @@ const DOCS = {
           "Beside each vehicle is a detail button that pulls its own rows from /user_reports/data-new using resource_id. The difference: data-summary returns one aggregated row per vehicle, while data-new returns the breakdown for a single vehicle.",
           "The last step is the export: choose PDF, Excel or HTML and the tool calls /user_reports/export with the same report id. If you see /user_reports/request-export with a format field instead of type in the newer screen's network log, that serves the same purpose in a later release; the tool uses the one documented in the collection.",
           "The same chain is what the Analyse a customer message tab puts into the ready reply when you paste the customer email, so you never have to write it out by hand."
+        ]
+      }
+    },
+    {
+      "since": "6.36",
+      "t": {
+        "ar": "شاشة تحليل رسالة العميل — الرد الأول",
+        "en": "The customer-message screen — the reply comes first"
+      },
+      "b": {
+        "ar": [
+          "أول ما تدوس «حلّل»، بيطلعلك سطر واحد بيقول الحالة: محسومة ولا ناقصة أدلة، ومعاه الغلطة اسمها إيه.",
+          "تحته على طول الرد الجاهز وزراريه: «انسخ الرد» و«نزّل كولكشن Postman». مش محتاج تسكرول ولا تفتح حاجة.",
+          "لو الرد طويل بيتقص عند حد معيّن وفيه زرار «اعرض الكل» — زي أي بلوك تاني في الأداة.",
+          "التحليل الكامل موجود في سطر مطوي تحت اسمه «التحليل اللي الرد اتبنى عليه»، وبيقولك فيه كام قسم. افتحه لما تحتاج تتأكد من التشخيص قبل ما تبعت.",
+          "لو الرسالة ناقصة أدلة، الحكم بيقول ناقص كام حاجة، ومفيش رد جاهز بيتعرض — الطلب المحدد بيبقى جوه التحليل."
+        ],
+        "en": [
+          "The moment you press Analyse, a single line states the case: settled or missing evidence, and what the mistake is called.",
+          "Directly beneath it sits the ready reply with its controls: Copy the reply and Download Postman collection. No scrolling and nothing to open first.",
+          "A long reply is clipped at a set height with a Show all control, like every other block in the tool.",
+          "The full analysis lives in one collapsed row labelled The analysis behind this reply, with the number of sections shown. Open it when you want to check the diagnosis before sending.",
+          "When the message lacks evidence the verdict says how many items are missing and no ready reply is shown — the specific ask sits inside the analysis instead."
         ]
       }
     },
@@ -9989,6 +10042,24 @@ function paintCase(){
   $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; CASE_LIVE = null; };
 }
 
+/* سطر واحد بيقول الحالة اتحسمت ولا لسه — عشان الموظف يعرف في ثانية
+   هيبعت ولا هيسأل، من غير ما يقرا ستة بلوكات. */
+function caseVerdict(a){
+  const missing = caseNeeds(a).length;
+  if(a && a.reportCase) return {ok:true,
+    tag:t('محسومة','Resolved'),
+    line:t('العميل نادى كتالوج التقارير وهو عايز داتا التقرير. الرد تحت فيه السلسلة الصح كاملة.',
+           'The customer called the report catalog while wanting report data. The reply below carries the full correct chain.')};
+  if(missing) return {ok:false,
+    tag:t('ناقصة أدلة','Evidence needed'),
+    line:t(`الرسالة ناقصة ${missing} حاجة عشان نحسمها. الطلب المحدد جوه التحليل تحت.`,
+           `The message is missing ${missing} item(s) before this can be settled. The specific ask is in the analysis below.`)};
+  return {ok:true,
+    tag:t('متشخّصة','Diagnosed'),
+    line:t('الرسالة فيها اللي يكفي للتشخيص. اقرا التحليل تحت قبل ما ترد.',
+           'The message carries enough to diagnose. Read the analysis below before replying.')};
+}
+
 function renderCase(text){
   const out = $('caseOut');
   if(!String(text||'').trim()){ out.innerHTML=''; return; }
@@ -10127,7 +10198,7 @@ function renderCase(text){
       <h3>${t('رد جاهز للعميل','A reply ready to send')}</h3>
       <div class="note" style="margin-bottom:8px">${t('مكتوب بلغة رسالته. اقراه قبل ما تبعته — وعدّل الجزء بتاع بودي التنفيذ لو تيم التقارير أكّدلك شكله.',
           'Written in the language of their message. Read it before sending, and adjust the execution-body part once the reports team confirms its shape.')}</div>
-      <pre id="caseReplyTxt" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
+      <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
       <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
         ${a.reportCase ? `<button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>` : ''}</div>
       ${a.reportCase ? `<div class="note" style="margin-top:8px">${t(
@@ -10136,7 +10207,26 @@ function renderCase(text){
     </div></div>`);
   }
 
-  out.innerHTML = L.join('');
+  /* الرد هو آخر حاجة اتحطت في L لو موجود — بنطلّعه لفوق.
+     السبب: الموظف بيفتح الشاشة عشان الرد، مش عشان يقرا التحليل. */
+  const replyHtml = reply ? L.pop() : '';
+  const vd = caseVerdict(a);
+  out.innerHTML = `
+    <div class="panel"><div class="sec" style="border-top:0">
+      <div class="caseVerdict">
+        <div style="flex:1 1 300px; min-width:0">
+          <div class="crumb">${t('الحالة','The case')}</div>
+          <div style="font-size:15px; font-weight:600; margin-top:5px; line-height:1.6">${vd.line}</div>
+        </div>
+        <span class="chip ${vd.ok ? 'sig' : ''}" style="pointer-events:none; flex:0 0 auto">${vd.tag}</span>
+      </div>
+    </div></div>
+    ${replyHtml}
+    ${L.length ? `<details class="caseMore">
+      <summary>${t('التحليل اللي الرد اتبنى عليه','The analysis behind this reply')}
+        <span class="cnt">— ${L.length} ${t('قسم','sections')}</span></summary>
+      ${L.join('')}</details>` : ''}`;
+  clipBlocks(out);
   out.querySelectorAll('[data-goep]').forEach(b => b.onclick = ()=>{
     const e = EPS.find(x => String(x.i) === b.dataset.goep);
     if(e){ showView('search'); select(e, []); pushRecent(e); }

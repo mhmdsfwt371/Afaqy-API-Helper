@@ -1,16 +1,16 @@
 {
-  "version": "6.35",
+  "version": "6.36",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "زرار «نزّل كولكشن Postman» في كل سيناريو جاهز: بينزّل ملف .postman_collection.json فيه السلسلة كاملة، تبعته أتاشمنت للعميل على طول من غير ما تكتبه بإيدك.",
-      "ونفس الزرار تحت الرد الجاهز في «حلّل رسالة عميل»: الكولكشن بيتبني بأكواد حقول العميل اللي كتبها في رسالته هو، مش عينة عامة.",
-      "الملف بيمشي لوحده: التوكن ورقم المستخدم ورقم العربية ورقم التقرير بيتنقلوا بين الخطوات، وخطوة الانتظار بتلف على نفسها كل ٣ ثواني لحد ١٠٠٪ لما تشغّله بالـ Runner."
+      "شاشة «حلّل رسالة عميل» كانت بتفرد ستة بلوكات فوق بعض، والرد — اللي هو سبب فتح الشاشة أصلاً — كان آخر واحد تحت. اتقلبت: سطر حكم واحد فوق، بعده الرد على طول.",
+      "سطر الحكم بيقول الحالة في جملة: محسومة ولا ناقصة أدلة، والغلطة اسمها إيه. تعرف هتبعت ولا هتسأل من غير ما تقرا حاجة تانية.",
+      "التحليل كله — اللي في الرسالة، والتشخيص، وغلطة العميل، والتحقّق اللايف — اتلمّ في سطر واحد مطوي بيتفتح لما تحتاجه."
     ],
     "en": [
-      "A Download Postman collection button on every ready scenario: it saves a .postman_collection.json carrying the whole chain, ready to attach to a customer email without writing it by hand.",
-      "The same button sits under the ready reply in Analyse a customer message, and there the collection is built from the field codes the customer wrote in their own message rather than a generic sample.",
-      "The file runs itself: the token, user id, unit id and report id are carried between the requests, and the wait request loops on itself every 3 seconds until 100% when run with the Postman Runner."
+      "The Analyse a customer message screen used to stack six blocks, with the reply — the reason the screen is opened at all — last. That is inverted now: a one-line verdict on top, the reply immediately under it.",
+      "The verdict states the case in a sentence: settled or missing evidence, and what the mistake is called. You know whether to send or to ask without reading anything else.",
+      "The whole analysis — what the message contained, the diagnosis, where the customer went wrong, the live verification — is gathered into one collapsed row that opens when needed."
     ]
   }
 }
