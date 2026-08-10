@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.18",
+  "version": "6.19",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.19",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "زرار «جرّب وصحّح» على ريكوستات التقارير بقى مسبار: بيجيب كل أرقام التقارير المتاحة — من تقارير المستخدم ومن القوالب — ويجرّبها على المسارين لحد ما يلاقي اللي بيرد ببيانات",
+          "بيوريك جدول بكل اللي اتجرّب: اسم التقرير، ومصدر الرقم، والمسار، والنتيجة — فتعرف بالظبط إيه اللي اترفض وإيه اللي نجح",
+          "أول ما يلاقي الصح بيديك زرار «استخدم الرقم ده» فيتحط في الريكوست على طول",
+          "لو ولا رقم اشتغل، بيقولك صراحة إن المشكلة مش في الرقم — يا إما مصدر تالت يا إما الحساب مالوش صلاحية — والجدول جاهز للتصعيد",
+          "لو الحساب مفيهوش تقارير أصلًا، بيقولك كده بدل ما تفضل تجرّب أرقام"
+        ],
+        "en": [
+          "The Try and auto-fix button on report requests is now a probe: it collects every available report id — from user reports and from templates — and tries them across both paths until one answers with data",
+          "It shows a table of everything tried: report name, id source, path and outcome, so you can see exactly what was rejected and what worked",
+          "Once it finds the right one it offers a Use this id button that applies it to the request",
+          "If no id works it says plainly that the id is not the problem — either a third source or the account lacks access — and the table is ready to escalate with",
+          "If the account has no reports at all, it tells you that instead of letting you keep trying ids"
+        ]
+      }
+    },
     {
       "v": "6.18",
       "date": "2026-08-05",
@@ -5178,8 +5198,101 @@ async function ladderCore(e, override, onStep){
   return {net:true, tried, win:null};
 }
 
+/* ============ سلّم التقارير ============
+   الرقم بيرجع not_found حتى وهو من الحساب — يعني مش أي رقم ينفع هنا.
+   بدل ما نخمّن أنهي مصدر صح، بنجيب المرشحين ونجرّبهم بالترتيب
+   ونقول للموظف أنهي واحد ردّ ببيانات فعلًا. */
+async function reportIdCandidates(){
+  const out = [];
+  const push = (id, name, src) => { if(id && !out.some(x=>x.id===id)) out.push({id, name, src}); };
+  /* ١) اللي الموظف حدده من نافذة الاعتمادية */
+  const picked = SESSION.deps && SESSION.deps.userReport;
+  if(picked) push(picked.id, picked.name, t('اللي حددته','your pick'));
+  /* ٢) تقارير المستخدم */
+  for(const body of [{data:{limit:200}}, {data:{data:[{filters:{}}]}}]){
+    try{
+      const r = await apiFetch('/user_reports/lists', body, {method:'POST', timeout:60000});
+      if(!r.ok) continue;
+      for(const it of deepItems(r.json)) push(it.id, it.name, '/user_reports/lists');
+      if(deepItems(r.json).length) break;
+    }catch(_){}
+  }
+  /* ٣) قوالب التقارير — مصدر تاني محتمل للرقم */
+  try{
+    const r = await apiFetch('/user_report_templates/lists', {data:{limit:1000}}, {method:'POST', timeout:60000});
+    if(r.ok) for(const it of deepItems(r.json)) push(it.id, it.name, '/user_report_templates/lists');
+  }catch(_){}
+  /* الـ Summary الأول */
+  out.sort((a,b)=>{
+    const A = /^summary$/i.test(String(a.name||'')) ? 0 : 1;
+    const B = /^summary$/i.test(String(b.name||'')) ? 0 : 1;
+    return A - B;
+  });
+  return out;
+}
+
+async function reportProbe(e){
+  const out = $('tryout');
+  out.innerHTML = `<div class="note" style="margin-top:12px">${t('بنجيب أرقام التقارير المتاحة…','Fetching the available report ids…')}</div>`;
+  let cands;
+  try{ cands = await reportIdCandidates(); }
+  catch(err){ out.innerHTML = `<div class="note warn" style="margin-top:12px">${esc(String(err.message||err))}</div>`; return; }
+  if(!cands.length){
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">
+      <b>${t('مفيش تقارير في الحساب ده.','This account has no reports.')}</b><br>
+      ${t('التقرير لازم يتعمل من المنصة الأول — أو الحساب مالوش صلاحية عليه. دي أول حاجة تتقال للعميل.',
+          'A report must exist in the platform first — or the account has no access to it. That is the first thing to tell the customer.')}</div>`;
+    return;
+  }
+  const paths = ['/user_reports/data-summary','/user_reports/data'];
+  const rows = [];
+  let win = null;
+  const scope = (RSCOPE.mode === 'imeis' && RSCOPE.uids.length) ? RSCOPE.uids.slice() : null;
+  outer:
+  for(const c of cands.slice(0, 6)){
+    for(const p of paths){
+      const body = {data: Object.assign({id: c.id}, scope ? {units: scope} : {})};
+      out.innerHTML = `<div class="note" style="margin-top:12px">${t(
+        `بنجرّب: ${esc(c.name||c.id)} على ${esc(p)}…`, `Trying ${esc(c.name||c.id)} on ${esc(p)}…`)}</div>`;
+      let r;
+      try{ r = await apiFetch(p, body, {method:'POST', timeout:90000}); }
+      catch(err){ rows.push({c, p, ok:false, why:t('ما وصلش للسيرفر','did not reach the server')}); continue; }
+      const n = r.ok ? deepItems(r.json).length : 0;
+      const msg = (r.json && (r.json.message || (r.json.errors && JSON.stringify(r.json.errors)))) || '';
+      rows.push({c, p, ok:r.ok, n, why: r.ok ? '' : String(msg).slice(0,60)});
+      if(r.ok && n){ win = {c, p, r}; break outer; }
+    }
+  }
+  const tbl = `<table class="kv" style="margin-top:10px"><tr>
+      <th>${t('التقرير','Report')}</th><th>${t('المصدر','Source')}</th><th>${t('المسار','Path')}</th><th>${t('النتيجة','Result')}</th></tr>
+    ${rows.map(x=>`<tr>
+      <td>${esc(x.c.name||x.c.id)}</td>
+      <td style="font-size:11.5px; color:var(--ink-2)">${esc(x.c.src)}</td>
+      <td><code style="font-size:11.5px">${esc(x.p)}</code></td>
+      <td>${x.ok && x.n ? `<b style="color:var(--ok)">${t(`${x.n} سجل`,`${x.n} records`)}</b>`
+            : (x.ok ? t('رد فاضي','empty') : `<span style="color:var(--alert)">${esc(x.why)}</span>`)}</td>
+    </tr>`).join('')}</table>`;
+  if(win){
+    out.innerHTML = `<div class="note sig" style="margin-top:12px">
+      <b>${t('لقيناها.','Found it.')}</b> ${t('التقرير','Report')} <b>${esc(win.c.name||win.c.id)}</b>
+      ${t('من','from')} <code>${esc(win.c.src)}</code> ${t('شغّال على','works on')} <code>${esc(win.p)}</code>.
+      </div>${tbl}
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="rpUse">${t('استخدم الرقم ده','Use this id')}</button></div>`;
+    const b = $('rpUse');
+    if(b) b.onclick = ()=>{ SESSION.deps.userReport = {id:win.c.id, name:win.c.name}; renderDetail(e, []); toast(t('اتظبط','Applied')); };
+  } else {
+    out.innerHTML = `<div class="note warn" style="margin-top:12px">
+      <b>${t('ولا رقم من دول اشتغل.','None of these ids worked.')}</b><br>
+      ${t('يعني المشكلة مش في الرقم: يا إما الريكوست ده بياخد رقم من مصدر تالت، يا إما الحساب مالوش صلاحية على التقارير. صعّدها بالجدول ده — فيه كل اللي اتجرب.',
+          'So the id is not the problem: either this request takes an id from a third source, or the account has no access to reports. Escalate with this table — it shows everything that was tried.')}
+      </div>${tbl}`;
+  }
+}
+
 async function labRunLadder(e){
   const out = $('tryout');
+  /* ريكوستات التقارير ليها سلّمها: المتغيّر هنا هو مصدر الرقم مش شكل البودي */
+  if(isReportEp(e)) return reportProbe(e);
   if(NO_RETRY.test(e.p||'')){ out.innerHTML=`<div class="note warn" style="margin-top:12px">${t('إعادة المحاولة على ريكوستات الدخول ممنوعة — بتقفل حسابات العملاء.','Retrying login requests is blocked — it locks customer accounts.')}</div>`; return; }
   if(e.t && !SESSION.token){ out.innerHTML=`<div class="note warn" style="margin-top:12px">${t('اتصل من الشريط اللي فوق الأول.','Connect from the top bar first.')}</div>`; return; }
   const vs = labVariants(e), tried = [];

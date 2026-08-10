@@ -1,16 +1,16 @@
 {
-  "version": "6.18",
+  "version": "6.19",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "لوحة الأجهزة بقت تجيب كل عربيات الحساب مهما كان عددها — بتجيب على دفعات لحد ما توصل للعدد اللي السيرفر نفسه قاله، والعداد ماشي قدامك «بيجيب… 2000 من 3700»",
-      "قبل كده كانت بتقف عند 1500 وتوريك أرقام كأنها الكل — حساب فيه 3700 كنت تشوف أقل من نصه وانت فاكره كامل",
-      "لو لأي سبب اتجاب أقل من العدد الحقيقي، بيظهر تنبيه صريح بالرقمين بدل ما تبني قرار على جزء"
+      "زرار «جرّب وصحّح» على ريكوستات التقارير بقى مسبار: بيجيب كل أرقام التقارير المتاحة — من تقارير المستخدم ومن القوالب — ويجرّبها على المسارين لحد ما يلاقي اللي بيرد ببيانات",
+      "بيوريك جدول بكل اللي اتجرّب: اسم التقرير، ومصدر الرقم، والمسار، والنتيجة — فتعرف بالظبط إيه اللي اترفض وإيه اللي نجح",
+      "أول ما يلاقي الصح بيديك زرار «استخدم الرقم ده» فيتحط في الريكوست على طول"
     ],
     "en": [
-      "The device dashboard now fetches every vehicle in the account whatever the size — in batches until it reaches the count the server itself reported, with a live counter reading Loading 2000 of 3700",
-      "It previously stopped at 1500 and presented the numbers as if they were the whole account — on a 3700-vehicle account you were seeing under half and believing it complete",
-      "If fewer than the real total arrive for any reason, an explicit warning shows both numbers instead of letting you decide on a fraction"
+      "The Try and auto-fix button on report requests is now a probe: it collects every available report id — from user reports and from templates — and tries them across both paths until one answers with data",
+      "It shows a table of everything tried: report name, id source, path and outcome, so you can see exactly what was rejected and what worked",
+      "Once it finds the right one it offers a Use this id button that applies it to the request"
     ]
   }
 }
