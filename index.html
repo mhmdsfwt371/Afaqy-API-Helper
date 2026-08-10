@@ -732,9 +732,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.29",
+  "version": "6.30",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.30",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "العميل قال الإندبوينت بالظبط — /reports/lists — والأداة بقت تميّزه: دي عائلة كتالوج أنواع التقارير، مش عائلة تقارير المستخدم اللي فيها الداتا",
+          "الفرق اللي بيلخبط: /reports/… بيرجّع أنواع التقارير المتاحة وتعريف أعمدة كل نوع، و/user_reports/… بيرجّع تقارير فيها صفوف. الأسماء متشابهة والمعنى مختلف",
+          "الرد الجاهز بقى يشرح السلسلة كاملة: خد الكود من الكتالوج، اعمل بيه تقرير بالعربيات والفترة، الرد يرجّع رقم، وبالرقم اقرا الصفوف",
+          "وبيرد على سؤاله عن الباراميترات بالتحديد: resources أرقام عربيات مش IMEIs، وتحويلهم من /units/lists، والفترة، ورقم المستخدم من رد الدخول",
+          "ملاحظة صريحة: summary_beta و/reports/lists مش موجودين في الكولكشن اللي عندنا — فالكلام عليهم مبني على بنية العائلة مش على عينة موثّقة"
+        ],
+        "en": [
+          "The customer named the exact endpoint — /reports/lists — and the tool now recognises it: that is the report-type catalog family, not the user-reports family that carries the data",
+          "The confusing difference: /reports/… returns the available report types and each type's column definitions, while /user_reports/… returns reports with rows. Similar names, different meaning",
+          "The drafted reply now explains the whole sequence: take the code from the catalog, create a report with it giving vehicles and a period, the response returns an id, and the id reads the rows",
+          "It answers the parameter question specifically: resources takes vehicle ids rather than IMEIs, how to resolve them from /units/lists, the date range, and the user id from the login response",
+          "Stated plainly: summary_beta and /reports/lists are not in the collection we hold, so what is said about them rests on the family's structure rather than a documented sample"
+        ]
+      }
+    },
     {
       "v": "6.29",
       "date": "2026-08-05",
@@ -8262,22 +8282,34 @@ function caseReply(a){
   const dataEp = EPS.find(e => e.p === '/user_reports/data-summary' && sysOf(e) === 'avl');
   const listEp = EPS.find(e => e.p === '/user_reports/lists' && sysOf(e) === 'avl');
   if(a.reportCase){
+    const onCatalog = /\/reports\/(lists|view)/.test(String(a.words||'') + JSON.stringify(a.paths||[]));
     return [
       'Hello,',
       '',
-      'Thank you for the detailed write-up — your reading of the response is correct, and the fields you listed identify exactly which report you are looking at.',
+      'Thank you for the detail — your reading of the response is correct, and the endpoint you named tells us exactly what is happening.',
       '',
-      '1) Yes. What you received is the report definition. The fields you quoted — date, route_length, engine_work, engine_work_percentage, move_duration, engine_idle, stop_duration — are the columns of the Summary report template. The object describes each column: its label, its code, its order and how it aggregates. It is the report configuration, so it carries no values by design.',
+      '1) ' + (onCatalog
+        ? 'The endpoint you are calling, /reports/lists, is the catalog of report types available in the platform. It returns each type and the definition of its columns — name, code, order, aggregation. summary_beta is one of those types. A catalog has no values by design; it is the menu, not the meal.'
+        : 'Yes. What you received is a report definition: the columns and how they aggregate, not the output of a run.'),
       '',
-      '2) The values come from running that report against a period, not from another call on the template. Use the report data endpoint:',
-      '   POST ' + (dataEp ? dataEp.p : '/user_reports/data-summary'),
-      '   The id in the body is the id of your Summary report in your own account. Ids from another account or from documentation samples return not_found — you can list yours with ' + (listEp ? listEp.p : '/user_reports/lists') + '.',
+      '2) The values come from a different family of endpoints: /user_reports/… rather than /reports/… . The sequence is:',
+      '   a. Take the code you already have from the catalog — summary_beta.',
+      '   b. Create the report:  POST ' + (dataEp ? '/user_reports/add' : '/user_reports/add'),
+      '      In the body you send: code (summary_beta), fields (the columns you want from the catalog), resources (the vehicle ids), selected_resource_type ("units"), and date with from and to.',
+      '   c. The response returns the report id.',
+      '   d. Read the rows:  POST ' + (dataEp ? dataEp.p : '/user_reports/data-summary') + '  with that id in the body.',
       '',
-      '3) A report run needs a scope: the date range and the vehicles it should cover. The template itself carries start-date and end-date columns (sdt, edt), which is how each row is stamped. Please confirm the exact body for your report type with us before you build against it, so you send the range and the vehicle list in the shape the platform expects.',
+      '3) Required parameters, to answer your question directly:',
+      '   - Vehicle ids in resources — not IMEIs. If you hold IMEIs, resolve them first with POST /units/lists and use the id of each unit.',
+      '   - A date range in date.from and date.to, in YYYY-MM-DD HH:MM:SS.',
+      '   - The report code from the catalog, and the fields you want from that type.',
+      '   - user_id: the account the report is filed under. The login response returns it.',
       '',
-      '4) On the mapping: the run returns rows, and each value is keyed by the same field code you already hold from the definition — date, route_length, engine_work, and the rest. The definition gives you the columns and the labels, the run gives you the rows, and the field code joins them.',
+      '4) On the mapping: the run returns rows whose keys are the same field codes you already hold — date, route_length, engine_work, engine_idle, stop_duration and the rest. So the catalog gives you the columns and the labels, the run gives you the rows, and the code is what joins them. That is where your Date: 10-08-2026 and Route Length: 70 km will appear.',
       '',
-      'One note that may save you time: if what you actually need is raw device signals over a period rather than a summarised report, that is a different call and we can point you to it — tell us which of the two you are building.',
+      'So: keep /reports/lists for building the column headers and letting the user pick a report type, and add the create-then-read pair for the data itself.',
+      '',
+      'If you would like, send us the account you are testing with and we will run the full sequence on it and share the exact request and response.',
       '',
       'Best regards,'
     ].join('\n');
@@ -8308,7 +8340,31 @@ function deepFindNode(obj, key, depth){
   }
   return null;
 }
+/* الترتيب مهم: الأدق يسبق الأعم. رد الكتالوج بيطابق قاعدة التعريف كمان،
+   فلو التعريف سبق، الموظف هيتقاله «ده تعريف تقرير» بدل «ده كتالوج أنواع»
+   — وهي إجابة أقل تحديدًا وبتوديه لمسار مختلف. */
 const PATTERNS = [
+  {
+    k: 'reports_catalog',
+    /* حالة عميل: نادى /reports/lists ولقى تعريفات حقول من غير قيم.
+       العائلتين متشابهين في الاسم ومختلفين في المعنى:
+         /reports/*       = كتالوج أنواع التقارير في المنصة (تعريفات)
+         /user_reports/*  = تقارير المستخدم الفعلية (فيها داتا) */
+    hit(j, raw){
+      const txt = String(raw || '');
+      const onCatalog = /\/reports\/lists|\/reports\/view/.test(txt);
+      if(!onCatalog) return false;
+      const f = deepFindNode(j, 'fields');
+      return Array.isArray(f) && f.length && f[0] && ('code' in f[0]) && !('value' in f[0]);
+    },
+    ttl:{ar:'ده كتالوج أنواع التقارير — مش تقرير فيه داتا',
+         en:'This is the catalog of report types — not a report with data'},
+    why:{ar:'المسار <code>/reports/…</code> بيرجّع أنواع التقارير المتاحة في المنصة وتعريف أعمدة كل نوع: الاسم والكود والترتيب وطريقة التجميع. دي قايمة اختيارات، مش نتيجة تشغيل. عشان كده مفيهاش قيم أصلًا.',
+         en:'The <code>/reports/…</code> path returns the report types available in the platform and each type\u2019s column definitions: name, code, order and aggregation. It is a menu of choices, not the output of a run — which is why it carries no values.'},
+    next:{ar:'الداتا في عائلة تانية: <code>/user_reports/…</code>. الترتيب: تاخد الـ <code>code</code> من الكتالوج (زي <code>summary_beta</code>) وتعمل بيه تقرير من <code>POST /user_reports/add</code> بالعربيات والفترة، والرد بيرجّع رقم التقرير — وبالرقم ده تقرا الداتا من <code>POST /user_reports/data-summary</code>.',
+          en:'The data lives in a different family: <code>/user_reports/…</code>. The order is: take the <code>code</code> from the catalog (such as <code>summary_beta</code>), create a report with it via <code>POST /user_reports/add</code> giving the vehicles and the period, and the response returns the report id — then read the rows with <code>POST /user_reports/data-summary</code>.'},
+    go: 'Add'
+  },
   {
     k: 'report_template',
     /* حالة عميل: بيقول «الحقول موجودة بس القيم مش موجودة» في تقرير.

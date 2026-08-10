@@ -1,16 +1,16 @@
 {
-  "version": "6.29",
+  "version": "6.30",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "الأداة كانت بتسألك «محتاج: المستخدم» وهي معاها الرقم أصلًا من رد تسجيل الدخول — وتروح تدوّر في لستة المستخدمين وترجع من غير سجلات",
-      "دلوقتي بتلتقط رقم المستخدم من رد الدخول وتحطه في البودي لوحدها، ومبقاش فيه سؤال",
-      "معنى user_id في إنشاء التقرير: صاحب الريكوست — الحساب اللي التقرير هيتسجّل عليه. مش اسم الدخول، رقم المستخدم في المنصة"
+      "العميل قال الإندبوينت بالظبط — /reports/lists — والأداة بقت تميّزه: دي عائلة كتالوج أنواع التقارير، مش عائلة تقارير المستخدم اللي فيها الداتا",
+      "الفرق اللي بيلخبط: /reports/… بيرجّع أنواع التقارير المتاحة وتعريف أعمدة كل نوع، و/user_reports/… بيرجّع تقارير فيها صفوف. الأسماء متشابهة والمعنى مختلف",
+      "الرد الجاهز بقى يشرح السلسلة كاملة: خد الكود من الكتالوج، اعمل بيه تقرير بالعربيات والفترة، الرد يرجّع رقم، وبالرقم اقرا الصفوف"
     ],
     "en": [
-      "The tool was asking you for the user while it already held the id from the login response — then searching the users list and coming back empty",
-      "It now captures the user id from the login response and fills it into the body itself, with no question asked",
-      "What user_id means when creating a report: the owner of the request — the account the report is filed under. Not the login name, but the platform user id"
+      "The customer named the exact endpoint — /reports/lists — and the tool now recognises it: that is the report-type catalog family, not the user-reports family that carries the data",
+      "The confusing difference: /reports/… returns the available report types and each type's column definitions, while /user_reports/… returns reports with rows. Similar names, different meaning",
+      "The drafted reply now explains the whole sequence: take the code from the catalog, create a report with it giving vehicles and a period, the response returns an id, and the id reads the rows"
     ]
   }
 }
