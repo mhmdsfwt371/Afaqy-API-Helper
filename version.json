@@ -1,16 +1,16 @@
 {
-  "version": "6.17",
+  "version": "6.18",
   "date": "2026-08-05",
   "notes": {
     "ar": [
-      "النطاق بقى يبان في البودي المعروض نفسه: أول ما تجيب الـ IDs، الـ units بتتحط في الجسون قدامك والعنوان يتغيّر لـ«البودي — اتظبط للتجربة»",
-      "اللي بتشوفه هو اللي بيتبعت بالحرف — قبل كده النطاق كان بيتحط وقت الإرسال بس، فكنت بتضغط جرّب وانت مش شايف اللي هيروح",
-      "الأداة بتقولك التغيير اللي عملته: «النطاق: كذا عربية — بأسمائها»، فتراجعه قبل ما تشغّل"
+      "لوحة الأجهزة بقت تجيب كل عربيات الحساب مهما كان عددها — بتجيب على دفعات لحد ما توصل للعدد اللي السيرفر نفسه قاله، والعداد ماشي قدامك «بيجيب… 2000 من 3700»",
+      "قبل كده كانت بتقف عند 1500 وتوريك أرقام كأنها الكل — حساب فيه 3700 كنت تشوف أقل من نصه وانت فاكره كامل",
+      "لو لأي سبب اتجاب أقل من العدد الحقيقي، بيظهر تنبيه صريح بالرقمين بدل ما تبني قرار على جزء"
     ],
     "en": [
-      "The scope now appears in the previewed body itself: as soon as you fetch the ids, units lands in the JSON in front of you and the heading changes to Body — prepared for running",
-      "What you see is exactly what gets sent — previously the scope was applied only at send time, so you pressed Run without seeing what would go out",
-      "The tool names the change it made — Scope: N vehicles, with their names — so you can review it before running"
+      "The device dashboard now fetches every vehicle in the account whatever the size — in batches until it reaches the count the server itself reported, with a live counter reading Loading 2000 of 3700",
+      "It previously stopped at 1500 and presented the numbers as if they were the whole account — on a 3700-vehicle account you were seeing under half and believing it complete",
+      "If fewer than the real total arrive for any reason, an explicit warning shows both numbers instead of letting you decide on a fraction"
     ]
   }
 }

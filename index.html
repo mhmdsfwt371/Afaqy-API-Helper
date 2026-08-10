@@ -730,9 +730,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.17",
+  "version": "6.18",
   "date": "2026-08-05",
   "history": [
+    {
+      "v": "6.18",
+      "date": "2026-08-05",
+      "items": {
+        "ar": [
+          "لوحة الأجهزة بقت تجيب كل عربيات الحساب مهما كان عددها — بتجيب على دفعات لحد ما توصل للعدد اللي السيرفر نفسه قاله، والعداد ماشي قدامك «بيجيب… 2000 من 3700»",
+          "قبل كده كانت بتقف عند 1500 وتوريك أرقام كأنها الكل — حساب فيه 3700 كنت تشوف أقل من نصه وانت فاكره كامل",
+          "لو لأي سبب اتجاب أقل من العدد الحقيقي، بيظهر تنبيه صريح بالرقمين بدل ما تبني قرار على جزء",
+          "تحويل الـ IMEIs بقى بياخد كل العربيات كمان، فالبحث عن جهاز في حساب كبير مش هيقول «مش موجود» وهو موجود",
+          "سقف قراءة السجلات كان 4000 داخليًا — كان هيقص الحسابات الكبيرة حتى بعد الجلب. اترفع لـ50 ألف"
+        ],
+        "en": [
+          "The device dashboard now fetches every vehicle in the account whatever the size — in batches until it reaches the count the server itself reported, with a live counter reading Loading 2000 of 3700",
+          "It previously stopped at 1500 and presented the numbers as if they were the whole account — on a 3700-vehicle account you were seeing under half and believing it complete",
+          "If fewer than the real total arrive for any reason, an explicit warning shows both numbers instead of letting you decide on a fraction",
+          "IMEI resolution now walks the full list too, so looking up a device in a large account no longer reports it missing when it exists",
+          "The internal record-parsing cap was 4000 — it would have truncated large accounts even after fetching. It is now 50,000"
+        ]
+      }
+    },
     {
       "v": "6.17",
       "date": "2026-08-05",
@@ -3872,7 +3892,7 @@ function deepFindObj(o, key, depth){
 
 /* كل الكائنات اللي شبه السجلات: عندها معرّف واسم */
 function deepItems(obj, out, depth){
-  out=out||[]; depth=depth||0; if(obj==null || depth>8 || out.length>4000) return out;
+  out=out||[]; depth=depth||0; if(obj==null || depth>8 || out.length>50000) return out;
   if(Array.isArray(obj)){ obj.forEach(x=>deepItems(x,out,depth+1)); return out; }
   if(typeof obj==='object'){
     const id = obj.id || obj._id, nm = obj.name || obj.title || obj.username || obj.label;
@@ -5927,19 +5947,45 @@ function typeLabel(k){
   return TYPE_LBL[k] ? dual(TYPE_LBL[k]) : k;
 }
 
+/* حسابات فيها آلاف العربيات: طلب واحد كبير بيتخنق، وطلب محدود بيوريك
+   جزء وانت فاكره الكل. بنجيب على دفعات لحد ما نوصل للعدد اللي السيرفر
+   نفسه قاله، والموظف شايف العداد وهو ماشي. */
+async function fetchAllUnits(projection, onProgress){
+  const PAGE = 500, CAP = 50000;
+  let offset = 0, all = [], total = null;
+  while(true){
+    const r = await apiFetch('/units/lists',
+      {data:{offset, limit:PAGE, simplify:0, projection}},
+      {method:'POST', timeout:120000});
+    if(!r.ok) throw new Error(diagnose(r.code, r.txt));
+    const items = deepItems(r.json).map(x=>x.raw);
+    if(total === null){
+      const pg = deepFindNode(r.json, 'pagination');
+      const n = pg && Number(pg.allCount || pg.resultCount);
+      total = (n && isFinite(n)) ? n : null;
+    }
+    all = all.concat(items);
+    if(onProgress) onProgress(all.length, total);
+    if(!items.length || items.length < PAGE) break;
+    if(total && all.length >= total) break;
+    if(all.length >= CAP) break;
+    offset += PAGE;
+  }
+  return {units: all, total: total || all.length};
+}
+
 async function dashLoadUnits(){
   const btn=$('dashLoad'), old=btn.textContent;
   if(!SESSION.token){ $('dashState').textContent = t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first'); return; }
   btn.disabled=true; btn.textContent=t('بيجيب…','Loading…');
   try{
-    /* حساب فيه آلاف العربيات كان بيتخنق: 5000 سجل بأربع بروجيكشنز في مهلة
-       واحدة. بنبدأ بطلب أخف، ولو الحساب كبير بنكمّل على دفعات. */
-    const r = await apiFetch('/units/lists',
-      {data:{offset:0, limit:1500, simplify:0, projection:['basic','last_update','counters','groups']}},
-      {method:'POST', timeout:120000});
-    if(!r.ok){ $('dashState').textContent=''; $('dashOut').innerHTML =
-      `<div class="panel"><div class="sec"><div class="note warn">${diagnose(r.code, r.txt)}</div></div></div>`; return; }
-    DASH.units = deepItems(r.json).map(x=>x.raw);
+    const got = await fetchAllUnits(['basic','last_update','counters','groups'], (n, tot)=>{
+      $('dashState').textContent = tot
+        ? t(`بيجيب… ${n} من ${tot}`, `Loading… ${n} of ${tot}`)
+        : t(`بيجيب… ${n}`, `Loading… ${n}`);
+    });
+    DASH.units = got.units;
+    DASH.total = got.total;
     DASH.filter = null; DASH.flag = null; DASH.scope = null; DASH.state = null; DASH.at = new Date();
     dashRender();
   }catch(err){
@@ -6288,6 +6334,10 @@ function dashRender(){
 
   out.innerHTML = `
   <div class="panel" style="margin-bottom:14px"><div class="sec" style="border-top:0">
+    ${(DASH.total && DASH.units.length < DASH.total) ? `<div class="note warn" style="margin-bottom:10px">
+      <b>${t(`جبنا ${DASH.units.length} من ${DASH.total}.`, `We fetched ${DASH.units.length} of ${DASH.total}.`)}</b>
+      ${t('الأرقام تحت على اللي اتجاب بس — دوس «جيب العربيات» تاني عشان يكمّل.',
+          'The numbers below cover only what was fetched — press Fetch vehicles again to continue.')}</div>` : ''}
     ${noType ? `<div class="note warn" style="margin-bottom:10px">
       <b>${t('نوع الجهاز مش راجع في الرد.','The device type is not present in the response.')}</b><br>
       ${t('الحقل device_type مش موجود في اللي رجع، فمقدرناش نقسّم. الأرقام تحت صحيحة كإجمالي. صعّدها لتيم مصر عشان يضيفوا الحقل في الـ projection.',
@@ -7165,11 +7215,8 @@ async function resolveImeis(text){
   const uniq = [...new Set(keys)];
   if(!uniq.length) return {uids:[], names:[], missing:[]};
   if(!UNITS_CACHE){
-    const r = await apiFetch('/units/lists',
-      {data:{offset:0, limit:5000, simplify:0, projection:['basic']}},
-      {method:'POST', timeout:120000});
-    if(!r.ok) throw new Error(diagnose(r.code, r.txt));
-    UNITS_CACHE = r.json;
+    const got = await fetchAllUnits(['basic']);
+    UNITS_CACHE = {data: got.units};
   }
   const uids=[], names=[], missing=[];
   for(const k of uniq){
