@@ -732,9 +732,33 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.31",
-  "date": "2026-08-05",
+  "version": "6.32",
+  "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.32",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "«حلّل رسالة عميل» بقى يجاوب بدل ما يسأل: لو الرسالة فيها اللي يكفي للحسم، الأداة تقولك الصح على طول وتطلّع رد جاهز تبعته من غير ما تطلب من العميل حاجة",
+          "بقى يقرا أكواد الحقول من كلام العميل مش من بلوكات الـ JSON بس — رسالة بتقول «Route Length — code: route_length» بقت تتشخّص، وقبل كده كانت بتعدّي وتطلب أدلة إحنا قاريينها",
+          "طلب الأدلة بقى واعي بالحالة: لو التشخيص محسوم مبيطلبش حاجة، ولو إنت متصل بحساب مبيطلبش منك اسم الحساب — بيجرّب بنفسه",
+          "الرد الجاهز بقى يجاوب أسئلة العميل واحد واحد، وبودي إنشاء التقرير كامل ومبني من حقول العميل نفسها زي ما بعتها — مش قالب عام",
+          "زرار «تحقّق لايف»: بيعمل تقرير مؤقت على أول عربية في الحساب المتصل، يقرا صفوفه، ويمسحه — والرد الحقيقي بيتحط في الرسالة بعد ما يتشال منه التوكن والمعرّفات والأسماء",
+          "الأكواد اللي مش موجودة في الكولكشن بتتشال من البودي وبتتقالك بالاسم — الأداة مبتبعتش حاجة مش متأكدة منها",
+          "اتصلح توجيه قديم كان بيوصّي بدومين التقارير للحصول على القيم؛ الصح هو /user_reports/add ثم /user_reports/data-summary، واتشال التحفّظ اللي كان بيقول إن بودي التنفيذ مش متسجّل"
+        ],
+        "en": [
+          "Analyse a customer message now answers instead of asking: when the message carries enough to settle it, the tool states the correct call and drafts a reply you can send without going back to the customer",
+          "It reads field codes from the customer's prose, not only from JSON blocks — a message saying \"Route Length — code: route_length\" is now diagnosed, where before it passed through and asked for evidence already in front of us",
+          "The evidence request is now aware of the diagnosis: it asks for nothing once the case is settled, and never asks you for the account name while you are connected — it runs the check itself",
+          "The drafted reply answers each of the customer's questions in turn, with a full create-report body built from the customer's own field codes rather than a generic template",
+          "A Verify live button: it creates a temporary report on the first vehicle in the connected account, reads its rows and deletes it — the real response goes into the reply after the token, ids and names are stripped",
+          "Codes that are not in our collection are left out of the body and named for you — the tool sends nothing it cannot verify",
+          "Corrected an older recommendation that pointed at the reports domain for values; the right pair is /user_reports/add then /user_reports/data-summary, and the caveat claiming the execution body was unrecorded has been removed"
+        ]
+      }
+    },
     {
       "v": "6.31",
       "date": "2026-08-05",
@@ -2490,6 +2514,31 @@ const DOCS = {
           "Scenarios — ready chains that run steps in sequence and carry results forward automatically.",
           "Integration basics — explanations, gathered knowledge, known errors, and the glossary.",
           "Guide — this page."
+        ]
+      }
+    },
+    {
+      "since": "6.32",
+      "t": {
+        "ar": "حلّل رسالة عميل — الأداة تجاوب بدل ما تسأل",
+        "en": "Analyse a customer message — it answers rather than asks"
+      },
+      "b": {
+        "ar": [
+          "التبويب في «افحص رد». الصق إيميل العميل كامل — كلام وأكواد وأسئلة مرقّمة — ودوس «حلّل».",
+          "الأداة بتقرا أكواد الحقول من الكلام العادي مش من الـ JSON بس، وبتطابقها بالكولكشن. لو اتطابق ٣ أكواد أو أكتر، الحالة بتتحسم من غير ما تسأل العميل حاجة.",
+          "لو الحالة محسومة بيظهر بانل «مش ناقص حاجة» ومعاه رد جاهز بيجاوب أسئلة العميل واحد واحد ببودي كامل. لو الرسالة فعلاً ناقصة، بيرجع يطلّع رسالة بتطلب الناقص بس.",
+          "وإنت متصل بحساب، الأداة مبتطلبش منك اسم الحساب — بتجرّب بنفسها. زرار «تحقّق لايف» بيعمل تقرير مؤقت على أول عربية، يقرا صفوفه، ويمسحه بعد كده.",
+          "الرد الحقيقي بيتحط في الرسالة بعد ما يتشال منه التوكن والمعرّفات والـ IMEI واسم العربية — اقراه قبل ما تبعت زي أي رسالة.",
+          "أي كود العميل ذكره وهو مش في الكولكشن بيتشال من البودي وبيتقالك بالاسم — الأداة مبتبعتش حاجة مش متأكدة منها."
+        ],
+        "en": [
+          "The tab lives under Inspect a response. Paste the customer's whole email — prose, codes and numbered questions — and press Analyse.",
+          "The tool reads field codes from plain prose, not only from JSON, and matches them against the collection. Three or more matches settle the case without asking the customer for anything.",
+          "When it is settled you get a Nothing is missing panel and a reply that answers each question in turn with a full request body. When the message really is thin, it goes back to drafting a request for exactly what is missing.",
+          "While you are connected it never asks you for the account name — it runs the check itself. Verify live creates a temporary report on the first vehicle, reads its rows, then deletes it.",
+          "The real response goes into the reply once the token, ids, IMEI and vehicle name are stripped — read it before sending, as with any message.",
+          "Any code the customer named that is not in the collection is left out of the body and named for you — the tool sends nothing it cannot verify."
         ]
       }
     },
@@ -8287,56 +8336,182 @@ function analyzeCase(text){
   const qs     = askedQuestions(text);
   const paths  = mentionedPaths(text);
 
-  /* الحالة: بيشتكي إن الحقول من غير قيم */
-  const reportCase = defs.length > 0 &&
-    /value|values|actual|قيم|قيمة/i.test(words) &&
-    /report|تقرير/i.test(words);
+  /* أكواد الحقول اللي العميل كتبها بالكلام — «Route Length — code: route_length».
+     الاعتماد على بلوك JSON بس كان بيخلّي رسالة زي دي تعدّي من غير تشخيص، فيطلب
+     أدلة إحنا أصلاً قاريينها في نص الرسالة. */
+  const proseCodes = [...new Set(
+    [...String(text||'').matchAll(/\bcode\s*[:=]\s*([a-z][a-z0-9_]{2,40})/gi)]
+      .map(m => m[1].toLowerCase()))];
+  const known   = summaryFieldCodes();
+  const matched = proseCodes.filter(c => known.indexOf(c) >= 0);
 
-  return {isMsg, arabic, blocks: kinds, defs, wanted, errs, qs, paths, reportCase, words};
+  /* كود التقرير نفسه: «under summary_beta» أو أي اسم فيه summary */
+  let reportCode = '';
+  const um = /under\s+([a-z][a-z0-9_]{3,40})/i.exec(String(text||''));
+  if(um && /_/.test(um[1])) reportCode = um[1];
+  if(!reportCode){ const sm = /\b(summary[a-z0-9_]*)\b/i.exec(String(text||'')); if(sm) reportCode = sm[1]; }
+
+  const wantsValues = /value|values|actual|real data|records|قيم|قيمة|بيانات فعلية/i.test(words);
+
+  /* الحالة: بيشتكي إن الحقول من غير قيم — سواء بعت الرد JSON أو وصفه بالكلام */
+  const reportCase =
+    (defs.length > 0 && wantsValues && /report|تقرير/i.test(words)) ||
+    (matched.length >= 3 && wantsValues);
+
+  return {isMsg, arabic, blocks: kinds, defs, wanted, errs, qs, paths,
+          reportCase, words, proseCodes, matched, reportCode};
+}
+
+/* أعمدة تقرير الـ Summary زي ما هي في الكولكشن — مصدر واحد، من غير تخمين.
+   البودي ده اتعافى كامل في v6.29 بعد ما كان مقطوع. */
+let RPT_FIELDS = null;
+function summaryFields(){
+  if(RPT_FIELDS) return RPT_FIELDS;
+  let out = [];
+  const add = EPS.find(e => e.p === '/user_reports/add' && e.b);
+  if(add){
+    try{
+      const j  = JSON.parse(add.b);
+      const fs = deepFindNode(j, 'fields');
+      if(Array.isArray(fs)) out = fs.filter(f => f && f.code);
+    }catch(_){}
+  }
+  RPT_FIELDS = out;
+  return out;
+}
+function summaryFieldCodes(){ return summaryFields().map(f => String(f.code).toLowerCase()); }
+function summaryFieldMap(){
+  const m = {};
+  summaryFields().forEach(f => { m[String(f.code).toLowerCase()] = f; });
+  return m;
+}
+
+/* فترة قريبة جاهزة: آخر ٧ أيام — عشان التقرير التجريبي يلاقي داتا */
+function caseRange(){
+  const p = n => String(n).padStart(2,'0');
+  const f = d => `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  const to = new Date(), from = new Date(to.getTime() - 6*86400000);
+  return { from: f(from)+' 00:00:00', to: f(to)+' 23:59:59' };
+}
+
+/* بودي إنشاء التقرير — مبني من حقول العميل نفسها زي ما بعتها، مش من قالب عام */
+function caseSampleBody(a){
+  const map   = summaryFieldMap();
+  const codes = (a && a.matched && a.matched.length) ? a.matched : summaryFieldCodes().slice(0, 9);
+  const fields = codes.map((c, i) => {
+    const f = map[c] || {};
+    return { name: f.name || c, code: c, format: f.format || 'label', order: i,
+             selected:'', active:'', readonly:'', titles:'', aggregate:'None',
+             minWidth:100, maxWidth:100 };
+  });
+  const r = caseRange();
+  return { data: {
+    name: 'Summary — API check',
+    code: (a && a.reportCode) || 'summary',
+    fields,
+    resources: ['<UNIT_ID>'],
+    selected_resource_type: 'units',
+    date: { interval:'interval', from:r.from, to:r.to,
+            interval_count:1, interval_unit:'days', including_current:false },
+    timelimit: {}, trip_details:'1', without_chunks:false, color_ranges:[],
+    user_id: '<USER_ID>', lang: 'en'
+  }};
+}
+
+/* أي حاجة رايحة للعميل بتعدي من هنا: التوكن واسم الحساب والمعرّفات بتتشال */
+function caseRedact(txt, extra){
+  let out = String(txt || '');
+  try{
+    if(SESSION.token) out = out.split(SESSION.token).join('<TOKEN>');
+    if(SESSION.user)  out = out.split(SESSION.user).join('<ACCOUNT>');
+    if(SESSION.userId) out = out.split(SESSION.userId).join('<USER_ID>');
+  }catch(_){}
+  (extra || []).forEach(v => { if(v) out = out.split(String(v)).join('<VEHICLE>'); });
+  out = out.replace(/\b[0-9a-f]{24}\b/gi, '<ID>');
+  out = out.replace(/\b\d{15,17}\b/g, '<IMEI>');
+  return out;
+}
+
+function haveLiveSession(){ try{ return !!(SESSION && SESSION.token); }catch(_){ return false; } }
+
+/* نتيجة آخر تجربة لايف — مربوطة بنص الرسالة عشان ما تتسرّبش لرسالة تانية */
+let CASE_LIVE = null;
+function caseLiveFor(a){
+  return (CASE_LIVE && a && CASE_LIVE.for === a._raw) ? CASE_LIVE : null;
 }
 
 /* الرد الجاهز للعميل — بلغة رسالته */
 function caseReply(a){
   /* الدليل من الكولكشن: حقول العميل (route_length, engine_work, engine_idle,
-     move_duration, stop_duration) موجودة بالحرف في قالب code:"summary".
-     يعني هو شايف قالب تقرير الـ Summary — والقيم بتيجي من تشغيل التقرير
-     على نطاق زمني وعربيات، مش من نداء تاني على القالب. */
-  const dataEp = EPS.find(e => e.p === '/user_reports/data-summary' && sysOf(e) === 'avl');
-  const listEp = EPS.find(e => e.p === '/user_reports/lists' && sysOf(e) === 'avl');
-  if(a.reportCase){
-    const onCatalog = /\/reports\/(lists|view)/.test(String(a.words||'') + JSON.stringify(a.paths||[]));
-    return [
-      'Hello,',
-      '',
-      'Thank you for the detail — your reading of the response is correct, and the endpoint you named tells us exactly what is happening.',
-      '',
-      '1) ' + (onCatalog
-        ? 'The endpoint you are calling, /reports/lists, is the catalog of report types available in the platform. It returns each type and the definition of its columns — name, code, order, aggregation. summary_beta is one of those types. A catalog has no values by design; it is the menu, not the meal.'
-        : 'Yes. What you received is a report definition: the columns and how they aggregate, not the output of a run.'),
-      '',
-      '2) The values come from a different family of endpoints: /user_reports/… rather than /reports/… . The sequence is:',
-      '   a. Take the code you already have from the catalog — summary_beta.',
-      '   b. Create the report:  POST ' + (dataEp ? '/user_reports/add' : '/user_reports/add'),
-      '      In the body you send: code (summary_beta), fields (the columns you want from the catalog), resources (the vehicle ids), selected_resource_type ("units"), and date with from and to.',
-      '   c. The response returns the report id.',
-      '   d. Read the rows:  POST ' + (dataEp ? dataEp.p : '/user_reports/data-summary') + '  with that id in the body.',
-      '',
-      '3) Required parameters, to answer your question directly:',
-      '   - Vehicle ids in resources — not IMEIs. If you hold IMEIs, resolve them first with POST /units/lists and use the id of each unit.',
-      '   - A date range in date.from and date.to, in YYYY-MM-DD HH:MM:SS.',
-      '   - The report code from the catalog, and the fields you want from that type.',
-      '   - user_id: the account the report is filed under. The login response returns it.',
-      '',
-      '4) On the mapping: the run returns rows whose keys are the same field codes you already hold — date, route_length, engine_work, engine_idle, stop_duration and the rest. So the catalog gives you the columns and the labels, the run gives you the rows, and the code is what joins them. That is where your Date: 10-08-2026 and Route Length: 70 km will appear.',
-      '',
-      'So: keep /reports/lists for building the column headers and letting the user pick a report type, and add the create-then-read pair for the data itself.',
-      '',
-      'If you would like, send us the account you are testing with and we will run the full sequence on it and share the exact request and response.',
-      '',
-      'Best regards,'
-    ].join('\n');
+     move_duration, stop_duration) موجودة بالحرف في قالب الـ Summary.
+     يعني هو شايف تعريف التقرير — والقيم بتيجي من إنشاء التقرير وقراءته. */
+  if(!a.reportCase) return null;
+
+  const code    = a.reportCode || 'summary';
+  const onCat   = /\/reports\/(lists|view)/.test(String(a.words||'') + JSON.stringify(a.paths||[]));
+  const body    = caseSampleBody(a);
+  const bodyTxt = JSON.stringify(body, null, 2);
+  const live    = caseLiveFor(a);
+  const codes   = (a.matched && a.matched.length ? a.matched : summaryFieldCodes().slice(0,6));
+
+  const L = [
+    'Hello,',
+    '',
+    'Thank you for the detail — your reading of the response is correct, and the endpoint you named tells us exactly what is happening. Taking your four questions in order:',
+    '',
+    '1) Which endpoint returns the actual data for ' + code,
+    '   ' + (onCat
+      ? 'The endpoint you are calling, /reports/lists, is the catalog of report types available in the platform. It returns each type and the definition of its columns — name, code, order, aggregation. A catalog has no values by design; it is the menu, not the meal.'
+      : 'What you received is a report definition: the columns and how they aggregate, not the output of a run.'),
+    '   The values live in a different family — /user_reports/… rather than /reports/… — and they take two calls:',
+    '     a. POST /user_reports/add            → creates the report, returns the report id',
+    '     b. POST /user_reports/data-summary   → returns the rows for that id',
+    '   /user_reports/data and /user_reports/data-new return the same rows in fuller shapes, and /user_reports/export returns the same result as a file.',
+    '',
+    '2) The parameters required',
+    '   - code: the report code you already have from the catalog — ' + code + '.',
+    '   - fields: the columns you want, in the same shape the catalog gives them (name, code, format, order, aggregate).',
+    '   - resources: the vehicle ids — not IMEIs. If you hold IMEIs, resolve them first with POST /units/lists and take the id of each unit.',
+    '   - selected_resource_type: "units" (or "drivers" for the by-driver variants).',
+    '   - date: from and to as YYYY-MM-DD HH:MM:SS, together with interval, interval_count and interval_unit.',
+    '   - user_id: the account the report is filed under. The login response returns it in data.user.id.',
+    '',
+    '3) Is another call needed after /reports/lists',
+    '   Yes — the two above. /reports/lists on its own can never return values, however the parameters are varied.',
+    '',
+    '4) A sample request and response',
+    '',
+    '   Step 1 — create the report:',
+    '   POST https://api.afaqy.sa/user_reports/add?token=<YOUR_TOKEN>',
+    bodyTxt,
+    '',
+    '   The response carries the id of the report just created:',
+    '   { "data": { "id": "<REPORT_ID>" } }',
+    '',
+    '   Step 2 — read its rows:',
+    '   POST https://api.afaqy.sa/user_reports/data-summary?token=<YOUR_TOKEN>',
+    '   { "data": { "id": "<REPORT_ID>" } }',
+    ''
+  ];
+
+  if(live && live.sample){
+    L.push('   Response — this is a real run on a test account, with ids and names removed:');
+    L.push(live.sample);
+    L.push('');
+    L.push('   The keys are the same field codes you already hold — ' + codes.slice(0,5).join(', ') + ' — so that is where your Date and Route Length appear with their values.');
+  } else {
+    L.push('   The response carries one row per period with the values keyed by the same field codes you already hold:');
+    L.push('   ' + codes.slice(0,5).join(', ') + ' …');
+    L.push('   So the catalog gives you the column labels, the run gives you the rows, and the code is what joins them. That is where your Date: 10-08-2026 and Route Length: 70 km appear.');
   }
-  return null;
+
+  L.push('');
+  L.push('One note on housekeeping: every create call stores a report on the account. While you are testing, remove it afterwards with POST /user_reports/delete and the same id.');
+  L.push('');
+  L.push('So: keep /reports/lists for building the column headers and letting the user pick a report type, and add the create-then-read pair for the data itself.');
+  L.push('');
+  L.push('Best regards,');
+  return L.join('\n');
 }
 
 /* ============ دورة الدعم على مرحلتين ============
@@ -8347,6 +8522,9 @@ function caseReply(a){
 
 /* إيه الأدلة الناقصة في الرسالة دي؟ */
 function caseNeeds(a){
+  /* لو الحالة اتشخّصت من الرسالة نفسها، مفيش أدلة ناقصة — الإجابة كاملة تحت.
+     كان بيطلب بودي ورد وحساب وهو قارى التشخيص أصلاً. */
+  if(a && a.reportCase) return [];
   const w = String(a.words || '');
   const all = String(a.words || '') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
   const need = [];
@@ -8382,7 +8560,8 @@ function caseNeeds(a){
       why:{ar:'عشان نجرّب نفس الحالة على نفس العربية بدل حالة تانية.',
            en:'So we reproduce the same case on the same vehicle rather than a different one.'}});
 
-  if(!/account|username|user|حساب|مستخدم/i.test(w))
+  /* إحنا متصلين بحساب: الأداة تجرّب بنفسها بدل ما تطلب من العميل حساب */
+  if(!haveLiveSession() && !/account|username|user|حساب|مستخدم/i.test(w))
     need.push({k:'account',
       ttl:{ar:'اسم الحساب اللي بيجرّب بيه', en:'The account they are testing with'},
       why:{ar:'الصلاحيات والبيانات بتختلف من حساب لحساب — نفس الريكوست بيرد مختلف.',
@@ -8522,11 +8701,11 @@ const PATTERNS = [
     },
     ttl: {ar:'ده تعريف التقرير — مش نتيجته',
           en:'This is the report definition — not its result'},
-    why:{ar:'الحقول اللي في الرد بتوصف أعمدة التقرير (الاسم، الكود، الترتيب، طريقة التجميع) — دي إعدادات التقرير نفسه. النتايج بتتولّد من إندبوينت تاني خالص، على دومين التقارير مش دومين الـ API الأساسي.',
-          en:'The fields in this response describe the report columns — name, code, order, aggregation. That is the report configuration. The values are produced by a different endpoint entirely, on the reports domain rather than the main API.'},
-    next:{ar:'شغّل التقرير من <code>POST https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID</code> — الـ REPORT_ID هو <code>id</code> التقرير اللي جالك في الرد ده، والـ USER_ID هو المستخدم اللي هيتشغّل باسمه. الرد ساعتها بيرجع الصفوف بقيمها مربوطة بنفس الـ <code>code</code> بتاع كل حقل.',
-          en:'Run the report with <code>POST https://reports.afaqy-fleet.site/api/reports/generate/REPORT_ID/USER_ID</code> — REPORT_ID is the report <code>id</code> from this response, and USER_ID is the user it runs as. The result then carries the rows with values keyed by the same field <code>code</code>.'},
-    go: 'EXCE BETA REPORTS'
+    why:{ar:'الحقول اللي في الرد بتوصف أعمدة التقرير (الاسم، الكود، الترتيب، طريقة التجميع) — دي إعدادات التقرير نفسه مش نتيجته، فطبيعي ما فيهاش قيم.',
+          en:'The fields in this response describe the report columns — name, code, order, aggregation. That is the report configuration rather than its output, so it carries no values.'},
+    next:{ar:'اعمل التقرير من <code>POST /user_reports/add</code> بنفس الـ <code>code</code> وبالحقول والعربيات والفترة — الرد بيرجّع رقم التقرير. وبالرقم ده اقرا الصفوف من <code>POST /user_reports/data-summary</code>. وبعد التجربة امسحه بـ <code>POST /user_reports/delete</code>.',
+          en:'Create the report with <code>POST /user_reports/add</code> using the same <code>code</code>, the fields, the vehicles and the period — the response returns the report id. Read the rows with <code>POST /user_reports/data-summary</code> and that id, then clean up with <code>POST /user_reports/delete</code>.'},
+    go: 'Data Summary'
   },
   {
     k: 'list_meta_only',
@@ -8934,7 +9113,7 @@ function paintCase(){
     </div></div>
     <div id="caseOut"></div>`;
   $('caseGo').onclick = ()=>renderCase($('caseText').value);
-  $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; };
+  $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; CASE_LIVE = null; };
 }
 
 function renderCase(text){
@@ -8984,6 +9163,20 @@ function renderCase(text){
         padding:12px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left; margin-top:6px">${esc(ask)}</pre>
       <div class="row" style="margin-top:8px"><button class="btn sig" id="caseAskCopy">${t('انسخ رسالة الطلب','Copy the request message')}</button></div>
     </div></div>`);
+  } else if(a.reportCase){
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('مش ناقص حاجة','Nothing is missing')}</h3>
+      <div class="note sig">${t(
+        'الرسالة فيها اللي يكفي للحسم: المسار اللي ناداه، وأكواد الحقول اللي شافها. الرد الجاهز تحت بيجاوب أسئلته الأربعة بالبودي كامل — مش محتاج تطلب منه حاجة.',
+        'The message carries enough to settle it: the path they called and the field codes they saw. The reply below answers all four of their questions with the full body — there is nothing to ask them for.')}</div>
+      ${a.matched && a.matched.length ? `<div class="note" style="margin-top:8px">${t('أكواد اتطابقت مع الكولكشن','Field codes matched against the collection')}:
+        ${a.matched.slice(0,10).map(c=>`<code>${esc(c)}</code>`).join(' · ')}</div>` : ''}
+      ${(()=>{ const un=(a.proseCodes||[]).filter(c=>(a.matched||[]).indexOf(c)<0);
+        return un.length ? `<div class="note warn" style="margin-top:8px">${t(
+          'أكواد العميل دي مش في الكولكشن اللي عندنا، فما اتحطتش في البودي عشان ما نبعتش حاجة مش متأكدين منها',
+          'These codes the customer listed are not in our collection, so they were left out of the body rather than sent unverified')}:
+          ${un.slice(0,8).map(c=>`<code>${esc(c)}</code>`).join(' · ')}</div>` : ''; })()}
+    </div></div>`);
   }
 
   /* ٣) غلطة العميل فين */
@@ -9015,8 +9208,12 @@ function renderCase(text){
         ${t('الحقول اللي بعتها (route_length و engine_work و stop_duration…) موجودة بالحرف في قالب code:"summary" — فده تقرير الـ Summary مش غيره.',
             'The fields they sent — route_length, engine_work, stop_duration — appear verbatim in the template with code "summary", so this is the Summary report.')}</div>
       ${dataEp2 ? `<div class="row" style="margin-top:10px"><button class="btn ghost" data-goep="${dataEp2.i}">${t('افتح الريكوست ده','Open that request')}</button></div>` : ''}
-      <div class="note" style="margin-top:8px">${t('محتاج تأكيد قبل ما تبعت: بودي التنفيذ (نطاق التواريخ والعربيات) مش متسجّل في الكولكشن — اسأل تيم التقارير.',
-            'Confirm before sending: the execution body — date range and vehicles — is not recorded in the collection. Ask the reports team.')}</div>
+      <div class="note" style="margin-top:8px"><b>${t('السلسلة كاملة','The full sequence')}:</b>
+        <code>POST /user_reports/add</code> → ${t('بيرجّع رقم التقرير','returns the report id')} →
+        <code>POST /user_reports/data-summary</code> → ${t('بيرجّع الصفوف','returns the rows')} →
+        <code>POST /user_reports/delete</code> ${t('للتنضيف بعد التجربة','to clean up after testing')}.<br>
+        ${t('بودي التنفيذ متسجّل بالكامل في الكولكشن: الحقول والعربيات والفترة و user_id — والرد الجاهز تحت مبني منه بالحرف.',
+            'The execution body is recorded in full in the collection — fields, vehicles, period and user_id — and the reply below is built from it verbatim.')}</div>
     </div></div>`);
   } else {
     L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
@@ -9026,7 +9223,27 @@ function renderCase(text){
     </div></div>`);
   }
 
-  /* ٣) رد جاهز */
+  /* ٤ب) تحقق لايف — الأداة تجرّب بنفسها على الحساب المتصل */
+  if(a.reportCase){
+    const lv = caseLiveFor(a);
+    L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('تحقّق لايف على الحساب المتصل','Verify live on the connected account')}</h3>
+      ${haveLiveSession()
+        ? `<div class="note">${t(
+            'بتعمل تقرير مؤقت على أول عربية في الحساب بنفس أكواد العميل، بتقرا نتيجته، وبتمسحه بعد كده. الرد الحقيقي بيتحط في الرسالة تحت بعد ما يتشال منه التوكن والمعرّفات والأسماء.',
+            'It creates a temporary report on the first vehicle in the account using the customer own field codes, reads its rows, then deletes it. The real response goes into the reply below after the token, ids and names are stripped.')}</div>
+           <div class="row" style="margin-top:10px">
+             <button class="btn sig" id="caseLive">${lv ? t('جرّب تاني','Run again') : t('جرّب دلوقتي','Run it now')}</button>
+           </div>
+           <div id="caseLiveOut" style="margin-top:10px; font-size:12.5px">${
+             lv ? `<div class="note sig">${t('اتعمل — الرد الحقيقي متحط في الرسالة تحت.','Done — the real response is in the reply below.')}</div>` : ''}</div>`
+        : `<div class="note warn">${t(
+            'مش متصل بحساب. اتصل من الشريط فوق والأداة هتجيب رد حقيقي بدل المثال — الرد تحت شغّال من غيره بردو.',
+            'Not connected. Connect from the bar above and the tool will fetch a real response instead of the illustrative one — the reply below still works without it.')}</div>`}
+    </div></div>`);
+  }
+
+  /* ٥) رد جاهز */
   const reply = caseReply(a);
   if(reply){
     L.push(`<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
@@ -9047,6 +9264,77 @@ function renderCase(text){
   if(cp) cp.onclick = ()=>{ copy(reply); toast(t('الرد اتنسخ','Reply copied')); };
   const ak = $('caseAskCopy');
   if(ak) ak.onclick = ()=>{ copy(askReply(a, caseNeeds(a)) || '', t('رسالة الطلب اتنسخت','Request message copied')); };
+  const lvb = $('caseLive');
+  if(lvb) lvb.onclick = ()=>caseLiveRun(a, $('caseLiveOut'), lvb);
+}
+
+/* بيشغّل السلسلة الحقيقية على الحساب المتصل: عربية → إنشاء → قراءة → مسح.
+   المسح في finally عشان ما نسيبش تقرير تجريبي في حساب العميل لو حاجة وقعت. */
+async function caseLiveRun(a, box, btn){
+  if(!haveLiveSession()){ toast(t('اتصل بحساب الأول','Connect to an account first')); return; }
+  const lines = [];
+  const say = (txt, cls) => {
+    lines.push(`<div class="note ${cls||''}" style="margin-bottom:6px">${txt}</div>`);
+    if(box) box.innerHTML = lines.join('');
+  };
+  const old = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = t('بيجرّب…','Running…'); }
+  let reportId = '', unitName = '';
+  try{
+    say(t('١) بجيب عربية من الحساب…','1) Fetching a vehicle from the account…'));
+    const u = await apiFetch('/units/lists',
+      {data:{offset:0, limit:1, simplify:0, projection:['basic']}}, {timeout:60000});
+    if(!u.ok) throw new Error(diagnose(u.code, u.txt));
+    const unit = (deepItems(u.json).map(x=>x.raw))[0];
+    const unitId = unit && String(unit.id || unit._id || '');
+    unitName = (unit && String(unit.name || '')) || '';
+    if(!unitId) throw new Error(t('الحساب مفيهوش عربيات','the account has no vehicles'));
+    say(t('عربية اتاخدت ✓','A vehicle was picked ✓'), 'sig');
+
+    say(t('٢) بعمل تقرير مؤقت بنفس أكواد العميل…','2) Creating a temporary report with the customer field codes…'));
+    const body = caseSampleBody(a);
+    body.data.resources = [unitId];
+    body.data.user_id   = SESSION.userId || body.data.user_id;
+    body.data.name      = 'API Helper check ' + new Date().toISOString().slice(0,19).replace('T',' ');
+    const add = await apiFetch('/user_reports/add', body, {timeout:120000});
+    if(!add.ok) throw new Error(diagnose(add.code, add.txt));
+    reportId = String(deepFindKey(add.json,'id') || deepFindKey(add.json,'_id') || '');
+    if(!reportId) throw new Error(t('الرد ما رجّعش رقم تقرير','the response returned no report id'));
+    say(t('التقرير اتعمل ✓','The report was created ✓'), 'sig');
+
+    say(t('٣) بقرا صفوفه…','3) Reading its rows…'));
+    const rd = await apiFetch('/user_reports/data-summary', {data:{id:reportId}}, {timeout:120000});
+    if(!rd.ok) throw new Error(diagnose(rd.code, rd.txt));
+
+    let sample = caseRedact(rd.pretty || rd.txt || '', [unitName]);
+    if(sample.length > 1800) sample = sample.slice(0, 1800) + '\n   … (truncated)';
+    sample = sample.split('\n').map(l => '   ' + l).join('\n');
+    const rows = deepFindNode(rd.json, 'data');
+    const empty = !rows || (Array.isArray(rows) && !rows.length);
+
+    CASE_LIVE = { for: a._raw, sample, empty, at: new Date() };
+    say(empty
+      ? t('الرد رجع سليم بس من غير صفوف — العربية دي ساكتة في الفترة دي. الشكل نفسه صح.',
+          'The response came back valid but with no rows — this vehicle was idle over the period. The shape itself is correct.')
+      : t('الصفوف رجعت ✓ — اتحطت في الرد تحت بعد التعقيم.',
+          'The rows came back ✓ — they are in the reply below, sanitised.'), 'sig');
+  }catch(err){
+    say(t('ما قدرناش نكمّل: ','Could not finish: ') + esc(String(err && err.message || err).slice(0,160)) +
+        '<br>' + t('الرد الجاهز تحت شغّال من غير التجربة — بالمثال بدل الرد الحقيقي.',
+                   'The reply below still works without the run — with the illustrative response instead of a real one.'), 'warn');
+  }finally{
+    if(reportId){
+      try{
+        await apiFetch('/user_reports/delete', {data:{id:reportId}}, {timeout:60000});
+        say(t('٤) التقرير المؤقت اتمسح من حساب العميل ✓','4) The temporary report was deleted from the account ✓'), 'sig');
+      }catch(_){
+        say(t('تنبيه: التقرير المؤقت اتعمل وما اتمسحش — امسحه من /user_reports/delete.',
+              'Note: the temporary report was created but not deleted — remove it with /user_reports/delete.'), 'warn');
+      }
+    }
+    if(btn){ btn.disabled = false; btn.textContent = old; }
+    if(CASE_LIVE && CASE_LIVE.for === a._raw) renderCase(a._raw);
+  }
 }
 
 function paintInspect(){

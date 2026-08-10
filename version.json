@@ -1,16 +1,16 @@
 {
-  "version": "6.31",
-  "date": "2026-08-05",
+  "version": "6.32",
+  "date": "2026-08-10",
   "notes": {
     "ar": [
-      "دورة الدعم بقت على مرحلتين في تبويب «حلّل رسالة عميل»: أول ما توصلك شكوى ناقصة، الأداة تقولك ناقص إيه وتطلّع رسالة بتطلبه بالظبط",
-      "الطلب محدد مش تشيك ليست عامة: بتطلب اللي مش موجود في الرسالة بس — ومعاه سبب كل طلب، عشان العميل يفهم ليه محتاجينه ويبعته",
-      "ولما الأدلة توصل، الطلب بيقل لوحده: رسالة فيها الرابط والتاريخ والعربية والحساب مبقاش يتطلب منها غير الناقص"
+      "«حلّل رسالة عميل» بقى يجاوب بدل ما يسأل: لو الرسالة فيها اللي يكفي للحسم، الأداة تقولك الصح على طول وتطلّع رد جاهز تبعته من غير ما تطلب من العميل حاجة",
+      "بقى يقرا أكواد الحقول من كلام العميل مش من بلوكات الـ JSON بس — رسالة بتقول «Route Length — code: route_length» بقت تتشخّص، وقبل كده كانت بتعدّي وتطلب أدلة إحنا قاريينها",
+      "طلب الأدلة بقى واعي بالحالة: لو التشخيص محسوم مبيطلبش حاجة، ولو إنت متصل بحساب مبيطلبش منك اسم الحساب — بيجرّب بنفسه"
     ],
     "en": [
-      "The support cycle now has two stages in the Analyse a customer message tab: when a vague complaint arrives, the tool names what is missing and drafts a message asking for exactly that",
-      "The ask is specific rather than a generic checklist: it requests only what the message lacks, each with the reason it is needed, so the customer understands why and actually sends it",
-      "Once the evidence arrives the ask shrinks by itself: a message carrying the URL, the date, the vehicle and the account is no longer asked for those"
+      "Analyse a customer message now answers instead of asking: when the message carries enough to settle it, the tool states the correct call and drafts a reply you can send without going back to the customer",
+      "It reads field codes from the customer's prose, not only from JSON blocks — a message saying \"Route Length — code: route_length\" is now diagnosed, where before it passed through and asked for evidence already in front of us",
+      "The evidence request is now aware of the diagnosis: it asks for nothing once the case is settled, and never asks you for the account name while you are connected — it runs the check itself"
     ]
   }
 }
