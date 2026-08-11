@@ -1,16 +1,16 @@
 {
-  "version": "6.37",
+  "version": "6.38",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "التشخيص بقى جدول أنماط بدل حالة واحدة. كانت الأداة فيها حالة متشخّصة واحدة (التقارير) مربوطة في ثمن مواضع بـ if، وأي رسالة تانية بتروح على «ناقص أدلة».",
-      "ست قواعد دلوقتي: كتالوج مكان تنفيذ، قرا قبل ما التوليد يخلص، IMEI مكان رقم العربية، ناقص خطوة قبله، ٢٠٠ وجواه خطأ، وفاضي مش عطلان. وحالة التقارير بقت القاعدة الأولى في الجدول مش الأساس.",
-      "كل قاعدة بتقرا دليلها من الرسالة وبتعرضه للموظف — عشان يشوف الأداة اتكلت على إيه ويقدر يكذّبها بدل ما ياخد الحكم على عماه."
+      "بودي أي ريكوست بقى يتعدّل قبل التنفيذ: افتح «عدّل البودي قبل ما تنفّذ» تحت المثال، غيّر الـ limit أو الـ projection أو أي حاجة، ودوس طبّق.",
+      "اللي في الصندوق هو اللي بيتبعت فعلًا — وهو نفسه اللي بيظهر في المثال (cURL وJavaScript وPython) وفي الرد الكامل للعميل. مستحيل يختلفوا.",
+      "JSON غلط ما بيتطبقش، والأداة بتقول غلط فين. وزرار «رجّع الأصلي» بيرجّع بودي القاعدة."
     ],
     "en": [
-      "Diagnosis is now a table of patterns rather than one case. The tool had a single diagnosed case (reports) wired through eight if branches, and every other message fell through to asking for evidence.",
-      "Six rules now: a catalog where execution was needed, reading before generation finished, an IMEI where a unit id belongs, a missing prerequisite step, a 200 carrying an error, and empty rather than broken. The report case is the first rule in the table rather than the foundation.",
-      "Each rule reads its evidence from the message and shows it, so the engineer can see what the tool relied on and contradict it rather than accepting a verdict blindly."
+      "Any request body can now be edited before running: open Edit the body before running under the example, change the limit or the projection or anything else, and press Apply.",
+      "What sits in the box is what actually gets sent, and it is the same body that appears in the example (cURL, JavaScript, Python) and in the full customer reply. The three cannot disagree.",
+      "Invalid JSON is not applied and the tool says where it broke. A Reset to original control restores the body from the knowledge base."
     ]
   }
 }

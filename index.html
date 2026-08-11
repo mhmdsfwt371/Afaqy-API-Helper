@@ -195,6 +195,15 @@ body.en .conn input.bidi{direction:ltr; text-align:left; font-family:var(--mono)
   white-space:pre; margin:0; overflow-x:auto; overflow-y:visible
 }
 /* الطويل بيتقفل بتدريج بدل سكرول جوه سكرول */
+.bodyEdit{border:1px solid var(--line); border-radius:var(--r); background:var(--panel);
+  margin-top:10px; overflow:hidden}
+.bodyEdit>summary{cursor:pointer; padding:10px 14px; font-weight:600; font-size:13.5px;
+  color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.bodyEdit>summary::-webkit-details-marker{display:none}
+.bodyEdit>summary::before{content:'\25B8'; color:var(--muted); font-size:11px; transition:transform .15s}
+.bodyEdit[open]>summary::before{transform:rotate(90deg)}
+.bodyEdit>summary:hover{background:var(--panel-2)}
+.bodyEdit>summary .cnt{color:var(--muted); font-weight:400; font-size:12.5px}
 .caseMore{border:1px solid var(--line); border-radius:var(--r); background:var(--panel);
   margin-top:12px; overflow:hidden}
 .caseMore>summary{cursor:pointer; padding:12px 16px; font-weight:600; font-size:14px;
@@ -744,9 +753,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.37",
+  "version": "6.38",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.38",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "بودي أي ريكوست بقى يتعدّل قبل التنفيذ: افتح «عدّل البودي قبل ما تنفّذ» تحت المثال، غيّر الـ limit أو الـ projection أو أي حاجة، ودوس طبّق.",
+          "اللي في الصندوق هو اللي بيتبعت فعلًا — وهو نفسه اللي بيظهر في المثال (cURL وJavaScript وPython) وفي الرد الكامل للعميل. مستحيل يختلفوا.",
+          "JSON غلط ما بيتطبقش، والأداة بتقول غلط فين. وزرار «رجّع الأصلي» بيرجّع بودي القاعدة.",
+          "كارت العربية كان بيقول «أوفلاين» لما last_update مش راجع أصلًا في الـ projection — وده ادعاء مش صحيح، الجهاز ممكن يكون شغّال. بقى بيقول «آخر إشارة مش راجعة» ويوجّهك تحطها في الـ projection.",
+          "ونفس الحاجة للحساسات: بدل ما تختفي من الكارت من غير سبب، بقى مكتوب إنها مش في الرد ومكتوب تحطها إزاي — ولو رجعت فاضية بعد كده يبقى الجهاز فعلًا مالوش حساسات."
+        ],
+        "en": [
+          "Any request body can now be edited before running: open Edit the body before running under the example, change the limit or the projection or anything else, and press Apply.",
+          "What sits in the box is what actually gets sent, and it is the same body that appears in the example (cURL, JavaScript, Python) and in the full customer reply. The three cannot disagree.",
+          "Invalid JSON is not applied and the tool says where it broke. A Reset to original control restores the body from the knowledge base.",
+          "The vehicle card used to say Offline when last_update was simply not in the projection — an untrue claim, since the device may well be reporting. It now says the last signal was not returned and points you at the projection.",
+          "The same for sensors: instead of vanishing from the card without explanation, the card states they are not in the response and how to ask for them — and if they still come back empty the device genuinely has none."
+        ]
+      }
+    },
     {
       "v": "6.37",
       "date": "2026-08-10",
@@ -2759,6 +2788,31 @@ const DOCS = {
       }
     },
     {
+      "since": "6.38",
+      "t": {
+        "ar": "عدّل البودي قبل ما تنفّذ",
+        "en": "Edit the body before running"
+      },
+      "b": {
+        "ar": [
+          "تحت «مثال جاهز» في شاشة أي إندبوينت في سطر «عدّل البودي قبل ما تنفّذ». افتحه وهتلاقي البودي كامل في صندوق يتكتب فيه.",
+          "غيّر اللي إنت عايزه — الـ limit، الـ offset، الحقول اللي في الـ projection، أي حاجة — ودوس «طبّق».",
+          "بعد ما تطبّق، المثال بأنواعه التلاتة والرد الكامل للعميل و«جرّب مرة واحدة» كلهم بيمشوا على البودي الجديد. اللي بتشوفه هو اللي بيتبعت.",
+          "لو الـ JSON فيه غلطة، الأداة بترفض تطبّق وبتقول الغلطة فين بدل ما تبعت حاجة مكسورة.",
+          "«رجّع الأصلي» بيرجّع البودي زي ما هو في قاعدة المعرفة. والتعديل بيروح لما تقفل الصفحة — مش بيتخزّن على الجهاز.",
+          "مثال عملي: عايز تشوف آخر إشارة وقراءات الحساسات في كروت العربيات؟ اتأكد إن last_update و sensors موجودين في الـ projection. لو مش موجودين، الكارت هيقولك إنهم مش في الرد بدل ما يسيبك تخمّن."
+        ],
+        "en": [
+          "Under Ready example on any endpoint screen there is a row labelled Edit the body before running. Open it and the full body appears in an editable box.",
+          "Change whatever you need — the limit, the offset, the fields in the projection, anything — then press Apply.",
+          "After applying, all three example formats, the full customer reply and Run once all use the new body. What you see is what gets sent.",
+          "If the JSON has a mistake the tool refuses to apply it and says where it broke, rather than sending something malformed.",
+          "Reset to original restores the body exactly as the knowledge base holds it. The edit disappears when you close the page — nothing is stored on the device.",
+          "A practical example: want the last signal and sensor readings in the vehicle cards? Make sure last_update and sensors are in the projection. If they are missing, the card now says so instead of leaving you to guess."
+        ]
+      }
+    },
+    {
       "since": "6.35",
       "t": {
         "ar": "كولكشن Postman من الأداة — تبعته للعميل على طول",
@@ -3716,9 +3770,21 @@ function fullUrl(e, real){
 }
 function bodyOf(e){ return prepBody(e).text; }
 
+/* البودي المعدّل لكل إندبوينت. المفتاح هو المسار، فالتعديل بيفضل
+   لو رحت لإندبوينت تاني ورجعت — ومش بيتخزّن على الجهاز، بيروح مع الصفحة. */
+const BODY_EDIT = {};
+
+/* البودي اللي المفروض يتبعت: المعدّل لو موجود، وإلا اللي من القاعدة */
+function bodyOf2(e){
+  const k = String(e && e.p || '');
+  if(BODY_EDIT[k] !== undefined) return BODY_EDIT[k];
+  return bodyOf(e);
+}
+
+
 /* ---------------- code generators ---------------- */
 function gen(e, mode){
-  const url = fullUrl(e,false), b = bodyOf(e), m = e.m || 'POST';
+  const url = fullUrl(e,false), b = bodyOf2(e), m = e.m || 'POST';
   const hasBody = b && m !== 'GET';
   if(mode==='curl'){
     let s = `curl -X ${m} "${url}" \\\n  -H "Content-Type: application/json"`;
@@ -3788,7 +3854,7 @@ function rememberRun(e, sentBody, resp){
 }
 function packetFor(e){
   if(LAST_RUN && LAST_RUN.i === e.i) return {text: customerPacket(e, LAST_RUN.body, LAST_RUN.resp), live:true};
-  return {text: customerPacket(e, bodyOf(e), {code:'—', json:null, pretty:''}), live:false};
+  return {text: customerPacket(e, bodyOf2(e), {code:'—', json:null, pretty:''}), live:false};
 }
 
 function customerPacket(e, sentBody, resp){
@@ -3917,7 +3983,7 @@ function _renderDetail(e, why){
   const isLogin = NO_RETRY.test(e.p||'');
   const KIND = epKind(e);
   const noFix = isLogin || KIND !== 'read' || DESTRUCTIVE.test(e.n) || DESTRUCTIVE.test(e.p);
-  const b = bodyOf(e);
+  const b = bodyOf2(e);
   $('detail').innerHTML = `
   <div class="panel">
     <div class="p-head">
@@ -4005,6 +4071,26 @@ function _renderDetail(e, why){
         ${['curl','js','python'].map(m=>`<button class="ct" data-m="${m}" aria-selected="${codeMode===m}">${m==='js'?'JavaScript':m==='python'?'Python':'cURL'}</button>`).join('')}
       </div>
       <pre class="pre" id="codeout">${esc(gen(e, codeMode))}</pre>
+      ${(e.m||'POST')!=='GET' && bodyOf(e) ? `
+      <details class="bodyEdit" id="bodyEditBox" ${BODY_EDIT[e.p]!==undefined?'open':''}>
+        <summary>${t('عدّل البودي قبل ما تنفّذ','Edit the body before running')}
+          <span class="cnt">— ${t('limit، projection، أي حاجة','limit, projection, anything')}</span>
+          ${BODY_EDIT[e.p]!==undefined?`<span class="chip sig" style="pointer-events:none; margin-inline-start:8px">${t('معدّل','edited')}</span>`:''}</summary>
+        <div style="padding:12px 14px">
+          <textarea id="bodyBox" spellcheck="false" style="width:100%; min-height:190px; resize:vertical;
+            font-family:var(--mono); font-size:12.5px; line-height:1.7; direction:ltr; text-align:left;
+            background:var(--panel-2); color:var(--ink); border:1px solid var(--field-line, var(--line));
+            border-radius:3px; padding:10px">${esc(bodyOf2(e))}</textarea>
+          <div class="row" style="margin-top:8px">
+            <button class="btn sig" id="bodyApply">${t('طبّق','Apply')}</button>
+            <button class="btn ghost" id="bodyReset">${t('رجّع الأصلي','Reset to original')}</button>
+            <span id="bodyMsg" style="font-size:12.5px; color:var(--muted); align-self:center"></span>
+          </div>
+          <div class="note" style="margin-top:8px">${t(
+            'اللي في الصندوق ده هو اللي بيتبعت فعلًا، وهو اللي بيظهر في المثال وفي الرد الكامل للعميل. لو JSON غلط الأداة هتقولك ومش هتطبّق.',
+            'What sits in this box is what actually gets sent, and it is what appears in the example and in the full customer reply. If the JSON is invalid the tool says so and applies nothing.')}</div>
+        </div>
+      </details>` : ''}
       <div class="row">
         <button class="btn sig" id="cpCode">${t('نسخ المثال','Copy example')}</button>
         <button class="btn ghost" id="cpReply">${t('نسخ رد كامل للعميل','Copy full reply for the customer')}</button>
@@ -4079,6 +4165,24 @@ function _renderDetail(e, why){
     renderDetail(e, []);
     toast(t('اترجّع للأصل','Reset to the original'));
   };
+  const bBox = $('bodyBox'), bMsg = $('bodyMsg');
+  if(bBox){
+    const say = (txt, bad) => { if(bMsg){ bMsg.textContent = txt; bMsg.style.color = bad ? 'var(--alert)' : 'var(--ok)'; } };
+    $('bodyApply').onclick = ()=>{
+      const v = bBox.value;
+      try{ JSON.parse(v); }
+      catch(err){ say(t('JSON مش سليم: ','Invalid JSON: ') + String(err.message).slice(0,70), true); return; }
+      BODY_EDIT[e.p] = v;
+      say(t('اتطبّق — المثال والتنفيذ بقوا على البودي ده','Applied — the example and the run now use this body'));
+      const co = $('codeout'); if(co) co.textContent = gen(e, codeMode);
+    };
+    $('bodyReset').onclick = ()=>{
+      delete BODY_EDIT[e.p];
+      bBox.value = bodyOf(e);
+      say(t('رجع للأصلي','Back to the original'));
+      const co = $('codeout'); if(co) co.textContent = gen(e, codeMode);
+    };
+  }
   $('tryIt').onclick = ()=>{ if(ensureDeps(e, ()=>tryIt(e))) tryIt(e); };
   if(!noFix) $('tryFix').onclick = ()=>{ if(ensureDeps(e, ()=>labRunLadder(e))) labRunLadder(e); };
 }
@@ -4140,7 +4244,7 @@ function echoReq(method, url, headers, bodyStr){
 function liveBody(e){
   /* النطاق بقى بيتحط جوه prepBody عشان المعروض = المتبعت، فمفيش داعي
      نحطه تاني هنا — كان هيتكتب مرتين. */
-  const raw = bodyOf(e);
+  const raw = bodyOf2(e);
   if(!NO_RETRY.test(e.p||'') || !SESSION.user) return raw;
   try{
     const o = JSON.parse(raw);
@@ -6783,7 +6887,7 @@ function labVariants(e, override){
   const out=[], base=baseUrl();
   const url = base + e.p + (e.t ? '?token=' + encodeURIComponent(SESSION.token||'') : '');
   let obj=override||null;
-  if(!obj){ try{ const t2=bodyOf(e); obj = t2 ? JSON.parse(t2) : null; }catch(_){ obj=null; } }
+  if(!obj){ try{ const t2=bodyOf2(e); obj = t2 ? JSON.parse(t2) : null; }catch(_){ obj=null; } }
   const H={'Content-Type':'application/json','Accept':'application/json'};
   const ov = OVERRIDES[e.i];
   if(ov){
@@ -9545,6 +9649,7 @@ function userCard(u){
   const seen = unitLastSeen(u);
   const hrs  = hoursSince(seen);
   const online = hrs !== null && hrs <= 1;
+  const seenUnknown = hrs === null;      /* الحقل مش راجع — مش معناه الجهاز أوفلاين */
   const speed  = pos.speed!==undefined ? Number(pos.speed) : (u.speed!==undefined?Number(u.speed):null);
   const eng    = engineOn(u);
   const eh     = cnt.engine_hours!==undefined ? Number(cnt.engine_hours) : null;
@@ -9559,6 +9664,10 @@ function userCard(u){
   const grp = (Array.isArray(u.groups)?u.groups:[]).map(g=>typeof g==='string'?g:(g&&(g.name||g.title))||'').filter(Boolean);
   if(grp.length) add(t('المجموعات','Groups'), grp.slice(0,4).join('، ') + (grp.length>4?` +${grp.length-4}`:''));
   const luRaw = lu.time || lu.datetime || u.last_time || '';
+  if(!luRaw && !seen)
+    add(t('آخر إشارة','Last signal'), t('مش في الرد','not in the response'),
+        t('حط last_update في الـ projection عشان تشوفها — من غيرها مينفعش نحكم أونلاين ولا أوفلاين',
+          'add last_update to the projection to see it — without it online/offline cannot be judged'));
   if(luRaw || seen) add(t('آخر تحديث','Last update'), luRaw,
                (seen ? timeAgo(seen) + ' — ' : '') + t('آخر إشارة من الجهاز، ومنها بيتحسب أونلاين/أوفلاين','the last signal from the device — online/offline is computed from it'));
   if(speed!==null && isFinite(speed))
@@ -9576,7 +9685,12 @@ function userCard(u){
     add(t('اتضافت على الحساب','Added to the account'), String(cAt),
         isFinite(cd.getTime()) ? timeAgo(cd) : '');
   }
-  sensorsOf(u).slice(0,6).forEach(s2=>add(String(s2.name), String(s2.value)));
+  const sns = sensorsOf(u);
+  if(sns.length) sns.slice(0,8).forEach(s2=>add(String(s2.name), String(s2.value),
+        t('قراءة حساس','sensor reading')));
+  else add(t('الحساسات','Sensors'), t('مش في الرد','not in the response'),
+        t('حط sensors في الـ projection — ولو حطيتها ورجعت فاضية يبقى الجهاز فعلًا مالوش حساسات',
+          'add sensors to the projection — and if it still comes back empty the device genuinely has none'));
 
   const badge = (txt, tone) => `<span style="display:inline-block; padding:2px 9px; border-radius:3px;
       font-size:11.5px; font-weight:600; background:${tone.bg}; color:${tone.fg}">${esc(txt)}</span>`;
@@ -9587,7 +9701,9 @@ function userCard(u){
     <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap">
       <b style="font-size:15.5px; font-family:var(--ar)">${esc(u.name || u.title || t('بدون اسم','Unnamed'))}</b>
       <span style="display:flex; gap:6px">
-        ${badge(online ? t('أونلاين','Online') : t('أوفلاين','Offline'), online?OK:BAD)}
+        ${badge(seenUnknown ? t('آخر إشارة مش راجعة','Last signal not returned')
+                             : online ? t('أونلاين','Online') : t('أوفلاين','Offline'),
+                seenUnknown ? GREY : online ? OK : BAD)}
         ${speed!==null && isFinite(speed) ? badge(speed>0 ? t('بتتحرك','Moving') : t('واقفة','Stopped'), speed>0?MID:GREY) : ''}
       </span>
     </div>
