@@ -753,9 +753,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.38",
+  "version": "6.39",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.39",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "إندبوينتس التقارير بقت تسأل عن اسم التقرير زي ما بتسأل عن اسم العربية. كانت بتتنفّذ برقم التقرير اللي في المثال — رقم من حساب تاني — فترجّع «مش موجود في الحساب ده» والموظف يفتكر إن في عطل.",
+          "دلوقتي أول ما تدوس «جرّب» على data أو data-summary أو data-new أو export أو delete، الأداة بتسألك اسم التقرير، تجيبه من /user_reports/lists بتاع الحساب المتصل، وتحط رقمه في الريكوست.",
+          "و/user_reports/add بقى يسألك على العربيات قبل ما ينفّذ: الصق الـ IMEIs والأداة تجيب أرقامها وتحطها في التقرير. سيبها فاضية والتقرير على الحساب كله.",
+          "اللستة والإنشاء مستثنيين من سؤال رقم التقرير — اللستة هي اللي بتجيبه، والإنشاء هو اللي بيعمله."
+        ],
+        "en": [
+          "Report endpoints now ask for the report name the way they already ask for a vehicle name. They used to run with the report id from the example — an id belonging to another account — and return not-found on this account, which reads as a fault.",
+          "Pressing Run on data, data-summary, data-new, export or delete now asks for the report name, fetches it from /user_reports/lists on the connected account, and puts its id into the request.",
+          "And /user_reports/add now asks which vehicles before it runs: paste the IMEIs and the tool resolves them to ids and inserts them. Leave it empty and the report covers the whole account.",
+          "The listing and the create call are exempt from the report-id question — the listing is what provides it and the create call is what produces it."
+        ]
+      }
+    },
     {
       "v": "6.38",
       "date": "2026-08-10",
@@ -2809,6 +2827,33 @@ const DOCS = {
           "If the JSON has a mistake the tool refuses to apply it and says where it broke, rather than sending something malformed.",
           "Reset to original restores the body exactly as the knowledge base holds it. The edit disappears when you close the page — nothing is stored on the device.",
           "A practical example: want the last signal and sensor readings in the vehicle cards? Make sure last_update and sensors are in the projection. If they are missing, the card now says so instead of leaving you to guess."
+        ]
+      }
+    },
+    {
+      "since": "6.39",
+      "t": {
+        "ar": "التقارير: بالاسم مش بالرقم",
+        "en": "Reports: by name, not by id"
+      },
+      "b": {
+        "ar": [
+          "الأرقام اللي في الأمثلة بتاعة حسابات تانية. لو نفّذت بيها على حساب عميل هترجّع «مش موجود» — والرد ده صحيح، مش عطل.",
+          "دوس «جرّب مرة واحدة» على /user_reports/data أو data-summary أو data-new أو export أو delete: الأداة هتسألك اسم التقرير.",
+          "اكتب الاسم زي ما هو في شاشة التقارير ودوس «اجيبهولك أنا». الأداة بتنادي /user_reports/lists على الحساب المتصل، تلاقي التقرير، وتحط رقمه في الريكوست.",
+          "أو دوس «وريني الخطوات» لو عايز تجيبه بنفسك أو تشرح الطريقة لعميل.",
+          "ولإنشاء تقرير: /user_reports/add بقى يسألك على العربيات قبل التنفيذ. الصق الـ IMEIs — واحد في كل سطر — والأداة تجيب أرقامها وتحطها في حقل العربيات.",
+          "سيبت الصندوق فاضي؟ التقرير هيتعمل على كل عربيات الحساب. ده اختيار مقصود مش نسيان.",
+          "الـ IMEI اللي مش لاقيه في الحساب الأداة بتقولك عليه بالاسم بدل ما تسيبه يقع بهدوء."
+        ],
+        "en": [
+          "The ids in the examples belong to other accounts. Running them against a customer account returns not-found — and that response is correct, not a fault.",
+          "Press Run once on /user_reports/data, data-summary, data-new, export or delete and the tool asks for the report name.",
+          "Type the name as it appears on the reports screen and press Fetch it for me. The tool calls /user_reports/lists on the connected account, finds the report and puts its id into the request.",
+          "Or press Show me the steps if you would rather fetch it yourself or explain the method to a customer.",
+          "To create a report, /user_reports/add now asks which vehicles before running. Paste the IMEIs, one per line, and the tool resolves them to ids and fills the vehicles field.",
+          "Left the box empty? The report covers every vehicle on the account. That is a deliberate choice rather than an oversight.",
+          "Any IMEI that is not on the account is named back to you rather than being dropped quietly."
         ]
       }
     },
@@ -6307,6 +6352,14 @@ function depSteps(r){
 /* بيرجع true لو كل حاجة جاهزة، وبيفتح النافذة لو ناقص حاجة */
 function ensureDeps(e, cont){
   const missing = missingDeps(e);
+  /* إنشاء التقرير مالوش متطلب ناقص بالمعنى الحرفي — البودي كامل.
+     بس من غير عربيات هيتعمل على الحساب كله، والموظف غالبًا عايز
+     عربيات معيّنة ومعاه IMEIs. فبنفتحله الصندوق مرة قبل التنفيذ. */
+  if(!missing.length && isReportMakeEp(e) && RSCOPE.mode !== 'imeis' && RSCOPE.mode !== 'allExplicit'){
+    if(!SESSION.token){ toast(t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first')); return false; }
+    openDepsModal(e, [], cont);
+    return false;
+  }
   if(!missing.length) return true;
   if(!SESSION.token){ toast(t('اتصل بحساب العميل من فوق الأول','Connect to the customer account first')); return false; }
   openDepsModal(e, missing, cont);
@@ -6315,12 +6368,17 @@ function ensureDeps(e, cont){
 
 function openDepsModal(e, missing, cont){
   const en = LANG==='en';
-  $('mtitle').textContent = t('الريكوست ده محتاج حاجة قبله','This request needs something first');
+  $('mtitle').textContent = missing.length
+    ? t('الريكوست ده محتاج حاجة قبله','This request needs something first')
+    : t('على أنهي عربيات؟','Which vehicles?');
   $('mbody').innerHTML = `
     <div class="note warn" style="margin-bottom:12px">
       <b>${esc(e.m+' '+e.p)}</b><br>
-      ${t('السيستم بيشتغل بالأرقام، وانت شغال بالأسماء. اكتب الاسم وأنا أجيب الرقم — أو خدلك الخطوات وروح جيبه بنفسك.',
-          'The platform works with ids and you work with names. Type the name and I will fetch the id — or take the steps and fetch it yourself.')}
+      ${missing.length
+        ? t('السيستم بيشتغل بالأرقام، وانت شغال بالأسماء. اكتب الاسم وأنا أجيب الرقم — أو خدلك الخطوات وروح جيبه بنفسك.',
+            'The platform works with ids and you work with names. Type the name and I will fetch the id — or take the steps and fetch it yourself.')
+        : t('البودي كامل. الحاجة الوحيدة الناقصة هي العربيات: الصق الـ IMEIs تحت وأنا أجيب أرقامها وأحطها، أو سيبها فاضية والتقرير هيتعمل على الحساب كله.',
+            'The body is complete. The only open question is the vehicles: paste the IMEIs below and the tool fetches their ids and inserts them, or leave it empty and the report covers the whole account.')}
     </div>
     ${missing.map((r,n)=>`
       <div class="panel" style="margin-bottom:10px" data-dep="${n}">
@@ -6337,7 +6395,7 @@ function openDepsModal(e, missing, cont){
           <div id="depOut_${n}"></div>
         </div>
       </div>`).join('')}
-    ${isReportEp(e) ? `
+    ${wantsImeis(e) ? `
       <div class="panel" style="margin-bottom:10px"><div class="sec" style="border-top:0">
         <h3 style="font-family:var(--ar); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink)">
           ${t('العربيات (اختياري)','Vehicles (optional)')}</h3>
@@ -6566,7 +6624,7 @@ function prepBody(e){
   }
   /* نطاق التقرير جزء من الريكوست الفعلي، فلازم يبان في البودي المعروض:
      اللي الموظف شايفه هو اللي هيتبعت لما يدوس جرّب. */
-  if(isReportEp(e) && (RSCOPE.mode === 'imeis' || RSCOPE.mode === 'allExplicit') && RSCOPE.uids.length){
+  if(wantsImeis(e) && (RSCOPE.mode === 'imeis' || RSCOPE.mode === 'allExplicit') && RSCOPE.uids.length){
     next.data = next.data || {};
     next.data.units = RSCOPE.uids.slice();
     changes.push(RSCOPE.mode === 'allExplicit'
@@ -6598,6 +6656,14 @@ const RESOLVERS = [
    list:{path:'/units/lists', body:{data:{offset:0,limit:1000,simplify:0,projection:['basic']}}},
    note:{ar:'العميل بيبعت IMEI، والسيستم عايز UID. إحنا بنحوّل.',
          en:'Customers send an IMEI; the platform wants a UID. We convert.'} },
+ /* التقارير: الموظف شايف اسم في شاشة التقارير، والريكوست عايز رقم.
+    نفس مشكلة العربيات بالظبط — وكانت مش متغطية. */
+ { key:'report', fields:['report_id'], path:/^\/user_reports\/(?!lists|add)/i,
+   label:{ar:'التقرير', en:'report'},
+   ask:{ar:'اسم التقرير زي ما هو في شاشة التقارير', en:'The report name as it appears on the reports screen'},
+   list:{path:'/user_reports/lists', body:{data:{limit:1000}}},
+   note:{ar:'الرقم اللي في المثال بتاع حساب تاني — لو نفّذت بيه هيرجّع «مش موجود». اكتب اسم التقرير وأنا أجيب رقمه من الحساب المتصل.',
+         en:'The id in the example belongs to another account — running with it returns not-found. Type the report name and the tool fetches its id from the connected account.'} },
  { key:'event', fields:['event_id'], path:/^\/events\//i,
    label:{ar:'الحدث', en:'event'},
    ask:{ar:'اسم الحدث زي ما هو في النظام', en:'Event name as stored in the system'},
@@ -6957,6 +7023,10 @@ async function ladderCore(e, override, onStep){
 const RSCOPE = { mode:'all', imeis:[], uids:[], names:[], missing:[] };
 
 function isReportEp(e){ return /^\/user_reports\/(data|data-summary|data-new)$/.test(e && e.p || ''); }
+/* إنشاء تقرير: مالوش رقم يتسأل عنه، بس محتاج عربيات — والموظف
+   معاه IMEIs مش أرقام. فبنفتحله نفس الصندوق. */
+function isReportMakeEp(e){ return /^\/user_reports\/add$/.test(e && e.p || ''); }
+function wantsImeis(e){ return isReportEp(e) || isReportMakeEp(e); }
 
 /* بيحوّل لستة IMEIs لـ UIDs من لستة عربيات الحساب */
 async function resolveImeis(text){

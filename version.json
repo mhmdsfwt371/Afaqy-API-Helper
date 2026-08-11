@@ -1,16 +1,16 @@
 {
-  "version": "6.38",
+  "version": "6.39",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "بودي أي ريكوست بقى يتعدّل قبل التنفيذ: افتح «عدّل البودي قبل ما تنفّذ» تحت المثال، غيّر الـ limit أو الـ projection أو أي حاجة، ودوس طبّق.",
-      "اللي في الصندوق هو اللي بيتبعت فعلًا — وهو نفسه اللي بيظهر في المثال (cURL وJavaScript وPython) وفي الرد الكامل للعميل. مستحيل يختلفوا.",
-      "JSON غلط ما بيتطبقش، والأداة بتقول غلط فين. وزرار «رجّع الأصلي» بيرجّع بودي القاعدة."
+      "إندبوينتس التقارير بقت تسأل عن اسم التقرير زي ما بتسأل عن اسم العربية. كانت بتتنفّذ برقم التقرير اللي في المثال — رقم من حساب تاني — فترجّع «مش موجود في الحساب ده» والموظف يفتكر إن في عطل.",
+      "دلوقتي أول ما تدوس «جرّب» على data أو data-summary أو data-new أو export أو delete، الأداة بتسألك اسم التقرير، تجيبه من /user_reports/lists بتاع الحساب المتصل، وتحط رقمه في الريكوست.",
+      "و/user_reports/add بقى يسألك على العربيات قبل ما ينفّذ: الصق الـ IMEIs والأداة تجيب أرقامها وتحطها في التقرير. سيبها فاضية والتقرير على الحساب كله."
     ],
     "en": [
-      "Any request body can now be edited before running: open Edit the body before running under the example, change the limit or the projection or anything else, and press Apply.",
-      "What sits in the box is what actually gets sent, and it is the same body that appears in the example (cURL, JavaScript, Python) and in the full customer reply. The three cannot disagree.",
-      "Invalid JSON is not applied and the tool says where it broke. A Reset to original control restores the body from the knowledge base."
+      "Report endpoints now ask for the report name the way they already ask for a vehicle name. They used to run with the report id from the example — an id belonging to another account — and return not-found on this account, which reads as a fault.",
+      "Pressing Run on data, data-summary, data-new, export or delete now asks for the report name, fetches it from /user_reports/lists on the connected account, and puts its id into the request.",
+      "And /user_reports/add now asks which vehicles before it runs: paste the IMEIs and the tool resolves them to ids and inserts them. Leave it empty and the report covers the whole account."
     ]
   }
 }
