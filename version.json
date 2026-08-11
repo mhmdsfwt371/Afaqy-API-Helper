@@ -3,14 +3,12 @@
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "إندبوينتس التقارير بقت تسأل عن اسم التقرير زي ما بتسأل عن اسم العربية. كانت بتتنفّذ برقم التقرير اللي في المثال — رقم من حساب تاني — فترجّع «مش موجود في الحساب ده» والموظف يفتكر إن في عطل.",
-      "دلوقتي أول ما تدوس «جرّب» على data أو data-summary أو data-new أو export أو delete، الأداة بتسألك اسم التقرير، تجيبه من /user_reports/lists بتاع الحساب المتصل، وتحط رقمه في الريكوست.",
-      "و/user_reports/add بقى يسألك على العربيات قبل ما ينفّذ: الصق الـ IMEIs والأداة تجيب أرقامها وتحطها في التقرير. سيبها فاضية والتقرير على الحساب كله."
+      "صندوق «عدّل البودي» بقى يظهر على نظام أفاقي إن كمان. كان مقفول عليه لأن الشرط كان على الميثود — وأفاقي إن كله GET، بس بودياه موجودة وبتتبعت مشفّرة جوه data= في الرابط.",
+      "لما تعدّل البودي في أفاقي إن، الرابط الكامل بيتحدّث معاه على طول — فاللي بتنسخه للعميل هو اللي عدّلته، مش الأصلي."
     ],
     "en": [
-      "Report endpoints now ask for the report name the way they already ask for a vehicle name. They used to run with the report id from the example — an id belonging to another account — and return not-found on this account, which reads as a fault.",
-      "Pressing Run on data, data-summary, data-new, export or delete now asks for the report name, fetches it from /user_reports/lists on the connected account, and puts its id into the request.",
-      "And /user_reports/add now asks which vehicles before it runs: paste the IMEIs and the tool resolves them to ids and inserts them. Leave it empty and the report covers the whole account."
+      "The Edit the body box now appears on the Afaqy IN system too. It was hidden there because the condition tested the method, and every Afaqy IN endpoint is a GET — yet each one has a body, encoded into data= in the URL.",
+      "When you edit the body on Afaqy IN the full URL updates with it, so what you copy for the customer is what you edited rather than the original."
     ]
   }
 }
