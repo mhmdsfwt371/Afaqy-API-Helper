@@ -1,14 +1,16 @@
 {
-  "version": "6.39",
+  "version": "6.40",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "صندوق «عدّل البودي» بقى يظهر على نظام أفاقي إن كمان. كان مقفول عليه لأن الشرط كان على الميثود — وأفاقي إن كله GET، بس بودياه موجودة وبتتبعت مشفّرة جوه data= في الرابط.",
-      "لما تعدّل البودي في أفاقي إن، الرابط الكامل بيتحدّث معاه على طول — فاللي بتنسخه للعميل هو اللي عدّلته، مش الأصلي."
+      "الكولكشن بقى نسختين: «كولكشن للعميل» نظيف زي ما هو، و«كولكشن ليّا — بالتوكين» معبّى من الحساب المتصل عشان تجرّب من أول Send من غير ما تملا حاجة.",
+      "النسخة اللي ليك بتاخد التوكن واسم المستخدم ورقمه من الجلسة. الباسورد ما بيتكتبش في أي ملف أبدًا في الحالتين.",
+      "النسخة اللي ليك اسمها فيه DO NOT SHARE ووصفها بيقول إن فيها توكن حي وما تتبعتش لعميل — عشان لو الملف اتلخبط مع غيره يبان من اسمه."
     ],
     "en": [
-      "The Edit the body box now appears on the Afaqy IN system too. It was hidden there because the condition tested the method, and every Afaqy IN endpoint is a GET — yet each one has a body, encoded into data= in the URL.",
-      "When you edit the body on Afaqy IN the full URL updates with it, so what you copy for the customer is what you edited rather than the original."
+      "The collection now comes in two versions: Collection for the customer, clean as before, and Collection for me — with the token, filled in from the connected account so it runs from the first Send with nothing to type.",
+      "Your version takes the token, the username and the user id from the session. The password is never written into a file in either version.",
+      "Your version carries DO NOT SHARE in its name and a description stating it holds a live token and must not be sent to a customer — so a mixed-up file is recognisable by its name alone."
     ]
   }
 }

@@ -753,9 +753,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.39",
+  "version": "6.40",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.40",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "الكولكشن بقى نسختين: «كولكشن للعميل» نظيف زي ما هو، و«كولكشن ليّا — بالتوكين» معبّى من الحساب المتصل عشان تجرّب من أول Send من غير ما تملا حاجة.",
+          "النسخة اللي ليك بتاخد التوكن واسم المستخدم ورقمه من الجلسة. الباسورد ما بيتكتبش في أي ملف أبدًا في الحالتين.",
+          "النسخة اللي ليك اسمها فيه DO NOT SHARE ووصفها بيقول إن فيها توكن حي وما تتبعتش لعميل — عشان لو الملف اتلخبط مع غيره يبان من اسمه.",
+          "زرار «ليّا» مقفول لو مش متصل، وبيسأل تأكيد قبل ما ينزّل.",
+          "الترتيب واحد في النسختين: دخول ثم إنشاء ثم انتظار التوليد ثم القراءة — الترتيب ده هو اللي بيخلي التقرير يرجّع صفوف بدل ما يرجّع فاضي."
+        ],
+        "en": [
+          "The collection now comes in two versions: Collection for the customer, clean as before, and Collection for me — with the token, filled in from the connected account so it runs from the first Send with nothing to type.",
+          "Your version takes the token, the username and the user id from the session. The password is never written into a file in either version.",
+          "Your version carries DO NOT SHARE in its name and a description stating it holds a live token and must not be sent to a customer — so a mixed-up file is recognisable by its name alone.",
+          "The for-me button is disabled while disconnected and asks for confirmation before downloading.",
+          "The order is identical in both: login, then create, then wait for generation, then read — that order is what makes the report return rows instead of coming back empty."
+        ]
+      }
+    },
     {
       "v": "6.39",
       "date": "2026-08-10",
@@ -2825,6 +2845,33 @@ const DOCS = {
           "Reset to original restores the body exactly as the knowledge base holds it. The edit disappears when you close the page — nothing is stored on the device.",
           "A practical example: want the last signal and sensor readings in the vehicle cards? Make sure last_update and sensors are in the projection. If they are missing, the card now says so instead of leaving you to guess.",
           "The box works on the Afaqy IN system too, even though every endpoint there is a GET. Its body is encoded into data= in the URL, so pressing Apply updates the full URL and that is what you copy for the customer."
+        ]
+      }
+    },
+    {
+      "since": "6.40",
+      "t": {
+        "ar": "كولكشن للعميل، وكولكشن ليك إنت",
+        "en": "A collection for the customer, and one for you"
+      },
+      "b": {
+        "ar": [
+          "في أي سيناريو جاهز في زرارين تحت: «كولكشن للعميل» و«كولكشن ليّا — بالتوكين».",
+          "بتاع العميل زي ما هو من الأول: كل قيمة علامة مكان، وكل المتغيّرات فاضية. ده اللي بتبعته أتاشمنت.",
+          "بتاعك معبّى من الحساب اللي إنت متصل بيه: التوكن واسم المستخدم ورقمه. تعمله Import وتدوس Send على طول من غير ما تكتب حاجة.",
+          "الباسورد ما بيتكتبش في أي ملف من الاتنين. أبدًا.",
+          "بتاعك اسمه فيه DO NOT SHARE، ووصفه بيقول إن فيه توكن حي. لو الملفين اتلخبطوا عندك، الاسم بيفرّق.",
+          "زرار «ليّا» مقفول لو مش متصل بحساب، وبيسألك تأكيد قبل ما ينزّل.",
+          "الترتيب واحد في النسختين: دخول، إنشاء التقرير، انتظار التوليد لحد ١٠٠٪، وبعدين القراءة. الترتيب ده هو اللي بيخلي التقرير يرجّع صفوف — لو قريت قبل الانتظار هترجع فاضية."
+        ],
+        "en": [
+          "Every ready scenario now has two buttons underneath: Collection for the customer and Collection for me — with the token.",
+          "The customer one is exactly as before: every value a placeholder, every variable empty. That is the one you attach to an email.",
+          "Yours is filled in from the account you are connected to: the token, the username and the user id. Import it and press Send immediately, with nothing to type.",
+          "The password is never written into either file. Ever.",
+          "Yours carries DO NOT SHARE in its name and a description stating it holds a live token. If the two files get mixed up, the name tells them apart.",
+          "The for-me button is disabled while you are not connected to an account, and asks for confirmation before downloading.",
+          "The order is the same in both: login, create the report, wait for generation to reach 100%, then read. That order is what makes the report return rows — reading before the wait returns empty."
         ]
       }
     },
@@ -5417,7 +5464,8 @@ function renderRecipe(){
     <div class="sec"><div class="row">
       <button class="btn sig" id="rcAll">${t('شغّل كل الخطوات','Run all steps')}</button>
       <button class="btn ghost" id="rcCurl">${t('نسخ السلسلة كاملة','Copy full chain')}</button>
-      <button class="btn ghost" id="rcPm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>
+      <button class="btn ghost" id="rcPm">${t('كولكشن للعميل','Collection for the customer')}</button>
+      <button class="btn ghost" id="rcPmMine" ${SESSION.token?'':'disabled'}>${t('كولكشن ليّا — بالتوكين','Collection for me — with the token')}</button>
       <button class="btn warn" id="rcEsc">${t('تصعيد لتيم مصر','Escalate')}</button>
     </div></div>
   </div>`;
@@ -5427,6 +5475,14 @@ function renderRecipe(){
   $('rcCurl').onclick = ()=>openModal(t('السلسلة كاملة','Full chain'), r.steps.map((st,i)=>
     st.kind!=='call' ? `# ${i+1}: ${dual(st.t)} (${t('بتتم داخل الأداة','handled inside the tool')})` :
     `# ${i+1}: ${dual(st.t)}\ncurl -X ${st.m} "${stepUrl(st)}" \\\n  -H "Content-Type: application/json" \\\n  -d '${stepBody(st)}'`).join('\n\n'), false);
+  const _pmMine = $('rcPmMine');
+  if(_pmMine) _pmMine.onclick = ()=>{
+    if(!SESSION.token){ toast(t('اتصل بحساب الأول عشان يبقى في توكن يتحط.',
+                                'Connect to an account first so there is a token to fill in.')); return; }
+    if(!confirm(t('الملف ده هيخرج وفيه توكن الحساب المتصل. لك إنت عشان تجرّب — ما يتبعتش لعميل ولا يترفع في مكان مشترك. تكمّل؟',
+                  'This file will carry the connected account token. It is for you to test with — do not send it to a customer or upload it anywhere shared. Continue?'))) return;
+    pmSave(pmFromRecipe(r, true), (r.id || 'recipe') + '-mine');
+  };
   $('rcPm').onclick = ()=>pmSave(pmFromRecipe(r),
     'afaqy-' + r.id + '.postman_collection.json');
   $('rcEsc').onclick = ()=>openEscalation(dual(r.title));
@@ -6029,13 +6085,17 @@ function pmLogin(){
 }
 
 /* الغلاف: المتغيّرات والشرح العام */
-function pmWrap(name, desc, items, extraVars){
+/* mine=true يعني الكولكشن ليّا أنا: بيتعبّى من الجلسة المتصلة عشان
+   يشتغل من أول Send. mine=false يعني للعميل: كل حاجة فاضية.
+   الفرق ده لازم يفضل صريح — ملف فيه توكن ما يتبعتش لحد. */
+function pmWrap(name, desc, items, extraVars, mine){
+  const F = mine ? (x=>x||'') : (()=>'');
   const v = [
     {key:'base_url',    value:baseUrl(),      type:'string'},
-    {key:'username',    value:'',             type:'string'},
-    {key:'password',    value:'',             type:'string'},
-    {key:'token',       value:'',             type:'string'},
-    {key:'user_id',     value:'',             type:'string'},
+    {key:'username',    value:F(SESSION.user), type:'string'},
+    {key:'password',    value:'',             type:'string'},   /* الباسورد ما بيتكتبش في ملف أبدًا */
+    {key:'token',       value:F(SESSION.token), type:'string'},
+    {key:'user_id',     value:F(SESSION.userId), type:'string'},
     {key:'imei',        value:'',             type:'string'},
     {key:'unit_id',     value:'',             type:'string'},
     {key:'date_from',   value:today(),        type:'string'},
@@ -6067,7 +6127,7 @@ function pmSave(col, file){
 
 /* سيناريو → كولكشن. خطوة call بتتحوّل لوحدها، والخطوات التانية
    بتتحوّل من وصف pm المكتوب جنبها في تعريف السيناريو. */
-function pmFromRecipe(r){
+function pmFromRecipe(r, mine){
   const V = pmVars();
   const items = [pmLogin()];
   r.steps.forEach(st=>{
@@ -6103,12 +6163,17 @@ function pmFromRecipe(r){
     + 'Generated by the Afaqy integration helper. Fill in the collection variables, '
     + 'then run the requests in order or use the Postman Runner — the token, user id, '
     + 'unit id and report id are carried between requests automatically.';
-  return pmWrap('AFAQY — ' + ((r.title && r.title.en) || dual(r.title)), desc, items,
+  return pmWrap('AFAQY — ' + ((r.title && r.title.en) || dual(r.title))
+                  + (mine ? '  [MY SESSION — DO NOT SHARE]' : ''),
+    (mine ? 'THIS FILE CARRIES A LIVE ACCESS TOKEN FOR THE CONNECTED ACCOUNT.\n'
+          + 'It is filled in so you can run it yourself immediately. Do not send it to a\n'
+          + 'customer and do not upload it anywhere shared. Use the customer version for that.\n\n'
+          : '') + desc, items,
     [{key:'report_code', value:'summary', type:'string'},
      {key:'report_id',   value:'',        type:'string'},
      {key:'group_id',    value:'',        type:'string'},
      {key:'driver_id',   value:'',        type:'string'},
-     {key:'poll_count',  value:'0',       type:'string'}]);
+     {key:'poll_count',  value:'0',       type:'string'}], mine);
 }
 
 /* رسالة عميل مشخّصة → كولكشن. بنستخدم بودي الإنشاء المبني من
