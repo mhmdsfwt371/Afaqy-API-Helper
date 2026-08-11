@@ -753,9 +753,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.40",
+  "version": "6.41",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.41",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "«شغّل كل الخطوات» بقى يمشي لوحده فعلًا. كان بيقف عند أول اختيار ويقول «اختار وكمّل» — وسيناريو التقرير فيه تلات اختيارات، يعني كان بيقف تلات مرات.",
+          "في خانة IMEI جديدة في مدخلات السيناريو. تحط رقم واحد وتدوس، والأداة تحوّله لرقم العربية، تختار قالب الـ summary من قوالب الحساب، تعمل التقرير، تستنى التوليد لحد ١٠٠٪، وتقرا الصفوف — كل ده لوحدها.",
+          "لو سيبت الخانة فاضية بيشتغل على الحساب كله. ولو الـ IMEI مش في الحساب بيقولك ويقف — ما بيكملش على تقرير غلط.",
+          "في الآخر بيطلّع خلاصة: كام صف رجع، والنطاق، والفترة، ورقم التقرير — ومعاها رد جاهز للعميل مكتوب من اللي حصل فعلًا، وزرار الكولكشن.",
+          "والصفوف الفاضية بقت حالة مش فشل: التشغيل التلقائي بيكمّل ويشرح إن العربية ما تحركتش في الفترة، بدل ما يقف ويقول فشل."
+        ],
+        "en": [
+          "Run all steps now genuinely runs on its own. It used to stop at the first choice and say pick one and continue — and the report scenario has three choices, so it stopped three times.",
+          "There is a new IMEI field in the scenario inputs. Put one number in and press run: the tool resolves it to the unit id, picks the summary template from the account's own templates, creates the report, waits for generation to reach 100%, and reads the rows — all by itself.",
+          "Leave the field empty and it runs on the whole account. If the IMEI is not on the account it says so and stops rather than continuing with the wrong report.",
+          "At the end it shows the outcome: how many rows came back, the scope, the period and the report id — together with a customer reply written from what actually happened, and the collection button.",
+          "Empty rows are now treated as a case rather than a failure: the automatic run continues and explains that the vehicle did not move in the period, instead of stopping and reporting failure."
+        ]
+      }
+    },
     {
       "v": "6.40",
       "date": "2026-08-10",
@@ -2872,6 +2892,31 @@ const DOCS = {
           "Yours carries DO NOT SHARE in its name and a description stating it holds a live token. If the two files get mixed up, the name tells them apart.",
           "The for-me button is disabled while you are not connected to an account, and asks for confirmation before downloading.",
           "The order is the same in both: login, create the report, wait for generation to reach 100%, then read. That order is what makes the report return rows — reading before the wait returns empty."
+        ]
+      }
+    },
+    {
+      "since": "6.41",
+      "t": {
+        "ar": "سيناريو التقرير يمشي لوحده",
+        "en": "The report scenario runs itself"
+      },
+      "b": {
+        "ar": [
+          "اتصل بحساب العميل من الشريط فوق، افتح «تقرير Summary»، حط IMEI عربية واحدة في خانة المدخلات، ودوس «شغّل كل الخطوات».",
+          "الأداة بتمشي السلسلة كاملة لوحدها: بتحوّل الـ IMEI لرقم العربية، بتختار القالب اللي كوده summary من قوالب الحساب نفسه، بتعمل التقرير، بتستنى التوليد لحد ١٠٠٪، وبتقرا الصفوف.",
+          "الخانة فاضية يعني الحساب كله. والـ IMEI اللي مش في الحساب بتقف عنده وتقولك، ما بتكملش على تقرير غلط.",
+          "في الآخر بيطلع بلوك الخلاصة: كام صف، النطاق، الفترة، رقم التقرير — ورد جاهز للعميل مكتوب من اللي حصل فعلًا مش كلام عام، وزرار كولكشن.",
+          "لو الصفوف رجعت فاضية التشغيل بيكمّل عادي والرد بيقول إن العربية ما تحركتش في الفترة. ده رد نهائي للعميل مش عطل.",
+          "التصدير بيتساب ليك — ده بينزّل ملف، فالأداة ما بتعملهوش من نفسها."
+        ],
+        "en": [
+          "Connect to the customer account from the top bar, open Summary report, put one vehicle IMEI in the inputs, and press Run all steps.",
+          "The tool walks the whole chain by itself: it resolves the IMEI to the unit id, picks the template whose code is summary from the account's own templates, creates the report, waits for generation to reach 100%, and reads the rows.",
+          "An empty field means the whole account. An IMEI that is not on the account stops the run with a clear message rather than continuing with the wrong report.",
+          "At the end an outcome block appears: how many rows, the scope, the period, the report id — plus a customer reply written from what actually happened rather than boilerplate, and a collection button.",
+          "If the rows come back empty the run still completes and the reply states that the vehicle did not move in the period. That is a definitive answer for the customer, not a fault.",
+          "The export is left to you — it downloads a file, so the tool does not do it unprompted."
         ]
       }
     },
@@ -5297,7 +5342,8 @@ const RECIPES = [
   desc:{ar:'السلسلة زي ما الشاشة بتمشيها بالظبط: تحدد النطاق، تعمل التقرير، تتابع التوليد لحد ١٠٠٪، تقرا الصفوف، وتصدّر. الخطوة اللي بتضيع من الناس هي متابعة التوليد.',
         en:'The chain exactly as the platform itself runs it: choose the scope, create the report, follow generation to 100%, read the rows, export. The step people miss is following the generation.'},
   inputs:[{k:'from',t:'date',l:{ar:'من يوم', en:'From'}},
-          {k:'to',t:'date',l:{ar:'لحد يوم', en:'To'}}],
+          {k:'to',t:'date',l:{ar:'لحد يوم', en:'To'}},
+          {k:'imei',t:'text',l:{ar:'IMEI عربية واحدة — للتشغيل التلقائي', en:'One vehicle IMEI — for the automatic run'}}],
   steps:[
    { t:{ar:'جلب مجموعات العربيات', en:'Fetch vehicle groups'}, kind:'call', m:'POST', path:'/unit_groups/lists',
      body:()=>({data:{projection:['name','unitsList']}}), extract:()=>({}),
@@ -5488,16 +5534,31 @@ function renderRecipe(){
   $('rcEsc').onclick = ()=>openEscalation(dual(r.title));
   $('rcAll').onclick = async ()=>{
     const b=$('rcAll'), old=b.textContent; b.disabled=true;
-    for(let i=0;i<r.steps.length;i++){
-      const st=r.steps[i];
-      if(st.kind==='choose'){ b.disabled=false; b.textContent=old;
-        toast(t('وقفت عند خطوة الاختيار — اختار وكمّل','Stopped at a choice step — pick one and continue')); return; }
-      b.textContent = t(`الخطوة ${i+1} من ${r.steps.length}…`,`Step ${i+1} of ${r.steps.length}…`);
-      await runStep(i);
-      if(!RC.results[i] || !RC.results[i].ok){ b.disabled=false; b.textContent=old;
-        toast(t('وقفت عند خطوة فشلت','Stopped at a failed step')); return; }
+    /* الوضع التلقائي: الخطوات اللي فيها اختيار بتختار لوحدها بدل ما توقف.
+       من غيره كان بيقف تلات مرات في سيناريو التقرير — يعني مش تلقائي. */
+    RC.auto = true;
+    try{
+      for(let i=0;i<r.steps.length;i++){
+        const st=r.steps[i];
+        if(st.kind==='rexport'){                 /* التصدير بينزّل ملف — مش من حق التلقائي */
+          RC.results[i] = {ok:true, msg:t('التصدير اتساب ليك — دوس عليه لو محتاجه.',
+                                          'The export is left to you — press it if you need the file.')};
+          renderSteps(); continue;
+        }
+        b.textContent = t(`الخطوة ${i+1} من ${r.steps.length}…`,`Step ${i+1} of ${r.steps.length}…`);
+        await runStep(i);
+        /* الخطوات اللي بتختار لوحدها بترجّع الوعد ده عشان نستناها */
+        if(RC.autoWait){ await RC.autoWait; RC.autoWait = null; }
+        if(!RC.results[i] || !RC.results[i].ok){
+          toast(t(`وقفت عند الخطوة ${i+1}`, `Stopped at step ${i+1}`));
+          return;
+        }
+      }
+      toast(t('خلصت كل الخطوات','All steps completed'));
+      summaryWrap(r);
+    } finally {
+      RC.auto = false; b.disabled=false; b.textContent=old;
     }
-    b.disabled=false; b.textContent=old; toast(t('خلصت كل الخطوات','All steps completed'));
   };
   renderSteps();
 }
@@ -5784,9 +5845,149 @@ function rowUnitId(r){
   return '';
 }
 
+/* بعد ما السلسلة تخلص لوحدها: الأرقام اللي طلعت، ورد جاهز للعميل
+   مبني على اللي حصل فعلًا مش على كلام عام. */
+function summaryWrap(r){
+  const rowsStep = r.steps.findIndex(s => s.kind === 'rows');
+  const res = RC.results[rowsStep];
+  const rows = (res && res.json) ? reportRows(res.json) : [];
+  const host = $('rcSteps');
+  if(!host) return;
+  const old = document.getElementById('rcWrap'); if(old) old.remove();
+
+  const box = document.createElement('div');
+  box.id = 'rcWrap';
+  box.className = 'panel';
+  box.style.marginTop = '14px';
+  box.innerHTML = `<div class="sec" style="border-top:0">
+      <div class="crumb">${t('الخلاصة','The outcome')}</div>
+      <div style="font-size:15px; font-weight:600; margin-top:5px; line-height:1.7">${
+        rows.length
+          ? t(`السلسلة مشيت لآخرها ورجعت ${rows.length} صف من الحساب المتصل.`,
+              `The chain ran to the end and returned ${rows.length} rows from the connected account.`)
+          : t('السلسلة مشيت لآخرها والصفوف رجعت فاضية — العربية ما تحركتش في الفترة دي.',
+              'The chain ran to the end and the rows came back empty — the vehicle did not move in this period.')}</div>
+      <div class="note" style="margin-top:8px">${t('النطاق','Scope')}: <b>${esc(RC.vars.scopeLabel||'—')}</b>
+        · ${t('الفترة','Period')}: <code>${esc(RC.vars.from||'—')}</code> → <code>${esc(RC.vars.to||'—')}</code>
+        · ${t('رقم التقرير','Report id')}: <code>${esc(RC.vars.reportId||'—')}</code></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn sig" id="rcReplyCopy">${t('انسخ رد للعميل','Copy the customer reply')}</button>
+        <button class="btn ghost" id="rcWrapPm">${t('كولكشن للعميل','Collection for the customer')}</button>
+      </div>
+      <pre class="pre" id="rcReplyTxt" style="white-space:pre-wrap; direction:ltr; text-align:left; margin-top:10px">${esc(summaryReply(rows))}</pre>
+    </div>`;
+  host.parentNode.appendChild(box);
+  clipBlocks(box);
+  const cp = document.getElementById('rcReplyCopy');
+  if(cp) cp.onclick = ()=>copy(document.getElementById('rcReplyTxt').textContent,
+                                   t('الرد اتنسخ','Reply copied'));
+  const pb = document.getElementById('rcWrapPm');
+  if(pb) pb.onclick = ()=>pmSave(pmFromRecipe(RC.r), (RC.r.id||'recipe'));
+  if(box.scrollIntoView) box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* الرد بيتكتب من اللي حصل فعلًا: عدد الصفوف، والأعمدة اللي رجعت */
+function summaryReply(rows){
+  const cols = rows.length ? Object.keys(rows[0]).filter(k=>typeof rows[0][k]!=='object').slice(0,8) : [];
+  const L = [];
+  L.push('Hello,');
+  L.push('');
+  L.push('Report values do not come from the catalog endpoints. /reports/lists and');
+  L.push('/user_report_templates/lists return report definitions — column names, codes and');
+  L.push('aggregation. They describe a report; they never run one.');
+  L.push('');
+  L.push('Retrieving the values is a chain of four calls, in this order:');
+  L.push('');
+  L.push('  1. POST /user_reports/add          creates and runs the report, returns its id');
+  L.push('  2. POST /user_reports/percentage   generation progress; repeat until it is 100');
+  L.push('  3. POST /user_reports/data-summary the aggregated summary, one row per vehicle');
+  L.push('  4. POST /user_reports/data-new     the detail behind one vehicle, by resource_id');
+  L.push('');
+  L.push('Step 2 is the one that is easy to miss and it is where most integrations stall.');
+  L.push('The report is generated asynchronously, so straight after step 1 the rows do not');
+  L.push('exist yet. Reading them at that moment returns an empty data array with');
+  L.push('status_code 200 and message success — a valid response that looks like a failure.');
+  L.push('');
+  L.push('Two details worth stating plainly:');
+  L.push('');
+  L.push('  · resources takes vehicle ids, not IMEIs. If you hold IMEIs, resolve them first');
+  L.push('    with POST /units/lists and take the id of each matching unit.');
+  L.push('  · /user_reports/lists returns the ids of reports that already exist, but their');
+  L.push('    data belongs to the period and vehicles they were created with. For a');
+  L.push('    different period you need a new /user_reports/add rather than a lookup.');
+  L.push('');
+  if(rows.length){
+    L.push('We ran this chain end to end on the account and it returned ' + rows.length + ' row(s).');
+    if(cols.length) L.push('The keys in the response are: ' + cols.join(', ') + '.');
+  } else {
+    L.push('We ran this chain end to end on the account. It completed and returned no rows,');
+    L.push('which means the vehicles did not move during the period requested rather than');
+    L.push('that anything failed.');
+  }
+  L.push('');
+  L.push('A Postman collection with the whole sequence is attached. Fill in the collection');
+  L.push('variables and run the requests in order, or use the Runner — the token, user id,');
+  L.push('unit id and report id are carried between the requests automatically, and the');
+  L.push('progress request loops on its own until generation completes.');
+  L.push('');
+  L.push('Please try it and tell us what comes back if anything differs.');
+  L.push('');
+  L.push('Best regards,');
+  return L.join('\n');
+}
+
 async function doRScope(i){
   const prev = RC.results[i-1];
   const groups = (prev && prev.json) ? deepItems(prev.json) : [];
+  /* تلقائي: لو الموظف حط IMEI بنشتغل على العربية دي لوحدها — أسرع
+     في التوليد وأدق في الإثبات. من غير IMEI بنجيب الحساب كله. */
+  if(RC.auto){
+    RC.autoWait = (async ()=>{
+      const box = $('out_'+i);
+      const im = String(RC.vars.imei || '').trim();
+      try{
+        if(box) box.innerHTML = `<div class="note">${t('بيجيب عربيات الحساب…','Fetching the account vehicles…')}</div>`;
+        const got = await fetchAllUnits(['basic'], (n)=>{
+          if(box) box.innerHTML = `<div class="note">${t(`بيجيب… ${n}`,`Fetching… ${n}`)}</div>`; });
+        const all = got.units || [];
+        RC.vars._unitNames = {};
+        all.forEach(u=>{ const k=String(u.id||u._id||''); if(k) RC.vars._unitNames[k]=String(u.name||k); });
+        if(im){
+          const hit = all.find(u => String(u.imei||'') === im);
+          if(!hit){
+            RC.results[i] = {ok:false,
+              msg: t(`الـ IMEI ده مش في الحساب المتصل: ${esc(im)}`, `This IMEI is not on the connected account: ${esc(im)}`),
+              html:`<div class="note warn" style="margin-top:8px">${t(
+                `الحساب فيه ${all.length} عربية ومفيهمش الرقم ده. اتأكد من الرقم، أو سيب الخانة فاضية عشان يشتغل على الحساب كله.`,
+                `The account holds ${all.length} vehicles and none carries this number. Check it, or leave the field empty to run on the whole account.`)}</div>`};
+            return renderSteps();
+          }
+          RC.vars.resources = [String(hit.id || hit._id)];
+          RC.vars.scopeLabel = String(hit.name || im);
+          RC.results[i] = {ok:true,
+            msg:`${t('العربية','Vehicle')}: <b>${esc(hit.name||im)}</b> — <code>${esc(String(hit.id||hit._id))}</code>`,
+            html:`<div class="note sig" style="margin-top:8px">${t(
+              'الـ IMEI اتحوّل لرقم العربية — ده اللي بيتحط في resources، مش الـ IMEI.',
+              'The IMEI was resolved to the unit id — that is what goes into resources, not the IMEI.')}</div>`,
+            vars:{scope: String(hit.name||im)}};
+          return renderSteps();
+        }
+        RC.vars.resources = all.map(u=>String(u.id||u._id||'')).filter(Boolean);
+        RC.vars.scopeLabel = t('كل الحساب','the whole account');
+        RC.results[i] = {ok: RC.vars.resources.length > 0,
+          msg: RC.vars.resources.length
+            ? `${t('النطاق','Scope')}: <b>${t('كل الحساب','the whole account')}</b> — ${RC.vars.resources.length} ${t('عربية','vehicles')}`
+            : t('الحساب مفيهوش عربيات ظاهرة.','No vehicles are visible on this account.'),
+          vars:{scope: RC.vars.resources.length + ' ' + t('عربية','vehicles')}};
+        return renderSteps();
+      }catch(err){
+        RC.results[i] = {ok:false, msg:t('ما قدرناش نجيب العربيات: ','Could not fetch the vehicles: ')
+          + esc(String(err && err.message || err).slice(0,140))};
+        return renderSteps();
+      }
+    })();
+    return;
+  }
   const opts = [`<option value="">${t('— اختار —','— choose —')}</option>`,
     `<option value="__all__">${t('كل عربيات الحساب','Every vehicle in the account')}</option>`]
     .concat(groups.slice(0,300).map((g,n)=>`<option value="${n}">${esc(g.name)}</option>`)).join('');
@@ -5919,7 +6120,10 @@ async function doRows(i){
   }
   const rows = reportRows(r.json);
   if(!rows.length){
-    RC.results[i] = {ok:false,
+    /* الفاضي مش فشل: الريكوست نجح والرد سليم. لو علّمناه فشل، التشغيل
+       التلقائي بيقف قبل الخلاصة — والحالة دي هي بالظبط اللي العميل
+       محتاج يفهمها. بنعلّمها نجاح ونشرح الفرق في النص. */
+    RC.results[i] = {ok:true, empty:true,
       msg: t('الرد رجع سليم بس من غير صفوف.','The response is valid but carries no rows.'),
       html:`<div class="note warn" style="margin-top:8px">${t(
         'ده مش خطأ. يا التوليد لسه ما خلصش — ارجع لخطوة المتابعة ونفّذها تاني — يا العربيات دي فعلاً ما تحرّكتش في الفترة اللي اخترتها.',
@@ -6362,6 +6566,20 @@ function doChoose(i){
   if(!prev||!prev.json){ RC.results[i]={ok:false,msg:t('محتاج رد الخطوة اللي قبلها الأول.','The previous step must run first.')}; return renderSteps(); }
   const items = deepItems(prev.json);
   if(!items.length){ RC.results[i]={ok:false,msg:t('مفيش قوالب في الرد. دي أول حاجة تتصعّد لتيم مصر: إيه أنواع التقارير المتاحة وأكوادها؟','No templates in the response. This is the first thing to escalate: which report types exist and what are their codes?')}; return renderSteps(); }
+  /* تلقائي: بندوّر على القالب اللي كوده summary. لو مش لاقيينه بناخد
+     الأول ونقول للموظف إحنا اخترنا إيه — مش بنسكت. */
+  if(RC.auto && st.into === 'tplId'){
+    const pick = items.find(x => /summary/i.test(String((x.raw && x.raw.code) || ''))) ||
+                 items.find(x => /summary/i.test(String(x.name || ''))) || items[0];
+    RC.vars[st.into] = pick.id; RC.vars._tplRaw = pick.raw;
+    RC.results[i] = {ok:true,
+      msg:`${t('القالب','Template')}: <b>${esc(pick.name)}</b> — <code>${esc(pick.raw && pick.raw.code || '—')}</code>`,
+      html:`<div class="note" style="margin-top:8px">${t(
+        `اتخد لوحده من ${items.length} قالب في الحساب. لو ده مش المطلوب، ارجع ونفّذ الخطوة دي بإيدك.`,
+        `Chosen automatically from ${items.length} templates on the account. If it is the wrong one, run this step by hand.`)}</div>`,
+      vars:{[st.into]:pick.id, code:(pick.raw && pick.raw.code) || '—'}};
+    return renderSteps();
+  }
   RC.results[i]={ok:false, msg:t(`اختار القالب (${items.length} متاح):`,`Choose a template (${items.length} available):`),
     picker:`<select id="ch_${i}" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:3px">
       <option value="">${t('— اختار —','— choose —')}</option>${items.slice(0,300).map((x,n)=>`<option value="${n}">${esc(x.name)}</option>`).join('')}</select>`,

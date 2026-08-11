@@ -1,16 +1,16 @@
 {
-  "version": "6.40",
+  "version": "6.41",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "الكولكشن بقى نسختين: «كولكشن للعميل» نظيف زي ما هو، و«كولكشن ليّا — بالتوكين» معبّى من الحساب المتصل عشان تجرّب من أول Send من غير ما تملا حاجة.",
-      "النسخة اللي ليك بتاخد التوكن واسم المستخدم ورقمه من الجلسة. الباسورد ما بيتكتبش في أي ملف أبدًا في الحالتين.",
-      "النسخة اللي ليك اسمها فيه DO NOT SHARE ووصفها بيقول إن فيها توكن حي وما تتبعتش لعميل — عشان لو الملف اتلخبط مع غيره يبان من اسمه."
+      "«شغّل كل الخطوات» بقى يمشي لوحده فعلًا. كان بيقف عند أول اختيار ويقول «اختار وكمّل» — وسيناريو التقرير فيه تلات اختيارات، يعني كان بيقف تلات مرات.",
+      "في خانة IMEI جديدة في مدخلات السيناريو. تحط رقم واحد وتدوس، والأداة تحوّله لرقم العربية، تختار قالب الـ summary من قوالب الحساب، تعمل التقرير، تستنى التوليد لحد ١٠٠٪، وتقرا الصفوف — كل ده لوحدها.",
+      "لو سيبت الخانة فاضية بيشتغل على الحساب كله. ولو الـ IMEI مش في الحساب بيقولك ويقف — ما بيكملش على تقرير غلط."
     ],
     "en": [
-      "The collection now comes in two versions: Collection for the customer, clean as before, and Collection for me — with the token, filled in from the connected account so it runs from the first Send with nothing to type.",
-      "Your version takes the token, the username and the user id from the session. The password is never written into a file in either version.",
-      "Your version carries DO NOT SHARE in its name and a description stating it holds a live token and must not be sent to a customer — so a mixed-up file is recognisable by its name alone."
+      "Run all steps now genuinely runs on its own. It used to stop at the first choice and say pick one and continue — and the report scenario has three choices, so it stopped three times.",
+      "There is a new IMEI field in the scenario inputs. Put one number in and press run: the tool resolves it to the unit id, picks the summary template from the account's own templates, creates the report, waits for generation to reach 100%, and reads the rows — all by itself.",
+      "Leave the field empty and it runs on the whole account. If the IMEI is not on the account it says so and stops rather than continuing with the wrong report."
     ]
   }
 }
