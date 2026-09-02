@@ -1,16 +1,16 @@
 {
-  "version": "6.41",
+  "version": "6.42",
   "date": "2026-08-10",
   "notes": {
     "ar": [
-      "«شغّل كل الخطوات» بقى يمشي لوحده فعلًا. كان بيقف عند أول اختيار ويقول «اختار وكمّل» — وسيناريو التقرير فيه تلات اختيارات، يعني كان بيقف تلات مرات.",
-      "في خانة IMEI جديدة في مدخلات السيناريو. تحط رقم واحد وتدوس، والأداة تحوّله لرقم العربية، تختار قالب الـ summary من قوالب الحساب، تعمل التقرير، تستنى التوليد لحد ١٠٠٪، وتقرا الصفوف — كل ده لوحدها.",
-      "لو سيبت الخانة فاضية بيشتغل على الحساب كله. ولو الـ IMEI مش في الحساب بيقولك ويقف — ما بيكملش على تقرير غلط."
+      "الفترة المقلوبة بقت تتمسك قبل ما نضرب السيرفر. لو «من» بعد «لحد»، السيرفر كان بيرجّع فاضي والأداة كانت بتطلّع رد للعميل بيقول إن العربية ما تحركتش — غلطة كتابة كانت بتتحوّل لجملة واثقة وغلط تتبعت لعميل.",
+      "الـ IMEI اللي بأرقام عربية (٨٦٠١٢٣…) بقى يلاقي العربية. كانت المقارنة حرفية فبيقول «الرقم مش في الحساب» على عربية موجودة فعلًا.",
+      "والرقم اللي اتنسخ من إيميل عربي وجاي معاه علامة اتجاه مخفية بقى يشتغل كمان. العلامة دي مش ظاهرة للمستخدم فالرسالة كانت غير قابلة للتفسير."
     ],
     "en": [
-      "Run all steps now genuinely runs on its own. It used to stop at the first choice and say pick one and continue — and the report scenario has three choices, so it stopped three times.",
-      "There is a new IMEI field in the scenario inputs. Put one number in and press run: the tool resolves it to the unit id, picks the summary template from the account's own templates, creates the report, waits for generation to reach 100%, and reads the rows — all by itself.",
-      "Leave the field empty and it runs on the whole account. If the IMEI is not on the account it says so and stops rather than continuing with the wrong report."
+      "A reversed period is now caught before any request is sent. When from is after to the server returned nothing and the tool produced a customer reply stating the vehicle did not move — a typing mistake turned into a confident, wrong sentence sent to a customer.",
+      "An IMEI written in Arabic-Indic digits now matches. The comparison was literal, so it reported the number was not on the account for a vehicle that was there.",
+      "A number copied from an Arabic email carrying an invisible direction mark now works too. That mark is not visible to the user, so the message was impossible to interpret."
     ]
   }
 }

@@ -753,9 +753,31 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.41",
+  "version": "6.42",
   "date": "2026-08-10",
   "history": [
+    {
+      "v": "6.42",
+      "date": "2026-08-10",
+      "items": {
+        "ar": [
+          "الفترة المقلوبة بقت تتمسك قبل ما نضرب السيرفر. لو «من» بعد «لحد»، السيرفر كان بيرجّع فاضي والأداة كانت بتطلّع رد للعميل بيقول إن العربية ما تحركتش — غلطة كتابة كانت بتتحوّل لجملة واثقة وغلط تتبعت لعميل.",
+          "الـ IMEI اللي بأرقام عربية (٨٦٠١٢٣…) بقى يلاقي العربية. كانت المقارنة حرفية فبيقول «الرقم مش في الحساب» على عربية موجودة فعلًا.",
+          "والرقم اللي اتنسخ من إيميل عربي وجاي معاه علامة اتجاه مخفية بقى يشتغل كمان. العلامة دي مش ظاهرة للمستخدم فالرسالة كانت غير قابلة للتفسير.",
+          "شكل الـ IMEI بيتفحص قبل النداء: ١٥ رقم. الرقم الناقص أو اللي فيه حروف بيتقال عليه فورًا بدل ما نجيب كل عربيات الحساب ونطلع مش لاقيينه.",
+          "والفترة الأطول من سنة بتتنبّه عليها — التوليد بياخد وقت وممكن يقف.",
+          "والمطابقة اليدوية (نافذة الاعتماديات ولصق أرقام كتير) بقت تطبّع كمان — كان نفس الباج فيها بالظبط، فالرقم بأرقام عربية كان بيتقال عليه مش موجود."
+        ],
+        "en": [
+          "A reversed period is now caught before any request is sent. When from is after to the server returned nothing and the tool produced a customer reply stating the vehicle did not move — a typing mistake turned into a confident, wrong sentence sent to a customer.",
+          "An IMEI written in Arabic-Indic digits now matches. The comparison was literal, so it reported the number was not on the account for a vehicle that was there.",
+          "A number copied from an Arabic email carrying an invisible direction mark now works too. That mark is not visible to the user, so the message was impossible to interpret.",
+          "The IMEI shape is checked before the call: 15 digits. A short number or one containing letters is reported at once instead of after fetching every vehicle on the account.",
+          "A period longer than a year is flagged — generation is slow and may stall.",
+          "Manual matching (the dependencies window and pasting several numbers) normalises too — it carried exactly the same bug, so an Arabic-digit number was reported as missing."
+        ]
+      }
+    },
     {
       "v": "6.41",
       "date": "2026-08-10",
@@ -2917,6 +2939,31 @@ const DOCS = {
           "At the end an outcome block appears: how many rows, the scope, the period, the report id — plus a customer reply written from what actually happened rather than boilerplate, and a collection button.",
           "If the rows come back empty the run still completes and the reply states that the vehicle did not move in the period. That is a definitive answer for the customer, not a fault.",
           "The export is left to you — it downloads a file, so the tool does not do it unprompted."
+        ]
+      }
+    },
+    {
+      "since": "6.42",
+      "t": {
+        "ar": "الأداة بتراجع مدخلاتك قبل ما تضرب السيرفر",
+        "en": "Inputs are checked before anything is sent"
+      },
+      "b": {
+        "ar": [
+          "لو «من يوم» بعد «لحد يوم»، بتقف وتقولك. قبل كده كانت بتمشي، والسيرفر يرجّع فاضي، والأداة تطلّع رد للعميل بيقول «العربية ما تحركتش في الفترة». غلطة كتابة كانت بتخرج جملة واثقة وغلط لعميل.",
+          "الـ IMEI بيتقرا سواء مكتوب ٠١٢٣ أو 0123، وسواء منسوخ نضيف أو جاي معاه علامة اتجاه مخفية من إيميل عربي.",
+          "والمطابقة اليدوية (نافذة الاعتماديات ولصق أرقام كتير) بقت تطبّع كمان — كان نفس الباج فيها بالظبط، فالرقم بأرقام عربية كان بيتقال عليه مش موجود.",
+          "وشكله بيتفحص قبل النداء: ١٥ رقم. لو ناقص أو فيه حروف بتعرف على طول بدل ما تستنى جلب كل عربيات الحساب.",
+          "الفترة الأطول من سنة بتتنبّه عليها عشان التوليد بياخد وقت وممكن يقف.",
+          "كل ده بيحصل قبل أول ريكوست — يعني ما بتستهلكش وقت ولا بتسيب تقرير ناقص في حساب العميل."
+        ],
+        "en": [
+          "If the from date is after the to date the run stops and tells you. Previously it continued, the server returned nothing, and the tool produced a customer reply saying the vehicle did not move during the period. A typing mistake produced a confident, wrong sentence for a customer.",
+          "The IMEI is read whether it is written 0123 or in Arabic-Indic digits, and whether it was copied cleanly or carries an invisible direction mark from an Arabic email.",
+          "Manual matching (the dependencies window and pasting several numbers) normalises too — it carried exactly the same bug, so an Arabic-digit number was reported as missing.",
+          "Its shape is checked before the call: 15 digits. A short number or one containing letters is reported immediately instead of after fetching every vehicle on the account.",
+          "A period longer than a year is flagged, because generation is slow and may stall.",
+          "All of this happens before the first request — so no time is spent and no half-finished report is left on the customer's account."
         ]
       }
     },
@@ -5127,14 +5174,36 @@ function deepItems(obj, out, depth){
   return out;
 }
 /* العميل ممكن يبعتلك أي رقم من أرقام العربية — نطابق عليهم كلهم */
+/* ═══ تحقق المدخلات ═══
+   الأرقام بتوصل الأداة منسوخة من تذاكر وإيميلات عربية. النسخ من نص
+   عربي بيجيب معاه علامات اتجاه غير مرئية، والكيبورد العربي بيكتب
+   ٠١٢٣ مش 0123. المقارنة بـ === بتفشل في الحالتين والمستخدم مش شايف
+   ليه — فبنطبّع الطرفين قبل أي مقارنة. */
+function normDigits(v){
+  return String(v == null ? '' : v)
+    /* علامات الاتجاه والمسافات الصفرية — بتتنسخ مع النص العربي وهي مخفية */
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '')
+    .replace(/[\u00A0\u2007\u202F]/g, ' ')
+    /* ٠-٩ عربية، و ۰-۹ فارسية/أردية */
+    .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
+    .trim();
+}
+/* للمقارنة بس: أرقام وخلاص، عشان الشرطة والمسافة ما يفرّقوش */
+function digitsOnly(v){ return normDigits(v).replace(/\D/g, ''); }
+
 function matchByName(resp, needle){
   const items = deepItems(resp); const n = norm(needle); const raw=(needle||'').trim();
+  const rawD = digitsOnly(raw);
   if(!items.length) return {items:[], hit:null, by:null, hasImei:false};
   const hasImei = items.some(x=>x.imei);
   const tries = [
     ['ID',            x=>x.id===raw],
-    ['IMEI',          x=>x.imei && x.imei===raw],
-    ['device_serial', x=>x.serial && x.serial===raw],
+    /* نفس علاج doRScope: الرقم بييجي منسوخ من تذكرة عربية، يا بأرقام
+       عربية يا بعلامة اتجاه مخفية. المقارنة الحرفية بتقول «مش موجود»
+       على عربية موجودة. بنطبّع الطرفين. */
+    ['IMEI',          x=>x.imei && rawD && digitsOnly(x.imei)===rawD],
+    ['device_serial', x=>x.serial && (x.serial===raw || (rawD && digitsOnly(x.serial)===rawD))],
     ['plate',         x=>x.plate && norm(x.plate)===n],
     ['name',          x=>norm(x.name)===n],
     ['name',          x=>norm(x.name).includes(n)],
@@ -5536,6 +5605,15 @@ function renderRecipe(){
     const b=$('rcAll'), old=b.textContent; b.disabled=true;
     /* الوضع التلقائي: الخطوات اللي فيها اختيار بتختار لوحدها بدل ما توقف.
        من غيره كان بيقف تلات مرات في سيناريو التقرير — يعني مش تلقائي. */
+    /* التحقق قبل أول نداء: الفترة المقلوبة كانت بتوصل لآخر السلسلة
+       وتطلّع رد غلط للعميل. أوقفها هنا. */
+    const _bad = periodIssue(RC.vars.from, RC.vars.to) || imeiIssue(RC.vars.imei);
+    if(_bad){
+      b.disabled=false;
+      openModal(t('المدخلات محتاجة مراجعة','Check the inputs'),
+        `<div class="note warn" style="font-size:14px; line-height:1.8">${esc(_bad)}</div>`, false);
+      return;
+    }
     RC.auto = true;
     try{
       for(let i=0;i<r.steps.length;i++){
@@ -5936,6 +6014,37 @@ function summaryReply(rows){
   return L.join('\n');
 }
 
+
+/* بترجّع رسالة لو في مشكلة، وسلسلة فاضية لو تمام */
+function imeiIssue(v){
+  const raw = normDigits(v);
+  if(!raw) return '';                       /* فاضي = مسموح، معناه الحساب كله */
+  const d = digitsOnly(raw);
+  if(!d) return t('الـ IMEI لازم يكون أرقام. اللي مكتوب مفيهوش ولا رقم.',
+                  'The IMEI must be digits. What is entered contains none.');
+  if(/\D/.test(raw)) return t(`في حروف أو رموز جوه الرقم: ${raw}`,
+                              `The value contains non-digit characters: ${raw}`);
+  if(d.length !== 15) return t(
+    `الـ IMEI بيتكوّن من ١٥ رقم، واللي مكتوب ${d.length}. اتأكد من الرقم قبل ما نضرب السيرفر.`,
+    `An IMEI is 15 digits; this one has ${d.length}. Check the number before we call the server.`);
+  return '';
+}
+
+function periodIssue(from, to){
+  if(!from || !to) return t('لازم تحدد الفترة: من يوم ولحد يوم.',
+                            'Both dates are required: from and to.');
+  const a = new Date(from + 'T00:00:00'), b = new Date(to + 'T00:00:00');
+  if(isNaN(a) || isNaN(b)) return t('التواريخ مش مقروءة.','The dates cannot be read.');
+  if(a > b) return t(
+    `الفترة مقلوبة: «من» ${from} بعد «لحد» ${to}. لو مشينا كده السيرفر هيرجّع فاضي، والأداة هتقول للعميل إن العربية ما تحركتش — وده رد غلط.`,
+    `The period is reversed: from ${from} is after to ${to}. If we proceed the server returns nothing and the tool would tell the customer the vehicle did not move — a wrong answer.`);
+  const days = (b - a) / 86400000;
+  if(days > 366) return t(
+    `الفترة ${Math.round(days)} يوم. التقارير الطويلة بتاخد وقت في التوليد وممكن توقف. قصّرها أو قسّمها.`,
+    `The period spans ${Math.round(days)} days. Long reports are slow to generate and may time out. Shorten or split it.`);
+  return '';
+}
+
 async function doRScope(i){
   const prev = RC.results[i-1];
   const groups = (prev && prev.json) ? deepItems(prev.json) : [];
@@ -5944,7 +6053,7 @@ async function doRScope(i){
   if(RC.auto){
     RC.autoWait = (async ()=>{
       const box = $('out_'+i);
-      const im = String(RC.vars.imei || '').trim();
+      const im = normDigits(RC.vars.imei);
       try{
         if(box) box.innerHTML = `<div class="note">${t('بيجيب عربيات الحساب…','Fetching the account vehicles…')}</div>`;
         const got = await fetchAllUnits(['basic'], (n)=>{
@@ -5953,10 +6062,13 @@ async function doRScope(i){
         RC.vars._unitNames = {};
         all.forEach(u=>{ const k=String(u.id||u._id||''); if(k) RC.vars._unitNames[k]=String(u.name||k); });
         if(im){
-          const hit = all.find(u => String(u.imei||'') === im);
+          /* التطبيع على الطرفين: الرقم اللي جه من التذكرة واللي راجع
+             من الحساب. أي واحد فيهم ممكن يكون فيه علامة مخفية. */
+          const imD = digitsOnly(im);
+          const hit = all.find(u => digitsOnly(u.imei) === imD);
           if(!hit){
             RC.results[i] = {ok:false,
-              msg: t(`الـ IMEI ده مش في الحساب المتصل: ${esc(im)}`, `This IMEI is not on the connected account: ${esc(im)}`),
+              msg: t(`الـ IMEI ده مش في الحساب المتصل: ${esc(imD)}`, `This IMEI is not on the connected account: ${esc(imD)}`),
               html:`<div class="note warn" style="margin-top:8px">${t(
                 `الحساب فيه ${all.length} عربية ومفيهمش الرقم ده. اتأكد من الرقم، أو سيب الخانة فاضية عشان يشتغل على الحساب كله.`,
                 `The account holds ${all.length} vehicles and none carries this number. Check it, or leave the field empty to run on the whole account.`)}</div>`};
