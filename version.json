@@ -1,16 +1,16 @@
 {
-  "version": "6.46",
+  "version": "6.47",
   "date": "2026-10-11",
   "notes": {
     "ar": [
-      "لقطة نافذة بوستمان كاملة (القائمة واللينك وبودي الريكوست والرد تحت بخط صغير) كانت بتطلع «{}». الأداة بقت تقرا على مرحلتين: الأولى بتلاقي فين الرد جوه الصورة، والتانية بتقصّه وتكبّره على قد خطه وتقراه.",
-      "لو الصورة فيها بودي الريكوست والرد مع بعض، الرد (اللي فيه message و status_code) هو اللي بيتحط الأول ويتفحص — بودي الريكوست بيفضل تحته.",
-      "أقواس الإغلاق اللي بتتقرى أرقام أو حروف («1» و«LL» ورا بعض) بترجع أقواس، والقيم المعروفة اللي اتقطعت بمسافة («validation error») بتتلمّ — عشان التشخيص يقرا الرسالة صح."
+      "صورة إيميل العميل بقت تتحوّل لتذكرة: ارفعها في «حلّل رسالة عميل» والأداة بتقسمها — كلام العميل، واللينك والميثود، وبودي الريكوست، والرد — وتقرا كل حتة لوحدها وتحطها في الخانة وتحلّلها. في «افحص رد» الرد بيتفحص، وزرار «حوّلها لتذكرة وحلّلها» بينقل الصورة كلها للتحليل. المحك إيميل حقيقي فيه لقطة بوستمان.",
+      "الرد اللي بوستمان بيعرضه بوضع Preview (جدول «message  not_allowed» مش JSON) بقى يتحوّل JSON.",
+      "المحلّل: بودي فيه unit_id بقى يتعرف كريكوست، وnot_allowed/401 بقت دليل على «IMEI مكان رقم العربية». الرد بيقول قيمة الـ IMEI اللي اتبعتت، وبيجاوب سؤال «في رول ناقص؟» بأمانة: صلّح المعرّف الأول، ولو فضل not_allowed نراجع الصلاحيات."
     ],
     "en": [
-      "A full Postman window screenshot (sidebar, URL, request body and the response below in small type) came out as \"{}\". The tool now reads in two passes: the first locates the response inside the image, the second crops it, enlarges it to its text size and reads it.",
-      "When the image holds both the request body and the response, the response (the block with message and status_code) is placed first and inspected — the request body stays below it.",
-      "Closing brackets read as digits or letters (\"1\" then \"LL\") are restored, and known values split by a space (\"validation error\") are rejoined — so the diagnosis reads the message correctly."
+      "A screenshot of a customer email now becomes a ticket: upload it in Analyse a customer message and the tool splits it — the customer text, the URL and method, the request body and the response — reads each part on its own, puts the ticket in the box and analyses it. In Inspect, the response is inspected and a \"Turn it into a ticket\" button moves the whole image to the analysis. The yardstick is a real email carrying a Postman screenshot.",
+      "A response shown in Postman Preview mode (a \"message  not_allowed\" table rather than JSON) is now converted to JSON.",
+      "Analyzer: a body carrying unit_id is now recognised as a request, and not_allowed/401 now counts as evidence for \"an IMEI where a unit id belongs\". The reply states the IMEI that was sent and answers \"is a role missing?\" honestly: fix the identifier first, and if not_allowed persists we review the permissions."
     ]
   }
 }

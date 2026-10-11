@@ -754,9 +754,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.46",
+  "version": "6.47",
   "date": "2026-10-11",
   "history": [
+    {
+      "v": "6.47",
+      "date": "2026-10-11",
+      "items": {
+        "ar": [
+          "صورة إيميل العميل بقت تتحوّل لتذكرة: ارفعها في «حلّل رسالة عميل» والأداة بتقسمها — كلام العميل، واللينك والميثود، وبودي الريكوست، والرد — وتقرا كل حتة لوحدها وتحطها في الخانة وتحلّلها. في «افحص رد» الرد بيتفحص، وزرار «حوّلها لتذكرة وحلّلها» بينقل الصورة كلها للتحليل. المحك إيميل حقيقي فيه لقطة بوستمان.",
+          "الرد اللي بوستمان بيعرضه بوضع Preview (جدول «message  not_allowed» مش JSON) بقى يتحوّل JSON.",
+          "المحلّل: بودي فيه unit_id بقى يتعرف كريكوست، وnot_allowed/401 بقت دليل على «IMEI مكان رقم العربية». الرد بيقول قيمة الـ IMEI اللي اتبعتت، وبيجاوب سؤال «في رول ناقص؟» بأمانة: صلّح المعرّف الأول، ولو فضل not_allowed نراجع الصلاحيات.",
+          "خطوة الحل بقت ببودي الإندبوينت الحقيقي من الكولكشن (/units/locations بياخد unit_id وفترة)، وكولكشن Postman بالحل بيتولّد فعلًا — الرد كان بيوعد بيه وهو مش موجود.",
+          "أغلاط قراءة اتقفلت: قوس الفتح اللي بيضيع أو بيتقرى «i»، القوس الخارجي اللي بيقع بره القص في عمود أرقام السطور، التنصيص اللي بيتقرى نجمة، والصفر اللي بيتقرى ©. وملاحظة «صفر سجلات» ما بقتش تظهر تحت رد فيه خطأ."
+        ],
+        "en": [
+          "A screenshot of a customer email now becomes a ticket: upload it in Analyse a customer message and the tool splits it — the customer text, the URL and method, the request body and the response — reads each part on its own, puts the ticket in the box and analyses it. In Inspect, the response is inspected and a \"Turn it into a ticket\" button moves the whole image to the analysis. The yardstick is a real email carrying a Postman screenshot.",
+          "A response shown in Postman Preview mode (a \"message  not_allowed\" table rather than JSON) is now converted to JSON.",
+          "Analyzer: a body carrying unit_id is now recognised as a request, and not_allowed/401 now counts as evidence for \"an IMEI where a unit id belongs\". The reply states the IMEI that was sent and answers \"is a role missing?\" honestly: fix the identifier first, and if not_allowed persists we review the permissions.",
+          "The fix step now uses the endpoint real body from the collection (/units/locations takes unit_id and a period), and a Postman collection with the fix is really generated — the reply used to promise one that did not exist.",
+          "Reading slips closed: an opening brace lost or read as \"i\", outer braces falling outside the crop in the line-number gutter, a quote read as an asterisk, and a zero read as ©. The \"zero records\" note no longer appears under an error response."
+        ]
+      }
+    },
     {
       "v": "6.46",
       "date": "2026-10-11",
@@ -6682,7 +6702,18 @@ function pmFromRecipe(r, mine){
 
 /* رسالة عميل مشخّصة → كولكشن. بنستخدم بودي الإنشاء المبني من
    أكواد حقول العميل نفسه، مش عينة عامة. */
+/* حالة اتشخّصت بقاعدة → كولكشن بنفس خطوات الحل اللي في الرد بالظبط */
+function pmFromRule(a){
+  const m = caseMatch(a);
+  if(!m || m.h.score < CASE_SURE || typeof m.r.chain !== 'function') return null;
+  const ch = m.r.chain(a) || [];
+  if(!ch.length) return null;
+  const items = [pmLogin()].concat(ch.map((s, i) => pmReq({ name: String(i + 1) + '. ' + s.m + ' ' + s.p, path: s.p, method: s.m || 'POST',
+                                                          body: s.body, desc: (s.note && (s.note.en || s.note.ar)) || '' })));
+  return pmWrap('AFAQY — ' + m.r.name.en, m.r.mistake.en + '\n\n' + m.r.why.en, items, []);
+}
 function pmFromCase(a){
+  if(a && !a.reportCase){ return pmFromRule(a); }
   if(!a || !a.reportCase) return null;
   const r = RECIPES.find(x=>x.id === 'summary-report');
   const col = r ? pmFromRecipe(r) : pmWrap('AFAQY — Report data', '', [pmLogin()], []);
@@ -10435,7 +10466,7 @@ function blockKind(j){
   const fields = deepFindNode(j, 'fields');
   if(Array.isArray(fields) && fields.length && fields[0] && 'code' in fields[0] && !('value' in fields[0]))
     return 'definition';
-  if(flat(j) && j.data && (j.data.id || j.data.username)) return 'request';
+  if(flat(j) && j.data && (j.data.id || j.data.username || j.data.unit_id || j.data.resources || j.data.ids || j.data.unit_ids || j.data.filters)) return 'request';
   const vals = flat(j) ? Object.keys(j).filter(k => {
     const v = j[k];
     return typeof v === 'string' || typeof v === 'number';
@@ -10707,7 +10738,8 @@ function _saysOk(a){
 }
 /* الأرقام اللي شكلها IMEI: ١٥ رقم متتالية */
 function _imeis(a){
-  const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
+  /* v6.47: النص كله كمان — بودي مقروء من صورة ناقص قوس كان بيتشال من words وبياخد الـ IMEI معاه */
+  const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ') + ' ' + String(a._raw||'');
   return (all.match(/\b\d{15}\b/g) || []).slice(0, 6);
 }
 /* المسارات اللي اتذكرت في الرسالة، منضّفة */
@@ -10791,24 +10823,40 @@ const CASE_RULES = [
       const e = _ep(p); const b = e ? String(e.b||'') : '';
       return /unit_id|"resources"|resource_id|unitId/.test(b);
     }) || /resources|unit_id|resource_id/i.test(String(a.words||''));
-    const err = (a.errs||[]).length || /not_found|not found|invalid|غير موجود/i.test(String(a.words||''));
+    /* v6.47: not_allowed/401 مع IMEI في unit_id — شفناها في إيميل حقيقي على /units/locations */
+    const err = (a.errs||[]).length || /not_found|not found|invalid|not_allowed|غير موجود/i.test(String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' '));
     if(!needsUid && !err) return null;
     const ev = [t(`في الرسالة رقم من ١٥ خانة (${ims[0]}) — ده شكل IMEI`,
                   `The message carries a 15-digit number (${ims[0]}), which is an IMEI`)];
     if(needsUid) ev.push(t('والريكوست بياخد رقم عربية مش رقم جهاز','and the request takes a unit id, not a device id'));
-    if(err) ev.push(t('والرد رجع مش لاقي','and the response came back not-found'));
+    if(err) ev.push(t('والرد رجع خطأ (مش لاقي أو مش مسموح)','and the response came back as an error (not found or not allowed)'));
     return {score: needsUid && err ? 80 : 60, ev};
   },
+  /* العميل بيسأل «في رول ناقص؟» — الإجابة الأمينة: صلّح المعرّف الأول، ولو فضل not_allowed يبقى الصلاحيات */
+  extra(a){
+    const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
+    const im = _imeis(a)[0];
+    const lead = im ? {ar:`في الريكوست، unit_id قيمته ${im} — ده الـ IMEI. السيرفر محتاج id العربية: حقل id بتاعها في رد /units/lists اللي بيوصلك أصلًا.`,
+                       en:`In your request, unit_id carries ${im}, which is the IMEI. The API expects the vehicle id instead: the id field of that vehicle in the /units/lists response you already receive.`} : null;
+    const role = /not_allowed|unauthori[sz]ed|"status_code"\s*:\s*40[13]|\brole\b|permission|صلاحي/i.test(all)
+      ? {ar:'لو بعد ما تبعت الـ id الرد فضل not_allowed، يبقى الرول بتاع الحساب ده مش عليه صلاحية الإندبوينت ده — ابعتلنا اسم المستخدم وإحنا نراجع صلاحياته.',
+         en:'If the call still returns not_allowed once the id is used, the role on this user does not include permission for this endpoint — reply with the username and we will review its permissions on our side.'} : null;
+    if(!lead && !role) return null;
+    return {ar:[lead, role].filter(Boolean).map(x=>x.ar).join('\n\n'), en:[lead, role].filter(Boolean).map(x=>x.en).join('\n\n')};
+  },
   mistake:{ar:'بعت رقم الجهاز (IMEI) في خانة بتاخد رقم العربية (UID).',
-           en:'Sent the device number (IMEI) where the unit id (UID) belongs.'},
+           en:'The request sends the device number (IMEI) where the vehicle id belongs.'},
   why:{ar:'الاتنين أرقام طويلة، والـ IMEI هو اللي مكتوب على الجهاز فطبيعي حد يفتكره المعرّف. الـ UID بيتجاب من نداء تاني.',
        en:'Both are long numbers, and the IMEI is the one printed on the device, so it is natural to assume it is the identifier. The UID comes from a separate call.'},
   chain(a){
     return [
       {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
        note:{ar:'دوّر على العربية اللي imei بتاعها = بتاعك، وخد id بتاعها.', en:'Find the unit whose imei matches yours and take its id.'}},
-      {m:'POST', p:(_paths(a)[0] || '/units/view'), body:{data:{id:'{{unit_id}}'}},
-       note:{ar:'وبعدين نفس الريكوست بس بالـ id.', en:'Then the same request, this time with the id.'}}
+      /* البودي الحقيقي للإندبوينت من الكولكشن — /units/locations بياخد unit_id وفترة، مش id */
+      (()=>{ const p = _paths(a)[0] || '/units/view', e = _ep(p);
+        let body = {data:{id:'{{unit_id}}'}};
+        if(e){ const b = reqPmBody(e); if(b && typeof b === 'object') body = b; }
+        return {m:'POST', p, body, note:{ar:'وبعدين نفس الريكوست بس بالـ id في مكان الـ IMEI.', en:'Then the same request, with that id in place of the IMEI.'}}; })()
     ];
   } },
 
@@ -10910,7 +10958,8 @@ function ruleReply(a, m){
   L.push('Thank you for the detail. ' + (r.mistake.en));
   L.push('');
   L.push((r.why.en));
-  if(r.extra){ L.push(''); L.push((r.extra.en)); }
+  const ex = typeof r.extra === 'function' ? r.extra(a) : r.extra;
+  if(ex){ L.push(''); L.push(ex.en); }
   if(ch && ch.length){
     L.push('');
     L.push('The sequence that returns what you need:');
@@ -10921,7 +10970,7 @@ function ruleReply(a, m){
       if(s.note) L.push('     ' + (s.note.en || s.note.ar || String(s.note)));
       L.push('');
     });
-    L.push('A Postman collection with these requests is attached; the identifiers move between the steps on their own.');
+    L.push('A Postman collection with these requests is attached: run Login first, then copy the id of your vehicle into the unit_id variable.');
   }
   L.push('');
   L.push('Please try this and tell us what comes back if anything differs.');
@@ -11282,6 +11331,10 @@ function ocrClean(txt){
   let v = 0;
   s = s.replace(/"([a-z]+(?: [a-z]+)+)"/g, (m, val)=>{ const u = val.replace(/ /g, '_'); if(KNOWN.indexOf(u) >= 0){ v++; return '"' + u + '"'; } return m; });
   if(v) fixes.push(t('قيم معروفة اتقطعت بمسافة اتلمّت','Known values split by a space rejoined'));
+  /* علامة تنصيص اتقرت نجمة أو ® بعد المفتاح: "from*: → "from": */
+  s = s.replace(/"([A-Za-z_][A-Za-z0-9_]*)[*®°'`´]\s*:/g, '"$1":');
+  /* الصفر اتقرى © أو ® جوه رقم أو وقت: ©0:00 → 00:00 */
+  s = s.replace(/(^|[\d:\s"\-])[©®](?=\d)/g, '$1' + '0').replace(/(?<=\d)[©®]/g, '0');
   /* علامة تنصيص اتقرت نجمة أو فاصلة في أول المفتاح: *message" → "message" */
   s = s.replace(/^(\s*)[*'`´]([a-z_][a-z0-9_]*)"/gmi, '$1"$2"');
   /* صفر اتقرى حرف في مكان رقم */
@@ -11294,6 +11347,21 @@ function ocrClean(txt){
     if(alt !== num && OCR_CODES.has(alt)){ fixes.push(t(`status_code اتقرى ${num} واتصلّح لـ ${alt} — اتأكد من الصورة`, `status_code read as ${num}, corrected to ${alt} — check the image`)); return a + alt; }
     return m;
   });
+  /* قوس الفتح الأول بيتقرى «i» أو بيضيع: لو أقواس القفل أكتر من الفتح بره النصوص، نكمّل من الأول */
+  {
+    let q = false, open = 0, close = 0, so = 0, sc = 0;
+    for(const ch of s){ if(ch === '"'){ q = !q; continue; } if(q) continue;
+      if(ch === '{') open++; else if(ch === '}') close++; else if(ch === '[') so++; else if(ch === ']') sc++; }
+    const bare = /^\s*(?:[il|!]\s*\n)?\s*"[^"\n]+"\s*:/.test(s);
+    if(bare && close > open){
+      s = '{\n'.repeat(close - open) + s.replace(/^\s*[il|!]\s*\n/, '');
+      fixes.push(t('قوس الفتح الأول ضاع في القراءة واترجّع','The opening brace was lost in reading and restored'));
+    } else if(bare && close === open){
+      /* القص بدأ بعد القوس الخارجي (عمود أرقام السطور في بوستمان): الكائن الخارجي كله ناقص */
+      s = '{\n' + s.replace(/^\s*[il|!]\s*\n/, '') + '\n}';
+      fixes.push(t('القوس الخارجي كان بره القص واترجّع','The outer braces fell outside the crop and were restored'));
+    }
+  }
   /* بودي الريكوست فوق والرد تحت في نفس اللقطة: الفحص بياخد أول بلوك، فالرد لازم يبقى الأول */
   const picked = ocrPickResponse(s);
   if(picked){ s = picked; fixes.push(t('الصورة فيها أكتر من بلوك — الرد اتحط الأول والباقي تحته','More than one block in the image — the response placed first, the rest below')); }
@@ -11314,6 +11382,63 @@ function ocrPickResponse(s){
   const resp = blocks.find(isResp);
   if(!resp || isResp(blocks[0])) return null;
   return resp + '\n\n' + blocks.filter(b => b !== resp).join('\n\n');
+}
+/* ============ لقطة إيميل فيها بوستمان → تذكرة ============
+   القراءة الأولى بترجّع السطور بمواضعها. لو فيها لينك وتحته شريط الرد
+   (Body · Cookies · Test Results / 200 OK)، الصورة بتتقسم أربع حتت:
+   كلام العميل فوق اللينك، واللينك، وبودي الريكوست، والرد. */
+function ocrSections(lines, scale, W, H){
+  const L = lines.map(l => ({text:l.text.trim(), x0:l.bbox.x0/scale, y0:l.bbox.y0/scale, x1:l.bbox.x1/scale, y1:l.bbox.y1/scale}))
+                 .sort((a,b) => a.y0 - b.y0 || a.x0 - b.x0);
+  const url = L.find(l => /https?:\/\/[^\s]+\/[a-z_]+/i.test(l.text));
+  if(!url) return null;
+  const mk = L.find(l => l.y0 > url.y1 && /Body\s+Cookies|Test\s*Results|\b[0-9OoBb]{3}\s*[O0]K\b/i.test(l.text));
+  if(!mk) return null;
+  const hs = L.map(l => l.y1 - l.y0).sort((a,b) => a-b), lh = hs[Math.floor(hs.length/2)] || 12;
+  const box = (arr, top, bottom) => {
+    if(!arr.length) return null;
+    const pad = Math.max(10, lh * 2);
+    const x0 = Math.max(0, Math.min(...arr.map(l=>l.x0)) - pad), x1 = Math.min(W, Math.max(...arr.map(l=>l.x1)) + pad);
+    const y0 = Math.max(top, Math.min(...arr.map(l=>l.y0)) - pad), y1 = Math.min(bottom, Math.max(...arr.map(l=>l.y1)) + pad * 1.5);
+    return (x1 - x0 > 30 && y1 - y0 > 10) ? {x:x0, y:y0, w:x1 - x0, h:y1 - y0} : null;
+  };
+  /* بودي الريكوست: سطور فيها علامة تنصيص بين اللينك والشريط، في الجنب الشمال (مش Cookies/Beautify) */
+  const reqL = L.filter(l => l.y0 > url.y1 && l.y1 < mk.y0 && /["“”]/.test(l.text) && l.x0 < W * 0.7);
+  /* الرد: تحت الشريط وتحت سطر أوضاع العرض (JSON · Preview · Visualize) — القص بيبدأ بعده عشان ما يدخلش في الجدول */
+  const modeL = L.filter(l => l.y0 > mk.y1 - 2 && l.y0 < mk.y1 + lh * 4 && /Preview|Visualize|Pretty|\bRaw\b/i.test(l.text));
+  const respTop = Math.max(mk.y1, ...modeL.map(l => l.y1));
+  const respL = L.filter(l => l.y0 > respTop + 1 && l.x0 < W * 0.8);
+  /* كلام العميل: فوق اللينك، من غير هيدر الإيميل (To/Cc/الأزرار/التاريخ) */
+  const head = /^(To|Cc|From|Sent|Subject)\b|<[^>\s]+@[^>\s]+>|Reply|Forward|\b\d{1,2}\/\d{1,2}\/\d{4}\b|^[^A-Za-z\u0600-\u06FF]{0,4}$/;
+  let prose = L.filter(l => l.y1 <= url.y0 + 2 && l.x0 < W * 0.62 && !head.test(l.text));
+  const g = prose.findIndex(l => /^(Dear|Hi|Hello|Good\s|السادة|عزيز|مرحب|السلام)/i.test(l.text));
+  if(g > 0) prose = prose.slice(g);
+  const paras = []; let last = null;
+  prose.forEach(l => {
+    if(last && l.y0 - last.y1 < lh * 1.2) paras[paras.length - 1] += ' ' + l.text; else paras.push(l.text);
+    last = l;
+  });
+  const m = url.text.match(/\b(GET|POST|PUT|PATCH|DELETE)\b/i);
+  const u = url.text.match(/https?:\/\/[^\s?]+/i);
+  return { prose: paras.join('\n\n'), method: m ? m[1].toUpperCase() : 'POST', url: u ? u[0] : '',
+           reqRegion: box(reqL, url.y1, mk.y0), respRegion: box(respL, respTop + 1, H), lineH: lh,
+           respIsTable: respL.length > 0 && !respL.some(l => /[{"“]/.test(l.text)) };
+}
+/* رد بوستمان بوضع Preview: جدول «مفتاح   قيمة» → كائن */
+function ocrTable(txt){
+  const o = {}; let n = 0;
+  String(txt || '').split('\n').forEach(line => {
+    const mm = line.trim().match(/^([a-z][a-z0-9_]{2,40})\s+(.+)$/);
+    if(!mm) return;
+    const k = mm[1], v = mm[2].trim(); let val;
+    /* المربع الصغير بتاع [] و{} بيتقرى «8)» أو «[]» أو «0» — في الحقول اللي دايمًا مصفوفة/كائن. قبل الأرقام. */
+    if(/^(data|extra|errors|items)$/i.test(k) && /^[\[\(\{]?\s*[8B0O\]\)\}|]{0,3}\s*[\]\)\}]?$/.test(v)) val = /^\{/.test(v) ? {} : [];
+    else if(/^-?\d+(\.\d+)?$/.test(v)) val = Number(v);
+    else if(/^(true|false|null)$/i.test(v)) val = JSON.parse(v.toLowerCase());
+    else val = v.replace(/\s+/g, '_').replace(/^"|"$/g, '');
+    o[k] = val; n++;
+  });
+  return n ? o : null;
 }
 /* السطور بمواضعها من رد المحرك — بلوك ← فقرة ← سطر */
 function ocrLines(d){
@@ -11357,7 +11482,11 @@ async function ocrImage(file, progress){
     const p1 = ocrPrepare(img);
     await w.setParameters({ tessedit_pageseg_mode: '3' });
     const r1 = await w.recognize(p1.canvas);
-    const loc = ocrLocate(ocrLines(r1.data), p1.scale, W, H);
+    const lines1 = ocrLines(r1.data);
+    /* v6.47: إيميل فيه لقطة بوستمان كاملة → تذكرة بأجزائها */
+    const sec = ocrSections(lines1, p1.scale, W, H);
+    if(sec && (sec.reqRegion || sec.respRegion)) return await ocrTicket(img, w, sec, progress, p1.dark);
+    const loc = ocrLocate(lines1, p1.scale, W, H);
     progress && progress(t('بنقرا الصورة','Reading the image'));
     const p2 = ocrPrepare(img, loc.region, ocrScaleFor(loc.lineH));
     await w.setParameters({ tessedit_pageseg_mode: '6' });
@@ -11369,6 +11498,42 @@ async function ocrImage(file, progress){
     return out;
   } finally { URL.revokeObjectURL(url); }
 }
+/* كل جزء بيتقص ويتكبّر ويتقرا لوحده؛ النتيجة: الرد (للفحص) + التذكرة كاملة (للتحليل) */
+async function ocrTicket(img, w, sec, progress, dark){
+  const fixes = [t('الصورة فيها تذكرة كاملة: كلام العميل والريكوست والرد — اتقسمت واتقرت كل حتة لوحدها','The image holds a full ticket — the customer text, the request and the response were split and read one by one')];
+  const sc = ocrScaleFor(sec.lineH);
+  const readRegion = async region => {
+    if(!region) return '';
+    const p = ocrPrepare(img, region, sc);
+    await w.setParameters({ tessedit_pageseg_mode: '6' });
+    return (await w.recognize(p.canvas)).data.text || '';
+  };
+  progress && progress(t('بنقرا الريكوست','Reading the request'));
+  let body = '';
+  if(sec.reqRegion){
+    const c = ocrClean(await readRegion(sec.reqRegion));
+    try{ body = JSON.stringify(JSON.parse(c.text), null, 2); }
+    catch(_){ const rp = repairJson(c.text); body = rp.json ? JSON.stringify(rp.json, null, 2) : c.text; }
+  }
+  progress && progress(t('بنقرا الرد','Reading the response'));
+  let resp = '';
+  if(sec.respRegion){
+    const raw = await readRegion(sec.respRegion);
+    const tbl = sec.respIsTable ? ocrTable(raw) : null;
+    if(tbl){ resp = JSON.stringify(tbl, null, 2); fixes.push(t('الرد كان معروض جدول (Preview) واتحوّل JSON','The response was shown as a Preview table and was converted to JSON')); }
+    else {
+      const c = ocrClean(raw); c.fixes.forEach(f => fixes.push(f));
+      try{ resp = JSON.stringify(JSON.parse(c.text), null, 2); }
+      catch(_){ const rp = repairJson(c.text); resp = rp.json ? JSON.stringify(rp.json, null, 2) : c.text; }
+    }
+  }
+  const path = String(sec.url || '').replace(/^https?:\/\/[^/]+/i, '');
+  const tech = [ sec.url ? 'Request:\n' + sec.method + ' ' + sec.url + '?token=<TOKEN>' + (body ? '\n' + body : '') : '',
+                 resp ? 'Response:\n' + resp : '' ].filter(Boolean).join('\n\n');
+  return { text: resp || body, ticket: [sec.prose, tech].filter(Boolean).join('\n\n'), tech,
+           prose: sec.prose, method: sec.method, url: sec.url, path, body, response: resp,
+           fixes, dark, confidence: 0, isTicket: true };
+}
 /* صندوق الصورة تحت الخانة: الصورة نفسها + الحالة + اللي اتصلّح */
 function ocrBox(boxId, html, thumb){
   const b = $(boxId); if(!b) return;
@@ -11378,7 +11543,7 @@ function ocrBox(boxId, html, thumb){
     <div style="flex:1 1 240px; font-size:13px">${html}</div></div>`;
 }
 /* بتوصّل الصورة بالخانة: رفع، أو لصق Ctrl+V، أو سحب. after() بتتنده بعد ما النص يتحط. */
-function ocrAttach(textId, boxId, fileId, after){
+function ocrAttach(textId, boxId, fileId, after, mode){
   const ta = $(textId); if(!ta) return;
   const run = async file => {
     if(!file || !/^image\//.test(file.type || '')){ toast(t('ده مش ملف صورة','That is not an image file')); return; }
@@ -11391,10 +11556,19 @@ function ocrAttach(textId, boxId, fileId, after){
         return;
       }
       const cur = ta.value.trim();
-      ta.value = cur ? cur + '\n\n' + r.text : r.text;
+      if(r.isTicket && mode === 'case'){
+        /* لو الموظف لصق كلام العميل قبلها، بنزوّد الريكوست والرد بس */
+        ta.value = cur ? cur + '\n\n' + r.tech : r.ticket;
+      } else {
+        ta.value = cur ? cur + '\n\n' + r.text : r.text;
+      }
       ocrBox(boxId, `<div class="note sig"><b>${t('اتقرت من الصورة','Read from the image')}</b>${r.dark ? ' — ' + esc(t('خلفية غامقة اتعكست قبل القراءة','dark background inverted before reading')) : ''}.
           ${t('راجع الأرقام الطويلة (المعرّفات والـ IMEI) قبل ما تعتمد عليها — الصفر ساعات بيتقرى 6 أو 8.','Check long numbers (ids and IMEIs) before relying on them — a zero sometimes reads as 6 or 8.')}
-          ${r.fixes.length ? `<ul style="margin:6px 0 0; padding-inline-start:20px">${r.fixes.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>` : ''}</div>`, thumb);
+          ${r.fixes.length ? `<ul style="margin:6px 0 0; padding-inline-start:20px">${r.fixes.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+           ${r.isTicket && mode !== 'case' ? `<div class="row" style="margin-top:8px"><button class="btn sig" id="${boxId}Tk">${t('حوّلها لتذكرة وحلّلها','Turn it into a ticket and analyse it')}</button>
+             <span style="font-size:12.5px; color:var(--muted); align-self:center">${t('الصورة فيها كلام العميل والريكوست — التحليل بيقول الغلطة والرد الجاهز.','The image carries the customer text and the request — the analysis gives the mistake and a ready reply.')}</span></div>` : ''}</div>`, thumb);
+      const tk = $(boxId + 'Tk');
+      if(tk) tk.onclick = ()=>{ INSPVIEW = 'case'; paintInspect(); $('caseText').value = r.ticket; renderCase(r.ticket); };
       after && after(r);
     }catch(err){
       const off = !navigator.onLine || /load |Failed to fetch|NetworkError/i.test(String(err && err.message || err));
@@ -11480,7 +11654,7 @@ function renderInspect(){
   const PK2 = pickRows(j), {rows, path, total} = PK2;
   if(!rows.length){
     out.innerHTML = `<div class="panel"><div class="sec">${fixNote}${head}
-      <div class="note" style="margin-top:8px">${PK2.empty ? t('الرد سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر. وسّع التواريخ أو شيل الفلاتر وجرّب تاني.','The response is valid and the connection works — zero records matched the filter. Widen the dates or drop the filters and retry.') : t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>
+      <div class="note" style="margin-top:8px">${(PK2.empty && !bad) ? t('الرد سليم والاتصال شغال — بس صفر سجلات مطابقة للفلتر. وسّع التواريخ أو شيل الفلاتر وجرّب تاني.','The response is valid and the connection works — zero records matched the filter. Widen the dates or drop the filters and retry.') : t('الرد ده مش لستة سجلات.','This response is not a list of records.')}</div>
       <div class="row" style="margin-top:10px">
         <button class="ct" id="imRaw2" aria-selected="${INSP_MODE!=='user'}">${t('الرد زي ما هو','The response as it is')}</button>
         <button class="ct" id="imUser2" aria-selected="${INSP_MODE==='user'}">${t('قراءة الحقول','Read the fields')}</button>
@@ -11799,7 +11973,7 @@ function paintCase(){
   $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; CASE_LIVE = null;
     const b=$('caseImgBox'); if(b){ b.hidden=true; b.innerHTML=''; } };
   /* v6.45: «Postman Response:» وبعدها صورة — بتتقرا وتتحط تحت كلام العميل وتتحلّل */
-  ocrAttach('caseText', 'caseImgBox', 'caseImg', ()=>renderCase($('caseText').value));
+  ocrAttach('caseText', 'caseImgBox', 'caseImg', ()=>renderCase($('caseText').value), 'case');
 }
 
 /* سطر واحد بيقول الحالة اتحسمت ولا لسه — عشان الموظف يعرف في ثانية
@@ -12368,7 +12542,7 @@ function renderCase(text){
           'Written in the language of their message. Read it before sending, and adjust the execution-body part once the reports team confirms its shape.')}</div>
       <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
       <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
-        ${a.reportCase ? `<button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>` : ''}</div>
+        ${(a.reportCase || pmFromRule(a)) ? `<button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>` : ''}</div>
       ${a.reportCase ? `<div class="note" style="margin-top:8px">${t(
         'الكولكشن بيتبعت أتاشمنت مع الرد. فيه السلسلة كاملة بأكواد حقول العميل نفسه، وبيمشي لوحده: التوكن ورقم العربية ورقم التقرير بيتنقلوا بين الخطوات، وخطوة الانتظار بتلف لحد ١٠٠٪.',
         'Attach the collection to the reply. It carries the whole chain using the customer\'s own field codes and runs itself: the token, unit id and report id move between the steps, and the wait request loops until 100%.')}</div>` : ''}
@@ -12405,7 +12579,7 @@ function renderCase(text){
   if(pmb) pmb.onclick = ()=>{
     const col = pmFromCase(a);
     if(!col){ toast(t('الحالة دي مش محتاجة كولكشن','This case does not need a collection')); return; }
-    pmSave(col, 'AFAQY_Report_Data_Full_Chain.postman_collection.json');
+    pmSave(col, a.reportCase ? 'AFAQY_Report_Data_Full_Chain.postman_collection.json' : 'AFAQY_Fix.postman_collection.json');
   };
   const ak = $('caseAskCopy');
   if(ak) ak.onclick = ()=>{ copy(askReply(a, caseNeeds(a)) || '', t('رسالة الطلب اتنسخت','Request message copied')); };
@@ -12845,7 +13019,7 @@ $('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f || /^image\//.tes
   const rd=new FileReader(); rd.onload=()=>{ $('inText').value=String(rd.result||''); renderInspect(); };
   rd.readAsText(f); };
 /* v6.45: صورة الرد — رفع أو لصق أو سحب، وبعد القراءة بتتفحص على طول */
-ocrAttach('inText', 'inImgBox', 'inFile', ()=>renderInspect());
+ocrAttach('inText', 'inImgBox', 'inFile', ()=>renderInspect(), 'resp');
 $('inClear').addEventListener('click', ()=>{ const b=$('inImgBox'); if(b){ b.hidden=true; b.innerHTML=''; } });
 $('unitGo').onclick = ()=>resolveUnit($('unitIn').value);
 $('unitIn').addEventListener('keydown', ev=>{ if(ev.key==='Enter') resolveUnit($('unitIn').value); });
