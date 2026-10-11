@@ -754,9 +754,23 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.47",
+  "version": "6.48",
   "date": "2026-10-11",
   "history": [
+    {
+      "v": "6.48",
+      "date": "2026-10-11",
+      "items": {
+        "ar": [
+          "رد «IMEI مكان رقم العربية» بقى صريح: الـ API بتعرّف العربية بالـ UID مش بالـ IMEI، فهات الـ UID الأول من /units/lists للعربية اللي الـ IMEI بتاعها كذا (بالرقم نفسه)، وبعدين اطلب الداتا بيه. ولو العميل سأل عن الصلاحيات: not_allowed سببها الـ IMEI ومفيش رول ناقص.",
+          "التوثيق الرسمي (1- AVL Integration documentation) بيقول إن التوكن ينفع في اللينك ?token= أو هيدر Authorization: Bearer. الأداة كانت بتقول «مش في الهيدر» في ١٢ مكان، منهم ردود بتروح للعميل وتعليقات في الكود المتولّد — اتصلّحوا كلهم."
+        ],
+        "en": [
+          "The \"IMEI where a unit id belongs\" reply is now explicit: the API identifies vehicles by the UID, not the IMEI, so get the UID first from /units/lists for the vehicle whose IMEI is the one sent (named in the reply), then request the data with it. If the customer asks about permissions: the not_allowed comes from the IMEI and no role is missing.",
+          "The official documentation (1- AVL Integration documentation) states that the token works as a ?token= URL parameter or as an Authorization: Bearer header. The tool said \"not in a header\" in 12 places, including customer replies and comments in generated code — all corrected."
+        ]
+      }
+    },
     {
       "v": "6.47",
       "date": "2026-10-11",
@@ -4218,7 +4232,7 @@ ${tr.trimmed ? `\n${tr.note}` : ''}
 
 NOTES
 - Get the token from POST ${baseUrl()}/auth/login with body {"data":{"username":"...","password":"..."}}. It is returned in data.token.
-- The token is passed as a "token" query parameter, not in an Authorization header.
+- The token is passed as a "token" query parameter; the official documentation also accepts it as an Authorization: Bearer header.
 - Almost every endpoint uses POST, including reads, and the body is always wrapped in a "data" object.
 - IMPORTANT: this API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the response body rather than relying on the HTTP status.
 
@@ -4346,7 +4360,7 @@ function _renderDetail(e, why){
     <div class="sec">
       <h3>${t('اللينك الكامل','Full URL')}</h3>
       <pre class="pre" id="fullUrlOut">${esc(fullUrl(e,false))}</pre>
-      ${e.t ? `<div class="note" style="margin-top:8px">${t('التوكن بيتبعت كـ','The token goes as')} <code>?token=</code> ${t('في الرابط، مش في هيدر.','in the URL, not in a header.')}</div>` : ''}
+      ${e.t ? `<div class="note" style="margin-top:8px">${t('التوكن بيتبعت كـ','The token goes as')} <code>?token=</code> ${t('في الرابط — أو هيدر Authorization: Bearer.','in the URL — or as an Authorization: Bearer header.')}</div>` : ''}
       ${e.t && haveToken() ? `<div class="note ${SHOW_TOKEN?'warn':''}" style="margin-top:8px">
         ${SHOW_TOKEN
           ? `<b>${t('توكنك الحقيقي ظاهر في اللينك والأمثلة تحت.','Your real token is showing in the link and the examples below.')}</b><br>
@@ -4820,9 +4834,9 @@ Content-Type: application/json
 }</pre><p>Every subsequent request passes the token in the URL: <code>?token=…</code></p>`}},
 
  {v:1, t:{ar:'التوكن بيتبعت إزاي؟', en:'How is the token passed?'},
-  h:{ar:`<p>كـ باراميتر في اللينك، مش هيدر:</p><pre class="pre">POST {base}/units/lists?token=YOUR_TOKEN</pre>
+  h:{ar:`<p>كـ باراميتر في اللينك — وده اللي الكولكشن كله ماشي بيه. التوثيق الرسمي بيقبله كمان هيدر <code>Authorization: Bearer</code>:</p><pre class="pre">POST {base}/units/lists?token=YOUR_TOKEN</pre>
    <p>ده الحال في <b>504</b> ريكوست من أصل <b>534</b> في الكولكشن.</p>`,
-     en:`<p>As a query parameter, not a header:</p><pre class="pre">POST {base}/units/lists?token=YOUR_TOKEN</pre>
+     en:`<p>As a query parameter — the way the whole collection does it. The official documentation also accepts an <code>Authorization: Bearer</code> header:</p><pre class="pre">POST {base}/units/lists?token=YOUR_TOKEN</pre>
    <p>This holds for <b>504</b> of the <b>534</b> requests in the collection.</p>`}},
 
  {v:1, t:{ar:'شكل الريكوست ثابت: كله جوه data', en:'One fixed shape: everything inside data'},
@@ -8342,7 +8356,7 @@ ${safeResp.slice(0,3000)}
 
 NOTES
 - Obtain the token from POST ${baseUrl()}/auth/login with body {"data":{"username":"...","password":"..."}}; it is returned in data.token.
-- The token is passed as a "token" query parameter, not in an Authorization header.
+- The token is passed as a "token" query parameter; the official documentation also accepts it as an Authorization: Bearer header.
 - Almost every endpoint uses POST, including read operations.
 - The request body is always wrapped in a "data" object.
 - IMPORTANT: the API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the response body rather than relying on the HTTP status.`;
@@ -8406,7 +8420,7 @@ Four things worth knowing before you begin — they account for most of the issu
    POST /auth/login with body {"data":{"username":"...","password":"..."}}
    The token is returned in data.token.
 
-2. The token goes in the URL, not a header
+2. The token goes in the URL (an Authorization: Bearer header also works)
    POST /units/lists?token=YOUR_TOKEN
 
 3. Almost every endpoint is POST, including reads and listings, and the body is always wrapped in a "data" object.
@@ -8756,7 +8770,7 @@ ${resp.slice(0,3000)}
 
 NOTES
 - The UID above is the identifier the API works with. The IMEI identifies the physical device and is not accepted by these endpoints.
-- Get your token from POST ${baseUrl()}/auth/login with body {"data":{"username":"...","password":"..."}}; it is returned in data.token, and is passed as a "token" query parameter rather than a header.
+- Get your token from POST ${baseUrl()}/auth/login with body {"data":{"username":"...","password":"..."}}; it is returned in data.token, and is passed as a "token" query parameter; an Authorization: Bearer header also works.
 - Almost every endpoint uses POST, and the body is always wrapped in a "data" object.
 - IMPORTANT: the API returns HTTP 200 even when a call fails. Read "status_code" and "message" from the response body rather than relying on the HTTP status.`;
 }
@@ -10282,7 +10296,7 @@ function usageGuide(json, method, path, hasToken){
   L.push('');
   L.push('5. THINGS THAT CATCH PEOPLE OUT');
   L.push('   - HTTP 200 does not mean success. Read status_code from the body.');
-  if(hasToken) L.push('   - The token goes in the URL as ?token=, not in an Authorization header.');
+  if(hasToken) L.push('   - The token goes in the URL as ?token= (an Authorization: Bearer header also works).');
   L.push('   - Almost every endpoint uses POST, including ones that only read.');
   if(has('engine_hours')) L.push('   - engine_hours is in seconds. Divide by 3600.');
   if(has('imei')) L.push('   - The IMEI identifies the device; the UID identifies the record. Other endpoints take the UID.');
@@ -10836,11 +10850,12 @@ const CASE_RULES = [
   extra(a){
     const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ');
     const im = _imeis(a)[0];
-    const lead = im ? {ar:`في الريكوست، unit_id قيمته ${im} — ده الـ IMEI. السيرفر محتاج id العربية: حقل id بتاعها في رد /units/lists اللي بيوصلك أصلًا.`,
-                       en:`In your request, unit_id carries ${im}, which is the IMEI. The API expects the vehicle id instead: the id field of that vehicle in the /units/lists response you already receive.`} : null;
+    /* v6.48 (صفوت): الـ API بتعرّف العربية بالـ UID بس. not_allowed هنا سببها الـ IMEI — مفيش رول ناقص. */
+    const lead = im ? {ar:`الـ API بتعرّف العربية بالـ UID مش بالـ IMEI. في الريكوست، unit_id قيمته ${im} — ده IMEI الجهاز. هات الـ UID الأول: حقل id بتاع العربية دي في رد /units/lists، واستخدمه في أي ريكوست بياخد unit_id — وممكن يتخزّن مرة واحدة لكل عربية جنب الـ IMEI.`,
+                       en:`The AFAQY API identifies vehicles by their unit ID (UID), not by the device IMEI. In your request, unit_id carries ${im}, which is the IMEI of the device. Get the UID first — the id field of that vehicle in the /units/lists response — then use it in every call that takes unit_id; you can store it once per vehicle next to the IMEI.`} : null;
     const role = /not_allowed|unauthori[sz]ed|"status_code"\s*:\s*40[13]|\brole\b|permission|صلاحي/i.test(all)
-      ? {ar:'لو بعد ما تبعت الـ id الرد فضل not_allowed، يبقى الرول بتاع الحساب ده مش عليه صلاحية الإندبوينت ده — ابعتلنا اسم المستخدم وإحنا نراجع صلاحياته.',
-         en:'If the call still returns not_allowed once the id is used, the role on this user does not include permission for this endpoint — reply with the username and we will review its permissions on our side.'} : null;
+      ? {ar:'رد not_allowed سببه الـ IMEI اللي في unit_id — مفيش رول ولا صلاحية محتاجة تتغيّر.',
+         en:'The not_allowed response comes from the IMEI in unit_id — no role or permission change is needed.'} : null;
     if(!lead && !role) return null;
     return {ar:[lead, role].filter(Boolean).map(x=>x.ar).join('\n\n'), en:[lead, role].filter(Boolean).map(x=>x.en).join('\n\n')};
   },
@@ -10849,14 +10864,16 @@ const CASE_RULES = [
   why:{ar:'الاتنين أرقام طويلة، والـ IMEI هو اللي مكتوب على الجهاز فطبيعي حد يفتكره المعرّف. الـ UID بيتجاب من نداء تاني.',
        en:'Both are long numbers, and the IMEI is the one printed on the device, so it is natural to assume it is the identifier. The UID comes from a separate call.'},
   chain(a){
+    const im = _imeis(a)[0];
     return [
       {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
-       note:{ar:'دوّر على العربية اللي imei بتاعها = بتاعك، وخد id بتاعها.', en:'Find the unit whose imei matches yours and take its id.'}},
+       note: im ? {ar:`دوّر على العربية اللي imei بتاعها ${im}، وخد قيمة id بتاعها — ده الـ UID.`, en:`Find the vehicle whose imei is ${im} and take the value of its id field — this is the UID.`}
+                : {ar:'دوّر على العربية اللي imei بتاعها = بتاعك، وخد قيمة id بتاعها — ده الـ UID.', en:'Find the vehicle whose imei matches yours and take the value of its id field — this is the UID.'}},
       /* البودي الحقيقي للإندبوينت من الكولكشن — /units/locations بياخد unit_id وفترة، مش id */
       (()=>{ const p = _paths(a)[0] || '/units/view', e = _ep(p);
         let body = {data:{id:'{{unit_id}}'}};
         if(e){ const b = reqPmBody(e); if(b && typeof b === 'object') body = b; }
-        return {m:'POST', p, body, note:{ar:'وبعدين نفس الريكوست بس بالـ id في مكان الـ IMEI.', en:'Then the same request, with that id in place of the IMEI.'}}; })()
+        return {m:'POST', p, body, note:{ar:'وبعدين نفس الريكوست بالـ UID في unit_id مكان الـ IMEI.', en:'Then the same request, with the UID in unit_id in place of the IMEI.'}}; })()
     ];
   } },
 
@@ -12137,8 +12154,8 @@ const REQ_CATALOG = [
 { id:'auth', st:'ok', eps:['/auth/login'],
   kw:/authentication|\bauth\b|\blogin\b|المصادقة|تسجيل الدخول|طريقة الدخول/i,
   t:{ar:'طريقة المصادقة', en:'Authentication'},
-  note:{ar:'POST /auth/login بـ data.username و data.password والتوكن في data.token. التوكن بيتبعت كباراميتر في اللينك ?token= مش هيدر (504 ريكوست من 534). كله POST تقريبًا والبودي جوه data، والرد 200 حتى لو فشل — الخطأ جوه status_code و message.',
-        en:'POST /auth/login with data.username and data.password; the token is data.token. It is sent as a URL parameter ?token=, not a header (504 of 534 requests). Almost everything is POST with the body inside data, and the HTTP status is 200 even on failure — the error is in status_code and message.'},
+  note:{ar:'POST /auth/login بـ data.username و data.password والتوكن في data.token. التوكن بيتبعت كباراميتر في اللينك ?token= (504 ريكوست من 534)، والتوثيق الرسمي بيقبله كمان هيدر Authorization: Bearer. كله POST تقريبًا والبودي جوه data، والرد 200 حتى لو فشل — الخطأ جوه status_code و message.',
+        en:'POST /auth/login with data.username and data.password; the token is data.token. It is sent as a URL parameter ?token= (504 of 534 requests); the official documentation also accepts an Authorization: Bearer header. Almost everything is POST with the body inside data, and the HTTP status is 200 even on failure — the error is in status_code and message.'},
   reply:{ar:'المصادقة تتم عبر الطلب POST /auth/login بالجسم {"data":{"username":"…","password":"…"}}، ويعود الرمز في الحقل data.token. يُمرَّر الرمز في كل طلب كمعامل في الرابط، مثل: POST /units/lists?token=YOUR_TOKEN. معظم الطلبات من نوع POST وجسمها داخل الكائن data، وتعيد الواجهة الحالة HTTP 200 حتى عند فشل الطلب؛ لذا يُقرأ الحقلان status_code و message من جسم الاستجابة.',
          en:'Authentication is POST /auth/login with the body {"data":{"username":"…","password":"…"}}; the token is returned in data.token. The token is passed on every call as a URL parameter, e.g. POST /units/lists?token=YOUR_TOKEN. Almost every endpoint is POST with the body wrapped in a "data" object, and the API returns HTTP 200 even when a call fails — read status_code and message from the response body.'} },
 
@@ -12320,7 +12337,7 @@ function pmFromReq(a){
   + '  - Set date_from and date_to (YYYY-MM-DD) for the period requests.\n\n'
   + 'THREE THINGS TO KNOW\n'
   + '  - Almost every endpoint is POST, and the body is always wrapped in a "data" object.\n'
-  + '  - The token goes in the URL as ?token=..., not in a header.\n'
+  + '  - The token goes in the URL as ?token=... (an Authorization: Bearer header also works).\n'
   + '  - The API returns HTTP 200 even when a call fails: read status_code and message from the body.\n\n'
   + 'Reports are generated asynchronously: create, then poll the percentage until 100, then read the rows.';
   return col;

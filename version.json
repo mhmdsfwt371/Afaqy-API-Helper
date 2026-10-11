@@ -1,16 +1,14 @@
 {
-  "version": "6.47",
+  "version": "6.48",
   "date": "2026-10-11",
   "notes": {
     "ar": [
-      "صورة إيميل العميل بقت تتحوّل لتذكرة: ارفعها في «حلّل رسالة عميل» والأداة بتقسمها — كلام العميل، واللينك والميثود، وبودي الريكوست، والرد — وتقرا كل حتة لوحدها وتحطها في الخانة وتحلّلها. في «افحص رد» الرد بيتفحص، وزرار «حوّلها لتذكرة وحلّلها» بينقل الصورة كلها للتحليل. المحك إيميل حقيقي فيه لقطة بوستمان.",
-      "الرد اللي بوستمان بيعرضه بوضع Preview (جدول «message  not_allowed» مش JSON) بقى يتحوّل JSON.",
-      "المحلّل: بودي فيه unit_id بقى يتعرف كريكوست، وnot_allowed/401 بقت دليل على «IMEI مكان رقم العربية». الرد بيقول قيمة الـ IMEI اللي اتبعتت، وبيجاوب سؤال «في رول ناقص؟» بأمانة: صلّح المعرّف الأول، ولو فضل not_allowed نراجع الصلاحيات."
+      "رد «IMEI مكان رقم العربية» بقى صريح: الـ API بتعرّف العربية بالـ UID مش بالـ IMEI، فهات الـ UID الأول من /units/lists للعربية اللي الـ IMEI بتاعها كذا (بالرقم نفسه)، وبعدين اطلب الداتا بيه. ولو العميل سأل عن الصلاحيات: not_allowed سببها الـ IMEI ومفيش رول ناقص.",
+      "التوثيق الرسمي (1- AVL Integration documentation) بيقول إن التوكن ينفع في اللينك ?token= أو هيدر Authorization: Bearer. الأداة كانت بتقول «مش في الهيدر» في ١٢ مكان، منهم ردود بتروح للعميل وتعليقات في الكود المتولّد — اتصلّحوا كلهم."
     ],
     "en": [
-      "A screenshot of a customer email now becomes a ticket: upload it in Analyse a customer message and the tool splits it — the customer text, the URL and method, the request body and the response — reads each part on its own, puts the ticket in the box and analyses it. In Inspect, the response is inspected and a \"Turn it into a ticket\" button moves the whole image to the analysis. The yardstick is a real email carrying a Postman screenshot.",
-      "A response shown in Postman Preview mode (a \"message  not_allowed\" table rather than JSON) is now converted to JSON.",
-      "Analyzer: a body carrying unit_id is now recognised as a request, and not_allowed/401 now counts as evidence for \"an IMEI where a unit id belongs\". The reply states the IMEI that was sent and answers \"is a role missing?\" honestly: fix the identifier first, and if not_allowed persists we review the permissions."
+      "The \"IMEI where a unit id belongs\" reply is now explicit: the API identifies vehicles by the UID, not the IMEI, so get the UID first from /units/lists for the vehicle whose IMEI is the one sent (named in the reply), then request the data with it. If the customer asks about permissions: the not_allowed comes from the IMEI and no role is missing.",
+      "The official documentation (1- AVL Integration documentation) states that the token works as a ?token= URL parameter or as an Authorization: Bearer header. The tool said \"not in a header\" in 12 places, including customer replies and comments in generated code — all corrected."
     ]
   }
 }
