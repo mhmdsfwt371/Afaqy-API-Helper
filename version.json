@@ -1,16 +1,16 @@
 {
-  "version": "6.45",
+  "version": "6.46",
   "date": "2026-10-11",
   "notes": {
     "ar": [
-      "العميل بعت الرد صورة؟ الصقها (Ctrl+V) أو ارفعها أو اسحبها على خانة «افحص رد» أو «حلّل رسالة عميل» — الأداة بتقرا الكلام اللي فيها وتحطه في الخانة وتفحصه زي أي رد. المحك إيميل حقيقي: «Postman Response:» وبعدها صورة.",
-      "القراءة بتتعمل على جهازك جوه المتصفح (محرك Tesseract مترجم WebAssembly) — الصورة ما بتتبعتش لأي سيرفر. المحرك بينزل أول مرة بس (حوالي ٦ ميجا من jsDelivr بنسخة مثبّتة) وبعدها بيشتغل أوفلاين من الكاش.",
-      "قبل القراءة الصورة بتتكبّر وتتعكس لو خلفيتها غامقة (بوستمان بالوضع الليلي). وبعدها تنضيف للي القراءة بتغلط فيه في JSON: أرقام سطور بوستمان، التنصيص المعوج، المفاتيح اللي اتقطعت بمسافة، قوس الإغلاق اللي بيتقرى حروف، والصفر اللي بيتقرى 6 أو 8 في status_code — وكل تصليح بيتقال لك."
+      "لقطة نافذة بوستمان كاملة (القائمة واللينك وبودي الريكوست والرد تحت بخط صغير) كانت بتطلع «{}». الأداة بقت تقرا على مرحلتين: الأولى بتلاقي فين الرد جوه الصورة، والتانية بتقصّه وتكبّره على قد خطه وتقراه.",
+      "لو الصورة فيها بودي الريكوست والرد مع بعض، الرد (اللي فيه message و status_code) هو اللي بيتحط الأول ويتفحص — بودي الريكوست بيفضل تحته.",
+      "أقواس الإغلاق اللي بتتقرى أرقام أو حروف («1» و«LL» ورا بعض) بترجع أقواس، والقيم المعروفة اللي اتقطعت بمسافة («validation error») بتتلمّ — عشان التشخيص يقرا الرسالة صح."
     ],
     "en": [
-      "The customer sent the response as a screenshot? Paste it (Ctrl+V), upload it or drop it on the Inspect or Analyse-a-message box — the tool reads the text in it, puts it in the box and inspects it like any response. The yardstick is a real email: \"Postman Response:\" followed by an image.",
-      "Reading happens on your device inside the browser (the Tesseract engine compiled to WebAssembly) — the image is never sent to any server. The engine downloads once (about 6 MB from jsDelivr, pinned version) and then works offline from the cache.",
-      "Before reading, the image is enlarged and inverted when its background is dark (Postman in dark mode). Afterwards, the things OCR gets wrong in JSON are cleaned up: Postman line numbers, curly quotes, keys split by a space, a closing bracket read as letters, and a zero read as 6 or 8 in status_code — every fix is reported to you."
+      "A full Postman window screenshot (sidebar, URL, request body and the response below in small type) came out as \"{}\". The tool now reads in two passes: the first locates the response inside the image, the second crops it, enlarges it to its text size and reads it.",
+      "When the image holds both the request body and the response, the response (the block with message and status_code) is placed first and inspected — the request body stays below it.",
+      "Closing brackets read as digits or letters (\"1\" then \"LL\") are restored, and known values split by a space (\"validation error\") are rejoined — so the diagnosis reads the message correctly."
     ]
   }
 }

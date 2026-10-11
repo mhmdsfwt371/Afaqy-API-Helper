@@ -754,9 +754,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.45",
+  "version": "6.46",
   "date": "2026-10-11",
   "history": [
+    {
+      "v": "6.46",
+      "date": "2026-10-11",
+      "items": {
+        "ar": [
+          "لقطة نافذة بوستمان كاملة (القائمة واللينك وبودي الريكوست والرد تحت بخط صغير) كانت بتطلع «{}». الأداة بقت تقرا على مرحلتين: الأولى بتلاقي فين الرد جوه الصورة، والتانية بتقصّه وتكبّره على قد خطه وتقراه.",
+          "لو الصورة فيها بودي الريكوست والرد مع بعض، الرد (اللي فيه message و status_code) هو اللي بيتحط الأول ويتفحص — بودي الريكوست بيفضل تحته.",
+          "أقواس الإغلاق اللي بتتقرى أرقام أو حروف («1» و«LL» ورا بعض) بترجع أقواس، والقيم المعروفة اللي اتقطعت بمسافة («validation error») بتتلمّ — عشان التشخيص يقرا الرسالة صح.",
+          "التكبير بقى من قياس حروف الصورة نفسها (×٢ لخط بوستمان العادي) بدل عرض الصورة — التكبير الزيادة كان بيلخبط الصفر والستة.",
+          "التشخيص بقى يقرا الرد بعد تصليحه: نسخة مقطوعة أو صورة فيها errors كانت بتضيّع اسم الحقل الغلط."
+        ],
+        "en": [
+          "A full Postman window screenshot (sidebar, URL, request body and the response below in small type) came out as \"{}\". The tool now reads in two passes: the first locates the response inside the image, the second crops it, enlarges it to its text size and reads it.",
+          "When the image holds both the request body and the response, the response (the block with message and status_code) is placed first and inspected — the request body stays below it.",
+          "Closing brackets read as digits or letters (\"1\" then \"LL\") are restored, and known values split by a space (\"validation error\") are rejoined — so the diagnosis reads the message correctly.",
+          "Enlargement is now derived from the measured text size in the image (×2 for ordinary Postman type) instead of the image width — over-enlarging confused zero and six.",
+          "The diagnosis now reads the response after repair: a truncated paste or an image carrying errors used to lose the name of the failing field."
+        ]
+      }
+    },
     {
       "v": "6.45",
       "date": "2026-10-11",
@@ -11184,13 +11204,15 @@ function ocrLoadImage(file){
 }
 /* تكبير ×٢ للصور الصغيرة، رمادي، عكس لو الخلفية غامقة، وشدّ تباين —
    بوستمان بالوضع الليلي من غير كده بيطلع نص صح نص غلط. */
-function ocrPrepare(img){
-  const scale = (img.naturalWidth || img.width) < 1400 ? 2 : 1;
+function ocrPrepare(img, region, scale){
+  const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+  const r = region || {x:0, y:0, w:W, h:H};
+  scale = scale || (W < 1400 ? 2 : 1);
   const c = document.createElement('canvas');
-  c.width = (img.naturalWidth || img.width) * scale; c.height = (img.naturalHeight || img.height) * scale;
+  c.width = Math.max(1, Math.round(r.w * scale)); c.height = Math.max(1, Math.round(r.h * scale));
   const x = c.getContext('2d', {willReadFrequently:true});
   x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
-  x.drawImage(img, 0, 0, c.width, c.height);
+  x.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, c.width, c.height);
   const d = x.getImageData(0, 0, c.width, c.height), p = d.data, n = p.length / 4;
   const hist = new Uint32Array(256); let sum = 0;
   for(let i = 0; i < p.length; i += 4){
@@ -11237,8 +11259,13 @@ function ocrClean(txt){
         else if((ch === '}' || ch === ']') && stack.length) stack.pop(); } };
     for(let i = 0; i < L2.length; i++){
       const tr = L2[i].trim();
-      if(stack.length && /^[A-Za-z¥£§†‡¢]{1,3}[.,]?$/.test(tr)){
-        const next = (L2.slice(i + 1).find(x => x.trim()) || '').trim();
+      if(!stack.length){ walk(L2[i]); continue; }
+      const next = (L2.slice(i + 1).find(x => x.trim()) || '').trim();
+      /* حروف لوحدها («Is» «LL» «¥»)، أو رقم أو خط لوحده («1» «|») مش قبل قوس حقيقي — ده قوس إغلاق اتقرى غلط.
+         قوسين ورا بعض بيقفلوا مستويين: «1» بعد عنصر المصفوفة بتبقى «]» و«LL» بعدها «},» */
+      const letters = /^[A-Za-z¥£§†‡¢]{1,3}[.,]?$/.test(tr);
+      const digits  = /^[0-9lI|!]{1,2}$/.test(tr) && !/^[\]\}]/.test(next);
+      if(letters || digits){
         const close = stack[stack.length - 1] === '{' ? '}' : ']';
         L2[i] = close + (next.startsWith('"') ? ',' : ''); fixed++;
       }
@@ -11250,6 +11277,11 @@ function ocrClean(txt){
   let k = 0;
   s = s.replace(/"([a-z][a-z0-9]*(?: [a-z][a-z0-9_]*)+)"\s*:/gi, (m, key)=>{ k++; return '"' + key.replace(/ /g, '_') + '":'; });
   if(k) fixes.push(t('مفاتيح اتقطعت بمسافة اتلمّت','Keys split by a space rejoined'));
+  /* قيمة معروفة اتقطعت بمسافة: "validation error" → "validation_error" — القيم اللي التشخيص بيقرأها */
+  const KNOWN = ['validation_error','not_found','invalid_credentials','invalid_resource','invalid_format','expired_password','reset_expired_password','data_messages','last_update','status_code','device_serial','sim_serial','plate_number','engine_hours','unit_id','user_id','report_id'];
+  let v = 0;
+  s = s.replace(/"([a-z]+(?: [a-z]+)+)"/g, (m, val)=>{ const u = val.replace(/ /g, '_'); if(KNOWN.indexOf(u) >= 0){ v++; return '"' + u + '"'; } return m; });
+  if(v) fixes.push(t('قيم معروفة اتقطعت بمسافة اتلمّت','Known values split by a space rejoined'));
   /* علامة تنصيص اتقرت نجمة أو فاصلة في أول المفتاح: *message" → "message" */
   s = s.replace(/^(\s*)[*'`´]([a-z_][a-z0-9_]*)"/gmi, '$1"$2"');
   /* صفر اتقرى حرف في مكان رقم */
@@ -11262,18 +11294,78 @@ function ocrClean(txt){
     if(alt !== num && OCR_CODES.has(alt)){ fixes.push(t(`status_code اتقرى ${num} واتصلّح لـ ${alt} — اتأكد من الصورة`, `status_code read as ${num}, corrected to ${alt} — check the image`)); return a + alt; }
     return m;
   });
+  /* بودي الريكوست فوق والرد تحت في نفس اللقطة: الفحص بياخد أول بلوك، فالرد لازم يبقى الأول */
+  const picked = ocrPickResponse(s);
+  if(picked){ s = picked; fixes.push(t('الصورة فيها أكتر من بلوك — الرد اتحط الأول والباقي تحته','More than one block in the image — the response placed first, the rest below')); }
   return {text: s.trim(), fixes};
 }
-/* الصورة → نص منضّف. progress(نص) بيتنده مع كل مرحلة. */
+/* البلوكات المتوازنة {…} من بره النصوص المقتبسة؛ لو أكتر من واحد والرد مش الأول، نقدّمه */
+function ocrPickResponse(s){
+  const blocks = []; let depth = 0, start = -1, q = false;
+  for(let i = 0; i < s.length; i++){
+    const ch = s[i];
+    if(ch === '"'){ q = !q; continue; }
+    if(q) continue;
+    if(ch === '{'){ if(depth === 0) start = i; depth++; }
+    else if(ch === '}' && depth > 0){ depth--; if(depth === 0 && start >= 0){ blocks.push(s.slice(start, i + 1)); start = -1; } }
+  }
+  if(blocks.length < 2) return null;
+  const isResp = b => /"(status_code|message|extra|errors)"/.test(b);
+  const resp = blocks.find(isResp);
+  if(!resp || isResp(blocks[0])) return null;
+  return resp + '\n\n' + blocks.filter(b => b !== resp).join('\n\n');
+}
+/* السطور بمواضعها من رد المحرك — بلوك ← فقرة ← سطر */
+function ocrLines(d){
+  const out = [];
+  ((d && d.blocks) || []).forEach(b => ((b && b.paragraphs) || []).forEach(p => ((p && p.lines) || []).forEach(l => {
+    if(l && l.text && l.text.trim() && l.bbox) out.push({text:l.text, bbox:l.bbox});
+  })));
+  return out;
+}
+/* فين الرد جوه لقطة الشاشة؟ السطور اللي شكلها JSON — لو كلها كده فمفيش قص.
+   بترجّع {region, lineH} بمقاس الصورة الأصلية، أو null لو مفيش ما يتقص. */
+function ocrLocate(lines, scale, W, H){
+  const jsonish = lines.filter(l => /["{}\[\]]/.test(l.text) || /status_code|message|extra|errors|"data"/i.test(l.text));
+  const use = jsonish.length >= 2 ? jsonish : lines;
+  if(!use.length) return {region:null, lineH:0};
+  const hs = use.map(l => (l.bbox.y1 - l.bbox.y0) / scale).sort((a,b)=>a-b);
+  const lineH = hs[Math.floor(hs.length / 2)];
+  if(jsonish.length < 2) return {region:null, lineH};
+  let x0 = Infinity, y0 = Infinity, x1 = 0, y1 = 0;
+  jsonish.forEach(l => { x0 = Math.min(x0, l.bbox.x0); y0 = Math.min(y0, l.bbox.y0); x1 = Math.max(x1, l.bbox.x1); y1 = Math.max(y1, l.bbox.y1); });
+  /* هامش سخي: المرحلة الأولى بتفوّت سطور في الأطراف (آخر قوس غالبًا) */
+  const pad = Math.max(12, lineH * 3) * scale;
+  x0 = Math.max(0, (x0 - pad) / scale); y0 = Math.max(0, (y0 - pad) / scale);
+  x1 = Math.min(W, (x1 + pad) / scale); y1 = Math.min(H, (y1 + pad * 2) / scale);
+  /* لو الرد هو معظم الصورة أصلًا، القص مش هيضيف حاجة — القص للقطة النافذة الكاملة بس */
+  if((x1 - x0) * (y1 - y0) > W * H * 0.5) return {region:null, lineH};
+  if(x1 - x0 < 40 || y1 - y0 < 16) return {region:null, lineH};
+  return {region:{x:x0, y:y0, w:x1 - x0, h:y1 - y0}, lineH};
+}
+/* المقاس من ارتفاع الحروف المقاس: الهدف ٢٦ بكسل (×٢ لخط بوستمان العادي)، بين ×١ و×٣ —
+   التكبير الزيادة بيلخبط الصفر والستة */
+function ocrScaleFor(lineH){ return lineH ? Math.max(1, Math.min(3, Math.round((26 / lineH) * 2) / 2)) : 2; }
+/* الصورة → نص منضّف. progress(نص) بيتنده مع كل مرحلة.
+   مرحلتين: الأولى تخطيط للصورة كلها عشان نلاقي الرد، والتانية قراءة للمنطقة مكبّرة. */
 async function ocrImage(file, progress){
   const {img, url} = await ocrLoadImage(file);
   try{
-    const prep = ocrPrepare(img);
+    const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
     const w = await ocrEngine(progress);
+    progress && progress(t('بندوّر على الرد جوه الصورة','Locating the response in the image'));
+    const p1 = ocrPrepare(img);
+    await w.setParameters({ tessedit_pageseg_mode: '3' });
+    const r1 = await w.recognize(p1.canvas);
+    const loc = ocrLocate(ocrLines(r1.data), p1.scale, W, H);
     progress && progress(t('بنقرا الصورة','Reading the image'));
-    const {data} = await w.recognize(prep.canvas);
+    const p2 = ocrPrepare(img, loc.region, ocrScaleFor(loc.lineH));
+    await w.setParameters({ tessedit_pageseg_mode: '6' });
+    const {data} = await w.recognize(p2.canvas);
     const out = ocrClean(data.text);
-    out.dark = prep.dark; out.confidence = Math.round(data.confidence || 0);
+    if(loc.region) out.fixes.unshift(t('الرد اتلقط من وسط لقطة الشاشة واتكبّر قبل القراءة','The response was located inside the screenshot and enlarged before reading'));
+    out.dark = p2.dark; out.confidence = Math.round(data.confidence || 0);
+    out.region = loc.region; out.scale = p2.scale;
     return out;
   } finally { URL.revokeObjectURL(url); }
 }
@@ -11378,7 +11470,7 @@ function renderInspect(){
 
   let head = '';
   if(bad){
-    head = `<div class="note warn"><b>${t('الرد ده فيه خطأ','This response carries an error')}</b> — <code>${esc(String(msg||''))}</code> · <code>${esc(String(code))}</code><br>${diagnose(Number(code), raw)}</div>`;
+    head = `<div class="note warn"><b>${t('الرد ده فيه خطأ','This response carries an error')}</b> — <code>${esc(String(msg||''))}</code> · <code>${esc(String(code))}</code><br>${diagnose(Number(code), JSON.stringify(j))}</div>`;
   } else if(code){
     head = `<div class="note sig"><b>${t('رد ناجح','Successful response')}</b> — <code>${esc(String(msg||'ok'))}</code> · <code>${esc(String(code))}</code>
       <br>${t('خد بالك: السيستم بيرجع 200 حتى مع الأخطاء، فالحكم من هنا مش من كود الـ HTTP.','Note: the platform returns 200 even on failure, so this is what to read — not the HTTP status.')}</div>`;
