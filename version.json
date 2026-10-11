@@ -1,16 +1,16 @@
 {
-  "version": "6.42",
-  "date": "2026-08-10",
+  "version": "6.45",
+  "date": "2026-10-11",
   "notes": {
     "ar": [
-      "الفترة المقلوبة بقت تتمسك قبل ما نضرب السيرفر. لو «من» بعد «لحد»، السيرفر كان بيرجّع فاضي والأداة كانت بتطلّع رد للعميل بيقول إن العربية ما تحركتش — غلطة كتابة كانت بتتحوّل لجملة واثقة وغلط تتبعت لعميل.",
-      "الـ IMEI اللي بأرقام عربية (٨٦٠١٢٣…) بقى يلاقي العربية. كانت المقارنة حرفية فبيقول «الرقم مش في الحساب» على عربية موجودة فعلًا.",
-      "والرقم اللي اتنسخ من إيميل عربي وجاي معاه علامة اتجاه مخفية بقى يشتغل كمان. العلامة دي مش ظاهرة للمستخدم فالرسالة كانت غير قابلة للتفسير."
+      "العميل بعت الرد صورة؟ الصقها (Ctrl+V) أو ارفعها أو اسحبها على خانة «افحص رد» أو «حلّل رسالة عميل» — الأداة بتقرا الكلام اللي فيها وتحطه في الخانة وتفحصه زي أي رد. المحك إيميل حقيقي: «Postman Response:» وبعدها صورة.",
+      "القراءة بتتعمل على جهازك جوه المتصفح (محرك Tesseract مترجم WebAssembly) — الصورة ما بتتبعتش لأي سيرفر. المحرك بينزل أول مرة بس (حوالي ٦ ميجا من jsDelivr بنسخة مثبّتة) وبعدها بيشتغل أوفلاين من الكاش.",
+      "قبل القراءة الصورة بتتكبّر وتتعكس لو خلفيتها غامقة (بوستمان بالوضع الليلي). وبعدها تنضيف للي القراءة بتغلط فيه في JSON: أرقام سطور بوستمان، التنصيص المعوج، المفاتيح اللي اتقطعت بمسافة، قوس الإغلاق اللي بيتقرى حروف، والصفر اللي بيتقرى 6 أو 8 في status_code — وكل تصليح بيتقال لك."
     ],
     "en": [
-      "A reversed period is now caught before any request is sent. When from is after to the server returned nothing and the tool produced a customer reply stating the vehicle did not move — a typing mistake turned into a confident, wrong sentence sent to a customer.",
-      "An IMEI written in Arabic-Indic digits now matches. The comparison was literal, so it reported the number was not on the account for a vehicle that was there.",
-      "A number copied from an Arabic email carrying an invisible direction mark now works too. That mark is not visible to the user, so the message was impossible to interpret."
+      "The customer sent the response as a screenshot? Paste it (Ctrl+V), upload it or drop it on the Inspect or Analyse-a-message box — the tool reads the text in it, puts it in the box and inspects it like any response. The yardstick is a real email: \"Postman Response:\" followed by an image.",
+      "Reading happens on your device inside the browser (the Tesseract engine compiled to WebAssembly) — the image is never sent to any server. The engine downloads once (about 6 MB from jsDelivr, pinned version) and then works offline from the cache.",
+      "Before reading, the image is enlarged and inverted when its background is dark (Postman in dark mode). Afterwards, the things OCR gets wrong in JSON are cleaned up: Postman line numbers, curly quotes, keys split by a space, a closing bracket read as letters, and a zero read as 6 or 8 in status_code — every fix is reported to you."
     ]
   }
 }

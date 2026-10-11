@@ -401,7 +401,7 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 <main class="wrap">
 
 <!-- ================= SEARCH ================= -->
-<section class="view" id="v-search">
+<section class="view" id="v-search" hidden>
   <div class="searchbar">
     <span class="ic">⌕</span>
     <input id="q" data-arph="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" data-enph="Type the customer&#39;s question — e.g. how do I list vehicles" placeholder="اكتب سؤال العميل بالعربي أو بالإنجليزي… مثلاً: عايز أجيب لستة العربيات" autocomplete="off">
@@ -508,9 +508,10 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
     <div class="row">
       <button class="btn sig" id="inGo"></button>
       <label class="btn ghost" style="cursor:pointer"><span id="inFileLbl"></span>
-        <input type="file" id="inFile" accept="application/json,.json,.txt" hidden></label>
+        <input type="file" id="inFile" accept="application/json,.json,.txt,image/*" hidden></label>
       <button class="btn ghost" id="inClear"></button>
     </div>
+    <div id="inImgBox" style="margin-top:10px" hidden></div>
   </div></div>
   <div id="inOut"></div>
 </section>
@@ -753,9 +754,71 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.42",
-  "date": "2026-08-10",
+  "version": "6.45",
+  "date": "2026-10-11",
   "history": [
+    {
+      "v": "6.45",
+      "date": "2026-10-11",
+      "items": {
+        "ar": [
+          "العميل بعت الرد صورة؟ الصقها (Ctrl+V) أو ارفعها أو اسحبها على خانة «افحص رد» أو «حلّل رسالة عميل» — الأداة بتقرا الكلام اللي فيها وتحطه في الخانة وتفحصه زي أي رد. المحك إيميل حقيقي: «Postman Response:» وبعدها صورة.",
+          "القراءة بتتعمل على جهازك جوه المتصفح (محرك Tesseract مترجم WebAssembly) — الصورة ما بتتبعتش لأي سيرفر. المحرك بينزل أول مرة بس (حوالي ٦ ميجا من jsDelivr بنسخة مثبّتة) وبعدها بيشتغل أوفلاين من الكاش.",
+          "قبل القراءة الصورة بتتكبّر وتتعكس لو خلفيتها غامقة (بوستمان بالوضع الليلي). وبعدها تنضيف للي القراءة بتغلط فيه في JSON: أرقام سطور بوستمان، التنصيص المعوج، المفاتيح اللي اتقطعت بمسافة، قوس الإغلاق اللي بيتقرى حروف، والصفر اللي بيتقرى 6 أو 8 في status_code — وكل تصليح بيتقال لك.",
+          "الأرقام الطويلة (المعرّفات والـ IMEI) ممكن تتقرى غلط: الأداة بتقولك راجعها ومش بتلعب فيها.",
+          "اختبار المتصفح في بوابة البناء بقى يقرا صورة رد بوستمان حقيقية بالوضع الليلي ويتأكد إنها اتشخّصت."
+        ],
+        "en": [
+          "The customer sent the response as a screenshot? Paste it (Ctrl+V), upload it or drop it on the Inspect or Analyse-a-message box — the tool reads the text in it, puts it in the box and inspects it like any response. The yardstick is a real email: \"Postman Response:\" followed by an image.",
+          "Reading happens on your device inside the browser (the Tesseract engine compiled to WebAssembly) — the image is never sent to any server. The engine downloads once (about 6 MB from jsDelivr, pinned version) and then works offline from the cache.",
+          "Before reading, the image is enlarged and inverted when its background is dark (Postman in dark mode). Afterwards, the things OCR gets wrong in JSON are cleaned up: Postman line numbers, curly quotes, keys split by a space, a closing bracket read as letters, and a zero read as 6 or 8 in status_code — every fix is reported to you.",
+          "Long numbers (ids and IMEIs) can be misread: the tool tells you to check them and leaves them alone.",
+          "The browser test in the build gate now reads a real dark-mode Postman screenshot and checks that it gets diagnosed."
+        ]
+      }
+    },
+    {
+      "v": "6.44",
+      "date": "2026-09-27",
+      "items": {
+        "ar": [
+          "الإيميل اللي فيه لستة بيانات مطلوبة (١) … ٢) …) بقى يتفهم كطلب إنتجريشن مش كتذكرة ناقصة أدلة. الصقه في «افحص رد ← حلّل رسالة عميل» وبيطلع رد نقطة بنقطة بنفس ترقيم العميل، بلغة إيميله، وزرار يقلبه للغة التانية.",
+          "كل بند بياخد حالته من الكولكشن ومن المعرفة المؤكدة: متاح، أو متاح جزئيًا، أو حسب الجهاز (حساس لازم يتأكد لكل عربية)، أو يحتاج تأكيد من مصر، أو قرار تجاري. اللي مش في الكولكشن بيتقال للعميل «قيد التأكيد» — مش بيتخمّن، وحدود الاستخدام ما بتتقالش كرقم.",
+          "للموظف جدول بكل بند وحالته والريكوست اللي وراه (بيفتح من زرار) وملاحظة تخلّيه يجاوب صح — زي إن ساعات المحرك بالثواني، والحساسات بتتأكد من /unit_sensors/lists بفلتر العربية.",
+          "كولكشن Postman للعميل بالريكوستات المتاحة للنقط اللي طلبها بس: الدخول وسلسلة التقرير والمواقع والإشارات والحساسات والسائق — من غير توكن ولا أرقام، كله علامات مكان.",
+          "المحك إيميل حقيقي: ١٤ نقطة بيانات و٨ أسئلة فنية اتجاوبوا كلهم، واختبار بيقفل على إن كل ريكوست في الكتالوج موجود فعلًا في الكولكشن."
+        ],
+        "en": [
+          "An email listing the data a customer wants (1) … 2) …) is now read as an integration request, not as a ticket missing evidence. Paste it into Inspect → Analyse a customer message and it produces a point-by-point reply with the customer own numbering, in the language of their email, with a button to flip the language.",
+          "Every point takes its status from the collection and verified knowledge: available, partly available, device-dependent (a sensor to check per vehicle), to be confirmed with development, or commercial. Anything not in the collection is told to the customer as \"to be confirmed\" — never guessed, and rate limits are never stated as a number.",
+          "For the engineer, a table with each point, its status, the request behind it (opens with one click) and the note that makes the answer right — such as engine hours being in seconds, and sensors being verified through /unit_sensors/lists filtered by vehicle.",
+          "A Postman collection for the customer with only the requests behind the points they asked for: login, the report chain, positions, signals, sensors and drivers — no token and no ids, placeholders throughout.",
+          "The yardstick is a real email: 14 data points and 8 technical questions all answered, and a test that locks every request in the catalog to one that really exists in the collection."
+        ]
+      }
+    },
+    {
+      "v": "6.43",
+      "date": "2026-09-08",
+      "items": {
+        "ar": [
+          "أول فتحة للأداة كانت بتفتح على «الريكوستات» والتبويب بيقول «ابدأ من هنا»، وكروت البداية فاضية — الأداة بقت تفتح على البداية فعلًا. الاختبارات ما مسكتهاش لأنها كلها كانت بتفتح التبويب بنفسها.",
+          "المعلومات اللي بتضيفها بقت تتحفظ على جهازك وترجع مع كل فتحة، مع عدّاد للي لسه ما اتصدّرش وتنبيه عند الفتح. قبل كده كانت بتروح لو قفلت التاب قبل ما تصدّر.",
+          "كارت «سؤال جديد ما جاش قبل كده» كان بيوجّه لتبويب اتشال من زمان فالزرار ما كانش بيعمل حاجة — بقى بيوديك للبحث، واختبار الفرز بقى يفشل لو كارت وجّه لمكان مش موجود.",
+          "بوابة البناء بقت تفتح الأداة في متصفح حقيقي على الملف اللي هيتنشر: الفتحة الأولى والتبويبات والبحث واللغة والوضع الليلي والموبايل والمعرفة المحفوظة — وده اللي كان هيمسك عيب الفتحة الأولى.",
+          "ملف معرفة مصدَّر من الأداة كان بيظهر فيه وسم <p> كنص لما يتستورد — اتصلح.",
+          "ملف setup.sh بيرجّع بيئة البناء بأمر واحد بعد أي تصفير: jsdom وكروم وفولدر النشر من الزيب."
+        ],
+        "en": [
+          "The first open landed on Requests while the tab said Start here, with the start cards empty — the tool now really opens on Start here. Tests missed it because every test switched the tab itself.",
+          "Entries you add are now kept on your device and come back on every open, with a count of what is not exported yet and a reminder on open. Before, closing the tab before exporting lost them.",
+          "The \"a new question\" card pointed at a tab removed long ago, so its button did nothing — it now opens search, and the triage test fails when a card points at a missing tab.",
+          "The build gate now opens the tool in a real browser on the file that will be published: first open, tabs, search, language, dark mode, mobile and saved entries — exactly what would have caught the first-open bug.",
+          "A knowledge file exported from the tool showed a literal <p> tag when imported back — fixed.",
+          "setup.sh restores the build environment in one command after a reset: jsdom, Chromium and the publish folder from the zip."
+        ]
+      }
+    },
     {
       "v": "6.42",
       "date": "2026-08-10",
@@ -2968,6 +3031,54 @@ const DOCS = {
       }
     },
     {
+      "t": {
+        "ar": "طلب إنتجريشن — رد نقطة بنقطة",
+        "en": "Integration request — a point-by-point reply"
+      },
+      "since": "6.44",
+      "b": {
+        "ar": [
+          "عميل جديد بيبعت إيميل فيه لستة: «نرغب في الحصول على ١) اللوحة ٢) المسافة ٣) الوقود…» وأسئلة فنية (التوثيق، المصادقة، Rate Limits، Webhooks). ده مش تذكرة عطل — ده طلب بيانات.",
+          "الصق الإيميل كامل في «افحص رد ← حلّل رسالة عميل». الأداة بتقسمه بنود وبتقابل كل بند مع الكولكشن ومع المعرفة المؤكدة، وبتطلّع رد جاهز بنفس ترقيم العميل وبلغة إيميله — وزرار يقلبه عربي/إنجليزي.",
+          "الحالات: **متاح** الريكوست في الكولكشن. **متاح جزئيًا** جزء مؤكد وجزء لسه. **حسب الجهاز** حساس لازم يتأكد لكل عربية من /unit_sensors/lists. **يحتاج تأكيد** اسأل مصر قبل ما تقولها. **قرار تجاري** مدير الحساب.",
+          "اللي «يحتاج تأكيد» بيتقال للعميل «قيد التأكيد» بصراحة، وبيتلخّص في آخر الرد عشان تعرف تسأل عن إيه بالظبط. ما تشيلش الجملة دي وتحطها متاح من دماغك.",
+          "زرار «نزّل كولكشن Postman للعميل» بيطلّع الريكوستات المتاحة للنقط اللي طلبها بس، بعلامات مكان — ابعته أتاشمنت مع الرد.",
+          "الجدول تحت الرد بيقولك لكل بند الريكوست اللي وراه وملاحظة الموظف. اقرا الملاحظة قبل ما تبعت: فيها اللي بيوقّع (ساعات المحرك بالثواني، offset 50، الاستهلاك الحسابي تقدير مش قراءة)."
+        ],
+        "en": [
+          "A new customer sends an email with a list: \"we would like 1) plates 2) distance 3) fuel…\" plus technical questions (documentation, authentication, rate limits, webhooks). That is not a fault ticket — it is a data request.",
+          "Paste the whole email into Inspect → Analyse a customer message. The tool splits it into points, matches each one against the collection and verified knowledge, and drafts a reply with the customer own numbering in the language of their email — with a button to flip it Arabic/English.",
+          "Statuses: **available** the request is in the collection. **partly available** one part confirmed, one still open. **depends on the device** a sensor to verify per vehicle through /unit_sensors/lists. **to be confirmed** ask development before saying it. **commercial** the account manager.",
+          "Whatever is \"to be confirmed\" is told to the customer as such, and summarised at the end of the reply so you know exactly what to ask about. Do not remove that sentence and mark it available from memory.",
+          "The \"Download the Postman collection\" button produces only the requests behind the points they asked for, with placeholders — attach it to the reply.",
+          "The table under the reply gives the request behind each point and the engineer note. Read the note before sending: it holds what trips people up (engine hours in seconds, offset 50, calculated fuel consumption is an estimate, not a reading)."
+        ]
+      }
+    },
+    {
+      "t": {
+        "ar": "الرد جه صورة — الأداة تقراه",
+        "en": "The response came as a screenshot — the tool reads it"
+      },
+      "since": "6.45",
+      "b": {
+        "ar": [
+          "العملاء كتير بيبعتوا رد بوستمان صورة. في «افحص رد» أو «حلّل رسالة عميل»: الصق الصورة في الخانة (Ctrl+V)، أو ارفعها من زرار الرفع، أو اسحبها على الخانة. الكلام اللي فيها بيتحط في الخانة وبيتفحص على طول.",
+          "القراءة على جهازك جوه المتصفح — الصورة ما بتروحش لأي سيرفر. أول مرة بس محتاجة نت عشان تنزّل محرك القراءة (حوالي ٦ ميجا)، وبعدها بتشتغل أوفلاين.",
+          "بوستمان بالوضع الليلي وأرقام السطور مش مشكلة: الصورة بتتعكس وتتكبّر قبل القراءة، وأرقام السطور بتتشال.",
+          "**راجع الأرقام الطويلة** قبل ما تعتمد عليها: المعرّف والـ IMEI ممكن يتقرى فيهم صفر على إنه 6 أو 8. الأداة بتصلّح status_code بس لو طلع رقم مش موجود أصلًا، وبتقولك إنها صلّحته.",
+          "لو الصورة صغيرة أو مقصوصة والكلام ما طلعش، اطلب من العميل النص نفسه — صورة أوضح أحسن من تخمين."
+        ],
+        "en": [
+          "Customers often send a Postman response as a screenshot. In Inspect or Analyse a customer message: paste the image into the box (Ctrl+V), upload it with the upload button, or drop it on the box. The text in it goes into the box and is inspected right away.",
+          "Reading happens on your device inside the browser — the image never goes to any server. The first time needs the internet to download the reader (about 6 MB); after that it works offline.",
+          "Postman in dark mode with line numbers is fine: the image is inverted and enlarged before reading, and line numbers are removed.",
+          "**Check long numbers** before relying on them: a zero inside an id or IMEI can read as 6 or 8. The tool corrects status_code only when it reads a number that does not exist as a code, and tells you it did.",
+          "If the image is small or cropped and no text comes out, ask the customer for the text itself — a clearer image beats a guess."
+        ]
+      }
+    },
+    {
       "since": "6.39",
       "t": {
         "ar": "التقارير: بالاسم مش بالرقم",
@@ -3153,7 +3264,7 @@ const DOCS = {
     },
     {
       "id": "grow",
-      "since": "1.0",
+      "since": "6.43",
       "t": {
         "ar": "المعرفة لازم تكبر",
         "en": "The knowledge has to grow"
@@ -3161,14 +3272,16 @@ const DOCS = {
       "b": {
         "ar": [
           "في تبويب أساسيات الإنتجريشن فورم «ضيف معلومة جديدة».",
-          "أول ما تيم مصر يرد عليك بحاجة مش موجودة في الأداة، سجّلها في نفس اللحظة وصدّرها وابعت الملف لمسؤول الأداة.",
-          "المسؤول بيجمّع الملفات أسبوعيًا ويرفع نسخة محدّثة.",
+          "أول ما تيم مصر يرد عليك بحاجة مش موجودة في الأداة، سجّلها في نفس اللحظة.",
+          "اللي بتضيفه بيتحفظ على جهازك وبيرجع مع كل فتحة — ما بيروحش لو قفلت التاب. والفورم بيقولك كام معلومة لسه ما اتصدّرتش، وبيفكّرك عند الفتح.",
+          "صدّرها من زرار التصدير وابعت الملف لمسؤول الأداة. المسؤول بيجمّع الملفات أسبوعيًا ويرفع نسخة محدّثة، وساعتها امسح المحفوظ من جهازك عشان ما يتكررش.",
           "من غير الخطوة دي الأداة هتبقى قديمة خلال شهرين."
         ],
         "en": [
           "The integration basics tab has an \"add a new entry\" form.",
-          "The moment development answers something the tool does not already cover, record it immediately, export it, and send the file to whoever maintains the tool.",
-          "That person merges the files weekly and publishes an updated version.",
+          "The moment development answers something the tool does not already cover, record it immediately.",
+          "What you add is kept on your device and comes back every time you open the tool — it is not lost when the tab closes. The form tells you how many entries are not exported yet, and reminds you on open.",
+          "Export it with the export button and send the file to whoever maintains the tool. That person merges the files weekly and publishes an updated version; clear the saved entries from your device then so they do not duplicate.",
           "Without this step the tool goes stale within two months."
         ]
       }
@@ -5005,8 +5118,58 @@ function renderLearned(){
    </div>`).join('');
 }
 
-/* معرفة يضيفها الفريق بنفسه — من غير ما حد يفتح الكود */
+/* معرفة يضيفها الفريق بنفسه — من غير ما حد يفتح الكود.
+   v6.43: كانت بتعيش في الذاكرة بس — تقفل التاب قبل ما تصدّر، تروح.
+   دلوقتي بتتحفظ على الجهاز ده (نفس أسلوب الحسابات والعدّاد) وبترجع مع كل
+   فتحة، ومعاها علامة هل اتصدّرت ولا لسه. */
 let ADDED = [];
+const ADDED_KEY = 'afaqy.added.v1', ADDED_EXP_KEY = 'afaqy.added.exportedAt';
+/* العنوان والمصدر نص عادي: بيتعرضوا بـ esc وقت الرسم، فبنشيل الوسوم بس ومش بنهرّب —
+   التهريب هنا كان بيتكرر مع التهريب وقت الرسم فـ «"» كانت بتظهر &quot; بعد الاستيراد. */
+const addedText = v => typeof v==='string' ? v.replace(/<[a-zA-Z\/!][^>]*>/g,'').slice(0,400) : '';
+/* البودي HTML الأداة نفسها كتبته: نص مهرّب + <p> و<br> و<pre class="pre"> بس.
+   بنسيب الوسوم العارية دي زي ما هي ونشيل أي وسم تاني بمحتواه من الصفات —
+   ملف مصدَّر بيترجع بالحرف، وملف غريب بيتحوّل لنص. */
+const addedHtml = v => String(v||'').replace(/<(?!\/?(?:p|br|b|i|code|pre)>|pre class="pre">)[^>]*>/gi,'').slice(0,6000);
+/* الملف ممكن ييجي من أي حد — ونفس التنضيف بيتطبّق على اللي راجع من الجهاز */
+function addedSafe(x){
+  x = x || {};
+  const body = raw => { const h = addedHtml(raw).trim(); return /^<(p|pre)\b/.test(h) ? h : '<p>'+h.replace(/<\/?p>/g,'')+'</p>'; };
+  const T = x.t||{}, S = x.src||{}, B = x.body||{};
+  return {
+    sev: x.sev==='high' ? 'high' : (x.sev==='mid' ? 'mid' : 'ok'),
+    t:   {ar: addedText(T.ar||''), en: addedText(T.en||T.ar||'')},
+    src: {ar: addedText(S.ar||''), en: addedText(S.en||S.ar||'')},
+    body:{ar: body(B.ar), en: body(B.en||B.ar)},
+    at:  typeof x.at==='string' ? x.at : ''
+  };
+}
+function addedLoad(){
+  try{ const a = JSON.parse(localStorage.getItem(ADDED_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+  catch(_){ return []; }
+}
+function addedStore(){
+  try{ localStorage.setItem(ADDED_KEY, JSON.stringify(ADDED.slice(-200))); return true; }
+  catch(_){ return false; }
+}
+function addedExportedAt(){ try{ return localStorage.getItem(ADDED_EXP_KEY) || ''; }catch(_){ return ''; } }
+function addedMarkExported(){ try{ localStorage.setItem(ADDED_EXP_KEY, new Date().toISOString()); }catch(_){} }
+function addedPending(){ const x = addedExportedAt(); return ADDED.filter(k => !x || String(k.at||'') > x).length; }
+/* اللي متخزّن على الجهاز اتكتب بإيد الأداة نفسها، بس بيعدّي على نفس التنضيف —
+   التنضيف بيرجّع اللي الأداة كتبته بالحرف، وأي حاجة اتحطت من بره بتبقى نص. */
+function addedRestore(){
+  ADDED = addedLoad().filter(k => k && k.t && k.body && typeof k.t.ar==='string' && typeof k.body.ar==='string').map(addedSafe);
+  ADDED.forEach(k => LEARNED.push(k));
+}
+function addedStatus(){
+  const n = ADDED.length, p = addedPending();
+  if(!n) return t('المعلومات اللي بتضيفها بتتحفظ على الجهاز ده وبترجع مع كل فتحة. صدّرها وابعت الملف لمسؤول الأداة عشان تدخل النسخة اللي عند الكل.',
+                  'Entries you add are kept on this device and come back every time you open the tool. Export the file and send it to whoever maintains the tool so it reaches everyone.');
+  if(p) return t(`عندك ${p} من ${n} لسه ما اتصدّرتش — صدّرها وابعتها لمسؤول الأداة، وإلا هتفضل على جهازك بس.`,
+                 `${p} of ${n} entries are not exported yet — export and send them to the maintainer, or they stay on this device only.`);
+  return t(`${n} معلومة محفوظة على الجهاز ده وكلها اتصدّرت. لما تدخل النسخة الجديدة، امسحها من هنا عشان ما تتكررش.`,
+           `${n} entries kept on this device, all exported. Once they ship in a new version, clear them here so they do not duplicate.`);
+}
 const GLOSSARY = [
  {w:'curl', ar:'أمر بتكتبه في الترمنال فيبعت الريكوست. لما تقول للعميل «ابعتلي الـ curl» انت طالب منه الريكوست كامل زي ما هو: اللينك والهيدرز والبودي. بيه تعيد نفس الحاجة عندك بالحرف.',
   en:'A terminal command that sends the request. Asking a customer for "the curl" means asking for the whole request as-is: URL, headers and body, so you can replay it exactly.'},
@@ -5058,9 +5221,9 @@ function renderAdder(){
       <button class="btn ghost" id="adExp">${t('تصدير كل المعلومات المضافة','Export added entries')}</button>
       <label class="btn ghost" style="cursor:pointer">${t('استيراد','Import')}
         <input type="file" id="adImp" accept="application/json" hidden></label>
+      <button class="btn ghost" id="adClr" ${ADDED.length ? '' : 'hidden'}>${t('امسح المحفوظ على الجهاز','Clear saved entries')}</button>
     </div>
-    <div class="note" style="margin-top:10px">${t('المعلومات المضافة بتفضل في الجلسة دي بس. صدّرها وابعت الملف لمسؤول الأداة عشان يضمّها للنسخة اللي عند الكل.',
-      'Added entries live in this session only. Export the file and send it to whoever maintains the tool so it reaches everyone.')}</div>
+    <div class="note${addedPending() ? ' warn' : ''}" style="margin-top:10px" id="adStat">${addedStatus()}</div>
   </div>`;
 }
 function wireAdder(){
@@ -5070,7 +5233,8 @@ function wireAdder(){
     if(!T || !B){ toast(t('اكتب العنوان والتفاصيل','Title and details are required')); return; }
     const item = { sev:'ok', t:{ar:T,en:T}, src:{ar:S||t('مضافة من الفريق','added by the team'), en:S||'added by the team'},
                    body:{ar:'<p>'+esc(B).replace(/\n/g,'<br>')+'</p>', en:'<p>'+esc(B).replace(/\n/g,'<br>')+'</p>'} };
-    ADDED.push(item); LEARNED.push(item);
+    item.at = new Date().toISOString();
+    ADDED.push(item); LEARNED.push(item); addedStore();
     $('adT').value=''; $('adB').value=''; $('adS').value='';
     toast(t('اتسجلت','Saved')); renderFaq();
   };
@@ -5079,6 +5243,16 @@ function wireAdder(){
     const blob = new Blob([JSON.stringify(ADDED,null,2)], {type:'application/json'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
     a.download='afaqy-knowledge.json'; a.click();
+    addedMarkExported(); renderFaq();
+  };
+  const c=$('adClr');
+  if(c) c.onclick = ()=>{
+    if(!confirm(t(`أمسح ${ADDED.length} معلومة محفوظة على الجهاز ده؟ اللي اتصدّر خلاص موجود في الملف اللي بعتّه.`,
+                  `Clear ${ADDED.length} saved entries from this device? Exported ones are already in the file you sent.`))) return;
+    ADDED.forEach(k=>{ const i=LEARNED.indexOf(k); if(i>=0) LEARNED.splice(i,1); });
+    ADDED = []; addedStore();
+    try{ localStorage.removeItem(ADDED_EXP_KEY); }catch(_){}
+    toast(t('اتمسحت','Cleared')); renderFaq();
   };
   $('adImp').onchange = ev=>{
     const f=ev.target.files[0]; if(!f) return;
@@ -5086,15 +5260,9 @@ function wireAdder(){
     rd.onload=()=>{ try{
       const arr=JSON.parse(rd.result);
       if(!Array.isArray(arr)) throw 0;
-      /* الملف ممكن ييجي من أي حد — بنشيل أي وسوم قبل ما نعرضه */
-      const clean = v => typeof v==='string' ? esc(v).replace(/&lt;br&gt;/g,'<br>') : v;
-      const safe = x => ({
-        sev: (x && x.sev==='high') ? 'high' : (x && x.sev==='mid' ? 'mid' : 'ok'),
-        t:   {ar: clean((x.t||{}).ar||''), en: clean((x.t||{}).en||(x.t||{}).ar||'')},
-        src: {ar: clean((x.src||{}).ar||''), en: clean((x.src||{}).en||(x.src||{}).ar||'')},
-        body:{ar: '<p>'+clean((x.body||{}).ar||'')+'</p>', en: '<p>'+clean((x.body||{}).en||(x.body||{}).ar||'')+'</p>'}
-      });
-      arr.filter(x=>x && x.t).map(safe).forEach(x=>{ LEARNED.push(x); ADDED.push(x); });
+      const now = new Date().toISOString();
+      arr.filter(x=>x && x.t).map(addedSafe).forEach(x=>{ x.at = x.at || now; LEARNED.push(x); ADDED.push(x); });
+      addedStore();
       toast(t('اتضافت '+arr.length, arr.length+' imported')); renderFaq();
     }catch(_){ toast(t('الملف مش سليم','Invalid file')); } };
     rd.readAsText(f);
@@ -8166,11 +8334,13 @@ Best regards,`}},
   sym:{ar:'عميل جديد طالب إنتجريشن', en:'New customer requesting integration'},
   dont:{ar:'ما تبعتش الكولكشن الخام. هيرجع يسأل في كل حاجة فيه.',
         en:'Do not send the raw collection. They will come back asking about every item in it.'},
-  steps:{ar:['ابعت لينك التوثيق الرسمي.',
+  steps:{ar:['لو الإيميل فيه لستة بيانات مطلوبة (١) … ٢) …)، الصقه في «افحص رد ← حلّل رسالة عميل» — بيطلّع رد نقطة بنقطة وكولكشن.',
+             'ابعت لينك التوثيق الرسمي.',
              'اشرح الأربع نقط اللي بتوقّع كل العملاء (في الرد الجاهز تحت).',
              'لو طلب داتا لحظية، حوّله لمدير الحساب — دي خدمة مدفوعة مش سؤال تقني.',
              'أي مشكلة تحصل بعد كده، اطلب منه حاجتين: الـ curl كامل، و UID عربية واحدة (أو الـ IMEI وإحنا نحوّله).'],
-         en:['Send the official documentation link.',
+         en:['If the email lists the data they want (1) … 2) …), paste it into Inspect → Analyse a customer message — it produces a point-by-point reply and a collection.',
+             'Send the official documentation link.',
              'Explain the four things that trip up every customer (in the ready reply below).',
              'If they ask for live data, route them to the account manager — it is a paid service, not a technical question.',
              'For any later issue, ask for two things: the full curl, and the UID of one vehicle (or the IMEI and we convert it).']},
@@ -8264,14 +8434,14 @@ Best regards,`}},
   dont:{ar:'ما تخمّنش وما تخترعش إندبوينت. أول إجابة غلط بتكلّف ثقة أسابيع.',
         en:'Do not guess and do not invent an endpoint. One wrong answer costs weeks of trust.'},
   steps:{ar:['ابحث في تبويب البحث بكلام العميل نفسه.',
-             'لقيت الريكوست؟ روح للمختبر وجرّبه على حساب العميل قبل ما تبعت.',
+             'لقيت الريكوست؟ دوس «جرّب» عليه على حساب العميل قبل ما تبعت.',
              'ما لقيتوش؟ ما تخمّنش — صعّد.',
              'وأول ما يرد تيم مصر، سجّل الإجابة في تبويب الأساسيات عشان ما تتسألش تاني.'],
          en:['Search using the customer\u2019s own wording in the search tab.',
-             'Found the request? Take it to the lab and run it against the customer account before replying.',
+             'Found the request? Press Try on it against the customer account before replying.',
              'Not found? Do not guess — escalate.',
              'The moment the development team answers, record it in the basics tab so it is never asked twice.']},
-  go:{tab:'lab'},
+  go:{tab:'search'},
   reply:{ar:'', en:''}}
 ];
 
@@ -10307,8 +10477,11 @@ function analyzeCase(text){
     (defs.length > 0 && wantsValues && /report|تقرير/i.test(words)) ||
     (matched.length >= 3 && wantsValues);
 
+  /* v6.44: إيميل فيه لستة بيانات مطلوبة مش تذكرة — بيتقابل مع الكتالوج */
+  const req = reqAnalyze(text, errs, defs, paths, reportCase);
   return {isMsg, arabic, blocks: kinds, defs, wanted, errs, qs, paths,
-          reportCase, words, proseCodes, matched, reportCode};
+          reportCase, words, proseCodes, matched, reportCode,
+          req, reqCase: req.reqCase};
 }
 
 /* أعمدة تقرير الـ Summary زي ما هي في الكولكشن — مصدر واحد، من غير تخمين.
@@ -10391,6 +10564,7 @@ function caseLiveFor(a){
 
 /* الرد الجاهز للعميل — بلغة رسالته */
 function caseReply(a){
+  if(a && a.reqCase) return reqReply(a, REQ_LANG || (a.arabic ? 'ar' : 'en'));
   /* الدليل من الكولكشن: حقول العميل (route_length, engine_work, engine_idle,
      move_duration, stop_duration) موجودة بالحرف في قالب الـ Summary.
      يعني هو شايف تعريف التقرير — والقيم بتيجي من إنشاء التقرير وقراءته. */
@@ -10956,6 +11130,201 @@ function diagPanel(j, raw){
   }
   return '';
 }
+
+/* ============ صورة الرد — قراءة على الجهاز ============
+   العميل كتير بيبعت رد بوستمان صورة. القراءة بتتعمل هنا في المتصفح
+   (Tesseract مترجم WebAssembly) — الصورة ما بتسيبش الجهاز. المحرك بينزل
+   من jsDelivr أول مرة بنسخة مثبّتة، وبعدها بيشتغل من الكاش أوفلاين. */
+const OCR = { lib:'tesseract.js@5.1.1', core:'tesseract.js-core@5.1.1',
+              lang:'@tesseract.js-data/eng@1.0.0/4.0.0_best_int', worker:null, loading:null };
+/* الاختبار بيوجّه المحرك لسيرفر محلي — الإنتاج دايمًا jsDelivr */
+function ocrCdn(){ return (typeof window !== 'undefined' && window.OCR_CDN_OVERRIDE) || 'https://cdn.jsdelivr.net/npm/'; }
+function loadScript(url){
+  return new Promise((res, rej)=>{
+    const s = document.createElement('script'); s.src = url; s.async = true;
+    s.onload = res; s.onerror = ()=>rej(new Error('load ' + url));
+    document.head.appendChild(s);
+  });
+}
+/* حالة المحرك بكلام الموظف — مش status بتاع المكتبة */
+function ocrStage(m){
+  const st = String((m && m.status) || ''), pc = Math.round(((m && m.progress) || 0) * 100);
+  const name = /core/.test(st)        ? t('بنزّل محرك القراءة — مرة واحدة بس','Downloading the reader — first time only')
+             : /traineddata/.test(st) ? t('بنزّل قاموس الحروف — مرة واحدة بس','Downloading the character data — first time only')
+             : /recogniz/.test(st)    ? t('بنقرا الصورة','Reading the image')
+             : t('بنجهّز','Preparing');
+  return name + (pc > 0 && pc < 100 ? ' ' + pc + '%' : '');
+}
+async function ocrEngine(progress){
+  if(OCR.worker) return OCR.worker;
+  if(OCR.loading) return OCR.loading;
+  OCR.loading = (async()=>{
+    try{
+      if(typeof Tesseract === 'undefined') await loadScript(ocrCdn() + OCR.lib + '/dist/tesseract.min.js');
+      const w = await Tesseract.createWorker('eng', 1, {
+        workerPath: ocrCdn() + OCR.lib + '/dist/worker.min.js',
+        corePath:   ocrCdn() + OCR.core,
+        langPath:   ocrCdn() + OCR.lang,
+        gzip: true,
+        logger: m => { try{ progress && progress(ocrStage(m)); }catch(_){} }
+      });
+      /* بلوك واحد متساوي الأسطر — ده شكل رد بوستمان، ومسافات الأعمدة بتتحفظ */
+      await w.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
+      OCR.worker = w; return w;
+    } finally { OCR.loading = null; }
+  })();
+  return OCR.loading;
+}
+function ocrLoadImage(file){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = ()=>res({img, url}); img.onerror = ()=>rej(new Error('bad image'));
+    img.src = url;
+  });
+}
+/* تكبير ×٢ للصور الصغيرة، رمادي، عكس لو الخلفية غامقة، وشدّ تباين —
+   بوستمان بالوضع الليلي من غير كده بيطلع نص صح نص غلط. */
+function ocrPrepare(img){
+  const scale = (img.naturalWidth || img.width) < 1400 ? 2 : 1;
+  const c = document.createElement('canvas');
+  c.width = (img.naturalWidth || img.width) * scale; c.height = (img.naturalHeight || img.height) * scale;
+  const x = c.getContext('2d', {willReadFrequently:true});
+  x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+  x.drawImage(img, 0, 0, c.width, c.height);
+  const d = x.getImageData(0, 0, c.width, c.height), p = d.data, n = p.length / 4;
+  const hist = new Uint32Array(256); let sum = 0;
+  for(let i = 0; i < p.length; i += 4){
+    const g = (p[i]*299 + p[i+1]*587 + p[i+2]*114) / 1000 | 0;
+    p[i] = g; sum += g; hist[g]++;
+  }
+  const dark = (sum / n) < 110;
+  /* قصّ ٠٫٥٪ من الطرفين عشان بيكسل واحد ما يبوّظش الشدّ */
+  let lo = 0, hi = 255, acc = 0, cut = n * 0.005;
+  for(let i = 0; i < 256; i++){ acc += hist[i]; if(acc > cut){ lo = i; break; } }
+  acc = 0; for(let i = 255; i >= 0; i--){ acc += hist[i]; if(acc > cut){ hi = i; break; } }
+  const rng = Math.max(1, hi - lo);
+  for(let i = 0; i < p.length; i += 4){
+    let v = Math.max(0, Math.min(255, Math.round((p[i] - lo) * 255 / rng)));
+    if(dark) v = 255 - v;
+    p[i] = p[i+1] = p[i+2] = v; p[i+3] = 255;
+  }
+  x.putImageData(d, 0, 0);
+  return {canvas:c, dark, scale};
+}
+/* الأكواد اللي بنعرفها — لو status_code طلع رقم مش منهم والصفر اتقرى 6 أو 8، بنرجّعه */
+const OCR_CODES = new Set(['200','201','204','400','401','402','403','404','405','406','408','409','410','415','422','429','500','501','502','503','504']);
+/* تنضيف اللي الـ OCR بيغلط فيه في JSON — كل تصليح بيتقال للموظف */
+function ocrClean(txt){
+  const fixes = []; let s = String(txt || '').replace(/\r/g, '');
+  const q = (s.match(/[“”„‟″‘’‚‛′]/g) || []).length;
+  s = s.replace(/[“”„‟″]/g, '"').replace(/[‘’‚‛′]/g, "'");
+  if(q) fixes.push(t('علامات تنصيص معوجة اتظبطت','Curly quotes straightened'));
+  /* أرقام السطور بتاعة بوستمان في أول كل سطر — ساعات لازقة في القوس: «5}» */
+  const lines = s.split('\n'), nonEmpty = lines.filter(l => l.trim()).length;
+  const LN = /^\s*\d{1,4}(?=\s+\S|[{}\[\]])/;
+  const numbered = lines.filter(l => LN.test(l)).length;
+  if(numbered >= 3 && numbered >= nonEmpty * 0.6){
+    s = lines.map(l => l.replace(/^\s*\d{1,4}\s*/, '')).join('\n');
+    fixes.push(t('أرقام السطور اتشالت','Line numbers removed'));
+  }
+  /* قوس إغلاق على سطر لوحده اتقرى حروف («Is» أو «L» أو «¥»): لو إحنا جوه كائن أو مصفوفة،
+     السطر ده هو القوس اللي بيقفلها. بنتتبّع الأقواس من بره النصوص المقتبسة. */
+  {
+    const L2 = s.split('\n'), stack = []; let fixed = 0;
+    const walk = line => { let q = false;
+      for(const ch of line){ if(ch === '"'){ q = !q; continue; } if(q) continue;
+        if(ch === '{' || ch === '[') stack.push(ch);
+        else if((ch === '}' || ch === ']') && stack.length) stack.pop(); } };
+    for(let i = 0; i < L2.length; i++){
+      const tr = L2[i].trim();
+      if(stack.length && /^[A-Za-z¥£§†‡¢]{1,3}[.,]?$/.test(tr)){
+        const next = (L2.slice(i + 1).find(x => x.trim()) || '').trim();
+        const close = stack[stack.length - 1] === '{' ? '}' : ']';
+        L2[i] = close + (next.startsWith('"') ? ',' : ''); fixed++;
+      }
+      walk(L2[i]);
+    }
+    if(fixed){ s = L2.join('\n'); fixes.push(t(`${fixed} قوس إغلاق اتقرى حروف واترجّع`, `${fixed} closing bracket read as letters restored`)); }
+  }
+  /* مفتاح اتقطع بمسافة: "status code": → "status_code": */
+  let k = 0;
+  s = s.replace(/"([a-z][a-z0-9]*(?: [a-z][a-z0-9_]*)+)"\s*:/gi, (m, key)=>{ k++; return '"' + key.replace(/ /g, '_') + '":'; });
+  if(k) fixes.push(t('مفاتيح اتقطعت بمسافة اتلمّت','Keys split by a space rejoined'));
+  /* علامة تنصيص اتقرت نجمة أو فاصلة في أول المفتاح: *message" → "message" */
+  s = s.replace(/^(\s*)[*'`´]([a-z_][a-z0-9_]*)"/gmi, '$1"$2"');
+  /* صفر اتقرى حرف في مكان رقم */
+  s = s.replace(/:\s*[@oO]\s*(?=[,\n}\]])/g, ': 0')
+       .replace(/(?<=\d)[oO](?=\d)/g, '0').replace(/(?<=\d)[lI](?=\d)/g, '1');
+  /* status_code بيقول رقم مش موجود أصلًا — الصفر اتقرى 6 أو 8 */
+  s = s.replace(/("status_code"\s*:\s*)(\d{3})\b/g, (m, a, num)=>{
+    if(OCR_CODES.has(num)) return m;
+    const alt = num.replace(/[68]/g, '0');
+    if(alt !== num && OCR_CODES.has(alt)){ fixes.push(t(`status_code اتقرى ${num} واتصلّح لـ ${alt} — اتأكد من الصورة`, `status_code read as ${num}, corrected to ${alt} — check the image`)); return a + alt; }
+    return m;
+  });
+  return {text: s.trim(), fixes};
+}
+/* الصورة → نص منضّف. progress(نص) بيتنده مع كل مرحلة. */
+async function ocrImage(file, progress){
+  const {img, url} = await ocrLoadImage(file);
+  try{
+    const prep = ocrPrepare(img);
+    const w = await ocrEngine(progress);
+    progress && progress(t('بنقرا الصورة','Reading the image'));
+    const {data} = await w.recognize(prep.canvas);
+    const out = ocrClean(data.text);
+    out.dark = prep.dark; out.confidence = Math.round(data.confidence || 0);
+    return out;
+  } finally { URL.revokeObjectURL(url); }
+}
+/* صندوق الصورة تحت الخانة: الصورة نفسها + الحالة + اللي اتصلّح */
+function ocrBox(boxId, html, thumb){
+  const b = $(boxId); if(!b) return;
+  b.hidden = false;
+  b.innerHTML = `<div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap">
+    ${thumb ? `<img src="${thumb}" alt="" style="max-height:120px; max-width:220px; border:1px solid var(--line); border-radius:var(--r); background:#fff">` : ''}
+    <div style="flex:1 1 240px; font-size:13px">${html}</div></div>`;
+}
+/* بتوصّل الصورة بالخانة: رفع، أو لصق Ctrl+V، أو سحب. after() بتتنده بعد ما النص يتحط. */
+function ocrAttach(textId, boxId, fileId, after){
+  const ta = $(textId); if(!ta) return;
+  const run = async file => {
+    if(!file || !/^image\//.test(file.type || '')){ toast(t('ده مش ملف صورة','That is not an image file')); return; }
+    const thumb = URL.createObjectURL(file);
+    ocrBox(boxId, `<div class="note">${esc(t('بنجهّز','Preparing'))}</div>`, thumb);
+    try{
+      const r = await ocrImage(file, stage => ocrBox(boxId, `<div class="note">${esc(stage)}</div>`, thumb));
+      if(!r.text){
+        ocrBox(boxId, `<div class="note warn">${t('ما طلعش كلام من الصورة. جرّب صورة أوضح أو أكبر — أو اطلب من العميل النص نفسه.','No text came out of the image. Try a clearer or larger one — or ask the customer for the text itself.')}</div>`, thumb);
+        return;
+      }
+      const cur = ta.value.trim();
+      ta.value = cur ? cur + '\n\n' + r.text : r.text;
+      ocrBox(boxId, `<div class="note sig"><b>${t('اتقرت من الصورة','Read from the image')}</b>${r.dark ? ' — ' + esc(t('خلفية غامقة اتعكست قبل القراءة','dark background inverted before reading')) : ''}.
+          ${t('راجع الأرقام الطويلة (المعرّفات والـ IMEI) قبل ما تعتمد عليها — الصفر ساعات بيتقرى 6 أو 8.','Check long numbers (ids and IMEIs) before relying on them — a zero sometimes reads as 6 or 8.')}
+          ${r.fixes.length ? `<ul style="margin:6px 0 0; padding-inline-start:20px">${r.fixes.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>` : ''}</div>`, thumb);
+      after && after(r);
+    }catch(err){
+      const off = !navigator.onLine || /load |Failed to fetch|NetworkError/i.test(String(err && err.message || err));
+      ocrBox(boxId, `<div class="note warn"><b>${t('ما قدرناش نقرا الصورة.','Could not read the image.')}</b> ${off
+        ? t('قراءة الصور محتاجة نت أول مرة بس عشان تنزّل المحرك (حوالي ٦ ميجا) — بعدها بتشتغل أوفلاين.','Reading images needs the internet the first time only, to download the reader (about 6 MB) — after that it works offline.')
+        : esc(String(err && err.message || err).slice(0, 160))}</div>`, thumb);
+    }
+  };
+  const fi = $(fileId);
+  if(fi) fi.addEventListener('change', ev => { const f = ev.target.files && ev.target.files[0]; if(f && /^image\//.test(f.type)) { run(f); ev.target.value = ''; } });
+  ta.addEventListener('paste', ev => {
+    const items = (ev.clipboardData && ev.clipboardData.items) || [];
+    const it = [...items].find(i => /^image\//.test(i.type));
+    if(it){ ev.preventDefault(); run(it.getAsFile()); }
+  });
+  ta.addEventListener('dragover', ev => { ev.preventDefault(); });
+  ta.addEventListener('drop', ev => {
+    const f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if(f && /^image\//.test(f.type)){ ev.preventDefault(); run(f); }
+  });
+}
+
 function renderInspect(){
   const raw = ($('inText').value||'').trim();
   const out = $('inOut');
@@ -11255,7 +11624,8 @@ function analyzeCapture(txt){
       body:{ar:`<p>الكولكشن بيوصف شكل تاني. اللي المنصة بتبعته فعلًا:</p><pre class="pre">${esc(safeBody.slice(0,600))}</pre>`,
             en:`<p>The collection describes a different shape. What the platform actually sends:</p><pre class="pre">${esc(safeBody.slice(0,600))}</pre>`}
     };
-    LEARNED.unshift(entry); ADDED.push(entry);
+    entry.at = new Date().toISOString();
+    LEARNED.unshift(entry); ADDED.push(entry); addedStore();
     $('capApplied').innerHTML = `<div class="note sig" style="margin-top:10px">
       <b>${t('اتطبّق.','Applied.')}</b> ${t('الشكل المرصود بقى أول صيغة في التصحيح التلقائي لـ','The captured shape is now the first variant auto-fix tries for')} <code>${esc(ep.p)}</code>.<br>
       ${t('واتسجّل في المعرفة — صدّرها من تبويب الأساسيات وابعتها لمسؤول الأداة عشان تدخل النسخة الجاية.',
@@ -11305,8 +11675,8 @@ function paintInspSwitch(){
   $('caseBox').hidden = INSPVIEW!=='case';
   if(INSPVIEW==='case'){
     $('inIntro').innerHTML = t(
-      'الصق رسالة العميل كاملة — كلام وأكواد وأسئلة. الأداة بتفصل الرد اللي اشتكى منه عن المثال اللي عايزه، وتقولك عمل إيه وإيه الغلط، وتطلّعلك رد جاهز تبعته.',
-      'Paste the whole customer message — prose, code blocks and questions. The tool separates the response they complained about from the shape they want, tells you what they did and what went wrong, and drafts a reply you can send.');
+      'الصق رسالة العميل كاملة — كلام وأكواد وأسئلة. الأداة بتفصل الرد اللي اشتكى منه عن المثال اللي عايزه، وتقولك عمل إيه وإيه الغلط، وتطلّعلك رد جاهز تبعته. ولو الإيميل طلب بيانات (١) … ٢) …) بتجاوب كل بند بحالته.',
+      'Paste the whole customer message — prose, code blocks and questions. The tool separates the response they complained about from the shape they want, tells you what they did and what went wrong, and drafts a reply you can send. If the email asks for data (1) … 2) …), every point is answered with its status.');
     if(!$('caseBox').innerHTML) paintCase();
   }
   if(INSPVIEW==='req'){
@@ -11323,15 +11693,21 @@ function paintCase(){
       <h3>${t('الصق رسالة العميل','Paste the customer message')}</h3>
       <textarea id="caseText" style="width:100%; min-height:190px; font-family:var(--mono); font-size:12.5px;
         padding:12px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel-2); color:var(--ink)"
-        placeholder="${t('الصق الإيميل كامل — الكلام والأكواد والأسئلة','Paste the full email — prose, code blocks and questions')}"></textarea>
+        placeholder="${t('الصق الإيميل كامل — الكلام والأكواد والأسئلة. ولو الرد جه صورة، الصقها هنا (Ctrl+V)','Paste the full email — prose, code blocks and questions. If the response came as a screenshot, paste it here (Ctrl+V)')}"></textarea>
       <div class="row" style="margin-top:10px">
         <button class="btn sig" id="caseGo">${t('حلّل','Analyse')}</button>
+        <label class="btn ghost" style="cursor:pointer">${t('أو ارفع صورة الرد','or upload the response image')}
+          <input type="file" id="caseImg" accept="image/*" hidden></label>
         <button class="btn ghost" id="caseClear">${t('مسح','Clear')}</button>
       </div>
+      <div id="caseImgBox" style="margin-top:10px" hidden></div>
     </div></div>
     <div id="caseOut"></div>`;
   $('caseGo').onclick = ()=>renderCase($('caseText').value);
-  $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; CASE_LIVE = null; };
+  $('caseClear').onclick = ()=>{ $('caseText').value=''; $('caseOut').innerHTML=''; CASE_LIVE = null;
+    const b=$('caseImgBox'); if(b){ b.hidden=true; b.innerHTML=''; } };
+  /* v6.45: «Postman Response:» وبعدها صورة — بتتقرا وتتحط تحت كلام العميل وتتحلّل */
+  ocrAttach('caseText', 'caseImgBox', 'caseImg', ()=>renderCase($('caseText').value));
 }
 
 /* سطر واحد بيقول الحالة اتحسمت ولا لسه — عشان الموظف يعرف في ثانية
@@ -11356,10 +11732,414 @@ function caseVerdict(a){
            'The message carries enough to diagnose. Read the analysis below before replying.')};
 }
 
+
+/* ============ طلب إنتجريشن — رد نقطة بنقطة ============
+   الإيميل اللي بيقول «نرغب في الحصول على: ١) … ٢) …» مش تذكرة عطل، ده طلب
+   بيانات. كل سطر في لستته بيتقابل مع الكتالوج ده، وكل بند فيه مربوط
+   بريكوست موجود فعلًا في الكولكشن أو بمعلومة اتأكدت من رد حقيقي أو تذكرة.
+
+   الحالات:
+     ok      متاح — الريكوست في الكولكشن
+     part    متاح جزئيًا — جزء مؤكد وجزء محتاج تأكيد
+     sensor  متاح لو الجهاز فيه الحساس — بيتأكد لكل عربية
+     confirm يحتاج تأكيد من تيم مصر — ما يتقالش للعميل كمؤكد
+     sales   قرار تجاري — مدير الحساب
+   وسطر ما لقيناش له مقابل بياخد none — بيتقال كده بصراحة، مش بيتخمّن. */
+const REQ_ST = {
+  ok:     {ar:'متاح',                    en:'Available'},
+  part:   {ar:'متاح جزئيًا',             en:'Partly available'},
+  sensor: {ar:'حسب الجهاز',              en:'Depends on the device'},
+  confirm:{ar:'يحتاج تأكيد',             en:'To be confirmed'},
+  sales:  {ar:'قرار تجاري',              en:'Commercial'},
+  none:   {ar:'مفيش مقابل في الكولكشن',  en:'No match in the collection'}
+};
+const REQ_CATALOG = [
+{ id:'vehicle-id', st:'ok', eps:['/units/lists'],
+  kw:/vehicle\s*id|unit\s*id|plate|licen[cs]e|لوحة|معر[ّ]?ف المركبة|رقم المركبة|list of (vehicles|units)|لستة (العربيات|المركبات)|قائمة (المركبات|العربيات)/i,
+  t:{ar:'رقم اللوحة ومعرّف المركبة', en:'Vehicle id and plate'},
+  note:{ar:'/units/lists بيرجّع كل عربيات الحساب: id (ده الـ UID اللي كل الريكوستات بتشتغل بيه) والاسم والـ IMEI ورقم الجهاز والشريحة، واللوحة زي ما هي متسجّلة على المنصة. projection ["basic"] يخلّي الرد خفيف.',
+        en:'/units/lists returns every vehicle on the account: id (the UID every other call uses), name, IMEI, device serial, SIM, and the plate as registered on the platform. projection ["basic"] keeps it light.'},
+  reply:{ar:'متاح. الطلب POST /units/lists يعيد جميع المركبات المسجلة في الحساب مع معرّف كل مركبة (id — وهو المعرّف المستخدم في بقية الطلبات) واسمها ورقم الـ IMEI والرقم التسلسلي للجهاز ورقم اللوحة كما هو مسجّل في المنصة.',
+         en:'Available. POST /units/lists returns every vehicle on the account with its id (the identifier used by all other calls), name, IMEI, device serial and the plate number as registered on the platform.'} },
+
+{ id:'distance', st:'ok', eps:['/user_reports/add','/units/lists'],
+  kw:/distance|mileage|kilomet|\bkm\b|odometer|المسافة|مسافة|كيلومتر|عداد المسافة/i,
+  t:{ar:'المسافة المقطوعة', en:'Distance travelled'},
+  note:{ar:'المسافة عن فترة من تقرير الـ Summary (حقل route_length) — والفترة بتتقسم بالأيام بـ interval_unit: days فيطلع صف لكل يوم لكل عربية. المسافة التراكمية من counters.odometer في /units/lists بالكيلومتر (بتطابق الشاشة على طول).',
+        en:'Distance per period comes from the Summary report (route_length); split the period with interval_unit "days" for one row per day per vehicle. The cumulative odometer is counters.odometer in /units/lists, in kilometres (matches the dashboard).'},
+  reply:{ar:'متاح. تقرير الملخص (Summary) يعيد المسافة المقطوعة (الحقل route_length) لأي فترة، ويمكن تقسيم الفترة يوميًا (interval_unit = days) فيعود صف لكل يوم لكل مركبة. كما يعيد الطلب POST /units/lists عداد المسافة التراكمي في الحقل counters.odometer بالكيلومتر.',
+         en:'Available. The Summary report returns the distance travelled (field route_length) for any period, and the period can be split per day (interval_unit "days") so you receive one row per day per vehicle. The cumulative odometer is also returned by POST /units/lists under counters.odometer, in kilometres.'} },
+
+{ id:'trips', st:'confirm', eps:['/user_report_templates/lists','/user_reports/add'],
+  kw:/\btrips?\b|journey|رحلة|رحلات|الرحلة/i,
+  t:{ar:'تفاصيل كل رحلة', en:'Per-trip detail'},
+  note:{ar:'تفاصيل كل رحلة على حدة (بداية ونهاية ومدة) بتيجي من قالب تقرير رحلات في حساب العميل. الكولكشن فيه آلية التقارير نفسها (إنشاء → انتظار → قراءة) بس مش قالب الرحلات. اجلب /user_report_templates/lists على حساب العميل: لو فيه قالب رحلات، النقطة متاحة بنفس السلسلة؛ لو مفيش، اسأل مصر — وما تقولش للعميل «متاح» قبل كده.',
+        en:'Per-trip detail (start, end, duration) comes from a trips report template on the customer account. The collection carries the reports mechanism (create → wait → read) but not the trips template itself. Fetch /user_report_templates/lists on the customer account: if a trips template exists the point is available through the same chain; if not, ask development — do not tell the customer it is available before that.'},
+  reply:{ar:'قيد التأكيد. تفاصيل كل رحلة (وقت البداية والنهاية والمدة) تُستخرج عبر منظومة التقارير بنفس تسلسل الإنشاء ثم الانتظار ثم القراءة، وسنؤكد لكم قالب تقرير الرحلات المتاح في حسابكم ونضمّنه في المجموعة المرسلة.',
+         en:'To be confirmed. Trip-level detail (start time, end time, duration) is produced through the reports family using the same create → wait → read sequence; we will confirm the trip report template available on your account and include it in the collection we send.'} },
+
+{ id:'ignition', st:'ok', eps:['/units/lists','/units/signals','/user_reports/add'],
+  kw:/ignition|\bacc\b|engine\s*(on|off|status|state)|تشغيل و(إيقاف|ايقاف) المحرك|حالة المحرك|حالة تشغيل/i,
+  not:/idl|idle|hours|ساعات|وقوف/i,
+  t:{ar:'حالة تشغيل وإيقاف المحرك', en:'Ignition ON/OFF'},
+  note:{ar:'الحالة الحالية جوه سجل العربية من /units/lists مع projection last_update: حقول acc و accOn و accOff — متأكدة من رد حقيقي. عن فترة: الرسائل الخام بتوقيتها من /units/signals، ومدة التشغيل من تقرير Summary (engine_work).',
+        en:'Current state is in the vehicle record from /units/lists with projection last_update: acc, accOn and accOff — confirmed from a real response. For a period: the raw messages with their times from /units/signals, and the engine-on duration from the Summary report (engine_work).'},
+  reply:{ar:'متاح. الحالة الحالية للمحرك تعود مع سجل المركبة من الطلب POST /units/lists (projection: basic و last_update) في الحقول acc و accOn و accOff. أما عن فترة محددة فيعيد الطلب POST /units/signals رسائل الجهاز بتوقيتها، ويعيد تقرير الملخص مدة تشغيل المحرك (engine_work).',
+         en:'Available. The current ignition state comes with the vehicle record from POST /units/lists (projection basic and last_update) in the fields acc, accOn and accOff. For a period, POST /units/signals returns the device messages with their timestamps, and the Summary report gives the engine-on duration (engine_work).'} },
+
+{ id:'engine-hours', st:'ok', eps:['/units/lists','/user_reports/add'],
+  kw:/engine\s*hours|engine\s*work|ساعات (تشغيل|عمل) المحرك|ساعات المحرك/i,
+  t:{ar:'إجمالي ساعات تشغيل المحرك', en:'Total engine hours'},
+  note:{ar:'counters.engine_hours في /units/lists مع projection counters — القيمة بالثواني، اقسمها على 3600 (أكتر سؤال بيتكرر مع أي إنتجريشن). عن فترة: engine_work في Summary.',
+        en:'counters.engine_hours in /units/lists with projection counters — the value is in seconds; divide by 3600 (the most repeated integration question). Per period: engine_work in the Summary report.'},
+  reply:{ar:'متاح. الطلب POST /units/lists (projection: basic و counters) يعيد إجمالي ساعات التشغيل في الحقل counters.engine_hours، مع ملاحظة أن القيمة بالثواني ويلزم قسمتها على 3600 للحصول على الساعات. ويعيد تقرير الملخص مدة التشغيل عن أي فترة في الحقل engine_work.',
+         en:'Available. POST /units/lists (projection basic and counters) returns the total in counters.engine_hours. Note that the value is in seconds — divide by 3600 for hours. Engine-on time for a period is engine_work in the Summary report.'} },
+
+{ id:'idling', st:'part', eps:['/user_reports/add'],
+  kw:/idl|idle|وقوف المركبة والمحرك|المحرك في حالة تشغيل|الخمول|تباطؤ/i,
+  t:{ar:'مدة التشغيل بدون حركة', en:'Idling duration'},
+  note:{ar:'مدة التشغيل بدون حركة عن فترة من Summary (engine_idle) — ويوميًا لو قسّمت الفترة. أما وقت بداية ونهاية كل حالة على حدة فمحتاج قالب تقرير في حساب العميل — يحتاج تأكيد.',
+        en:'Idling duration per period from the Summary report (engine_idle) — per day if you split the period. The start and end time of each idling episode needs a report template on the customer account — to be confirmed.'},
+  reply:{ar:'متاح جزئيًا. مدة التشغيل بدون حركة عن أي فترة (ويوميًا عند تقسيم الفترة) تعود في تقرير الملخص في الحقل engine_idle. أما وقت بداية ونهاية كل حالة على حدة فسنؤكد لكم قالب التقرير المتاح لذلك في حسابكم.',
+         en:'Partly available. The idling duration for any period (per day when the period is split) is returned by the Summary report in engine_idle. The start and end time of each idling episode requires a dedicated report template; we will confirm the one available on your account.'} },
+
+{ id:'stops', st:'part', eps:['/user_reports/add'],
+  kw:/\bstops?\b|parking|\bpark|التوقف|توقفات|الوقوف|وقوف/i,
+  not:/idl|idle|المحرك في حالة تشغيل/i,
+  t:{ar:'التوقفات والوقوف', en:'Stops and parking'},
+  note:{ar:'مدة التوقف عن فترة من Summary (stop_duration). قايمة التوقفات نفسها (بداية ونهاية ومدة وموقع لكل توقف) محتاجة قالب تقرير توقفات في حساب العميل — يحتاج تأكيد.',
+        en:'Stop duration per period from the Summary report (stop_duration). A per-stop list (start, end, duration and location) needs a stops report template on the customer account — to be confirmed.'},
+  reply:{ar:'متاح جزئيًا. إجمالي مدة التوقف عن أي فترة يعود في تقرير الملخص في الحقل stop_duration. أما قائمة التوقفات تفصيليًا (وقت البداية والنهاية والمدة والموقع لكل توقف) فتُستخرج عبر قالب تقرير التوقفات، وسنؤكد لكم المتاح منه في حسابكم.',
+         en:'Partly available. The total stop duration for any period is returned by the Summary report in stop_duration. A detailed stop list (start, end, duration and location per stop) is produced through a stops report template; we will confirm the one available on your account.'} },
+
+{ id:'gps-history', st:'ok', eps:['/units/locations','/units/signals','/units/lists'],
+  kw:/\bgps\b|location|position|coordinates|\broutes?\b|track|history|مسار|المسارات|الموقع|مواقع|إحداثيات|حركة المركبة|تحركات/i,
+  not:/historical data|maximum\s+period|retention|أقصى مدة|البيانات التاريخية|stop|parking|توقف|وقوف/i,
+  t:{ar:'المواقع والمسارات التاريخية', en:'GPS positions and historical routes'},
+  note:{ar:'المواقع خلال فترة: /units/locations بـ unit_id و date (from/to) و address:true. الرسائل الخام بكل حقولها (سرعة واتجاه وارتفاع…): /units/signals بنفس الفترة، بـ limit و offset — عينة الكولكشن فيها offset 50، لازم يبقى 0. آخر موقع: last_update في /units/lists.',
+        en:'Positions over a period: /units/locations with unit_id, date (from/to) and address:true. The raw messages with every field (speed, heading, altitude…): /units/signals over the same period, paginated with limit and offset — the collection sample has offset 50, it must be 0. Latest position: last_update in /units/lists.'},
+  reply:{ar:'متاح. الطلب POST /units/locations يعيد مواقع المركبة خلال فترة زمنية محددة (مع العنوان عند تفعيل address)، ويعيد الطلب POST /units/signals رسائل الجهاز الخام خلال الفترة نفسها (بالتاريخ والوقت والسرعة) مع إمكانية التقسيم إلى صفحات بالحقلين limit و offset، ويعود آخر موقع للمركبة في الحقل last_update من الطلب POST /units/lists.',
+         en:'Available. POST /units/locations returns the positions of a vehicle over a date range (with the address when address is true); POST /units/signals returns the raw device messages for the same range (date, time, speed and more), paginated with limit and offset; the latest position is in last_update from POST /units/lists.'} },
+
+{ id:'speed', st:'ok', eps:['/units/signals','/user_reports/add','/units/lists'],
+  kw:/speed|السرعة|سرعة/i,
+  t:{ar:'بيانات السرعة', en:'Speed data'},
+  note:{ar:'السرعة الحالية spd جوه last_update، والسرعة في كل رسالة من /units/signals، وأقصى ومتوسط السرعة عن فترة من Summary (max_spd و avg_spd).',
+        en:'Current speed is spd inside last_update, speed per message from /units/signals, and maximum and average speed per period from the Summary report (max_spd, avg_spd).'},
+  reply:{ar:'متاح. السرعة الحالية تعود في الحقل spd ضمن last_update، وتعود سرعة كل رسالة من الطلب POST /units/signals، كما يعيد تقرير الملخص أقصى سرعة ومتوسط السرعة عن أي فترة (الحقلان max_spd و avg_spd).',
+         en:'Available. The current speed is the field spd inside last_update, each message from POST /units/signals carries its speed, and the Summary report returns the maximum and average speed for any period (max_spd and avg_spd).'} },
+
+{ id:'reefer-pto', st:'sensor', eps:['/unit_sensors/lists','/units/signals','/units/lists'],
+  kw:/reefer|refrigerat|cooling unit|\bpto\b|التبريد|المبردة|مبردة|تبريد/i,
+  t:{ar:'وحدة التبريد والـ PTO', en:'Refrigeration unit and PTO'},
+  note:{ar:'دي حساسات: بتيجي بس لو الجهاز موصّل فعلًا على وحدة التبريد أو الـ PTO ومعمول له حساس على المنصة. اتأكد لكل عربية من /unit_sensors/lists بفلتر unit_id — رد حقيقي عن الجهاز ده (جهاز GPS بسيط بيرجّع فاضي). القراءات بتيجي مع رسائل الجهاز من /units/signals بـ sensors:true. ساعات تشغيل وحدة التبريد وأوقات البداية والنهاية: يحتاج تأكيد من مصر.',
+        en:'These are sensors: they exist only where the device is actually wired to the refrigeration unit or PTO and a sensor is configured on the platform. Check per vehicle with /unit_sensors/lists filtered by unit_id — a real answer for that device (a plain GPS unit returns an empty list). Readings come with the device messages from /units/signals with sensors:true. Running hours and start/end times of the unit: confirm with development.'},
+  reply:{ar:'متاح بحسب الجهاز. تعود حالة وحدة التبريد أو الـ PTO فقط للمركبات التي يكون جهاز التتبع فيها موصولًا بالوحدة مع تعريف حساس لها في المنصة؛ يعيد الطلب POST /unit_sensors/lists الحساسات المعرّفة لكل مركبة، وتعود قراءات الحساسات مع رسائل الجهاز من الطلب POST /units/signals (الخيار sensors). وسنؤكد لكم أي المركبات المبردة لديكم تتوفر فيها هذه المدخلات، وإمكانية استخراج ساعات تشغيل وحدة التبريد وأوقات بدايتها ونهايتها.',
+         en:'Depends on the device. The refrigeration unit or PTO state is available only for vehicles whose tracking device is wired to the unit with a sensor configured on the platform; POST /unit_sensors/lists returns the sensors defined on a vehicle, and the sensor readings come with the device messages from POST /units/signals (sensors option). We will confirm which of your refrigerated vehicles have this input, and whether the unit running hours and start/end times can be reported.'} },
+
+{ id:'fuel', st:'sensor', eps:['/unit_sensors/lists','/units/signals','/user_reports/add'],
+  kw:/fuel|can\s*-?\s*bus|الوقود|وقود/i,
+  t:{ar:'مستوى الوقود واستهلاكه', en:'Fuel level and consumption'},
+  note:{ar:'حساس: لو العربية فيها حساس وقود أو CAN معمول له حساس (اتأكد من /unit_sensors/lists بفلتر unit_id)، القراءات بتيجي مع رسائل /units/signals بـ sensors:true، والاستهلاك عن فترة من Summary (fuel_level_sensor). لو مفيش حساس، Summary فيه استهلاك حسابي (fuel_consumption) من المسافة ومعدل الاستهلاك المسجّل للعربية — ده تقدير مش قراءة، وقوله للعميل كده.',
+        en:'Sensor-based: where the vehicle has a fuel sensor or a CAN connection with a sensor configured (check /unit_sensors/lists filtered by unit_id), the readings come with the /units/signals messages with sensors:true, and the consumption per period from the Summary report (fuel_level_sensor). Without a sensor the Summary report gives a calculated consumption (fuel_consumption) from distance and the configured rate — an estimate, not a reading; say so.'},
+  reply:{ar:'متاح بحسب الجهاز. للمركبات المزودة بحساس وقود أو باتصال CAN مع تعريف حساس في المنصة، تعود قراءات مستوى الوقود مع رسائل الجهاز من الطلب POST /units/signals (الخيار sensors) ويعيد تقرير الملخص الاستهلاك عن الفترة في الحقل fuel_level_sensor. أما المركبات غير المزودة بحساس فيعيد تقرير الملخص استهلاكًا محسوبًا (fuel_consumption) من المسافة ومعدل الاستهلاك المسجّل للمركبة، وهو تقدير وليس قراءة فعلية. وسنؤكد لكم المركبات المزودة بحساس وقود لديكم.',
+         en:'Depends on the device. For vehicles fitted with a fuel sensor or a CAN-bus connection with a sensor configured on the platform, the fuel level readings come with the device messages from POST /units/signals (sensors option) and the consumption per period is returned by the Summary report in fuel_level_sensor. For vehicles without a sensor, the Summary report returns a calculated consumption (fuel_consumption) derived from distance and the vehicle configured rate — an estimate, not a reading. We will confirm which of your vehicles have a fuel sensor.'} },
+
+{ id:'driver', st:'ok', eps:['/drivers/get_unit_driver','/drivers/lists','/units/lists'],
+  kw:/driver|السائق|سائق|السواق/i,
+  t:{ar:'السائق المرتبط بالمركبة', en:'Driver linked to the vehicle'},
+  note:{ar:'السائق المرتبط بعربية في وقت معين: /drivers/get_unit_driver بـ unit_id و date. بيانات السواقين كلهم من /drivers/lists، و driver_id جوه سجل العربية في /units/lists.',
+        en:'The driver assigned to a vehicle at a given time: /drivers/get_unit_driver with unit_id and date. All drivers from /drivers/lists, and driver_id inside the vehicle record in /units/lists.'},
+  reply:{ar:'متاح. يعيد الطلب POST /drivers/get_unit_driver السائق المرتبط بالمركبة في تاريخ ووقت محددين (الحقلان unit_id و date)، ويعيد الطلب POST /drivers/lists بيانات السائقين في الحساب، كما يحمل سجل المركبة من POST /units/lists الحقل driver_id.',
+         en:'Available. POST /drivers/get_unit_driver returns the driver assigned to a vehicle at a given date and time (unit_id and date), POST /drivers/lists returns the drivers on the account, and the vehicle record from POST /units/lists carries driver_id.'} },
+
+{ id:'retention', st:'confirm', eps:[],
+  kw:/historical data|maximum\s+period|maximum\s+history|retention|how far back|أقصى مدة|البيانات التاريخية|مدة الاحتفاظ/i,
+  t:{ar:'أقصى مدة للبيانات التاريخية', en:'Maximum historical period'},
+  note:{ar:'الاستعلام التاريخي نفسه متاح (فترات على /units/locations و /units/signals والتقارير). لكن مدة الاحتفاظ بالبيانات مش موجودة في الكولكشن — اسأل مصر، وما تقولش رقم.',
+        en:'Historical querying itself is available (date ranges on /units/locations, /units/signals and the reports). The retention period is not in the collection — ask development, and do not quote a number.'},
+  reply:{ar:'قيد التأكيد. الاستعلام عن البيانات التاريخية متاح عبر الطلبات المذكورة أعلاه (فترات زمنية على /units/locations و /units/signals والتقارير)، وسنوافيكم بأقصى مدة احتفاظ بالبيانات المتاحة عبر الواجهة بعد تأكيدها من فريق المنصة.',
+         en:'To be confirmed. Historical queries are supported by the calls above (date ranges on /units/locations, /units/signals and the reports); the maximum retention period available through the API is being confirmed with our platform team and we will state it in our follow-up.'} },
+
+{ id:'docs', st:'ok', eps:[],
+  kw:/documentation|\bdocs\b|توثيق|التوثيق|الدليل الفني/i,
+  t:{ar:'توثيق الـ API', en:'API documentation'},
+  note:{ar:'في توثيق رسمي — ابعت اللينك مع أي طلب إنتجريشن جديد.', en:'There is official documentation — send the link with every new integration request.'},
+  reply:{ar:'التوثيق الرسمي للواجهة متاح على الرابط: https://api.afaqy.sa/docs/',
+         en:'The official API documentation is available at: https://api.afaqy.sa/docs/'} },
+
+{ id:'auth', st:'ok', eps:['/auth/login'],
+  kw:/authentication|\bauth\b|\blogin\b|المصادقة|تسجيل الدخول|طريقة الدخول/i,
+  t:{ar:'طريقة المصادقة', en:'Authentication'},
+  note:{ar:'POST /auth/login بـ data.username و data.password والتوكن في data.token. التوكن بيتبعت كباراميتر في اللينك ?token= مش هيدر (504 ريكوست من 534). كله POST تقريبًا والبودي جوه data، والرد 200 حتى لو فشل — الخطأ جوه status_code و message.',
+        en:'POST /auth/login with data.username and data.password; the token is data.token. It is sent as a URL parameter ?token=, not a header (504 of 534 requests). Almost everything is POST with the body inside data, and the HTTP status is 200 even on failure — the error is in status_code and message.'},
+  reply:{ar:'المصادقة تتم عبر الطلب POST /auth/login بالجسم {"data":{"username":"…","password":"…"}}، ويعود الرمز في الحقل data.token. يُمرَّر الرمز في كل طلب كمعامل في الرابط، مثل: POST /units/lists?token=YOUR_TOKEN. معظم الطلبات من نوع POST وجسمها داخل الكائن data، وتعيد الواجهة الحالة HTTP 200 حتى عند فشل الطلب؛ لذا يُقرأ الحقلان status_code و message من جسم الاستجابة.',
+         en:'Authentication is POST /auth/login with the body {"data":{"username":"…","password":"…"}}; the token is returned in data.token. The token is passed on every call as a URL parameter, e.g. POST /units/lists?token=YOUR_TOKEN. Almost every endpoint is POST with the body wrapped in a "data" object, and the API returns HTTP 200 even when a call fails — read status_code and message from the response body.'} },
+
+{ id:'readonly-token', st:'confirm', eps:['/auth/login'],
+  kw:/api\s*key|read.?only|بصلاحية|صلاحية القراءة|مفتاح/i,
+  t:{ar:'مفتاح أو توكن بصلاحية قراءة فقط', en:'API key or read-only token'},
+  note:{ar:'التوكن مرتبط بحساب مستخدم مش مفتاح مستقل. الكولكشن فيه Roles and Permissions، فمستخدم فرعي بدور محدود للإنتجريشن ممكن — بس إن الدور ينفع «قراءة فقط» بالظبط ده يتأكد من مصر قبل ما يتوعد.',
+        en:'The token belongs to a user account; it is not a standalone key. The collection has Roles and Permissions, so a dedicated sub-user with a restricted role is possible — but that the role can be exactly "read only" must be confirmed with development before it is promised.'},
+  reply:{ar:'قيد التأكيد. الرمز يُصدر لحساب مستخدم عبر POST /auth/login وليس مفتاحًا مستقلًا، ويمكن إنشاء مستخدم فرعي مخصص للتكامل بدور محدود الصلاحيات؛ وسنؤكد لكم مجموعة صلاحيات القراءة فقط المتاحة وننشئ المستخدم لكم.',
+         en:'To be confirmed. The token is issued to a user account through POST /auth/login rather than as a standalone key; a dedicated sub-user with a restricted role can be created for the integration. We will confirm the exact read-only permission set available and create the user for you.'} },
+
+{ id:'endpoints-list', st:'ok', eps:[],
+  kw:/endpoints?|list of (calls|requests)|الإندبوينت|قائمة الطلبات|المسارات المتاحة/i,
+  t:{ar:'قائمة الإندبوينتس', en:'List of endpoints'},
+  note:{ar:'التوثيق فيه القايمة كاملة. الأداة بتطلّع كولكشن Postman فيه الريكوستات المتاحة للنقط دي بالظبط — من الزرار تحت.', en:'The documentation carries the full list. The tool produces a Postman collection with exactly the requests for these points — the button below.'},
+  reply:{ar:'قائمة الطلبات كاملة في التوثيق. وللبنود المذكورة أعلاه أرفقنا مجموعة Postman تحتوي الطلبات تحديدًا (تسجيل الدخول، المركبات، المواقع، الإشارات، الحساسات، السائقون، وتسلسل التقارير) مع مواضع فارغة للرمز ومعرّف المركبة.',
+         en:'The full list is in the documentation. For the points above, the attached Postman collection contains the exact requests (login, vehicles, locations, signals, sensors, drivers and the report chain) with placeholders for your token and vehicle id.'} },
+
+{ id:'rate-limits', st:'confirm', eps:[],
+  kw:/rate\s*limit|throttl|quota|حدود الاستخدام|حد الاستدعاء|الحد الأقصى للطلبات|عدد الطلبات/i,
+  t:{ar:'حدود الاستخدام', en:'Rate limits'},
+  note:{ar:'مفيش أي معلومة عن حد أقصى للريكوستات في الكولكشن — اسأل مصر. ما تقولش «مفيش حد».', en:'Nothing about request limits in the collection — ask development. Do not say "no limit".'},
+  reply:{ar:'قيد التأكيد. سنوافيكم بحدود الاستخدام بعد تأكيدها من فريق المنصة.',
+         en:'To be confirmed. We will state the rate limits after confirming them with our platform team.'} },
+
+{ id:'webhooks', st:'part', eps:[],
+  kw:/webhook|callback|\bpush\b|notification url|الإشعارات|ويب ?هوك/i,
+  t:{ar:'الإشعارات الفورية', en:'Webhooks'},
+  note:{ar:'من التذاكر: رابط إشعارات للأحداث والتنبيهات بيدفع البيانات لسيرفر العميل موجود، والبث اللحظي للمواقع خدمة مدفوعة بتتحوّل لمدير الحساب. تفاصيل إعداد الرابط: مصر.',
+        en:'From tickets: a notification URL that pushes events and alerts to the customer server exists, and continuous live streaming of positions is a paid service handled by the account manager. Setup details for the URL: development.'},
+  reply:{ar:'متاح جزئيًا. يمكن إعداد رابط إشعارات يدفع الأحداث والتنبيهات إلى الخادم الخاص بكم، وسنؤكد لكم تفاصيل إعداده. أما البث اللحظي المستمر للمواقع فهو خدمة إضافية مدفوعة يوضح تفاصيلها مدير حسابكم.',
+         en:'Partly available. A notification URL can be configured to push events and alerts to your endpoint; we will confirm the setup details. Continuous real-time streaming of positions is a separate paid add-on that your account manager can advise on.'} },
+
+{ id:'sandbox', st:'confirm', eps:[],
+  kw:/sandbox|test environment|staging|test account|بيئة تجريبية|بيانات تجريبية|تجريبي|حساب تجريبي/i,
+  t:{ar:'بيئة تجريبية', en:'Sandbox or test environment'},
+  note:{ar:'الكولكشن فيه عناوين apibeta و stageavl كعينات، بس أنهي واحد بيتدي للعملاء دلوقتي محتاج تأكيد من مصر.', en:'The collection carries apibeta and stageavl as sample environments, but which one is offered to customers now must be confirmed with development.'},
+  reply:{ar:'قيد التأكيد. سنوافيكم بإمكانية توفير بيئة أو حساب تجريبي للتكامل بعد التأكيد من فريق المنصة.',
+         en:'To be confirmed. We will advise whether a test environment or test account can be provided for your integration after checking with our platform team.'} },
+
+{ id:'fees', st:'sales', eps:[],
+  kw:/\bfees?\b|cost|pricing|charge|رسوم|تكلفة|مدفوع/i,
+  t:{ar:'الرسوم', en:'Fees'},
+  note:{ar:'من التذاكر: الـ REST العادي مشمول، والبث اللحظي مدفوع. أي رقم أو عرض: مدير الحساب — ده سؤال تجاري مش تقني.', en:'From tickets: standard REST access is included, live streaming is paid. Any figure or offer: the account manager — a commercial question, not a technical one.'},
+  reply:{ar:'الوصول القياسي إلى الواجهة (REST) مشمول ضمن الحساب. أما البث اللحظي فخدمة منفصلة مدفوعة، وتفاصيلها التجارية لدى مدير حسابكم.',
+         en:'Standard REST API access is included with the account. Real-time streaming is a separate paid service; its commercial details are handled by your account manager.'} }
+];
+
+/* أوصاف الريكوستات في كولكشن العميل — إنجليزي دايمًا لأن الملف رايح للعميل */
+const REQ_EPDESC = {
+  '/units/lists':             {n:'Vehicles on the account', d:'Lists every vehicle on the account. The id in each record is the vehicle identifier used by all other calls. Use projection to choose what comes back: basic, last_update (latest position, speed and ignition), counters (odometer in km, engine_hours in seconds), sensors.'},
+  '/units/locations':         {n:'Vehicle positions over a period', d:'Positions of one vehicle over a date range. Set address to true to receive the address with each point.'},
+  '/units/signals':           {n:'Vehicle messages over a period', d:'Raw device messages of one vehicle over a date range, with speed and the other message fields; with sensors true the sensor readings come with each message. Paginated with limit and offset — keep offset at 0 for the first page.'},
+  '/unit_sensors/lists':      {n:'Sensors configured on a vehicle', d:'The sensors configured on a vehicle (fuel, temperature, digital inputs such as a refrigeration unit or PTO), filtered by unit_id. A data point that depends on a sensor exists only where the sensor is listed here; a plain GPS unit returns an empty list.'},
+  '/drivers/get_unit_driver': {n:'Driver assigned to a vehicle at a time', d:'The driver assigned to a vehicle at a given date and time.'},
+  '/drivers/lists':           {n:'Drivers on the account', d:'The drivers registered on the account.'}
+};
+
+/* السطور اللي شكلها بند في لستة: رقم أو نقطة أو شرطة في الأول */
+function reqExtract(text){
+  const out = [];
+  String(text||'').split(/\r?\n/).forEach(line=>{
+    const l = normDigits(line).trim();
+    const m = l.match(/^(?:(\d{1,2})\s*[\.\)\-:،]\s*|[•\-\*·▪◦–]\s*)(.+)$/);
+    if(m && m[2].trim().length >= 3) out.push({num:m[1]||'', text:m[2].trim()});
+  });
+  return out;
+}
+function reqMatch(item){
+  const s = normDigits(item.text).toLowerCase();
+  return REQ_CATALOG.filter(c => c.kw.test(s) && !(c.not && c.not.test(s)));
+}
+/* الحالة الأضعف بتحكم على السطر: ok < part < sensor < confirm < sales */
+const REQ_RANK = {ok:0, part:1, sensor:2, confirm:3, sales:4};
+function reqAnalyze(text, errs, defs, paths, reportCase){
+  /* تذكرة فيها رد أو خطأ أو مسار اتنادى أو كلام عن عطل — دي مش طلب بيانات حتى لو فيها لستة */
+  const trouble = (errs||[]).length || (defs||[]).length || (paths||[]).length || reportCase
+    || /\b(response|returning|returned|not working|error|failed|failing|fails|fail|unauthori[sz]ed|status_code)\b|مش شغال|بيرجع|بترجع|رجع فاضي|خطأ|فشل/i.test(String(text||''));
+  const items = reqExtract(text).map(it=>{
+    const hits = reqMatch(it);
+    const st = hits.length ? hits.slice().sort((a,b)=>REQ_RANK[b.st]-REQ_RANK[a.st])[0].st : 'none';
+    return {num:it.num, text:it.text, hits, st};
+  });
+  const matched = items.filter(x=>x.hits.length).length;
+  const asks = /نرغب|نأمل|نرجو|تزويدنا|إمكانية|الحصول على|نود|please provide|we would like|we need|access to|integrat|\bapi\b/i.test(String(text||''));
+  const reqCase = !trouble && items.length >= 3 && matched >= 3 && matched >= Math.ceil(items.length * 0.4) && asks;
+  const count = {ok:0, part:0, sensor:0, confirm:0, sales:0, none:0};
+  items.forEach(x=>{ count[x.st]++; });
+  return {items, matched, reqCase, count};
+}
+
+/* الرد للعميل بلغة إيميله — بنفس ترقيمه. الحالة بتتقال في أول كل بند. */
+function reqReply(a, lang){
+  const L = lang === 'ar';
+  const r = a.req; if(!r) return '';
+  const P = (ar,en) => L ? ar : en;
+  const out = [];
+  out.push(P('السادة/ فريق تقنية المعلومات المحترمين،', 'Dear team,'));
+  out.push('');
+  out.push(P('نشكر لكم اهتمامكم بالتكامل مع منصة أفاقي. فيما يلي الرد على كل بند من طلبكم بالترتيب نفسه. البنود المعلَّمة «قيد التأكيد» يجري التحقق منها مع فريق المنصة وسنوافيكم بتفاصيلها في رد لاحق.',
+             'Thank you for your interest in integrating with the AFAQY platform. Below is a point-by-point answer to your list, in the same order. Items marked "to be confirmed" are being checked with our platform team and we will revert with the details.'));
+  out.push('');
+  /* العنوان: نص العميل نفسه لو الرد بلغة إيميله، وإلا عنوان البند من الكتالوج */
+  const same = (L === !!a.arabic);
+  r.items.forEach(it=>{
+    const head = (same || !it.hits.length) ? it.text
+               : it.hits.map(h => L ? h.t.ar : h.t.en).join(L ? ' · ' : ' · ');
+    out.push((it.num ? it.num + ') ' : '• ') + head);
+    if(!it.hits.length){
+      out.push('   ' + P('قيد التأكيد. نتحقق من هذا البند وسنوافيكم بالإجابة في ردنا اللاحق.',
+                         'To be confirmed. We are checking this point and will answer it in our follow-up.'));
+    } else {
+      it.hits.forEach(h=>{ out.push('   ' + (L ? h.reply.ar : h.reply.en)); });
+    }
+    out.push('');
+  });
+  const has = id => r.items.some(it=>it.hits.some(h=>h.id===id));
+  if(!has('docs') || !has('auth')){
+    out.push(P('للبدء:', 'Getting started:'));
+    if(!has('docs')) out.push('   ' + P('التوثيق الرسمي: https://api.afaqy.sa/docs/', 'Documentation: https://api.afaqy.sa/docs/'));
+    if(!has('auth')) out.push('   ' + REQ_CATALOG.find(c=>c.id==='auth').reply[L?'ar':'en']);
+    out.push('');
+  }
+  const pend = r.items.filter(it=>it.st==='confirm' || it.st==='none' || it.st==='part')
+    .map(it=>it.num || (it.hits.length ? (L ? it.hits[0].t.ar : it.hits[0].t.en) : it.text.split(/\s+/).slice(0,4).join(' ')));
+  if(pend.length){
+    out.push(P('البنود التي سنوافيكم بها في رد لاحق: ' + pend.join('، ') + '.',
+               'Points we will come back to in a follow-up: ' + pend.join(', ') + '.'));
+    out.push('');
+  }
+  out.push(P('مرفق مجموعة Postman تحتوي الطلبات المتاحة للبنود أعلاه مع مواضع فارغة للرمز ومعرّف المركبة، ونرحب بأي استفسار أثناء التنفيذ.',
+             'Attached is a Postman collection with the available requests for the points above, with placeholders for your token and vehicle id. We are glad to help with any question during implementation.'));
+  out.push('');
+  out.push(P('وتفضلوا بقبول فائق الاحترام،', 'Best regards,'));
+  return out.join('\n');
+}
+
+/* كولكشن للعميل: الدخول + سلسلة التقرير + الريكوستات المتاحة للنقط اللي طلبها.
+   من غير توكن ولا أرقام — كله علامات مكان. */
+function reqPmBody(e){
+  let obj = null; try{ obj = e.b ? JSON.parse(e.b) : null; }catch(_){ return e.b || ''; }
+  const scoped = /^\/units\//i.test(e.p||'');
+  const walk = (x, k) => {
+    if(Array.isArray(x)) return k==='resources' ? ['{{unit_id}}'] : x.map(v=>walk(v,k));
+    if(x && typeof x==='object'){ const o={}; Object.keys(x).forEach(kk=>{ o[kk]=walk(x[kk],kk); }); return o; }
+    if(k==='unit_id' || (scoped && k==='id')) return '{{unit_id}}';
+    if(k==='user_id') return '{{user_id}}';
+    if(k==='offset') return 0;
+    if(typeof x==='string' && /^\d{4}-\d{1,2}-\d{1,2}/.test(x)){
+      if(k==='from') return '{{date_from}} 00:00:00';
+      return '{{date_to}} 23:59:59';
+    }
+    return x;
+  };
+  return walk(obj, null);
+}
+function pmFromReq(a){
+  if(!a || !a.req) return null;
+  const r = RECIPES.find(x=>x.id === 'summary-report');
+  const col = r ? pmFromRecipe(r, false) : pmWrap('AFAQY — Integration', '', [pmLogin()], []);
+  const have = new Set(col.item.map(it=>String((it.request&&it.request.url&&it.request.url.raw)||'').replace(/^\{\{base_url\}\}/,'').replace(/\?.*$/,'')));
+  const paths = [];
+  a.req.items.forEach(it=>it.hits.forEach(h=>{ if(REQ_RANK[h.st] <= REQ_RANK.sensor) h.eps.forEach(p=>{ if(paths.indexOf(p)<0) paths.push(p); }); }));
+  paths.forEach(p=>{
+    if(have.has(p) || /user_report/.test(p)) return;
+    const e = EPS.find(x=>x.p===p && sysOf(x)==='avl' && (x.m||'POST')==='POST') || EPS.find(x=>x.p===p);
+    if(!e) return;
+    const d = REQ_EPDESC[p] || {n:e.n, d:''};
+    col.item.push(pmReq({name:d.n + '  (' + p + ')', path:p, method:e.m||'POST', body:reqPmBody(e), desc:d.d}));
+    have.add(p);
+  });
+  col.info.name = 'AFAQY — Integration requests';
+  col.info.description =
+    'The requests behind the data points in our reply, ready to run.\n\n'
+  + 'HOW TO USE\n'
+  + '  - Open the Variables tab and fill in username and password, or paste a token.\n'
+  + '  - Run Login first; the token and user id are captured automatically.\n'
+  + '  - Run the vehicle list; copy the id of a vehicle into unit_id (or put its IMEI in imei).\n'
+  + '  - Set date_from and date_to (YYYY-MM-DD) for the period requests.\n\n'
+  + 'THREE THINGS TO KNOW\n'
+  + '  - Almost every endpoint is POST, and the body is always wrapped in a "data" object.\n'
+  + '  - The token goes in the URL as ?token=..., not in a header.\n'
+  + '  - The API returns HTTP 200 even when a call fails: read status_code and message from the body.\n\n'
+  + 'Reports are generated asynchronously: create, then poll the percentage until 100, then read the rows.';
+  return col;
+}
+
+/* شاشة الموظف: الرد فوق، والجدول اللي اتبنى منه تحت */
+let REQ_LANG = null;
+function renderReq(a, out){
+  const r = a.req, c = r.count;
+  const lang = REQ_LANG || (a.arabic ? 'ar' : 'en');
+  const reply = reqReply(a, lang);
+  const chip = st => `<span class="pill" style="${st==='ok'?'background:var(--ok-soft); color:var(--ok)':
+    st==='part'||st==='sensor'?'background:var(--signal-soft); color:var(--signal-deep)':
+    st==='sales'?'background:var(--panel-2); color:var(--ink-2)':'background:var(--alert-soft); color:var(--alert-ink)'}">${esc(dual(REQ_ST[st]))}</span>`;
+  const sum = [
+    c.ok      ? t(`${c.ok} متاحة`, `${c.ok} available`) : '',
+    c.part    ? t(`${c.part} جزئيًا`, `${c.part} partly`) : '',
+    c.sensor  ? t(`${c.sensor} حسب الجهاز`, `${c.sensor} device-dependent`) : '',
+    c.confirm ? t(`${c.confirm} تحتاج تأكيد`, `${c.confirm} to confirm`) : '',
+    c.sales   ? t(`${c.sales} تجارية`, `${c.sales} commercial`) : '',
+    c.none    ? t(`${c.none} من غير مقابل`, `${c.none} unmatched`) : ''
+  ].filter(Boolean).join(' · ');
+  const epBtn = p => { const e = EPS.find(x=>x.p===p && sysOf(x)==='avl'); return e
+    ? `<button class="chip" data-goep="${e.i}" style="padding:1px 8px"><code>${esc(p)}</code></button>` : `<code>${esc(p)}</code>`; };
+  const rows = r.items.map((it,i)=>`<tr>
+    <td style="width:26%; font-size:13px; font-family:var(--ar); color:var(--ink)"><b>${esc(it.num ? it.num+')' : '•')}</b> ${esc(it.text)}</td>
+    <td style="width:12%">${chip(it.st)}</td>
+    <td style="font-size:12.5px; color:var(--ink-2)">${it.hits.length
+      ? it.hits.map(h=>`<div style="margin-bottom:6px"><b>${esc(dual(h.t))}</b>${h.eps.length ? ' — ' + h.eps.map(epBtn).join(' ') : ''}<br>${esc(dual(h.note))}</div>`).join('')
+      : t('ما لقيناش لها مقابل في الكولكشن — اسأل مصر أو صعّد، وما تجاوبش عليها من دماغك.',
+          'No match in the collection — ask development or escalate; do not answer it from memory.')}</td></tr>`).join('');
+  out.innerHTML = `
+    <div class="panel"><div class="sec" style="border-top:0">
+      <div class="caseVerdict">
+        <div style="flex:1 1 300px; min-width:0">
+          <div class="crumb">${t('الحالة','The case')}</div>
+          <div style="font-size:15px; font-weight:600; margin-top:5px; line-height:1.6">${t(
+            `طلب إنتجريشن: ${r.items.length} بند — ${sum}. الرد تحت بيجاوب كل بند بحالته، والبنود اللي «تحتاج تأكيد» اتقالت كده للعميل مش اتخمّنت.`,
+            `Integration request: ${r.items.length} points — ${sum}. The reply answers each point with its status; "to be confirmed" points are stated as such, not guessed.`)}</div>
+        </div>
+        <span class="chip sig" style="pointer-events:none; flex:0 0 auto">${t('رد نقطة بنقطة','Point-by-point reply')}</span>
+      </div>
+    </div></div>
+    <div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('رد جاهز للعميل — نقطة بنقطة','A reply ready to send — point by point')}</h3>
+      <div class="row" style="margin-bottom:8px">
+        <button class="ct" id="reqAr" aria-selected="${lang==='ar'}">${t('عربي','Arabic')}</button>
+        <button class="ct" id="reqEn" aria-selected="${lang==='en'}">${t('إنجليزي','English')}</button>
+        <span style="font-size:12.5px; color:var(--muted); align-self:center">${t('بلغة إيميله افتراضيًا. اقراه قبل ما تبعته.','In the language of their email by default. Read it before sending.')}</span>
+      </div>
+      <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:${lang==='ar'?'rtl':'ltr'}; text-align:${lang==='ar'?'right':'left'}; color:var(--ink)">${esc(reply)}</pre>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
+        <button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman للعميل','Download the Postman collection')}</button>
+      </div>
+      <div class="note" style="margin-top:8px">${t(
+        'الكولكشن فيه الدخول وسلسلة التقرير والريكوستات المتاحة للنقط اللي طلبها بس — من غير توكن ولا أرقام، كله علامات مكان. ابعته أتاشمنت مع الرد.',
+        'The collection carries login, the report chain and only the requests behind the points they asked for — no token and no ids, placeholders throughout. Attach it to the reply.')}</div>
+    </div></div>
+    <details class="caseMore" open>
+      <summary>${t('كل بند وحالته والريكوست بتاعه','Each point, its status and its request')}<span class="cnt">— ${r.items.length}</span></summary>
+      <div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+        <div class="note" style="margin-bottom:8px">${t(
+          'الحالة بتيجي من الكولكشن ومن المعرفة المؤكدة: «متاح» يعني الريكوست موجود فعلًا. «حسب الجهاز» يعني حساس لازم يتأكد لكل عربية. «يحتاج تأكيد» ما يتقالش للعميل كمؤكد.',
+          'Status comes from the collection and verified knowledge: "available" means the request exists. "Depends on the device" means a sensor to check per vehicle. "To be confirmed" is never stated to the customer as certain.')}</div>
+        <table class="kv" style="font-size:13px">${rows}</table>
+      </div></div>
+    </details>`;
+  out.querySelectorAll('[data-goep]').forEach(b => b.onclick = ()=>{
+    const e = EPS.find(x => String(x.i) === b.dataset.goep);
+    if(e){ showView('search'); select(e, []); pushRecent(e); }
+  });
+  $('caseCopy').onclick = ()=>{ copy(reply); toast(t('الرد اتنسخ','Reply copied')); };
+  $('casePm').onclick = ()=>{ const col = pmFromReq(a); if(col) pmSave(col, 'AFAQY_Integration_Requests.postman_collection.json'); };
+  $('reqAr').onclick = ()=>{ REQ_LANG='ar'; renderReq(a, out); };
+  $('reqEn').onclick = ()=>{ REQ_LANG='en'; renderReq(a, out); };
+}
+
 function renderCase(text){
   const out = $('caseOut');
   if(!String(text||'').trim()){ out.innerHTML=''; return; }
   const a = analyzeCase(text);
+  a._raw = text;
+  /* طلب بيانات مش تذكرة عطل: شاشة تانية خالص — رد نقطة بنقطة */
+  if(a.reqCase){ renderReq(a, out); clipBlocks(out); return; }
   /* أكبر بلوك في الرسالة هو غالبًا الرد — بنديه للقواعد عشان تشخّص عليه */
   const biggest = (a.blocks||[]).slice().sort((x,y)=>y.raw.length-x.raw.length)[0];
   a._json = biggest ? biggest.json : {};
@@ -11615,11 +12395,12 @@ function paintInspect(){
   if(INSPVIEW==='req') return;
   $('inH1').textContent = t('الصق الرد هنا','Paste the response here');
   $('inGo').textContent = t('افحص','Inspect');
-  $('inFileLbl').textContent = t('أو ارفع ملف','or upload a file');
+  $('inFileLbl').textContent = t('أو ارفع ملف أو صورة','or upload a file or image');
+  $('inText').placeholder = t('الصق الرد هنا — أو الصق صورة الرد (Ctrl+V) أو اسحبها على الخانة','Paste the response here — or paste a screenshot of it (Ctrl+V) or drop it on the box');
   $('inClear').textContent = t('مسح','Clear');
   $('inIntro').innerHTML = t(
-    'الصق أي رد من الـ API — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء: أسماء وأرقام وعدادات محوّلة. لو الرد فيه خطأ، بتقولك السبب.',
-    'Paste any API response — yours or one a customer sent you — and the tool turns it into a readable table: names, ids, converted counters. If the response carries an error, it explains it.');
+    'الصق أي رد من الـ API — بتاعك أو اللي العميل بعتهولك — والأداة تحوّله لجدول مقروء: أسماء وأرقام وعدادات محوّلة. لو الرد فيه خطأ، بتقولك السبب. والعميل لو بعته صورة، الصقها زي ما هي والأداة تقراها.',
+    'Paste any API response — yours or one a customer sent you — and the tool turns it into a readable table: names, ids, converted counters. If the response carries an error, it explains it. If the customer sent a screenshot, paste it as it is and the tool reads it.');
 }
 
 /* ================= عدّاد التذاكر =================
@@ -11968,9 +12749,12 @@ $('ivCase').onclick = ()=>{ INSPVIEW='case'; paintInspect(); };
 $('ivReq').onclick  = ()=>{ INSPVIEW='req';  paintInspect(); };
 $('inGo').onclick = renderInspect;
 $('inClear').onclick = ()=>{ $('inText').value=''; renderInspect(); };
-$('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f) return;
+$('inFile').onchange = ev=>{ const f=ev.target.files[0]; if(!f || /^image\//.test(f.type||'')) return;
   const rd=new FileReader(); rd.onload=()=>{ $('inText').value=String(rd.result||''); renderInspect(); };
   rd.readAsText(f); };
+/* v6.45: صورة الرد — رفع أو لصق أو سحب، وبعد القراءة بتتفحص على طول */
+ocrAttach('inText', 'inImgBox', 'inFile', ()=>renderInspect());
+$('inClear').addEventListener('click', ()=>{ const b=$('inImgBox'); if(b){ b.hidden=true; b.innerHTML=''; } });
 $('unitGo').onclick = ()=>resolveUnit($('unitIn').value);
 $('unitIn').addEventListener('keydown', ev=>{ if(ev.key==='Enter') resolveUnit($('unitIn').value); });
 $('mdRes').onclick = ()=>{ MODE='res'; refreshLeft(); };
@@ -12008,6 +12792,13 @@ function guard(fn, where){
 }
 
 function boot(){
+addedRestore();
+/* تنبيه مرة واحدة في الجلسة لو فيه معلومات مضافة لسه ما اتبعتتش */
+try{ const p = addedPending();
+  if(p && !sessionStorage.getItem('addedNag')){ sessionStorage.setItem('addedNag','1');
+    setTimeout(()=>toast(t(`عندك ${p} معلومة مضافة لسه ما اتصدّرتش — من تبويب الأساسيات`,
+                            `${p} added entries are not exported yet — see the basics tab`)), 1500); }
+}catch(_){}
 resetEmpty();
 paintIntros();
 refreshLeft();
@@ -12023,8 +12814,12 @@ initPWA();
 $('q').setAttribute('title', t('اضغط / للوصول السريع','Press / to jump here'));
 unitPaint(t('مفيش جهاز محدد','no device set'));
 $('verTag').textContent = 'v'+DOCS.version;
+/* v6.43: من غير hash كان قسم البحث وقسم البداية بيظهروا فوق بعض وكروت البداية
+   ما بتترسمش خالص — لأن showView ما كانتش بتتنده غير لو فيه hash.
+   البداية بتترسم صراحةً، من غير ما تتسجّل في التاريخ (noPush). */
 (function(){ const h=(location.hash||'').slice(1);
-  if(VIEWS.indexOf(h)>=0 && h!=='triage') showView(h); else VIEW_STACK=['triage']; })();
+  if(VIEWS.indexOf(h)>=0 && h!=='triage') showView(h);
+  else { VIEW_STACK=['triage']; showView('triage', true); } })();
 $('q').focus();
 }
 renderDetail = guard(_renderDetail, 'renderDetail');
