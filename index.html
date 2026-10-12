@@ -381,6 +381,8 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
              data-arph="IMEI أو الاسم" data-enph="IMEI or name">
       <button class="btn sig" id="unitGo" hidden style="padding:6px 12px; font-size:13px" data-ar="حدّد الجهاز" data-en="Set device">حدّد الجهاز</button>
       <span id="unitState" class="pill" hidden>—</span>
+      <button id="unitUid" class="pill on" hidden type="button" style="cursor:pointer; font-family:var(--mono, monospace); font-size:12px; letter-spacing:.2px"
+              data-ar-title="الـ UID — اضغط للنسخ" data-en-title="The UID — click to copy"></button>
       <button class="btn ghost" id="sesCopy" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="نسخ التوكن" data-en="Copy token">نسخ التوكن</button>
       <button class="btn ghost" id="sesOut" style="padding:6px 10px; font-size:12px; color:#C7D6DF; border-color:#33475C" hidden data-ar="قطع" data-en="Disconnect">قطع</button>
     </div>
@@ -754,9 +756,21 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.48",
-  "date": "2026-10-11",
+  "version": "6.49",
+  "date": "2026-10-12",
   "history": [
+    {
+      "v": "6.49",
+      "date": "2026-10-12",
+      "items": {
+        "ar": [
+          "بعد «حدّد الجهاز» الـ UID بقى يظهر جنب اللوحة في الشريط فوق — ده اللي العميل محتاجه في unit_id. ضغطة على الشريحة بتنسخه."
+        ],
+        "en": [
+          "After \"Set device\", the UID now shows next to the plate in the top bar — the value a customer needs in unit_id. One click on the chip copies it."
+        ]
+      }
+    },
     {
       "v": "6.48",
       "date": "2026-10-11",
@@ -7168,7 +7182,21 @@ function unitPaint(msg, bad){
   const el=$('unitState'); if(!el) return;
   el.textContent = msg;
   el.className = 'pill' + (SESSION.unit ? ' on' : (bad ? ' bad' : ''));
+  /* v6.49: الـ UID جنب اللوحة — ده اللي العميل محتاجه في unit_id، وضغطة بتنسخه */
+  const u = $('unitUid');
+  if(u){
+    const uid = on && SESSION.unit && SESSION.unit.uid ? String(SESSION.unit.uid) : '';
+    u.hidden = !uid;
+    u.textContent = uid ? 'UID ' + uid : '';
+    u.title = t('الـ UID — اضغط للنسخ','The UID — click to copy');
+  }
 }
+/* نسخ الـ UID من الشريط */
+document.addEventListener('click', ev => {
+  const b = ev.target && ev.target.closest && ev.target.closest('#unitUid');
+  if(!b || !SESSION.unit || !SESSION.unit.uid) return;
+  copy(String(SESSION.unit.uid), t('الـ UID اتنسخ','UID copied'));
+});
 
 /* بنجيب اللستة مرة واحدة، وبعدين أي رقم يتحوّل لـ UID فورًا */
 async function resolveUnit(key){

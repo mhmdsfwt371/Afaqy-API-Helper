@@ -1,14 +1,12 @@
 {
-  "version": "6.48",
-  "date": "2026-10-11",
+  "version": "6.49",
+  "date": "2026-10-12",
   "notes": {
     "ar": [
-      "رد «IMEI مكان رقم العربية» بقى صريح: الـ API بتعرّف العربية بالـ UID مش بالـ IMEI، فهات الـ UID الأول من /units/lists للعربية اللي الـ IMEI بتاعها كذا (بالرقم نفسه)، وبعدين اطلب الداتا بيه. ولو العميل سأل عن الصلاحيات: not_allowed سببها الـ IMEI ومفيش رول ناقص.",
-      "التوثيق الرسمي (1- AVL Integration documentation) بيقول إن التوكن ينفع في اللينك ?token= أو هيدر Authorization: Bearer. الأداة كانت بتقول «مش في الهيدر» في ١٢ مكان، منهم ردود بتروح للعميل وتعليقات في الكود المتولّد — اتصلّحوا كلهم."
+      "بعد «حدّد الجهاز» الـ UID بقى يظهر جنب اللوحة في الشريط فوق — ده اللي العميل محتاجه في unit_id. ضغطة على الشريحة بتنسخه."
     ],
     "en": [
-      "The \"IMEI where a unit id belongs\" reply is now explicit: the API identifies vehicles by the UID, not the IMEI, so get the UID first from /units/lists for the vehicle whose IMEI is the one sent (named in the reply), then request the data with it. If the customer asks about permissions: the not_allowed comes from the IMEI and no role is missing.",
-      "The official documentation (1- AVL Integration documentation) states that the token works as a ?token= URL parameter or as an Authorization: Bearer header. The tool said \"not in a header\" in 12 places, including customer replies and comments in generated code — all corrected."
+      "After \"Set device\", the UID now shows next to the plate in the top bar — the value a customer needs in unit_id. One click on the chip copies it."
     ]
   }
 }
