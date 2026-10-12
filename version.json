@@ -1,16 +1,16 @@
 {
-  "version": "6.50",
+  "version": "6.51",
   "date": "2026-10-12",
   "notes": {
     "ar": [
-      "الأداة بقت على التوثيق الرسمي «1- AVL Integration documentation» بدل كولكشن AVL PROOOO: 193 ريكوست في 18 موديول بدل 529. الموديولات اللي مش في التوثيق (النفايات، المخالفات، سجل التعديلات، الصلاحيات، الإشعارات، الخرائط…) اتشالت من الأداة ومن مفردات البحث.",
-      "كل ريكوست بقى فيه «من التوثيق الرسمي»: الغرض والاستخدام والنجاح والخطأ زي ما التوثيق كاتبهم.",
-      "13 ريكوست مش في التوثيق فضلوا لأن الأداة نفسها بتستخدمهم أو بتشرحهم — أهمهم /units/locations ولوحة وصل وقوالب التقارير وOTP. عليهم علامة «مش في التوثيق» في النتايج، وتحذير في صفحة الريكوست بالسبب: ما يتبعتوش للعميل كحل قبل التأكد إنهم لسه مدعومين."
+      "رد «IMEI مكان رقم العربية» بقى يرسم للعميل الطريق كله بإندبوينتس من التوثيق الرسمي: التوكن من /auth/login (في اللينك أو Bearer)، وبعدين /units/lists مفلتر بالـ IMEI بتاعه — بيرجّع الـ UID وآخر موقع في نداء واحد — وبعدين /units/signals للمواقع خلال الفترة اللي كان طالبها.",
+      "/units/locations (مش في التوثيق) ما بقاش بيتبعت للعميل — بقى بديله الموثّق /units/signals.",
+      "لو حدّدت نفس الـ IMEI من الشريط فوق، الـ UID الحقيقي بيتكتب في الرد بدل {{unit_id}}، وتواريخ العميل من الريكوست اللي بعته. كولكشن Postman بنفس الطريق ومتغيراته متعبّية بنفس القيم. لو عربية تانية متحددة فوق، الـ UID بتاعها ما بيتكتبش."
     ],
     "en": [
-      "The tool now runs on the official documentation \"1- AVL Integration documentation\" instead of the AVL PROOOO collection: 193 requests in 18 modules instead of 529. Modules not in the documentation (waste, traffic tickets, audit log, roles, notifications, markers…) were removed from the tool and from the search vocabulary.",
-      "Every request now shows \"From the official documentation\": its purpose, usage, success and error as the documentation states them.",
-      "13 requests that are not in the documentation were kept because the tool itself uses or explains them — chiefly /units/locations, the WASL board, report templates and OTP. They carry an \"undocumented\" badge in results and a warning with the reason on the request page: do not send them to a customer as the solution before confirming they are still supported."
+      "The \"IMEI where a unit id belongs\" reply now lays out the whole path with endpoints from the official documentation: the token from /auth/login (URL or Bearer), then /units/lists filtered by the customer IMEI — which returns the UID and the last location in one call — then /units/signals for positions over the period they asked for.",
+      "/units/locations (not documented) is no longer sent to the customer — its documented replacement /units/signals is.",
+      "When you set the same IMEI in the top bar, the real UID is written into the reply instead of {{unit_id}}, and the customer dates come from the request they sent. The Postman collection follows the same path with its variables pre-filled. If a different vehicle is set in the top bar, its UID is never written."
     ]
   }
 }

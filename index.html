@@ -756,9 +756,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.50",
+  "version": "6.51",
   "date": "2026-10-12",
   "history": [
+    {
+      "v": "6.51",
+      "date": "2026-10-12",
+      "items": {
+        "ar": [
+          "رد «IMEI مكان رقم العربية» بقى يرسم للعميل الطريق كله بإندبوينتس من التوثيق الرسمي: التوكن من /auth/login (في اللينك أو Bearer)، وبعدين /units/lists مفلتر بالـ IMEI بتاعه — بيرجّع الـ UID وآخر موقع في نداء واحد — وبعدين /units/signals للمواقع خلال الفترة اللي كان طالبها.",
+          "/units/locations (مش في التوثيق) ما بقاش بيتبعت للعميل — بقى بديله الموثّق /units/signals.",
+          "لو حدّدت نفس الـ IMEI من الشريط فوق، الـ UID الحقيقي بيتكتب في الرد بدل {{unit_id}}، وتواريخ العميل من الريكوست اللي بعته. كولكشن Postman بنفس الطريق ومتغيراته متعبّية بنفس القيم. لو عربية تانية متحددة فوق، الـ UID بتاعها ما بيتكتبش."
+        ],
+        "en": [
+          "The \"IMEI where a unit id belongs\" reply now lays out the whole path with endpoints from the official documentation: the token from /auth/login (URL or Bearer), then /units/lists filtered by the customer IMEI — which returns the UID and the last location in one call — then /units/signals for positions over the period they asked for.",
+          "/units/locations (not documented) is no longer sent to the customer — its documented replacement /units/signals is.",
+          "When you set the same IMEI in the top bar, the real UID is written into the reply instead of {{unit_id}}, and the customer dates come from the request they sent. The Postman collection follows the same path with its variables pre-filled. If a different vehicle is set in the top bar, its UID is never written."
+        ]
+      }
+    },
     {
       "v": "6.50",
       "date": "2026-10-12",
@@ -6778,7 +6794,13 @@ function pmFromRule(a){
   if(!ch.length) return null;
   const items = [pmLogin()].concat(ch.map((s, i) => pmReq({ name: String(i + 1) + '. ' + s.m + ' ' + s.p, path: s.p, method: s.m || 'POST',
                                                           body: s.body, desc: (s.note && (s.note.en || s.note.ar)) || '' })));
-  return pmWrap('AFAQY — ' + m.r.name.en, m.r.mistake.en + '\n\n' + m.r.why.en, items, []);
+  const col = pmWrap('AFAQY — ' + m.r.name.en, m.r.mistake.en + '\n\n' + m.r.why.en, items, []);
+  /* v6.51: المتغيرات متعبّية بقيم الحالة (الـ IMEI، والـ UID لو معروف، وفترة العميل) */
+  const fv = typeof m.r.fill === 'function' ? m.r.fill(a) : {};
+  const setV = (k, v) => { if(!v) return; const x = col.variable.find(z => z.key === k); if(x) x.value = v; };
+  setV('imei', fv.imei); setV('unit_id', fv.unit_id);
+  setV('date_from', (fv.from || '').slice(0, 10)); setV('date_to', (fv.to || '').slice(0, 10));
+  return col;
 }
 function pmFromCase(a){
   if(a && !a.reportCase){ return pmFromRule(a); }
@@ -10819,6 +10841,20 @@ function _saysOk(a){
   return /200|success|successful|ناجح|سليم/i.test(raw);
 }
 /* الأرقام اللي شكلها IMEI: ١٥ رقم متتالية */
+/* v6.51: مسار مش في التوثيق الرسمي ← البديل الموثّق اللي بيجيب نفس الحاجة */
+const DOC_ALT = { '/units/locations': '/units/signals' };
+/* الـ UID الحقيقي لو الموظف حدّد نفس الـ IMEI من الشريط فوق */
+function _uidFor(im){
+  return (im && typeof SESSION !== 'undefined' && SESSION.unit && String(SESSION.unit.imei) === String(im) && SESSION.unit.uid) ? String(SESSION.unit.uid) : '';
+}
+/* فترة العميل من بودي الريكوست اللي بعته (data.date.from / to) */
+function _reqDates(a){
+  for(const b of (a && a.blocks) || []){
+    try{ const j = JSON.parse(b.raw); const dt = j && j.data && j.data.date;
+      if(dt && dt.from && dt.to) return {from: String(dt.from), to: String(dt.to)}; }catch(_){}
+  }
+  return {};
+}
 function _imeis(a){
   /* v6.47: النص كله كمان — بودي مقروء من صورة ناقص قوس كان بيتشال من words وبياخد الـ IMEI معاه */
   const all = String(a.words||'') + ' ' + (a.blocks||[]).map(b=>b.raw).join(' ') + ' ' + String(a._raw||'');
@@ -10931,18 +10967,34 @@ const CASE_RULES = [
            en:'The request sends the device number (IMEI) where the vehicle id belongs.'},
   why:{ar:'الاتنين أرقام طويلة، والـ IMEI هو اللي مكتوب على الجهاز فطبيعي حد يفتكره المعرّف. الـ UID بيتجاب من نداء تاني.',
        en:'Both are long numbers, and the IMEI is the one printed on the device, so it is natural to assume it is the identifier. The UID comes from a separate call.'},
+  /* v6.51 (صفوت): الرد بيرسم الطريق كله بإندبوينتس من التوثيق الرسمي، بالقيم الحقيقية */
   chain(a){
-    const im = _imeis(a)[0];
-    return [
-      {m:'POST', p:'/units/lists', body:{data:{offset:0, limit:1000, projection:['basic']}},
-       note: im ? {ar:`دوّر على العربية اللي imei بتاعها ${im}، وخد قيمة id بتاعها — ده الـ UID.`, en:`Find the vehicle whose imei is ${im} and take the value of its id field — this is the UID.`}
-                : {ar:'دوّر على العربية اللي imei بتاعها = بتاعك، وخد قيمة id بتاعها — ده الـ UID.', en:'Find the vehicle whose imei matches yours and take the value of its id field — this is the UID.'}},
-      /* البودي الحقيقي للإندبوينت من الكولكشن — /units/locations بياخد unit_id وفترة، مش id */
-      (()=>{ const p = _paths(a)[0] || '/units/view', e = _ep(p);
-        let body = {data:{id:'{{unit_id}}'}};
-        if(e){ const b = reqPmBody(e); if(b && typeof b === 'object') body = b; }
-        return {m:'POST', p, body, note:{ar:'وبعدين نفس الريكوست بالـ UID في unit_id مكان الـ IMEI.', en:'Then the same request, with the UID in unit_id in place of the IMEI.'}}; })()
+    const im = _imeis(a)[0], uid = _uidFor(im);
+    const steps = [
+      {m:'POST', p:'/units/lists',
+       body:{data:{offset:0, limit:1, projection:['basic','last_update'], filters:{imei:{value:['{{imei}}'], op:'in'}}}},
+       note: {ar:`بيرجّع العربية اللي الـ IMEI بتاعها ${im || 'ده'} بس: حقل id هو الـ UID، و last_update فيه آخر موقع (الإحداثيات والسرعة والوقت).` + (uid ? ` الـ UID بتاع العربية دي: ${uid}.` : ''),
+              en:`Returns only the vehicle with IMEI ${im || 'yours'}: its id field is the UID, and last_update holds its last location — position, speed and time.` + (uid ? ` For this vehicle the UID is ${uid}.` : '')}}
     ];
+    /* اللي العميل كان بيحاول يجيبه: لو المسار مش في التوثيق وليه بديل موثّق، البديل */
+    const p0 = _paths(a)[0];
+    const p = p0 ? (DOC_ALT[p0] || p0) : '';
+    if(p === '/units/signals'){
+      steps.push({m:'POST', p:'/units/signals',
+        body:{data:{unit_id:'{{unit_id}}', date:{interval:'interval', from:'{{date_from}} 00:00:00', to:'{{date_to}} 23:59:59'}, address:true, limit:100, offset:0}},
+        note:{ar:'المواقع خلال فترة: كل رسالة فيها الوقت والموقع والسرعة. الصفحات بـ limit و offset — زوّد offset بـ 100 لحد ما الرد يرجع فاضي.',
+              en:'Positions over a period: every message carries its time, position and speed. Page through with limit and offset — increase offset by 100 until the response comes back empty.'}});
+    } else if(p && p !== '/units/lists'){
+      const e = _ep(p); let body = {data:{id:'{{unit_id}}'}};
+      if(e){ const b = reqPmBody(e); if(b && typeof b === 'object') body = b; }
+      steps.push({m:'POST', p, body, note:{ar:'وبعدين نفس الريكوست بالـ UID في unit_id مكان الـ IMEI.', en:'Then the same request, with the UID in unit_id in place of the IMEI.'}});
+    }
+    return steps;
+  },
+  /* القيم اللي بتتكتب في الرد للعميل (الكولكشن بيفضل بمتغيرات متعبّية بنفس القيم) */
+  fill(a){
+    const im = _imeis(a)[0], uid = _uidFor(im), d = _reqDates(a);
+    return { imei: im || '', unit_id: uid || '', from: d.from || '', to: d.to || '' };
   } },
 
 /* ④  ريكوست محتاج حاجة قبله */
@@ -11046,16 +11098,27 @@ function ruleReply(a, m){
   const ex = typeof r.extra === 'function' ? r.extra(a) : r.extra;
   if(ex){ L.push(''); L.push(ex.en); }
   if(ch && ch.length){
+    /* v6.51: القيم الحقيقية في الرد — الـ IMEI والـ UID لو معروف وتواريخ العميل */
+    const fv = typeof r.fill === 'function' ? r.fill(a) : {};
+    const put = txt => String(txt)
+      .split('{{imei}}').join(fv.imei || '<IMEI>')
+      .split('{{unit_id}}').join(fv.unit_id || '<UID from step 1>')
+      .split('{{date_from}} 00:00:00').join(fv.from || 'YYYY-MM-DD 00:00:00')
+      .split('{{date_to}} 23:59:59').join(fv.to || 'YYYY-MM-DD 23:59:59');
     L.push('');
-    L.push('The sequence that returns what you need:');
+    L.push('The path to follow, using the documented endpoints:');
+    L.push('');
+    L.push('  0. Use the token from POST /auth/login — as ?token= in the URL or as an Authorization: Bearer header.');
     L.push('');
     ch.forEach((s, i) => {
       L.push('  ' + String(i + 1) + '. ' + s.m + ' ' + s.p);
-      L.push('     ' + JSON.stringify(s.body));
+      L.push('     ' + put(JSON.stringify(s.body)));
       if(s.note) L.push('     ' + (s.note.en || s.note.ar || String(s.note)));
       L.push('');
     });
-    L.push('A Postman collection with these requests is attached: run Login first, then copy the id of your vehicle into the unit_id variable.');
+    L.push(fv.unit_id
+      ? 'A Postman collection with these requests is attached, with the IMEI, the UID and the period already set: run Login first, then the requests in order.'
+      : 'A Postman collection with these requests is attached: run Login first, then copy the id from step 1 into the unit_id variable.');
   }
   L.push('');
   L.push('Please try this and tell us what comes back if anything differs.');
