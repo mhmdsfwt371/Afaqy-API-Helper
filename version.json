@@ -1,16 +1,14 @@
 {
-  "version": "6.51",
+  "version": "6.52",
   "date": "2026-10-12",
   "notes": {
     "ar": [
-      "رد «IMEI مكان رقم العربية» بقى يرسم للعميل الطريق كله بإندبوينتس من التوثيق الرسمي: التوكن من /auth/login (في اللينك أو Bearer)، وبعدين /units/lists مفلتر بالـ IMEI بتاعه — بيرجّع الـ UID وآخر موقع في نداء واحد — وبعدين /units/signals للمواقع خلال الفترة اللي كان طالبها.",
-      "/units/locations (مش في التوثيق) ما بقاش بيتبعت للعميل — بقى بديله الموثّق /units/signals.",
-      "لو حدّدت نفس الـ IMEI من الشريط فوق، الـ UID الحقيقي بيتكتب في الرد بدل {{unit_id}}، وتواريخ العميل من الريكوست اللي بعته. كولكشن Postman بنفس الطريق ومتغيراته متعبّية بنفس القيم. لو عربية تانية متحددة فوق، الـ UID بتاعها ما بيتكتبش."
+      "التذكرة فيها IMEI؟ الأداة بتجيب الـ UID لوحدها من الحساب المتصل وتكتبه في الرد والكولكشن — من غير ما تحدّد الجهاز من الشريط فوق. بتستخدم نفس الريكوست الموثّق اللي الرد بيقترحه (/units/lists مفلتر بالـ IMEI)، ولو الفلتر ما اشتغلش بتدوّر في لستة الحساب.",
+      "فوق الرد ملاحظة بتقول حصل إيه: الـ UID اتجاب واسم العربية، أو العربية مش على الحساب المتصل (اتصل بحساب العميل)، أو مش متصل. التطابق على الـ IMEI بس، والبحث مرة واحدة لكل IMEI لكل حساب، ولو غيّرت الحساب الكاش بيتمسح. الشريط فوق ما بيتغيّرش."
     ],
     "en": [
-      "The \"IMEI where a unit id belongs\" reply now lays out the whole path with endpoints from the official documentation: the token from /auth/login (URL or Bearer), then /units/lists filtered by the customer IMEI — which returns the UID and the last location in one call — then /units/signals for positions over the period they asked for.",
-      "/units/locations (not documented) is no longer sent to the customer — its documented replacement /units/signals is.",
-      "When you set the same IMEI in the top bar, the real UID is written into the reply instead of {{unit_id}}, and the customer dates come from the request they sent. The Postman collection follows the same path with its variables pre-filled. If a different vehicle is set in the top bar, its UID is never written."
+      "The ticket has an IMEI? The tool fetches the UID from the connected account by itself and writes it into the reply and the collection — without setting the device in the top bar. It uses the same documented request the reply recommends (/units/lists filtered by IMEI), and searches the account list if the filter is ignored.",
+      "A note above the reply says what happened: the UID was fetched (with the vehicle name), or the vehicle is not on the connected account (connect to the customer account), or you are not connected. Matching is on the IMEI only, the lookup runs once per IMEI per account, and switching accounts clears it. The top bar is left unchanged."
     ]
   }
 }

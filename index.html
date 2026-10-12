@@ -756,9 +756,23 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.51",
+  "version": "6.52",
   "date": "2026-10-12",
   "history": [
+    {
+      "v": "6.52",
+      "date": "2026-10-12",
+      "items": {
+        "ar": [
+          "التذكرة فيها IMEI؟ الأداة بتجيب الـ UID لوحدها من الحساب المتصل وتكتبه في الرد والكولكشن — من غير ما تحدّد الجهاز من الشريط فوق. بتستخدم نفس الريكوست الموثّق اللي الرد بيقترحه (/units/lists مفلتر بالـ IMEI)، ولو الفلتر ما اشتغلش بتدوّر في لستة الحساب.",
+          "فوق الرد ملاحظة بتقول حصل إيه: الـ UID اتجاب واسم العربية، أو العربية مش على الحساب المتصل (اتصل بحساب العميل)، أو مش متصل. التطابق على الـ IMEI بس، والبحث مرة واحدة لكل IMEI لكل حساب، ولو غيّرت الحساب الكاش بيتمسح. الشريط فوق ما بيتغيّرش."
+        ],
+        "en": [
+          "The ticket has an IMEI? The tool fetches the UID from the connected account by itself and writes it into the reply and the collection — without setting the device in the top bar. It uses the same documented request the reply recommends (/units/lists filtered by IMEI), and searches the account list if the filter is ignored.",
+          "A note above the reply says what happened: the UID was fetched (with the vehicle name), or the vehicle is not on the connected account (connect to the customer account), or you are not connected. Matching is on the IMEI only, the lookup runs once per IMEI per account, and switching accounts clears it. The top bar is left unchanged."
+        ]
+      }
+    },
     {
       "v": "6.51",
       "date": "2026-10-12",
@@ -10843,9 +10857,46 @@ function _saysOk(a){
 /* الأرقام اللي شكلها IMEI: ١٥ رقم متتالية */
 /* v6.51: مسار مش في التوثيق الرسمي ← البديل الموثّق اللي بيجيب نفس الحاجة */
 const DOC_ALT = { '/units/locations': '/units/signals' };
-/* الـ UID الحقيقي لو الموظف حدّد نفس الـ IMEI من الشريط فوق */
+/* v6.52: الـ UID اللي اتجاب أوتوماتيك لكل IMEI — مربوط بالحساب المتصل، ويتمسح لو الحساب اتغيّر */
+const IMEI_UID = { tok:null, map:{}, state:{} };
+function _imeiCacheFresh(){
+  const tok = (typeof SESSION !== 'undefined' && SESSION.token) || null;
+  if(IMEI_UID.tok !== tok){ IMEI_UID.tok = tok; IMEI_UID.map = {}; IMEI_UID.state = {}; }
+}
+/* الـ UID الحقيقي: من الشريط فوق لو نفس الـ IMEI، أو اللي اتجاب أوتوماتيك */
 function _uidFor(im){
-  return (im && typeof SESSION !== 'undefined' && SESSION.unit && String(SESSION.unit.imei) === String(im) && SESSION.unit.uid) ? String(SESSION.unit.uid) : '';
+  if(!im) return '';
+  if(typeof SESSION !== 'undefined' && SESSION.unit && String(SESSION.unit.imei) === String(im) && SESSION.unit.uid) return String(SESSION.unit.uid);
+  _imeiCacheFresh();
+  const hit = IMEI_UID.map[digitsOnly(String(im))];
+  return hit ? hit.uid : '';
+}
+/* بيجيب الـ UID لـ IMEI من الحساب المتصل — بنفس الريكوست الموثّق اللي الرد بيقترحه.
+   بيرجّع: 'ok' | 'none' (مش على الحساب) | 'err' | 'nosession' */
+async function autoUid(im){
+  _imeiCacheFresh();
+  const key = digitsOnly(String(im || ''));
+  if(!key) return 'none';
+  if(!SESSION.token) return 'nosession';
+  if(IMEI_UID.map[key]) return 'ok';
+  if(IMEI_UID.state[key] && IMEI_UID.state[key] !== 'busy') return IMEI_UID.state[key];
+  IMEI_UID.state[key] = 'busy';
+  const take = resp => { const m = matchByName(resp, key); return (m.hit && m.by === 'IMEI') ? m.hit : null; };
+  try{
+    let hit = null;
+    const r = await apiFetch('/units/lists', {data:{offset:0, limit:1, projection:['basic'], filters:{imei:{value:[key], op:'in'}}}}, {method:'POST'});
+    if(r && r.ok) hit = take(r.json);
+    if(!hit){
+      /* الفلتر ما رجّعش العربية — نفس لستة «حدّد الجهاز» (مرة واحدة للحساب) */
+      if(!UNITS_CACHE){
+        const r2 = await apiFetch('/units/lists', {data:{offset:0, limit:1000, simplify:0, projection:['basic']}}, {method:'POST'});
+        if(r2 && r2.ok) UNITS_CACHE = r2.json;
+      }
+      if(UNITS_CACHE) hit = take(UNITS_CACHE);
+    }
+    if(hit){ IMEI_UID.map[key] = {uid:String(hit.id), name:String(hit.name || '')}; IMEI_UID.state[key] = 'ok'; return 'ok'; }
+    IMEI_UID.state[key] = 'none'; return 'none';
+  }catch(_){ IMEI_UID.state[key] = 'err'; return 'err'; }
 }
 /* فترة العميل من بودي الريكوست اللي بعته (data.date.from / to) */
 function _reqDates(a){
@@ -12681,6 +12732,31 @@ function renderCase(text){
     </div></div>`);
   }
 
+  /* v6.52: الـ IMEI اللي في التذكرة ← الـ UID من الحساب المتصل، أوتوماتيك */
+  let uidNote = '';
+  { const m0 = caseMatch(a), im = _imeis(a)[0];
+    if(im && m0 && m0.r && m0.r.id === 'imei-vs-uid'){
+      _imeiCacheFresh();
+      const key = digitsOnly(String(im)), st = IMEI_UID.state[key], got = _uidFor(im), hit = IMEI_UID.map[key];
+      if(got){
+        uidNote = `<div class="note sig" style="margin-bottom:8px"><b>${t('الـ UID مكتوب في الرد:','The UID is in the reply:')}</b> <code>${esc(got)}</code>${hit && hit.name ? ' — ' + esc(hit.name) : ''}.
+          ${hit ? t('اتجاب أوتوماتيك من الحساب المتصل بالـ IMEI اللي في التذكرة.','Fetched automatically from the connected account using the IMEI in the ticket.') : t('من الجهاز المحدد فوق.','From the device set in the top bar.')}</div>`;
+      } else if(!SESSION.token){
+        uidNote = `<div class="note warn" style="margin-bottom:8px">${t(`اتصل بحساب العميل (أو أي حساب شايف العربية) والأداة هتجيب الـ UID بتاع ${im} وتكتبه في الرد لوحدها.`, `Connect to the customer account (or any account that sees the vehicle) and the tool fetches the UID for ${im} and writes it into the reply.`)}</div>`;
+      } else if(st === 'none'){
+        uidNote = `<div class="note warn" style="margin-bottom:8px">${t(`العربية اللي الـ IMEI بتاعها ${im} مش على الحساب المتصل — اتصل بحساب العميل والـ UID هيتكتب لوحده.`, `The vehicle with IMEI ${im} is not on the connected account — connect to the customer account and the UID is written automatically.`)}</div>`;
+      } else if(st === 'err'){
+        uidNote = `<div class="note warn" style="margin-bottom:8px">${t('ما وصلناش للسيرفر عشان نجيب الـ UID — الرد تحت فيه الخطوة اللي العميل يجيبه بيها.','Could not reach the server to fetch the UID — the reply below carries the step the customer uses to get it.')}</div>`;
+      } else {
+        uidNote = `<div class="note" style="margin-bottom:8px">${t(`بنجيب الـ UID بتاع ${im} من الحساب المتصل…`, `Fetching the UID for ${im} from the connected account…`)}</div>`;
+        if(st !== 'busy'){
+          const again = text;
+          autoUid(im).then(() => { const box = $('caseText'); if(!box || box.value === again || !box.value) renderCase(again); });
+        }
+      }
+    }
+  }
+
   /* ٥) رد جاهز */
   const reply = caseReply(a);
   if(reply){
@@ -12688,6 +12764,7 @@ function renderCase(text){
       <h3>${t('رد جاهز للعميل','A reply ready to send')}</h3>
       <div class="note" style="margin-bottom:8px">${t('مكتوب بلغة رسالته. اقراه قبل ما تبعته — وعدّل الجزء بتاع بودي التنفيذ لو تيم التقارير أكّدلك شكله.',
           'Written in the language of their message. Read it before sending, and adjust the execution-body part once the reports team confirms its shape.')}</div>
+      ${uidNote}
       <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:ltr; text-align:left">${esc(reply)}</pre>
       <div class="row" style="margin-top:10px"><button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
         ${(a.reportCase || pmFromRule(a)) ? `<button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>` : ''}</div>
