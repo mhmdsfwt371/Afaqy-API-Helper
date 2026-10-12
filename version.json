@@ -1,12 +1,16 @@
 {
-  "version": "6.49",
+  "version": "6.50",
   "date": "2026-10-12",
   "notes": {
     "ar": [
-      "بعد «حدّد الجهاز» الـ UID بقى يظهر جنب اللوحة في الشريط فوق — ده اللي العميل محتاجه في unit_id. ضغطة على الشريحة بتنسخه."
+      "الأداة بقت على التوثيق الرسمي «1- AVL Integration documentation» بدل كولكشن AVL PROOOO: 193 ريكوست في 18 موديول بدل 529. الموديولات اللي مش في التوثيق (النفايات، المخالفات، سجل التعديلات، الصلاحيات، الإشعارات، الخرائط…) اتشالت من الأداة ومن مفردات البحث.",
+      "كل ريكوست بقى فيه «من التوثيق الرسمي»: الغرض والاستخدام والنجاح والخطأ زي ما التوثيق كاتبهم.",
+      "13 ريكوست مش في التوثيق فضلوا لأن الأداة نفسها بتستخدمهم أو بتشرحهم — أهمهم /units/locations ولوحة وصل وقوالب التقارير وOTP. عليهم علامة «مش في التوثيق» في النتايج، وتحذير في صفحة الريكوست بالسبب: ما يتبعتوش للعميل كحل قبل التأكد إنهم لسه مدعومين."
     ],
     "en": [
-      "After \"Set device\", the UID now shows next to the plate in the top bar — the value a customer needs in unit_id. One click on the chip copies it."
+      "The tool now runs on the official documentation \"1- AVL Integration documentation\" instead of the AVL PROOOO collection: 193 requests in 18 modules instead of 529. Modules not in the documentation (waste, traffic tickets, audit log, roles, notifications, markers…) were removed from the tool and from the search vocabulary.",
+      "Every request now shows \"From the official documentation\": its purpose, usage, success and error as the documentation states them.",
+      "13 requests that are not in the documentation were kept because the tool itself uses or explains them — chiefly /units/locations, the WASL board, report templates and OTP. They carry an \"undocumented\" badge in results and a warning with the reason on the request page: do not send them to a customer as the solution before confirming they are still supported."
     ]
   }
 }
