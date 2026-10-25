@@ -756,9 +756,25 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "7.0",
+  "version": "7.1",
   "date": "2026-10-25",
   "history": [
+    {
+      "v": "7.1",
+      "date": "2026-10-25",
+      "items": {
+        "ar": [
+          "الأداة بتتعلم من كل حالة: «احفظ كمعرفة للفريق» تحت رد Claude — لما تراجع الرد وتعتمده، الفهم والخطوات واللي مش مؤكد بيتحفظوا مع المعلومات المضافة: بترجع مع كل فتحة، وبتدخل مع كل نداء Claude جاي، وبتتصدّر لمسؤول الأداة عشان توصل للكل. الرد اللي فيه مسار مخترع ما يتحفظش.",
+          "تبويب الريكوستات: «اسأل Claude عن ده» لما البحث ما يلاقيش، وشريحة فوق النتايج — السؤال بيتنقل لخانة الرسالة ويتفهم من التوثيق الرسمي.",
+          "«جرّب المفتاح» في إعدادات Claude: نداء صغير بيأكد إن المفتاح شغّال قبل أي حالة."
+        ],
+        "en": [
+          "The tool learns from every case: \"Save as team knowledge\" under a Claude answer — once you review and approve it, the understanding, the steps and the unverified points are kept with the added entries: they come back every time, go into every future Claude call, and export to the maintainer so everyone gets them. An answer with an invented path cannot be saved.",
+          "Requests tab: \"Ask Claude about it\" when the search finds nothing, and a chip above the results — the question moves to the message box and is understood from the official documentation.",
+          "\"Test the key\" in the Claude settings: a tiny call that confirms the key works before any case."
+        ]
+      }
+    },
     {
       "v": "7.0",
       "date": "2026-10-25",
@@ -4445,11 +4461,11 @@ function docHtml(d){
   return h;
 }
 function renderResults(list){
-  const box = $('results');
+  const box = $('results'); setTimeout(()=>{ const b = $('aiAskR'); if(b) b.onclick = ()=>aiFromSearch(lastQ || ''); }, 0);
   const tot = list.total || list.length;
   $('count').textContent = tot ? (tot>list.length ? t(`أقرب ${list.length} من ${tot}`,`top ${list.length} of ${tot}`) : t(tot+' نتيجة', tot+' results')) : '';
   if(!list.length){ box.innerHTML = ''; return; }
-  box.innerHTML = list.map((r,i)=>`
+  box.innerHTML = (lastQ && lastQ.trim().length > 6 ? `<button class="chip" id="aiAskR" style="margin:0 0 8px; font-size:12px" title="${esc(t('بيجاوب من التوثيق الرسمي بس','Answers from the official documentation only'))}">${t('اسأل Claude عن ده','Ask Claude about it')}</button>` : '') + list.map((r,i)=>`
     <button class="res" data-i="${r.e.i}" aria-current="${cur && cur.i===r.e.i}">
       <span class="m m-${esc(r.e.m||'POST')}">${esc(r.e.m||'POST')}</span>
       <span class="rp">${esc(r.e.p)}</span> ${sysChip(r.e)} ${kindChip(r.e)} ${undocChip(r.e)}
@@ -4951,9 +4967,12 @@ function emptyState(q){
     <b>${t('مفيش ريكوست مطابق في الكولكشن','No matching request in the collection')}</b>
     ${t('ما تخمّنش وما تبعتش للعميل حاجة مش متأكد منها. صعّدها لتيم مصر.','Do not guess, and do not send the customer anything you are unsure of. Escalate it to the Egypt team.')}
     <div class="row" style="justify-content:center; margin-top:14px">
+      <button class="btn sig" id="aiAsk0">${t('اسأل Claude عن ده','Ask Claude about it')}</button>
       <button class="btn warn" id="escal0">${t('تصعيد لتيم مصر','Escalate')}</button>
-    </div></div></div>`;
+    </div>
+    <div style="font-size:12.5px; color:var(--muted); margin-top:8px">${t('Claude بيجاوب من التوثيق الرسمي بس، وكل مسار بيتفحص قبل ما يظهر.','Claude answers from the official documentation only, and every path is checked before it is shown.')}</div></div></div>`;
   $('escal0').onclick = ()=>openEscalation(lastQ || t('سؤال غير معروف','unknown question'));
+  $('aiAsk0').onclick = ()=>aiFromSearch(lastQ || q || '');
 }
 
 /* ---------------- FAQ (كله مستخرج من الكولكشن) ---------------- */
@@ -13022,12 +13041,28 @@ function aiSettingsHtml(){
     <div class="row" style="margin-top:8px; font-size:13px; gap:14px">
       <label><input type="checkbox" id="aiVision" ${AI.vision?'checked':''}> ${t('ابعت الصورة نفسها لـ Claude (أدق من القراءة المحلية)','Send the image itself to Claude (more accurate than local reading)')}</label>
       <label><input type="checkbox" id="aiRemember" ${AI.remember?'checked':''}> ${t('افتكر المفتاح على الجهاز ده','Remember the key on this device')}</label>
-      <button class="btn sig" id="aiSave" style="margin-inline-start:auto">${t('احفظ','Save')}</button>
+      <button class="btn ghost" id="aiPing" style="margin-inline-start:auto">${t('جرّب المفتاح','Test the key')}</button>
+      <button class="btn sig" id="aiSave">${t('احفظ','Save')}</button>
     </div>
     <div style="font-size:12px; color:var(--muted); margin-top:6px">${t('المفتاح من console.anthropic.com — مفتاح الفريق أو مفتاحك. التكلفة التقريبية للنداء بتظهر بعد كل مرة.','Get the key from console.anthropic.com — the team key or your own. The approximate cost shows after each call.')}</div>
   </div></div>`;
 }
+/* نداء صغير بيأكد إن المفتاح شغّال — من غير التوثيق ولا أدوات */
+async function aiPing(key, model){
+  const r = await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
+    headers: {'content-type':'application/json', 'x-api-key': key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({ model: model || 'claude-sonnet-5', max_tokens: 5, messages: [{role:'user', content:'Reply with OK'}] }) });
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error((j && j.error && j.error.message) || ('HTTP ' + r.status));
+  return j;
+}
 function aiWireSettings(){
+  const p = $('aiPing');
+  if(p) p.onclick = async ()=>{ const k = ($('aiKey').value || '').trim(); if(k.length < 20){ toast(t('اكتب المفتاح الأول','Enter the key first')); return; }
+    p.disabled = true; p.textContent = t('بنجرّب…','Testing…');
+    try{ await aiPing(k, $('aiModel').value); toast(t('المفتاح شغّال ✓','The key works ✓')); }
+    catch(err){ const m = String(err && err.message || err); toast(/invalid x-api-key|authentication/i.test(m) ? t('المفتاح مرفوض','The key was rejected') : /Failed to fetch|network/i.test(m) ? t('مفيش نت','No internet connection') : m.slice(0, 120)); }
+    p.disabled = false; p.textContent = t('جرّب المفتاح','Test the key'); };
   const s = $('aiSave'); if(!s) return;
   s.onclick = ()=>{ AI.key = ($('aiKey').value || '').trim(); AI.model = $('aiModel').value; AI.vision = $('aiVision').checked; AI.remember = $('aiRemember').checked; aiStore();
     toast(aiReady() ? t('اتحفظ — زرار «افهمها بـ Claude» شغّال','Saved — the Claude button is live') : t('المفتاح مش شكله مفتاح','That does not look like a key'));
@@ -13082,7 +13117,9 @@ function renderAi(ans, out, text){
         <button class="ct" id="aiEn" aria-selected="${lang==='en'}">${t('إنجليزي','English')}</button></div>
       ${issues}
       <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:${lang==='ar'?'rtl':'ltr'}; text-align:${lang==='ar'?'right':'left'}; color:var(--ink)">${esc(reply)}</pre>
-      <div class="row" style="margin-top:10px"><button class="btn ${ans.blocked ? 'ghost' : 'sig'}" id="caseCopy">${ans.blocked ? t('انسخ (فيه مسار مخترع!)','Copy (contains an invented path!)') : t('انسخ الرد','Copy the reply')}</button></div>
+      <div class="row" style="margin-top:10px"><button class="btn ${ans.blocked ? 'ghost' : 'sig'}" id="caseCopy">${ans.blocked ? t('انسخ (فيه مسار مخترع!)','Copy (contains an invented path!)') : t('انسخ الرد','Copy the reply')}</button>
+        ${!ans.blocked ? `<button class="btn ghost" id="aiKeep">${t('احفظ كمعرفة للفريق','Save as team knowledge')}</button>
+        <span style="font-size:12px; color:var(--muted); align-self:center">${t('راجعته واتأكدت؟ بيتحفظ مع المعلومات المضافة وبيدخل مع كل نداء جاي.','Reviewed and confirmed? It is kept with the added entries and goes into every future call.')}</span>` : ''}</div>
     </div></div>
     ${(ans.unverified || []).length || (ans.needs_from_customer || []).length ? `<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
       ${(ans.unverified || []).length ? `<h3>${t('مش مؤكد — ما يتقالش للعميل كمؤكد','Unverified — never state it as certain')}</h3><ul>${ans.unverified.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
@@ -13090,8 +13127,29 @@ function renderAi(ans, out, text){
     </div></div>` : ''}`;
   out.querySelectorAll('[data-goep]').forEach(b => b.onclick = ()=>{ const e = EPS.find(x => String(x.i) === b.dataset.goep); if(e){ showView('search'); select(e, []); pushRecent(e); } });
   $('caseCopy').onclick = ()=>{ copy(reply, t('الرد اتنسخ','Reply copied')); };
+  const keep = $('aiKeep');
+  if(keep) keep.onclick = ()=>{ const r = aiKeep(ans); toast(r === 'dup' ? t('متحفوظة قبل كده','Already saved') : t('اتحفظت مع معلومات الفريق — صدّرها من الأساسيات عشان توصل للكل','Saved with the team entries — export them from Basics so everyone gets them')); keep.disabled = true; };
   $('aiAr').onclick = ()=>{ AI_LANG = 'ar'; renderAi(ans, out, text); };
   $('aiEn').onclick = ()=>{ AI_LANG = 'en'; renderAi(ans, out, text); };
+}
+/* رد Claude اللي الموظف راجعه → معلومة مضافة زي بتوع الفريق: بترجع مع كل فتحة، وبتدخل مع كل نداء جاي، وبتتصدّر */
+function aiKeep(ans){
+  const T = String(ans.summary_ar || ans.diagnosis_ar || '').trim().slice(0, 160); if(!T) return 'empty';
+  if(ADDED.some(k => k.t && k.t.ar === T)) return 'dup';
+  const lines = [];
+  if(ans.diagnosis_ar) lines.push(ans.diagnosis_ar);
+  (ans.steps || []).forEach((s, i) => lines.push(`${i + 1}. ${s.method || 'POST'} ${s.path}` + (s.body && !s.body._raw ? ' ' + JSON.stringify(s.body) : '') + (s.why_ar || s.why_en ? ' — ' + (s.why_ar || s.why_en) : '')));
+  (ans.unverified || []).forEach(x => lines.push(t('مش مؤكد: ','Unverified: ') + x));
+  const B = lines.join('\n');
+  const item = { sev:'ok', t:{ar:T, en:T}, src:{ar:'من Claude — راجعها الموظف واعتمدها', en:'From Claude — reviewed and approved by the engineer'},
+                 body:{ar:'<p>' + esc(B).replace(/\n/g, '<br>') + '</p>', en:'<p>' + esc(B).replace(/\n/g, '<br>') + '</p>'}, at:new Date().toISOString() };
+  ADDED.push(item); LEARNED.push(item); addedStore();
+  return 'ok';
+}
+/* سؤال الموظف من تبويب البحث → خانة الرسالة → Claude */
+function aiFromSearch(q){
+  showView('inspect'); INSPVIEW = 'case'; paintInspect();
+  $('caseText').value = q; if(aiReady()) aiRun(q); else { const b = $('aiSet'); if(b) b.hidden = false; }
 }
 /* القواعد ما عرفتش → اقتراح Claude فوق النتيجة */
 function aiHint(text){
