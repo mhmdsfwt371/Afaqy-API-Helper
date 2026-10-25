@@ -756,9 +756,29 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "6.52",
-  "date": "2026-10-12",
+  "version": "6.53",
+  "date": "2026-10-25",
   "history": [
+    {
+      "v": "6.53",
+      "date": "2026-10-25",
+      "items": {
+        "ar": [
+          "العميل بعت لقطة لكارت العربية في المنصة وبيسأل «إيه الـ API اللي بيرجّع البيانات دي؟» — الأداة بقت تتعرف عليها وتطلّع الرد: ريكوست موثّق واحد (/units/lists مفلتر بالـ IMEI ببروجيكشن basic و last_update و counters و sensors) بالـ IMEI الحقيقي، وكل حقل في الكارت مكانه في الرد. المحك إيميل حقيقي.",
+          "POS = last_update.dtt و SRV = last_update.dts (توقيتين epoch بالملّي ثانية)، والسرعة والزاوية والارتفاع والإحداثيات و ACC وحالة الحركة والحساسات — من الرد المحفوظ في التوثيق الرسمي. ساعات المحرك (بالثواني) والعداد (كم) متأكدين من قبل من رد حقيقي.",
+          "اللي مش في بيانات العربية (الأقمار، أقرب منطقة وعلامة، الشركة، كود التشغيل) الرد بيقول إنه مش جزء من الرد — ما بيخترعش حقل.",
+          "لو متصل: الأداة بتنده نفس الريكوست وبتعرض قيمة كل حقل لايف جنبه، والتوقيتات بتوقيت السعودية — قارنها بالكارت قبل ما تبعت.",
+          "القارئ: صورة مفيهاش JSON (زي كارت المنصة) بتتقرا بترتيب أعمدتها بدل ما الأعمدة تتخلط."
+        ],
+        "en": [
+          "A customer sends a screenshot of the platform vehicle panel and asks \"which API returns this data?\" — the tool now recognises it and drafts the reply: one documented request (/units/lists filtered by IMEI with projections basic, last_update, counters and sensors) with the real IMEI, and where each panel field sits in the response. The yardstick is a real email.",
+          "POS = last_update.dtt and SRV = last_update.dts (two epoch-millisecond timestamps), plus speed, angle, altitude, coordinates, ACC, motion state and sensors — from the saved response in the official documentation. Engine hours (seconds) and odometer (km) were already verified from a real response.",
+          "Whatever is not in the vehicle data (satellites, nearest geofence and marker, company, operation code) is stated as not part of the response — no field is invented.",
+          "When connected, the tool runs the same request and shows each field live next to it, with times in Saudi time — compare them with the panel before sending.",
+          "Reader: an image with no JSON in it (such as the platform panel) is read in its column layout instead of mixing the columns."
+        ]
+      }
+    },
     {
       "v": "6.52",
       "date": "2026-10-12",
@@ -6817,6 +6837,7 @@ function pmFromRule(a){
   return col;
 }
 function pmFromCase(a){
+  if(a && a.fieldsCase) return pmFromFields(a);
   if(a && !a.reportCase){ return pmFromRule(a); }
   if(!a || !a.reportCase) return null;
   const r = RECIPES.find(x=>x.id === 'summary-report');
@@ -10648,9 +10669,11 @@ function analyzeCase(text){
 
   /* v6.44: إيميل فيه لستة بيانات مطلوبة مش تذكرة — بيتقابل مع الكتالوج */
   const req = reqAnalyze(text, errs, defs, paths, reportCase);
+  /* v6.53: «إيه الـ API اللي بيرجّع الحقول دي؟» — لقطة كارت المنصة */
+  const fields = fieldsAnalyze(text, (errs||[]).length || (defs||[]).length || (paths||[]).length || reportCase || req.reqCase);
   return {isMsg, arabic, blocks: kinds, defs, wanted, errs, qs, paths,
           reportCase, words, proseCodes, matched, reportCode,
-          req, reqCase: req.reqCase};
+          req, reqCase: req.reqCase, fields, fieldsCase: fields.ok};
 }
 
 /* أعمدة تقرير الـ Summary زي ما هي في الكولكشن — مصدر واحد، من غير تخمين.
@@ -10734,6 +10757,7 @@ function caseLiveFor(a){
 /* الرد الجاهز للعميل — بلغة رسالته */
 function caseReply(a){
   if(a && a.reqCase) return reqReply(a, REQ_LANG || (a.arabic ? 'ar' : 'en'));
+  if(a && a.fieldsCase) return fieldsReply(a, FIELDS_LANG || (a.arabic ? 'ar' : 'en'));
   /* الدليل من الكولكشن: حقول العميل (route_length, engine_work, engine_idle,
      move_duration, stop_duration) موجودة بالحرف في قالب الـ Summary.
      يعني هو شايف تعريف التقرير — والقيم بتيجي من إنشاء التقرير وقراءته. */
@@ -11685,6 +11709,17 @@ async function ocrImage(file, progress){
     /* v6.47: إيميل فيه لقطة بوستمان كاملة → تذكرة بأجزائها */
     const sec = ocrSections(lines1, p1.scale, W, H);
     if(sec && (sec.reqRegion || sec.respRegion)) return await ocrTicket(img, w, sec, progress, p1.dark);
+    /* v6.53: مفيش سطور JSON (لقطة كارت المنصة أو إيميل كلام) — قراءة المرحلة الأولى بترتيب الأعمدة؛
+       المرحلة التانية بتقرا القص كبلوك واحد وبتخلط الأعمدة */
+    /* سطر JSON: مفتاح بين تنصيص (عادي أو معوج — القراءة الأولى بترجّع “message”:) أو سطر أقواس لوحده */
+    /* القفلة بتتقرى كمان ® أو * («“status_code®: 465,») — اتشافت في لقطة نافذة بوستمان كاملة */
+    const jsonLine = l => /["“”„][A-Za-z_][^"“”„\n]{0,40}["“”„®*]\s*[:;]/.test(l.text) || /^\s*\d{0,3}\s*[{}\[\]]\s*,?\s*$/.test(l.text);
+    if(lines1.filter(jsonLine).length < 2){
+      const o = ocrClean(r1.data.text);
+      o.fixes.unshift(t('الصورة مفيهاش رد JSON — اتقرت كنص بترتيب أعمدتها','The image holds no JSON response — read as text in its column layout'));
+      o.dark = p1.dark; o.confidence = Math.round(r1.data.confidence || 0);
+      return o;
+    }
     const loc = ocrLocate(lines1, p1.scale, W, H);
     progress && progress(t('بنقرا الصورة','Reading the image'));
     const p2 = ocrPrepare(img, loc.region, ocrScaleFor(loc.lineH));
@@ -12598,6 +12633,199 @@ function renderReq(a, out){
   $('reqEn').onclick = ()=>{ REQ_LANG='en'; renderReq(a, out); };
 }
 
+/* ============ «إيه الـ API اللي بيرجّع الحقول دي؟» — لقطة كارت العربية في المنصة ============
+   كل حقل في كارت المنصة ← مكانه في سجل العربية من /units/lists.
+   src: 'doc' من الرد المحفوظ في التوثيق الرسمي (/share-locations/:SHARE_ID — عربية بـ last_update كامل)،
+        'verified' اتأكد قبل كده من رد حقيقي، 'none' مش في بيانات العربية الموثّقة (بيتقال كده، مش بيتخترع). */
+const FIELD_MAP = [
+  { id:'pos', kw:/\bPOS\b|position time|gps time|وقت الموقع/i, path:'last_update.dtt', src:'doc', time:true,
+    t:{ar:'POS — وقت آخر موقع', en:'POS — time of the last position'},
+    how:{ar:'وقت آخر موقع بعته الجهاز — epoch بالملّي ثانية (UTC)، حوّله لتوقيت السعودية (+3).', en:'Time of the last position reported by the device — epoch milliseconds (UTC); convert to Saudi time (UTC+3).'} },
+  { id:'srv', kw:/\bSRV\b|server time|وقت السيرفر/i, path:'last_update.dts', src:'doc', time:true,
+    t:{ar:'SRV — وقت وصوله للسيرفر', en:'SRV — time the server received it'},
+    how:{ar:'وقت وصول الرسالة للسيرفر — epoch بالملّي ثانية (UTC).', en:'Time the platform received that message — epoch milliseconds (UTC).'} },
+  { id:'coords', kw:/\b\d{1,2}\.\d{4,}\s*,\s*\d{1,3}\.\d{4,}\b|coordinates|\blatitude\b|\blongitude\b|إحداثيات/i, path:'last_update.lat, last_update.lng', src:'doc',
+    t:{ar:'الإحداثيات', en:'Coordinates'}, how:{ar:'خط العرض وخط الطول لآخر موقع.', en:'Latitude and longitude of the last position.'} },
+  { id:'speed', kw:/\bspeed\b|السرعة/i, path:'last_update.spd', src:'doc',
+    t:{ar:'السرعة', en:'Speed'}, how:{ar:'السرعة في آخر رسالة (كم/س).', en:'Speed in the last message (km/h).'} },
+  { id:'angle', kw:/\bangle\b|\bheading\b|الاتجاه|الزاوية/i, path:'last_update.ang', src:'doc',
+    t:{ar:'الزاوية', en:'Angle'}, how:{ar:'اتجاه الحركة بالدرجات.', en:'Heading in degrees.'} },
+  { id:'alt', kw:/altitude|الارتفاع/i, path:'last_update.alt', src:'doc',
+    t:{ar:'الارتفاع', en:'Altitude'}, how:{ar:'الارتفاع بالمتر.', en:'Altitude in metres.'} },
+  { id:'acc', kw:/\bA?ACC\b|ignition|تشغيل المحرك/i, path:'last_update.acc', src:'verified',
+    t:{ar:'ACC (تشغيل المحرك)', en:'ACC (ignition)'}, how:{ar:'1 = شغّال، 0 = مطفي.', en:'1 = on, 0 = off.'} },
+  { id:'status', kw:/\bidle\b|\bmoving\b|\bstopped\b|\bparked\b|خامل|متحرك|متوقف/i, path:'last_update.unit_state.motion.state', src:'doc',
+    t:{ar:'حالة الحركة', en:'Motion state'}, how:{ar:'حالة الحركة زي ما المنصة بتحسبها (متحرك / واقف…).', en:'The motion state as the platform computes it (moving, idle…).'} },
+  { id:'engine_hours', kw:/engine\s*hours|ساعات (تشغيل )?المحرك/i, path:'counters.engine_hours', src:'verified',
+    t:{ar:'ساعات المحرك', en:'Engine hours'}, how:{ar:'بالثواني — اقسم على 3600 للساعات.', en:'In seconds — divide by 3600 for hours.'} },
+  { id:'odometer', kw:/odometer|mileage|عداد المسافة/i, path:'counters.odometer', src:'verified',
+    t:{ar:'العداد', en:'Odometer'}, how:{ar:'بالكيلومتر — بيطابق الشاشة.', en:'In kilometres — matches the screen.'} },
+  { id:'sensors', kw:/\bsensors?\b|\bweight\b|battery|temperature|\bfuel\b|الحساسات|الوزن|البطارية|الحرارة|الوقود/i, path:'last_update.sensors_chDate', src:'doc',
+    t:{ar:'الحساسات (الوزن، البطارية…)', en:'Sensors (weight, battery…)'},
+    how:{ar:'قراءة كل حساس: الاسم والقيمة والعرض (زي «ON» أو «14500 KG») ووقت التغيير. تعريف الحساسات بييجي ببروجيكشن sensors.', en:'Each sensor reading: its name, value, display text (such as "ON" or "14500 KG") and change time. The sensor definitions come with the sensors projection.'} },
+  { id:'sat', kw:/satellites?|الأقمار/i, path:'', src:'none',
+    t:{ar:'الأقمار', en:'Satellites'}, how:{ar:'مش في بيانات العربية الموثّقة.', en:'Not part of the documented vehicle data.'} },
+  { id:'geo', kw:/nearest\s*(geofence|zone)|أقرب منطقة/i, path:'', src:'none',
+    t:{ar:'أقرب منطقة', en:'Nearest geofence'}, how:{ar:'المنصة بتحسبها وقت العرض — مش حقل في الرد ده.', en:'Calculated by the platform display — not a field of this response.'} },
+  { id:'marker', kw:/nearest\s*marker|أقرب علامة/i, path:'', src:'none',
+    t:{ar:'أقرب علامة', en:'Nearest marker'}, how:{ar:'المنصة بتحسبها وقت العرض — مش حقل في الرد ده.', en:'Calculated by the platform display — not a field of this response.'} },
+  { id:'company', kw:/\bcompany\b|الشركة/i, path:'', src:'none',
+    t:{ar:'الشركة', en:'Company'}, how:{ar:'اسم الحساب — مش جزء من بيانات العربية.', en:'The account name — not part of the vehicle data.'} },
+  { id:'opcode', kw:/operation\s*code|كود التشغيل/i, path:'', src:'none',
+    t:{ar:'كود التشغيل', en:'Operation code'}, how:{ar:'مش في بيانات العربية الموثّقة.', en:'Not part of the documented vehicle data.'} }
+];
+const FIELDS_ASK = /correct api|which api|what api|api details|api for|sample request|request body|which endpoint|what endpoint|share\s+the\s+api|share\s+api|الـ ?api اللي|انهي api|أي api|ريكوست|بودي/i;
+/* لقطة الكارت: التوقيتين جنب بعض (POS ثم SRV) حتى لو اسم الخانة ما اتقراش */
+const TWO_TIMES = /\b\d{2}[-\/]\d{2}[-\/]\d{4}\s+\d{2}:\d{2}:\d{2}\b[\s\S]{0,120}?\b\d{2}[-\/]\d{2}[-\/]\d{4}\s+\d{2}:\d{2}:\d{2}\b/;
+function fieldsAnalyze(text, trouble){
+  const s = normDigits(String(text || ''));
+  let hits = FIELD_MAP.filter(f => f.kw.test(s));
+  if(TWO_TIMES.test(s) || /main info/i.test(s)){
+    ['pos','srv'].forEach(id => { if(!hits.some(h => h.id === id)) hits.push(FIELD_MAP.find(f => f.id === id)); });
+  }
+  hits = FIELD_MAP.filter(f => hits.indexOf(f) >= 0);   /* بترتيب الخريطة */
+  const ok = !trouble && FIELDS_ASK.test(s) && hits.filter(h => h.src !== 'none').length >= 3;
+  return { ok, hits };
+}
+/* الـ IMEI: من الرسالة، وإلا الجهاز المحدد فوق */
+function fieldsImei(a){
+  const im = _imeis(a)[0];
+  if(im) return {imei: im, from: 'text'};
+  if(typeof SESSION !== 'undefined' && SESSION.unit && SESSION.unit.imei) return {imei: String(SESSION.unit.imei), from: 'bar', name: SESSION.unit.name || ''};
+  return {imei: '', from: ''};
+}
+function fieldsBody(imei){
+  return {data:{offset:0, limit:1, projection:['basic','last_update','counters','sensors'], filters:{imei:{value:[imei || '<IMEI>'], op:'in'}}}};
+}
+/* قيمة لايف: نفس الريكوست على الحساب المتصل — مرة لكل IMEI لكل حساب */
+const FIELDS_LIVE = { tok:null, map:{}, state:{} };
+function _fieldsFresh(){ const tok = (typeof SESSION !== 'undefined' && SESSION.token) || null;
+  if(FIELDS_LIVE.tok !== tok){ FIELDS_LIVE.tok = tok; FIELDS_LIVE.map = {}; FIELDS_LIVE.state = {}; } }
+function _rawUnit(resp, imei){
+  const want = digitsOnly(String(imei || '')); let first = null, hit = null;
+  (function walk(o){
+    if(hit || !o || typeof o !== 'object') return;
+    if(!Array.isArray(o) && (o.last_update || o.imei)){
+      if(!first) first = o;
+      if(want && digitsOnly(String(o.imei || '')) === want){ hit = o; return; }
+    }
+    for(const k in o) walk(o[k]);
+  })(resp);
+  return hit || (want ? null : first);
+}
+function _getPath(o, p){ return String(p).split('.').reduce((x, k) => (x && typeof x === 'object') ? x[k] : undefined, o); }
+async function fieldsLive(imei){
+  _fieldsFresh();
+  const key = digitsOnly(String(imei || ''));
+  if(!key || !SESSION.token) return 'nosession';
+  if(FIELDS_LIVE.map[key]) return 'ok';
+  if(FIELDS_LIVE.state[key] && FIELDS_LIVE.state[key] !== 'busy') return FIELDS_LIVE.state[key];
+  FIELDS_LIVE.state[key] = 'busy';
+  try{
+    const r = await apiFetch('/units/lists', fieldsBody(key), {method:'POST'});
+    const u = r && r.ok ? _rawUnit(r.json, key) : null;
+    if(u){ FIELDS_LIVE.map[key] = u; FIELDS_LIVE.state[key] = 'ok'; return 'ok'; }
+    FIELDS_LIVE.state[key] = 'none'; return 'none';
+  }catch(_){ FIELDS_LIVE.state[key] = 'err'; return 'err'; }
+}
+function _fmtKsa(ms){
+  const n = Number(ms); if(!isFinite(n) || n < 1e11) return '';
+  try{ return new Date(n).toLocaleString('en-GB', {timeZone:'Asia/Riyadh', hour12:false}) + ' (KSA)'; }catch(_){ return new Date(n).toISOString(); }
+}
+function _liveVal(u, f){
+  if(!u || !f.path) return '';
+  if(f.id === 'coords'){ const la = _getPath(u, 'last_update.lat'), ln = _getPath(u, 'last_update.lng'); return (la != null && ln != null) ? la + ', ' + ln : ''; }
+  const v = _getPath(u, f.path);
+  if(v == null) return '';
+  if(f.time) return String(v) + (_fmtKsa(v) ? ' → ' + _fmtKsa(v) : '');
+  if(f.id === 'engine_hours' && isFinite(Number(v))) return String(v) + ' s → ' + (Number(v) / 3600).toFixed(1) + ' h';
+  if(f.id === 'sensors' && typeof v === 'object'){
+    const out = [];
+    Object.keys(v).forEach(k => (Array.isArray(v[k]) ? v[k] : [v[k]]).forEach(x => { const sv = x && x.sensorValue; if(sv) out.push((sv.name || k) + ': ' + (sv.representation != null ? sv.representation : sv.value)); }));
+    return out.slice(0, 6).join(' · ');
+  }
+  return typeof v === 'object' ? JSON.stringify(v).slice(0, 120) : String(v);
+}
+/* الرد للعميل */
+function fieldsReply(a, lang){
+  const L = lang === 'ar', f = a.fields, im = fieldsImei(a).imei;
+  const P = (ar, en) => L ? ar : en, out = [];
+  const have = f.hits.filter(h => h.src !== 'none'), none = f.hits.filter(h => h.src === 'none');
+  out.push(P('السادة المحترمين،', 'Hello,'), '');
+  out.push(P('كل البيانات الظاهرة في كارت العربية دي بترجع من طلب موثّق واحد:', 'All the data in that vehicle panel comes back from one documented request:'), '');
+  out.push('POST https://api.afaqy.sa/units/lists?token=<YOUR_TOKEN>');
+  out.push(JSON.stringify(fieldsBody(im)));
+  out.push('');
+  out.push(P('الحقول جوه سجل العربية في الرد:', 'Where each field is in the vehicle record of the response:'));
+  have.forEach(h => out.push('  - ' + (L ? h.t.ar : h.t.en) + ': ' + h.path + ' — ' + (L ? h.how.ar : h.how.en)));
+  if(none.length){
+    out.push('');
+    out.push(P('ومش جزء من الرد ده: ', 'Not part of this response: ') + none.map(h => L ? h.t.ar : h.t.en).join(P('، ', ', ')) + '.');
+  }
+  out.push('');
+  out.push(P('التوكن من POST /auth/login — في الرابط ?token= أو هيدر Authorization: Bearer. ولقراءة كل العربيات مرة واحدة: شيل filters وقلّب الصفحات بـ offset و limit.',
+             'The token comes from POST /auth/login — as ?token= in the URL or as an Authorization: Bearer header. To read all vehicles at once, remove filters and page through with offset and limit.'));
+  out.push(P('مرفق كولكشن Postman فيه الطلب ده جاهز.', 'A Postman collection with this request is attached, ready to run.'));
+  out.push('', P('مع خالص التحية،', 'Best regards,'));
+  return out.join('\n');
+}
+function pmFromFields(a){
+  const im = fieldsImei(a).imei;
+  const items = [pmLogin(), pmReq({name:'Vehicle live data by IMEI  (/units/lists)', path:'/units/lists', method:'POST', body:fieldsBody('{{imei}}'),
+    desc:'One vehicle filtered by IMEI with projections basic, last_update, counters and sensors. last_update.dtt = POS time, last_update.dts = SRV time (epoch ms, UTC); counters.engine_hours is in seconds.'})];
+  const col = pmWrap('AFAQY — Vehicle live data', 'The request behind the vehicle panel fields.', items, []);
+  const v = col.variable.find(z => z.key === 'imei'); if(v && im) v.value = im;
+  return col;
+}
+/* شاشة الموظف */
+let FIELDS_LANG = null;
+function renderFields(a, out){
+  const f = a.fields, lang = FIELDS_LANG || (a.arabic ? 'ar' : 'en'), reply = fieldsReply(a, lang), src = fieldsImei(a);
+  _fieldsFresh();
+  const key = digitsOnly(src.imei || ''), st = FIELDS_LIVE.state[key], u = FIELDS_LIVE.map[key];
+  if(src.imei && SESSION.token && !st){ const again = a._raw; fieldsLive(src.imei).then(() => { const box = $('caseText'); if(!box || box.value === again || !box.value) renderCase(again); }); }
+  const live = !src.imei ? `<div class="note warn">${t('مفيش IMEI في الرسالة ولا جهاز محدد فوق — حدّد العربية من الشريط والرد هيبقى بالـ IMEI بتاعها وهتشوف القيم لايف.','No IMEI in the message and no device set in the top bar — set the vehicle in the bar and the reply carries its IMEI, with live values shown.')}</div>`
+    : !SESSION.token ? `<div class="note warn">${t('اتصل بحساب العميل عشان تشوف قيمة كل حقل لايف قبل ما تبعت.','Connect to the customer account to see each field live before sending.')}</div>`
+    : (st === 'none') ? `<div class="note warn">${t('العربية دي مش على الحساب المتصل — اتصل بحساب العميل عشان تتأكد لايف.','This vehicle is not on the connected account — connect to the customer account to check live.')}</div>`
+    : (st === 'err') ? `<div class="note warn">${t('ما وصلناش للسيرفر — الخريطة تحت من التوثيق.','Could not reach the server — the map below is from the documentation.')}</div>`
+    : u ? `<div class="note sig">${t('القيم لايف من الحساب المتصل بنفس الريكوست اللي في الرد — قارنها بالكارت قبل ما تبعت.','Live values from the connected account using the same request as the reply — compare them with the panel before sending.')}</div>`
+    : `<div class="note">${t('بنجيب القيم لايف من الحساب المتصل…','Fetching live values from the connected account…')}</div>`;
+  const srcChip = s => s === 'none' ? `<span class="pill" style="background:var(--alert-soft); color:var(--alert-ink)">${t('مش في الرد','not in the response')}</span>`
+    : s === 'verified' ? `<span class="pill" style="background:var(--ok-soft); color:var(--ok)">${t('متأكد من رد حقيقي','verified')}</span>`
+    : `<span class="pill" style="background:var(--signal-soft); color:var(--signal-deep)">${t('من رد التوثيق','documented sample')}</span>`;
+  const rows = f.hits.map(h => `<tr><td style="width:24%; font-size:13px; font-family:var(--ar)"><b>${esc(dual(h.t))}</b></td>
+      <td style="width:22%"><code>${esc(h.path || '—')}</code><br>${srcChip(h.src)}</td>
+      <td style="font-size:12.5px; color:var(--ink-2)">${esc(dual(h.how))}${u && h.path ? `<div dir="ltr" style="text-align:left; margin-top:4px; font-family:var(--mono, monospace); color:var(--ink)">${esc(_liveVal(u, h) || t('— مش موجود في الرد اللايف','— absent from the live response'))}</div>` : ''}</td></tr>`).join('');
+  out.innerHTML = `
+    <div class="panel"><div class="sec" style="border-top:0"><div class="caseVerdict">
+      <div style="flex:1 1 300px; min-width:0"><div class="crumb">${t('الحالة','The case')}</div>
+        <div style="font-size:15px; font-weight:600; margin-top:5px; line-height:1.6">${t(
+          `العميل بيسأل إيه الـ API اللي بيرجّع حقول من كارت العربية في المنصة: ${f.hits.length} حقل. كلهم من ريكوست موثّق واحد — والرد بالريكوست جاهز${src.imei ? ' بالـ IMEI ' + src.imei : ''}.`,
+          `The customer asks which API returns fields from the platform vehicle panel: ${f.hits.length} fields. They all come from one documented request — the reply carries it ready${src.imei ? ' with IMEI ' + src.imei : ''}.`)}</div></div>
+      <span class="chip sig" style="pointer-events:none; flex:0 0 auto">${t('حقول من المنصة','Platform fields')}</span></div></div></div>
+    <div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('رد جاهز للعميل','A reply ready to send')}</h3>
+      <div class="row" style="margin-bottom:8px">
+        <button class="ct" id="fldAr" aria-selected="${lang==='ar'}">${t('عربي','Arabic')}</button>
+        <button class="ct" id="fldEn" aria-selected="${lang==='en'}">${t('إنجليزي','English')}</button>
+        ${src.from === 'bar' ? `<span style="font-size:12.5px; color:var(--muted); align-self:center">${t('الـ IMEI من الجهاز المحدد فوق','IMEI from the device set in the top bar')}${src.name ? ' — ' + esc(src.name) : ''}</span>` : ''}
+      </div>
+      <pre id="caseReplyTxt" class="pre" style="white-space:pre-wrap; font-family:var(--ar); font-size:13.5px; background:var(--panel-2); padding:14px; border-radius:var(--r); border:1px solid var(--line); direction:${lang==='ar'?'rtl':'ltr'}; text-align:${lang==='ar'?'right':'left'}; color:var(--ink)">${esc(reply)}</pre>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sig" id="caseCopy">${t('انسخ الرد','Copy the reply')}</button>
+        <button class="btn ghost" id="casePm">${t('نزّل كولكشن Postman','Download Postman collection')}</button>
+      </div></div></div>
+    <div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('كل حقل في الكارت ← مكانه في الرد','Each panel field → its place in the response')}</h3>
+      ${live}
+      <table class="kv" style="font-size:13px; margin-top:8px">${rows}</table>
+    </div></div>`;
+  $('caseCopy').onclick = ()=>{ copy(reply, t('الرد اتنسخ','Reply copied')); };
+  $('casePm').onclick = ()=>{ pmSave(pmFromFields(a), 'AFAQY_Vehicle_Live_Data.postman_collection.json'); };
+  $('fldAr').onclick = ()=>{ FIELDS_LANG='ar'; renderFields(a, out); };
+  $('fldEn').onclick = ()=>{ FIELDS_LANG='en'; renderFields(a, out); };
+}
+
 function renderCase(text){
   const out = $('caseOut');
   if(!String(text||'').trim()){ out.innerHTML=''; return; }
@@ -12605,6 +12833,7 @@ function renderCase(text){
   a._raw = text;
   /* طلب بيانات مش تذكرة عطل: شاشة تانية خالص — رد نقطة بنقطة */
   if(a.reqCase){ renderReq(a, out); clipBlocks(out); return; }
+  if(a.fieldsCase){ renderFields(a, out); clipBlocks(out); return; }
   /* أكبر بلوك في الرسالة هو غالبًا الرد — بنديه للقواعد عشان تشخّص عليه */
   const biggest = (a.blocks||[]).slice().sort((x,y)=>y.raw.length-x.raw.length)[0];
   a._json = biggest ? biggest.json : {};

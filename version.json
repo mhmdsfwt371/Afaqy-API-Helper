@@ -1,14 +1,16 @@
 {
-  "version": "6.52",
-  "date": "2026-10-12",
+  "version": "6.53",
+  "date": "2026-10-25",
   "notes": {
     "ar": [
-      "التذكرة فيها IMEI؟ الأداة بتجيب الـ UID لوحدها من الحساب المتصل وتكتبه في الرد والكولكشن — من غير ما تحدّد الجهاز من الشريط فوق. بتستخدم نفس الريكوست الموثّق اللي الرد بيقترحه (/units/lists مفلتر بالـ IMEI)، ولو الفلتر ما اشتغلش بتدوّر في لستة الحساب.",
-      "فوق الرد ملاحظة بتقول حصل إيه: الـ UID اتجاب واسم العربية، أو العربية مش على الحساب المتصل (اتصل بحساب العميل)، أو مش متصل. التطابق على الـ IMEI بس، والبحث مرة واحدة لكل IMEI لكل حساب، ولو غيّرت الحساب الكاش بيتمسح. الشريط فوق ما بيتغيّرش."
+      "العميل بعت لقطة لكارت العربية في المنصة وبيسأل «إيه الـ API اللي بيرجّع البيانات دي؟» — الأداة بقت تتعرف عليها وتطلّع الرد: ريكوست موثّق واحد (/units/lists مفلتر بالـ IMEI ببروجيكشن basic و last_update و counters و sensors) بالـ IMEI الحقيقي، وكل حقل في الكارت مكانه في الرد. المحك إيميل حقيقي.",
+      "POS = last_update.dtt و SRV = last_update.dts (توقيتين epoch بالملّي ثانية)، والسرعة والزاوية والارتفاع والإحداثيات و ACC وحالة الحركة والحساسات — من الرد المحفوظ في التوثيق الرسمي. ساعات المحرك (بالثواني) والعداد (كم) متأكدين من قبل من رد حقيقي.",
+      "اللي مش في بيانات العربية (الأقمار، أقرب منطقة وعلامة، الشركة، كود التشغيل) الرد بيقول إنه مش جزء من الرد — ما بيخترعش حقل."
     ],
     "en": [
-      "The ticket has an IMEI? The tool fetches the UID from the connected account by itself and writes it into the reply and the collection — without setting the device in the top bar. It uses the same documented request the reply recommends (/units/lists filtered by IMEI), and searches the account list if the filter is ignored.",
-      "A note above the reply says what happened: the UID was fetched (with the vehicle name), or the vehicle is not on the connected account (connect to the customer account), or you are not connected. Matching is on the IMEI only, the lookup runs once per IMEI per account, and switching accounts clears it. The top bar is left unchanged."
+      "A customer sends a screenshot of the platform vehicle panel and asks \"which API returns this data?\" — the tool now recognises it and drafts the reply: one documented request (/units/lists filtered by IMEI with projections basic, last_update, counters and sensors) with the real IMEI, and where each panel field sits in the response. The yardstick is a real email.",
+      "POS = last_update.dtt and SRV = last_update.dts (two epoch-millisecond timestamps), plus speed, angle, altitude, coordinates, ACC, motion state and sensors — from the saved response in the official documentation. Engine hours (seconds) and odometer (km) were already verified from a real response.",
+      "Whatever is not in the vehicle data (satellites, nearest geofence and marker, company, operation code) is stated as not part of the response — no field is invented."
     ]
   }
 }
