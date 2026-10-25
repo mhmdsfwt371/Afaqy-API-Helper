@@ -1,16 +1,16 @@
 {
-  "version": "6.53",
+  "version": "7.0",
   "date": "2026-10-25",
   "notes": {
     "ar": [
-      "العميل بعت لقطة لكارت العربية في المنصة وبيسأل «إيه الـ API اللي بيرجّع البيانات دي؟» — الأداة بقت تتعرف عليها وتطلّع الرد: ريكوست موثّق واحد (/units/lists مفلتر بالـ IMEI ببروجيكشن basic و last_update و counters و sensors) بالـ IMEI الحقيقي، وكل حقل في الكارت مكانه في الرد. المحك إيميل حقيقي.",
-      "POS = last_update.dtt و SRV = last_update.dts (توقيتين epoch بالملّي ثانية)، والسرعة والزاوية والارتفاع والإحداثيات و ACC وحالة الحركة والحساسات — من الرد المحفوظ في التوثيق الرسمي. ساعات المحرك (بالثواني) والعداد (كم) متأكدين من قبل من رد حقيقي.",
-      "اللي مش في بيانات العربية (الأقمار، أقرب منطقة وعلامة، الشركة، كود التشغيل) الرد بيقول إنه مش جزء من الرد — ما بيخترعش حقل."
+      "Claude جوه الأداة: زرار «افهمها بـ Claude» في «حلّل رسالة عميل» بيفهم أي رسالة عميل (إيميل، صورة، عربي أو إنجليزي) أو سؤال منك، وبيطلّع النوع والفهم والتشخيص والخطوات بالإندبوينتس والبودي ورد للعميل عربي وإنجليزي، واللي مش مؤكد، واللي محتاجه من العميل.",
+      "مؤسس على التوثيق: كل نداء معاه فهرس كل ريكوستات التوثيق الرسمي وتفاصيل المرشّحين والمعرفة المؤكدة (الأساسيات، الأخطاء، دروس التذاكر، القواعد)، وتعليمات صارمة: ما يخترعش، ما يوعدش، الـ UID مش الـ IMEI، الـ 200 اللي جواه خطأ. الريكوستات المحفوظة من غير توثيق متعلّمة «ما تتبعتش للعميل».",
+      "متفحوص قبل ما يظهر: كل مسار بيذكره بيتقارن بالكولكشن — مش موجود = مخترع (أحمر، ومنع الإرسال)، محفوظ من غير توثيق = تحذير. البودي لازم JSON."
     ],
     "en": [
-      "A customer sends a screenshot of the platform vehicle panel and asks \"which API returns this data?\" — the tool now recognises it and drafts the reply: one documented request (/units/lists filtered by IMEI with projections basic, last_update, counters and sensors) with the real IMEI, and where each panel field sits in the response. The yardstick is a real email.",
-      "POS = last_update.dtt and SRV = last_update.dts (two epoch-millisecond timestamps), plus speed, angle, altitude, coordinates, ACC, motion state and sensors — from the saved response in the official documentation. Engine hours (seconds) and odometer (km) were already verified from a real response.",
-      "Whatever is not in the vehicle data (satellites, nearest geofence and marker, company, operation code) is stated as not part of the response — no field is invented."
+      "Claude inside the tool: an \"Understand with Claude\" button in Analyse a customer message understands any customer message (email, image, Arabic or English) or a question from you, and returns the kind, the understanding, the diagnosis, steps with endpoints and bodies, a customer reply in Arabic and English, what is unverified, and what to ask the customer for.",
+      "Grounded: every call carries the index of every request in the official documentation, the candidate details and the verified knowledge (basics, errors, ticket lessons, rules), with strict instructions: never invent, never promise, UID not IMEI, 200 with an error inside. Kept-but-undocumented requests are marked \"never send to a customer\".",
+      "Checked before it is shown: every path it mentions is compared with the collection — absent = invented (red, sending blocked), kept-but-undocumented = warning. Bodies must be JSON."
     ]
   }
 }
