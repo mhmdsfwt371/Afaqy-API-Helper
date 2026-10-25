@@ -756,9 +756,21 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "7.1",
+  "version": "7.2",
   "date": "2026-10-25",
   "history": [
+    {
+      "v": "7.2",
+      "date": "2026-10-25",
+      "items": {
+        "ar": [
+          "لوحة الأجهزة: عمود «uid» بعد الاسم مباشرة — الـ id بتاع العربية اللي العميل بيحتاجه في unit_id. ضغطة عليه بتنسخه من غير ما تفتح الحساسات، وبيطلع في تصدير إكسل والطباعة."
+        ],
+        "en": [
+          "Devices dashboard: a \"uid\" column right after the name — the vehicle id a customer needs in unit_id. One click copies it without opening the sensors, and it is included in the Excel export and the print."
+        ]
+      }
+    },
     {
       "v": "7.1",
       "date": "2026-10-25",
@@ -9308,10 +9320,14 @@ function dashColumns(rows){
       seen.set(k,(seen.get(k)||0)+1);
     });
   });
-  const first=['name','imei','device_serial','device','device_type','plate_number','sim_number','active'];
+  /* v7.2: الـ UID (id العربية) عمود بعد الاسم — ده اللي العميل بيحتاجه في unit_id */
+  if(rows.slice(0,300).some(u => u && (u.id || u._id))) seen.set('uid', rows.length);
+  const first=['name','uid','imei','device_serial','device','device_type','plate_number','sim_number','active'];
   const rest=[...seen.keys()].filter(k=>!first.includes(k)).sort((a,b)=>seen.get(b)-seen.get(a));
-  return first.filter(k=>seen.has(k)).concat(rest).slice(0,14);
+  return first.filter(k=>seen.has(k)).concat(rest).slice(0,15);
 }
+/* الصف بقيمه + الـ uid — للتصدير والطباعة */
+function dashRowOut(u){ return Object.assign({uid: String((u && (u.id || u._id)) || '')}, u || {}); }
 
 /* آخر مرة الجهاز رسل فيها */
 /* آخر إشارة ممكن ترجع بأشكال كتير حسب الـ projection والإصدار.
@@ -9715,7 +9731,8 @@ function dashRender(){
   const noType = counts.size===1 && counts.has('__none__');
 
   const rows=dashRows(), cols=dashColumns(rows);
-  const cell=(u,c)=>{ const v=u[c];
+  const cell=(u,c)=>{ const v = c==='uid' ? String(u.id||u._id||'') : u[c];
+    if(c==='uid') return v ? `<code class="uidc" data-uid="${esc(v)}" title="${esc(t('اضغط للنسخ','Click to copy'))}" style="font-size:11.5px; cursor:copy">${esc(v)}</code>` : '—';
     if(v===null||v===undefined||v==='') return '—';
     if(typeof v==='boolean') return v?t('أيوه','yes'):t('لأ','no');
     const s2=String(v);
@@ -9789,6 +9806,7 @@ function dashRender(){
 
   $('dashCsv').hidden = false; $('dashPdf').hidden = false;
   $('dashState').textContent = t('اتجابت','Loaded')+' '+DASH.at.toTimeString().slice(0,5);
+  out.querySelectorAll('.uidc').forEach(el2=>el2.onclick=ev=>{ ev.stopPropagation(); copy(el2.dataset.uid, t('الـ UID اتنسخ','UID copied')); });
   out.querySelectorAll('[data-slice]').forEach(el2=>el2.onclick=()=>{
     const k=el2.dataset.slice;
     DASH.filter = (DASH.filter===k) ? null : k;
@@ -9831,7 +9849,7 @@ function dashLabel(){
 }
 function dashPrint(){
   const rows=dashRows(), cols=dashColumns(rows);
-  return printReport(t('تقرير الأجهزة','Device report'), cols, rows,
+  return printReport(t('تقرير الأجهزة','Device report'), cols, rows.map(dashRowOut),
     {account:SESSION.user, filter:dashLabel()});
 }
 function waslPrint(){
@@ -9857,7 +9875,7 @@ function dashExport(){
                   + (DASH.scope ? ' ' + (DASH.scope==='on'?'online':'offline') : '')
                   + (DASH.state ? ' ' + STATE_META[DASH.state].file : ''))
               : 'all');
-  downloadXlsx(cols, rows, exportName(what), t('العربيات','Vehicles'));
+  downloadXlsx(cols, rows.map(dashRowOut), exportName(what), t('العربيات','Vehicles'));
 }
 
 /* ---------------- تصدير إكسل ----------------
