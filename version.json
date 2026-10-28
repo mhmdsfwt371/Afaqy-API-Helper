@@ -1,16 +1,16 @@
 {
-  "version": "7.3",
+  "version": "7.4",
   "date": "2026-10-27",
   "notes": {
     "ar": [
-      "Claude بيجرّب قبل ما يجاوب: لو متصل بحساب، بيطلب يجرّب ريكوست العميل زي ما هو والمصلّح على الحساب نفسه، ويشوف الرد الحقيقي، ويجاوب من الدليل. كل ريكوست بيظهر لك قبل ما يتنفّذ (المسار والبودي والسبب): «نفّذ» أو «تخطّى» أو «نفّذ الكل للحالة دي».",
-      "قراءة بس: ريكوست في الكولكشن، قراءة، مش تحت /auth، ومن غير أي أثر جانبي (إرسال، إشعار، تصدير، تنزيل، طباعة) — و/reports/completed اتقفل لأنه إشعار. أي حاجة تانية بترجع لـ Claude «مش مسموح». الحد 4 ريكوستات للحالة، بالكود.",
-      "الرد بيتقص قبل ما يروح لـ Claude (أول 3 عناصر في أي لستة، نصوص قصيرة) والتوكن عمره ما بيروح. لوحة «اتجرّب على الحساب» بتعرض كل ريكوست وحالته ودليل Claude، والخطوة اللي اتجربت ونجحت عليها «اتجرّب ✓»."
+      "إيميل Outlook من غير لقطة شاشة: اسحب الإيميل من Outlook للديسكتوب (.msg) أو احفظه .eml، وارميه في «حلّل رسالة عميل» أو ارفعه بزرار «أو ارفع الإيميل». الموضوع والمرسل والنص بيتقروا بالحرف من غير OCR، وأي صورة مرفقة كبيرة (لقطة بوستمان أو كارت المنصة) بتتقرا بالقارئ المحلي وتتضاف للتذكرة. اللوجوهات الصغيرة بتتساب. شغّال من غير نت.",
+      "حالات شبيهة اتحلّت قبل كده: تحت أي رد جاهز «احفظ الحالة دي للفريق» — بيتحفظ الرد وبصمة تقنية للحالة (مسارات، أكواد أخطاء، كلمات من قاموس التوثيق) من غير نص رسالة العميل، فمفيش أسماء توصل للتصدير. ولما رسالة جديدة تشبه حالة محفوظة، «حالة شبيهة اتحلّت قبل كده» بتظهر فوق بالرد اللي نفع وزرار نسخه. كله في المتصفح.",
+      "طبقة Claude ما بقتش بتزحم الشاشة: الإعدادات مقفولة، وزراير Claude مستخبية من غير مفتاح، واقتراح «القواعد ما عرفتش» بيوجّه للريكوستات والتصعيد والحفظ."
     ],
     "en": [
-      "Claude tests before it answers: when connected to an account, it asks to run the customer request as sent and the corrected one on that account, reads the real response, and answers from the evidence. Every call is shown to you before it runs (path, body, reason): Run it, Skip, or Run all for this case.",
-      "Read-only: a request in the collection, read-only, not under /auth, and with no side effect (send, notify, export, download, print) — /reports/completed is locked because it is a notification. Anything else returns \"not allowed\" to Claude. At most 4 calls per case, enforced in code.",
-      "Responses are trimmed before they go to Claude (first 3 items of any list, short strings) and the token never goes. A \"Tested on the account\" panel shows each call, its outcome and Claude's evidence, and a step that was tested successfully is marked \"tested ✓\"."
+      "Outlook email without a screenshot: drag the email from Outlook to the desktop (.msg) or save it as .eml, then drop it on Analyse a customer message or use the \"or upload the email\" button. The subject, sender and text are read verbatim without OCR, and any large image attachment (a Postman screenshot or the platform panel) goes through the local reader and is added to the ticket. Small logos are skipped. Works offline.",
+      "Similar cases resolved before: under any ready reply, \"Save this case for the team\" keeps the reply and a technical fingerprint of the case (paths, error codes, words from the documentation vocabulary) without the customer message text, so no names reach the export. When a new message resembles a saved case, \"A similar case was resolved before\" appears on top with the reply that worked and a copy button. All in the browser.",
+      "The Claude layer no longer crowds the screen: settings stay closed, the Claude buttons are hidden without a key, and the \"rules did not recognise this\" hint points to the Requests tab, escalation and saving instead."
     ]
   }
 }
