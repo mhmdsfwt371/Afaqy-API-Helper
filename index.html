@@ -756,9 +756,27 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "7.2",
-  "date": "2026-10-25",
+  "version": "7.3",
+  "date": "2026-10-27",
   "history": [
+    {
+      "v": "7.3",
+      "date": "2026-10-27",
+      "items": {
+        "ar": [
+          "Claude بيجرّب قبل ما يجاوب: لو متصل بحساب، بيطلب يجرّب ريكوست العميل زي ما هو والمصلّح على الحساب نفسه، ويشوف الرد الحقيقي، ويجاوب من الدليل. كل ريكوست بيظهر لك قبل ما يتنفّذ (المسار والبودي والسبب): «نفّذ» أو «تخطّى» أو «نفّذ الكل للحالة دي».",
+          "قراءة بس: ريكوست في الكولكشن، قراءة، مش تحت /auth، ومن غير أي أثر جانبي (إرسال، إشعار، تصدير، تنزيل، طباعة) — و/reports/completed اتقفل لأنه إشعار. أي حاجة تانية بترجع لـ Claude «مش مسموح». الحد 4 ريكوستات للحالة، بالكود.",
+          "الرد بيتقص قبل ما يروح لـ Claude (أول 3 عناصر في أي لستة، نصوص قصيرة) والتوكن عمره ما بيروح. لوحة «اتجرّب على الحساب» بتعرض كل ريكوست وحالته ودليل Claude، والخطوة اللي اتجربت ونجحت عليها «اتجرّب ✓».",
+          "مقياس الدقة في إعدادات Claude: 8 حالات حقيقية من تذاكر الشهر (متنضّفة) بنتيجة متوقعة لكل واحدة — بيطلّع النسبة وكل غلطة والتكلفة، ونتيجة تتنسخ. شغّله أول ما تحط المفتاح، قبل ما الفريق يعتمد عليه."
+        ],
+        "en": [
+          "Claude tests before it answers: when connected to an account, it asks to run the customer request as sent and the corrected one on that account, reads the real response, and answers from the evidence. Every call is shown to you before it runs (path, body, reason): Run it, Skip, or Run all for this case.",
+          "Read-only: a request in the collection, read-only, not under /auth, and with no side effect (send, notify, export, download, print) — /reports/completed is locked because it is a notification. Anything else returns \"not allowed\" to Claude. At most 4 calls per case, enforced in code.",
+          "Responses are trimmed before they go to Claude (first 3 items of any list, short strings) and the token never goes. A \"Tested on the account\" panel shows each call, its outcome and Claude's evidence, and a step that was tested successfully is marked \"tested ✓\".",
+          "Accuracy check in the Claude settings: 8 real cases from this month's tickets (sanitised), each with an expected outcome — it reports the score, every failure and the cost, and the result can be copied. Run it as soon as a key is set, before the team relies on it."
+        ]
+      }
+    },
     {
       "v": "7.2",
       "date": "2026-10-25",
@@ -2842,13 +2860,15 @@ const DOCS = {
           "في «حلّل رسالة عميل»: الصق الرسالة أو ارفع الصورة، واضغط **افهمها بـ Claude**. بتاخد الفهم والتشخيص والخطوات والرد للعميل (عربي/إنجليزي) واللي مش مؤكد واللي محتاجه من العميل. وتقدر تكتب سؤالك أنت في نفس الخانة.",
           "Claude ما بيجاوبش من دماغه: بيشوف التوثيق الرسمي والمعرفة المؤكدة بس، وكل مسار بيذكره الأداة بتفحصه. لو ظهر «مش في الكولكشن — مخترع» ما تبعتش الرد. ولو «مش في التوثيق الرسمي» راجع قبل ما تبعت.",
           "الإعدادات: المفتاح من console.anthropic.com، والموديل (Sonnet 5 الافتراضي)، وإرسال الصورة. الرسالة والصورة بتروح لـ Anthropic API على حساب المفتاح — التوكن وكلمة السر بيتشالوا الأول. التكلفة التقريبية للنداء بتظهر تحت الفهم.",
-          "الرد اللي بيطلع مسودة: اقراه قبل ما تبعته. القواعد والقراءة المحلية والفحص اللايف فاضلين زي ما هم — Claude طبقة فوقهم مش بديل."
+          "الرد اللي بيطلع مسودة: اقراه قبل ما تبعته. القواعد والقراءة المحلية والفحص اللايف فاضلين زي ما هم — Claude طبقة فوقهم مش بديل.",
+          "لو متصل بحساب، Claude ممكن يطلب يجرّب ريكوستات قراءة على الحساب قبل ما يجاوب — كل ريكوست بيستنى موافقتك، ورده بيروح لـ Claude متقصوص من غير التوكن. ومقياس الدقة في الإعدادات بيقيس Claude على حالات حقيقية."
         ],
         "en": [
           "In Analyse a customer message: paste the message or upload the image and press **Understand with Claude**. You get the understanding, the diagnosis, the steps, the customer reply (Arabic/English), what is unverified and what to ask the customer for. You can type your own question in the same box.",
           "Claude never answers from memory: it only sees the official documentation and the verified knowledge, and the tool checks every path it mentions. If \"not in the collection — invented\" appears, do not send the reply. If \"not in the official documentation\" appears, review before sending.",
           "Settings: the key from console.anthropic.com, the model (Sonnet 5 by default), and sending the image. The message and image go to the Anthropic API under that key — tokens and passwords are stripped first. The approximate cost of each call shows under the understanding.",
-          "The reply is a draft: read it before sending. The rules, the local reader and the live checks stay as they are — Claude is a layer on top, not a replacement."
+          "The reply is a draft: read it before sending. The rules, the local reader and the live checks stay as they are — Claude is a layer on top, not a replacement.",
+          "When connected to an account, Claude may ask to run read-only requests on it before answering — each waits for your approval, and its response goes to Claude trimmed and without the token. The accuracy check in the settings measures Claude on real cases."
         ]
       }
     },
@@ -12978,7 +12998,8 @@ HARD RULES — violating any of them is a failure:
 7. Write the customer reply in a professional tone, in English (reply_en) and in formal Arabic (reply_ar) — each language pure, no mixing. Address the customer as "Dear team," in English and "السادة المحترمين،" in Arabic. No placeholders like [TO CONFIRM]; use "unverified" instead.
 8. Write summary_ar and diagnosis_ar in Egyptian Arabic for the engineer, short and concrete.
 9. Each step: method, path, a complete JSON body as a string using the customer's own values when known (IMEI, dates, codes); otherwise clear placeholders like <UID> or <YOUR_TOKEN>.
-10. Answer by calling the "answer" tool exactly once. If an image is attached, read it carefully — it is the customer's screenshot (email, Postman, or the platform panel).`;
+10. Answer by calling the "answer" tool exactly once. If an image is attached, read it carefully — it is the customer's screenshot (email, Postman, or the platform panel).
+11. If the "call_api" tool is available, the engineer is connected to a customer account and you may verify before answering: reproduce the customer's request as they sent it, then the corrected request, and read the real responses. Read-only requests only, at most 4 calls, each with a short reason. The engineer approves every call. Only say something was tested if a call actually returned it; put what the calls showed in evidence_ar. A response that is HTTP 200 can still be an error — read status_code.`;
 const AI_TOOL = { name:'answer', description:'Return the structured answer for the engineer and the customer.',
   input_schema:{ type:'object', properties:{
     kind:{type:'string', enum:['troubleshoot','integration_request','fields_request','question','other']},
@@ -12986,8 +13007,52 @@ const AI_TOOL = { name:'answer', description:'Return the structured answer for t
     steps:{type:'array', items:{type:'object', properties:{method:{type:'string'}, path:{type:'string'}, body:{type:'string'}, why_en:{type:'string'}, why_ar:{type:'string'}}, required:['method','path']}},
     reply_en:{type:'string'}, reply_ar:{type:'string'},
     unverified:{type:'array', items:{type:'string'}}, needs_from_customer:{type:'array', items:{type:'string'}},
-    confidence:{type:'number'} },
+    evidence_ar:{type:'string'}, confidence:{type:'number'} },
     required:['kind','summary_ar','steps','reply_en','reply_ar','unverified','confidence'] } };
+const AI_CALL_TOOL = { name:'call_api', description:'Run one read-only request on the connected AFAQY account and get the real response. The engineer approves each call.',
+  input_schema:{ type:'object', properties:{ method:{type:'string'}, path:{type:'string'}, body:{type:'string', description:'Complete JSON body as a string'}, reason:{type:'string', description:'One sentence: what this call checks'} }, required:['method','path','body','reason'] } };
+/* قايمة المسموح لـ Claude: في الكولكشن، قراءة، مش /auth، ومن غير أي أثر جانبي */
+const AI_CALL_SIDE = /\/(send|notify|completed|export|exports|download|download_\w+|print|preview|percentage)(\/|$)|\/send_|_send\b/i;
+function aiCallAllowed(path){
+  const p = String(path || '').replace(/^https?:\/\/[^/]+/i, '').replace(/\?.*$/, '');
+  const e = EPS.find(x => x.p === p && sysOf(x) === 'avl');
+  if(!e) return {ok:false, why:'not in the collection'};
+  if(/^\/auth\//i.test(p) || FORBIDDEN.test(p)) return {ok:false, why:'authentication requests are not allowed'};
+  if(epKind(e) !== 'read') return {ok:false, why:'not a read-only request'};
+  if(AI_CALL_SIDE.test(p)) return {ok:false, why:'has side effects (send, notify, export, download, print)'};
+  return {ok:true, e};
+}
+/* الرد بيتقص قبل ما يروح لـ Claude: أول 3 في أي لستة، نصوص قصيرة، 6000 حرف */
+function aiTrim(v, depth){
+  depth = depth || 0;
+  if(Array.isArray(v)) return v.length > 3 ? v.slice(0, 3).map(x => aiTrim(x, depth + 1)).concat(['… ' + (v.length - 3) + ' more']) : v.map(x => aiTrim(x, depth + 1));
+  if(v && typeof v === 'object'){ if(depth > 6) return '{…}'; const o = {}; Object.keys(v).slice(0, 60).forEach(k => o[k] = aiTrim(v[k], depth + 1)); return o; }
+  if(typeof v === 'string') return v.length > 300 ? v.slice(0, 300) + '…' : v;
+  return v;
+}
+function aiCallResult(r){
+  const j = r && r.json; const s = JSON.stringify({http: r && r.status, status_code: j && j.status_code, message: j && j.message, body: aiTrim(j)});
+  return aiRedact(s.length > 6000 ? s.slice(0, 6000) + '…(trimmed)' : s);
+}
+/* موافقة الموظف على كل ريكوست */
+let AI_APPROVE_ALL = false;
+function aiApprove(call){
+  if(AI_APPROVE_ALL) return Promise.resolve(true);
+  const out = $('caseOut');
+  return new Promise(res => {
+    const box = document.createElement('div'); box.className = 'panel'; box.style.marginTop = '12px';
+    box.innerHTML = `<div class="sec" style="border-top:0"><h3>${t('Claude عايز يجرّب على الحساب','Claude wants to test on the account')}</h3>
+      <div class="note" style="margin-bottom:8px">${esc(call.reason || '')}</div>
+      <div dir="ltr" style="text-align:left"><b>${esc(call.method || 'POST')} ${esc(call.path)}</b>
+        <pre class="pre" style="white-space:pre-wrap; font-size:12px; margin-top:6px">${esc(String(call.body || ''))}</pre></div>
+      <div style="font-size:12.5px; color:var(--muted); margin:6px 0">${t('قراءة بس. الرد هيتبعت لـ Claude بعد ما يتقص — التوكن عمره ما بيروح.','Read-only. The response goes to Claude after trimming — the token never does.')}</div>
+      <div class="row"><button class="btn sig" data-a="yes">${t('نفّذ','Run it')}</button>
+        <button class="btn ghost" data-a="all">${t('نفّذ الكل للحالة دي','Run all for this case')}</button>
+        <button class="btn ghost" data-a="no">${t('تخطّى','Skip')}</button></div></div>`;
+    (out || document.body).appendChild(box);
+    box.querySelectorAll('[data-a]').forEach(b => b.onclick = ()=>{ const a = b.dataset.a; if(a === 'all') AI_APPROVE_ALL = true; box.remove(); res(a !== 'no'); });
+  });
+}
 /* الفحص: كل مسار اتذكر لازم يكون في الكولكشن؛ المحفوظ من غير توثيق تحذير؛ البودي JSON */
 function aiValidate(ans){
   const avl = EPS.filter(e => sysOf(e) === 'avl');
@@ -13006,6 +13071,9 @@ function aiValidate(ans){
     }
   }));
   ans.replyIssues = Object.keys(issues).map(p => ({path:p, st:issues[p]}));
+  /* v7.3: الخطوة اللي اتجربت على الحساب ورجعت سليمة */
+  const tested = new Set((ans._calls || []).filter(c => c.st === 'ok').map(c => norm(c.path)));
+  ans.steps.forEach(s => { if(s.st === 'ok' && tested.has(s.path)) s.tested = true; });
   ans.blocked = ans.steps.some(s => s.st === 'invented') || ans.replyIssues.some(x => x.st === 'invented');
   ans.warn = ans.steps.some(s => s.st === 'undocumented') || ans.replyIssues.some(x => x.st === 'undocumented');
   return ans;
@@ -13014,7 +13082,7 @@ function _aiB64(file){
   return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
 }
 /* النداء نفسه */
-async function aiAsk(text, image){
+async function aiAsk(text, image, opts){
   if(!aiReady()) throw new Error('nokey');
   const pack = 'OFFICIAL DOCUMENTATION — index of every request (method path — name: purpose):\n' + aiIndex()
     + '\n\nVERIFIED KNOWLEDGE (facts confirmed from real responses and tickets):\n' + aiFacts();
@@ -13023,21 +13091,54 @@ async function aiAsk(text, image){
   if(image){ content.push({type:'image', source:{type:'base64', media_type: image.type || 'image/png', data: await _aiB64(image)}}); }
   content.push({type:'text', text: detail + '\n\n=====\nENGINEER CONTEXT: ' + (SESSION.token ? 'connected to a customer account' : 'not connected') + (SESSION.unit && SESSION.unit.uid ? `; device set in the tool: IMEI ${SESSION.unit.imei || '?'} = UID ${SESSION.unit.uid} (${SESSION.unit.name || ''})` : '')
     + '\n\nMESSAGE FROM THE CUSTOMER OR QUESTION FROM THE ENGINEER:\n' + aiRedact(text)});
-  const body = { model: AI.model, max_tokens: 4000,
-    system: [{type:'text', text: AI_RULES}, {type:'text', text: pack, cache_control:{type:'ephemeral'}}],
-    tools: [AI_TOOL], messages: [{role:'user', content}] };
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
-    headers: {'content-type':'application/json', 'x-api-key': AI.key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
-    body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({}));
-  if(!r.ok){ const err = new Error((j && j.error && j.error.message) || ('HTTP ' + r.status)); err.status = r.status; throw err; }
-  const tu = (j.content || []).find(c => c.type === 'tool_use' && c.name === 'answer');
-  let ans = tu ? tu.input : null;
-  if(!ans){ const txt = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n'); const m = txt.match(/\{[\s\S]*\}/); if(m){ try{ ans = JSON.parse(m[0]); }catch(_){} } }
+  /* v7.3: لو متصل، Claude يقدر يجرّب ريكوستات قراءة — الموظف بيوافق على كل واحد */
+  const canCall = !!(SESSION.token) && !(opts && opts.noCalls);
+  const msgs = [{role:'user', content}], calls = [], U = {input_tokens:0, output_tokens:0, cache_read_input_tokens:0, cache_creation_input_tokens:0};
+  let ans = null, model = AI.model;
+  for(let turn = 0; turn < 7 && !ans; turn++){
+    const last = turn === 6 || calls.length >= 4;
+    const body = { model: AI.model, max_tokens: 4000,
+      system: [{type:'text', text: AI_RULES}, {type:'text', text: pack, cache_control:{type:'ephemeral'}}],
+      tools: canCall && !last ? [AI_TOOL, AI_CALL_TOOL] : [AI_TOOL], messages: msgs };
+    if(last || !canCall) body.tool_choice = {type:'tool', name:'answer'};
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
+      headers: {'content-type':'application/json', 'x-api-key': AI.key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok){ const err = new Error((j && j.error && j.error.message) || ('HTTP ' + r.status)); err.status = r.status; throw err; }
+    const u = j.usage || {}; Object.keys(U).forEach(k => U[k] += (u[k] || 0)); model = j.model || model;
+    const blocks = j.content || [];
+    const fin = blocks.find(c => c.type === 'tool_use' && c.name === 'answer');
+    if(fin){ ans = fin.input; break; }
+    const asks = blocks.filter(c => c.type === 'tool_use' && c.name === 'call_api');
+    if(!asks.length){
+      const txt = blocks.filter(c => c.type === 'text').map(c => c.text).join('\n'); const m = txt.match(/\{[\s\S]*\}/);
+      if(m){ try{ ans = JSON.parse(m[0]); }catch(_){} }
+      if(!ans){ msgs.push({role:'assistant', content: blocks}); msgs.push({role:'user', content:'Call the answer tool now.'}); }
+      continue;
+    }
+    msgs.push({role:'assistant', content: blocks});
+    const results = [];
+    for(const c of asks){
+      const call = c.input || {}, chk = aiCallAllowed(call.path), rec = {method: call.method || 'POST', path: String(call.path || ''), body: call.body, reason: call.reason, at: new Date()};
+      /* الحد 4 ريكوستات بالكود — مش معتمد على إن Claude يلتزم */
+      if(calls.filter(x => x.st === 'ok' || x.st === 'error').length >= 4){ results.push({type:'tool_result', tool_use_id: c.id, content: 'Call limit reached (4). Answer now with the answer tool.', is_error: true}); continue; }
+      if(!chk.ok){ rec.st = 'refused'; rec.why = chk.why; calls.push(rec); results.push({type:'tool_result', tool_use_id: c.id, content: 'Not allowed: ' + chk.why + '. Use only read-only documented requests.', is_error: true}); continue; }
+      if(!(await aiApprove(call))){ rec.st = 'skipped'; calls.push(rec); results.push({type:'tool_result', tool_use_id: c.id, content: 'The engineer skipped this call.'}); continue; }
+      let b = call.body; if(typeof b === 'string'){ try{ b = JSON.parse(b); }catch(_){ b = {}; } }
+      try{
+        const rr = await apiFetch(chk.e.p, b, {method: (call.method || chk.e.m || 'POST').toUpperCase()});
+        const j2 = rr && rr.json, sc = j2 && j2.status_code;
+        rec.st = (rr && rr.ok && (sc == null || Number(sc) < 400)) ? 'ok' : 'error'; rec.http = rr && rr.status; rec.status_code = sc; rec.message = j2 && j2.message;
+        calls.push(rec); results.push({type:'tool_result', tool_use_id: c.id, content: aiCallResult(rr)});
+      }catch(err){ rec.st = 'error'; rec.message = String(err && err.message || err); calls.push(rec); results.push({type:'tool_result', tool_use_id: c.id, content: 'Request failed: ' + rec.message, is_error: true}); }
+    }
+    msgs.push({role:'user', content: results});
+  }
+  AI_APPROVE_ALL = false;
   if(!ans) throw new Error('no-answer');
-  const u = j.usage || {};
-  AI.usage.calls++; AI.usage.inp += (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0); AI.usage.out += (u.output_tokens || 0);
-  ans._usage = u; ans._model = j.model || AI.model;
+  AI.usage.calls++; AI.usage.inp += U.input_tokens + U.cache_read_input_tokens + U.cache_creation_input_tokens; AI.usage.out += U.output_tokens;
+  ans._usage = U; ans._model = model; ans._calls = calls;
   return aiValidate(ans);
 }
 function aiCost(u, model){
@@ -13045,13 +13146,76 @@ function aiCost(u, model){
   const inp = ((u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) * 1.25 + (u.cache_read_input_tokens || 0) * 0.1) * p[0] / 1e6 + (u.output_tokens || 0) * p[1] / 1e6;
   return '$' + inp.toFixed(3);
 }
+/* ============ مقياس الدقة: حالات حقيقية متنضّفة بنتيجة متوقعة ============
+   must/mustNot: مسارات في الخطوات · say/never: كلام في الرد (إنجليزي) · unv: لازم يقول إن فيه حاجة مش مؤكدة */
+const AI_EVAL = [
+  { id:'imei', t:'IMEI مكان الـ UID — /units/locations رجّعت not_allowed',
+    text:'Dear team, we can get the token and the vehicle list, but getting the last location fails.\nPOST https://api.afaqy.sa/units/locations?token=<TOKEN>\n{"data":{"unit_id":"861230044934025","address":true,"date":{"interval":"interval","from":"2026-10-10 00:00:00","to":"2026-10-11 23:59:59"}}}\nResponse: {"message":"not_allowed","status_code":401,"data":[]}\nIs a role missing?',
+    must:['/units/lists'], mustNot:['/units/locations'], say:[/UID/i, /IMEI/i], never:[/role (is )?missing|add (a|the) role|grant\s+the\s+permission|grant\s+a\s+permission/i] },
+  { id:'panel', t:'حقول كارت المنصة — POS و SRV',
+    text:'Dear team, we need the correct API for the info in the vehicle panel: speed, engine hours, odometer, angle, altitude, POS 25-10-2026 12:08:20, SRV 25-10-2026 12:08:38, sensors ACC, weight, device battery. Please share the API details with a sample request body.',
+    must:['/units/lists'], mustNot:[], say:[/dtt/, /dts/, /last_update/], never:[] },
+  { id:'list', t:'طلب إنتجريشن — لستة بيانات',
+    text:'Hello, for our integration we need:\n1. Vehicle list with plate numbers\n2. Last location of each vehicle\n3. Trip history per day\n4. Fuel level\n5. Assigned driver\n6. Real-time push (webhooks) for alarms\nPlease confirm the APIs.',
+    must:['/units/lists'], mustNot:['/units/locations'], say:[], never:[/webhooks? (are|is) (available|supported)|we support webhooks|push notifications are available/i], unv:true },
+  { id:'ok200', t:'200 وجواه خطأ',
+    text:'Hi, the API returns HTTP 200 but no data:\nPOST /units/view {"data":{"id":"5e6790e103ed52cf443362c9"}}\nResponse 200: {"message":"validation_error","status_code":405,"errors":{"id":["not_found"]}}',
+    must:[], mustNot:[], say:[/status_code/], never:[] },
+  { id:'bearer', t:'التوكن في الهيدر',
+    text:'Can we send the token in an Authorization header instead of the URL?',
+    must:[], mustNot:[], say:[/Bearer/], never:[] },
+  { id:'retention', t:'سؤال مش في التوثيق — مدة الاحتفاظ بالبيانات',
+    text:'How long do you keep historical position data, and is there a rate limit on the API?',
+    must:[], mustNot:[], say:[], never:[/\b\d+\s*(days?|months?|years?)\b|\b\d+\s*requests? (per|\/)/i], unv:true },
+  { id:'undoc', t:'فخ: ريكوست مش في التوثيق',
+    text:'We have been using /units/locations for history. Is that the right endpoint to keep using?',
+    must:[], mustNot:['/units/locations'], say:[/\/units\/signals/], never:[] },
+  { id:'ar', t:'سؤال المهندس بالعربي — تقرير',
+    text:'العميل عايز يجيب تقرير ملخص الرحلات لعربية امبارح عن طريق الـ API — إيه الخطوات؟',
+    must:[], mustAny:['/user_reports/add','/user_reports/data','/user_reports/data-summary','/user_reports/lists'], mustNot:[], say:[], never:[] }
+];
+function aiEvalScore(c, a){
+  const fails = [], paths = (a.steps || []).map(s => s.path), en = String(a.reply_en || ''), all = en + '\n' + String(a.reply_ar || '');
+  if(a.blocked) fails.push(t('فيه مسار مخترع','an invented path'));
+  (c.must || []).forEach(p => { if(!paths.includes(p)) fails.push(t('ناقص ','missing ') + p); });
+  if(c.mustAny && !c.mustAny.some(p => paths.includes(p))) fails.push(t('ناقص واحد من ','missing one of ') + c.mustAny.join(' / '));
+  (c.mustNot || []).forEach(p => { if(paths.includes(p)) fails.push(t('بيقترح ','recommends ') + p); });
+  (c.say || []).forEach(re => { if(!re.test(all)) fails.push(t('الرد ما فيهوش ','the reply lacks ') + re.source); });
+  (c.never || []).forEach(re => { if(re.test(all)) fails.push(t('الرد فيه ','the reply contains ') + re.source); });
+  if(c.unv && !(a.unverified || []).length) fails.push(t('ما قالش إن فيه حاجة مش مؤكدة','did not flag anything as unverified'));
+  if(!String(a.reply_en || '').trim() || !String(a.reply_ar || '').trim()) fails.push(t('رد ناقص لغة','a reply is missing a language'));
+  if(/\[TO CONFIRM\]|\bTBC\b|للتأكيد/i.test(all)) fails.push(t('فيه «للتأكيد»','contains a TO CONFIRM placeholder'));
+  return fails;
+}
+async function aiEvalRun(){
+  const box = $('aiEvalOut'); if(!box) return;
+  if(!aiReady()){ box.innerHTML = `<div class="note warn">${t('محتاج مفتاح الأول.','A key is needed first.')}</div>`; return; }
+  let cost = 0, pass = 0; const rows = [];
+  for(let i = 0; i < AI_EVAL.length; i++){
+    const c = AI_EVAL[i];
+    box.innerHTML = `<div class="note">${t('بنشغّل','Running')} ${i + 1}/${AI_EVAL.length}: ${esc(c.t)}…</div>`;
+    try{
+      const a = await aiAsk(c.text, null, {noCalls:true});
+      const f = aiEvalScore(c, a); if(!f.length) pass++;
+      cost += parseFloat(aiCost(a._usage || {}, a._model).slice(1)) || 0;
+      rows.push({c, f, kind:a.kind});
+    }catch(err){ rows.push({c, f:[t('النداء فشل: ','the call failed: ') + String(err && err.message || err).slice(0, 80)]}); }
+  }
+  const pct = Math.round(pass / AI_EVAL.length * 100);
+  box.innerHTML = `<div class="note ${pct === 100 ? 'sig' : 'warn'}"><b>${t('الدقة','Accuracy')}: ${pass}/${AI_EVAL.length} (${pct}%)</b> · ${esc(AI.model)} · ${t('التكلفة','cost')} $${cost.toFixed(3)}</div>
+    <table class="kv" style="font-size:13px; margin-top:8px">${rows.map(r => `<tr><td style="width:40%">${r.f.length ? '✗' : '✓'} ${esc(r.c.t)}</td>
+      <td>${r.f.length ? r.f.map(x => `<div style="color:var(--alert-ink)">${esc(x)}</div>`).join('') : `<span style="color:var(--ok)">${t('كل الشروط اتحققت','every condition met')}</span>`}</td></tr>`).join('')}</table>
+    <div class="row" style="margin-top:8px"><button class="btn ghost" id="aiEvalCopy">${t('انسخ النتيجة','Copy the result')}</button></div>`;
+  $('aiEvalCopy').onclick = ()=>copy([`AFAQY API Helper — Claude accuracy ${pass}/${AI_EVAL.length} (${pct}%) · ${AI.model} · $${cost.toFixed(3)} · ${new Date().toISOString().slice(0,16)}`]
+    .concat(rows.map(r => (r.f.length ? '✗ ' : '✓ ') + r.c.id + (r.f.length ? ' — ' + r.f.join('; ') : ''))).join('\n'), t('اتنسخت','Copied'));
+}
 /* إعدادات المفتاح — جوه خانة الرسالة */
 function aiSettingsHtml(){
   return `<div id="aiSet" class="panel" style="margin-top:10px" ${aiReady() ? 'hidden' : ''}><div class="sec" style="border-top:0">
     <h3>${t('Claude جوه الأداة','Claude inside the tool')}</h3>
     <div class="note" style="margin-bottom:8px">${t(
-      'بتفهم أي رسالة عميل أو سؤال منك، وبتجاوب من التوثيق الرسمي بس — وكل مسار بتذكره بيتفحص قبل ما يظهر. الرسالة (والصورة) بتتبعت لـ Anthropic API على حساب المفتاح ده؛ التوكن وكلمة السر بيتشالوا قبل الإرسال. المفتاح بيتحفظ على الجهاز ده بس زي الحسابات.',
-      'Understands any customer message or question from you and answers from the official documentation only — every path it cites is checked before it is shown. The message (and image) is sent to the Anthropic API under this key; tokens and passwords are stripped first. The key is kept on this device only, like saved accounts.')}</div>
+      'بتفهم أي رسالة عميل أو سؤال منك، وبتجاوب من التوثيق الرسمي بس — وكل مسار بتذكره بيتفحص قبل ما يظهر. الرسالة (والصورة) بتتبعت لـ Anthropic API على حساب المفتاح ده؛ التوكن وكلمة السر بيتشالوا قبل الإرسال. ولو متصل بحساب، Claude ممكن يطلب يجرّب ريكوستات قراءة — كل واحد بيستنى موافقتك، ورده بيروح لـ Claude متقصوص. المفتاح بيتحفظ على الجهاز ده بس زي الحسابات.',
+      'Understands any customer message or question from you and answers from the official documentation only — every path it cites is checked before it is shown. The message (and image) is sent to the Anthropic API under this key; tokens and passwords are stripped first. When you are connected to an account, Claude may ask to run read-only requests — each waits for your approval, and its trimmed response goes to Claude. The key is kept on this device only, like saved accounts.')}</div>
     <div class="row">
       <input id="aiKey" type="password" placeholder="sk-ant-…" value="${esc(AI.key)}" style="flex:1 1 260px; font-family:var(--mono, monospace)" autocomplete="off">
       <select id="aiModel">${AI_MODELS.map(([v,l]) => `<option value="${v}" ${AI.model===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
@@ -13063,6 +13227,10 @@ function aiSettingsHtml(){
       <button class="btn sig" id="aiSave">${t('احفظ','Save')}</button>
     </div>
     <div style="font-size:12px; color:var(--muted); margin-top:6px">${t('المفتاح من console.anthropic.com — مفتاح الفريق أو مفتاحك. التكلفة التقريبية للنداء بتظهر بعد كل مرة.','Get the key from console.anthropic.com — the team key or your own. The approximate cost shows after each call.')}</div>
+    <div class="row" style="margin-top:10px; border-top:1px solid var(--line); padding-top:10px">
+      <button class="btn ghost" id="aiEval">${t('شغّل مقياس الدقة','Run the accuracy check')} (${AI_EVAL.length})</button>
+      <span style="font-size:12px; color:var(--muted); align-self:center">${t('حالات حقيقية من التذاكر بنتيجة متوقعة — بيقيس قبل ما الفريق يعتمد عليه.','Real ticket cases with expected outcomes — measures it before the team relies on it.')}</span></div>
+    <div id="aiEvalOut" style="margin-top:8px"></div>
   </div></div>`;
 }
 /* نداء صغير بيأكد إن المفتاح شغّال — من غير التوثيق ولا أدوات */
@@ -13075,6 +13243,7 @@ async function aiPing(key, model){
   return j;
 }
 function aiWireSettings(){
+  const ev = $('aiEval'); if(ev) ev.onclick = ()=>{ AI.key = AI.key || ($('aiKey').value || '').trim(); aiEvalRun(); };
   const p = $('aiPing');
   if(p) p.onclick = async ()=>{ const k = ($('aiKey').value || '').trim(); if(k.length < 20){ toast(t('اكتب المفتاح الأول','Enter the key first')); return; }
     p.disabled = true; p.textContent = t('بنجرّب…','Testing…');
@@ -13113,7 +13282,7 @@ function renderAi(ans, out, text){
   const chip = st => st === 'invented' ? `<span class="pill" style="background:var(--alert-soft); color:var(--alert-ink)">${t('مش في الكولكشن — مخترع','not in the collection — invented')}</span>`
     : st === 'undocumented' ? `<span class="pill" style="background:var(--signal-soft); color:var(--signal-deep)">${t('مش في التوثيق الرسمي','not in the official documentation')}</span>` : `<span class="pill" style="background:var(--ok-soft); color:var(--ok)">${t('موثّق','documented')}</span>`;
   const epBtn = p => { const e = EPS.find(x => x.p === p && sysOf(x) === 'avl'); return e ? `<button class="chip" data-goep="${e.i}" style="padding:1px 8px"><code>${esc(p)}</code></button>` : `<code>${esc(p)}</code>`; };
-  const steps = (ans.steps || []).map((s, i) => `<tr><td style="width:34%"><b>${i + 1}.</b> ${esc(s.method || 'POST')} ${epBtn(s.path)}<br>${chip(s.st)}</td>
+  const steps = (ans.steps || []).map((s, i) => `<tr><td style="width:34%"><b>${i + 1}.</b> ${esc(s.method || 'POST')} ${epBtn(s.path)}<br>${chip(s.st)}${s.tested ? ` <span class="pill" style="background:var(--ok-soft); color:var(--ok)">${t('اتجرّب ✓','tested ✓')}</span>` : ''}</td>
       <td><pre class="pre" style="white-space:pre-wrap; font-size:12px; margin:0">${esc(typeof s.body === 'object' && !s.body._raw ? JSON.stringify(s.body) : String((s.body && s.body._raw) || ''))}</pre>
       <div style="font-size:12.5px; color:var(--ink-2); margin-top:4px">${esc(dual({ar:s.why_ar || s.why_en || '', en:s.why_en || s.why_ar || ''}))}</div></td></tr>`).join('');
   const issues = ans.replyIssues.length ? `<div class="note warn" style="margin-top:8px">${t('الرد بيذكر مسارات:','The reply mentions paths:')} ${ans.replyIssues.map(x => `<code>${esc(x.path)}</code> ${chip(x.st)}`).join(' ')}</div>` : '';
@@ -13127,6 +13296,16 @@ function renderAi(ans, out, text){
       <div class="note" style="margin-top:8px">${t('اتولّد بالذكاء الاصطناعي من التوثيق الرسمي والمعرفة المؤكدة. الأداة فحصت كل مسار اتذكر — بس اقرا الرد قبل ما تبعته.','Generated by AI from the official documentation and verified knowledge. The tool checked every path mentioned — still read the reply before sending.')}
         <span style="color:var(--muted)"> · ${esc(ans._model || '')} · ${t('التكلفة التقريبية','approx. cost')} ${aiCost(u, ans._model)}</span></div>
     </div></div>
+    ${(ans._calls || []).length ? `<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
+      <h3>${t('اتجرّب على الحساب','Tested on the account')}</h3>
+      ${ans.evidence_ar ? `<div class="note sig" style="margin-bottom:8px">${esc(ans.evidence_ar)}</div>` : ''}
+      <table class="kv" style="font-size:13px">${ans._calls.map(c => `<tr><td style="width:40%" dir="ltr"><code>${esc(c.method)} ${esc(c.path)}</code></td>
+        <td>${c.st === 'ok' ? `<span class="pill" style="background:var(--ok-soft); color:var(--ok)">${t('رجع سليم','returned OK')}</span>`
+          : c.st === 'error' ? `<span class="pill" style="background:var(--alert-soft); color:var(--alert-ink)">${t('رجع خطأ','returned an error')}</span> <code>${esc(String(c.status_code || c.http || ''))} ${esc(String(c.message || ''))}</code>`
+          : c.st === 'skipped' ? `<span class="pill">${t('اتخطّى','skipped')}</span>`
+          : `<span class="pill" style="background:var(--alert-soft); color:var(--alert-ink)">${t('اترفض','refused')}</span> ${esc(c.why || '')}`}
+          <div style="font-size:12px; color:var(--muted)">${esc(c.reason || '')}</div></td></tr>`).join('')}</table>
+    </div></div>` : ''}
     ${steps ? `<div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0"><h3>${t('الخطوات بالإندبوينتس','Steps with endpoints')}</h3><table class="kv" style="font-size:13px">${steps}</table></div></div>` : ''}
     <div class="panel" style="margin-top:12px"><div class="sec" style="border-top:0">
       <h3>${t('رد جاهز للعميل','A reply ready to send')}</h3>
