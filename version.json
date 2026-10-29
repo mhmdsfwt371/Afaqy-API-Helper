@@ -1,16 +1,14 @@
 {
-  "version": "7.5",
+  "version": "7.6",
   "date": "2026-10-28",
   "notes": {
     "ar": [
-      "من صفوت: آخر موقع للعربية بييجي من /units/lists نفسه في last_update (lat و lng ووقت آخر سيجنال)، و/units/locations هو نقط التراك اللي بتترسم خلال فترة زمنية — شغّال بس مش في التوثيق الرسمي. اتضافت معلومة ثابتة للفريق بالكلام ده.",
-      "سبب احتفاظ الأداة بـ /units/locations اتصلّح: كان بيقول «آخر موقع لعربية» وده غلط — دلوقتي «نقط التراك خلال فترة».",
-      "رد الـ IMEI: الخطوة التانية (/units/signals) بقت بتقول صراحة إنها للفترة بس — لو العميل عايز آخر موقع، الخطوة الأولى كفاية. وفي ردود العملاء الموثّق للفترة هو /units/signals."
+      "قياس فايدة الأداة: تحت أي تحليل في «حلّل رسالة عميل» تلات زراير — «اتحلّت» و«ما اتحلّتش» و«اتصعّدت». كل تحليل بيتعدّ مرة واحدة، وبيتسجّل نوع الحالة والنتيجة والمصدر (نص، صورة، ملف إيميل) وهل ظهرت حالة شبيهة — من غير أي نص من رسالة العميل ولا أسماء ولا أرقام أجهزة.",
+      "«تقرير الاستخدام» في الأساسيات: بالشهر — عدد التحليلات، ونسبة اللي اتحلّت من غير تصعيد، ونسبة التصعيد، وأكتر أنواع الحالات، وكام جه من ملف إيميل. «صدّر التقرير» بيطلّع ملف صغير، و«اجمع تقارير الفريق» بيقرا ملفات الفريق كلها مرة واحدة ويطلّع أرقام الفرع، و«انسخ الملخص» للإيميل أو العرض."
     ],
     "en": [
-      "From Safwat: the last location of a vehicle comes from /units/lists itself, in last_update (lat, lng and the time of the last signal), and /units/locations returns the track points drawn over a period — it works but is not in the official documentation. A permanent team entry now says so.",
-      "The reason the tool keeps /units/locations was corrected: it said \"last location of a vehicle\", which was wrong — it now says \"track points over a period\".",
-      "IMEI reply: the second step (/units/signals) now states it is only for a period — if the customer needs the last location, step 1 is enough. In customer replies the documented request for a period is /units/signals."
+      "Measuring the tool: under every analysis in Analyse a customer message there are three buttons — Resolved, Not resolved, Escalated. Each analysis is counted once, recording the case kind, the outcome, the source (text, image, email file) and whether a similar case was shown — with no customer message text, names or device numbers.",
+      "A Usage report in Basics: per month — analyses, the share resolved without escalation, the share escalated, the most common case kinds, and how many came from an email file. Export the report as a small file; Combine team reports reads every team file at once and gives the branch figures; Copy the summary for an email or a deck."
     ]
   }
 }

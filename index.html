@@ -756,9 +756,23 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "7.5",
+  "version": "7.6",
   "date": "2026-10-28",
   "history": [
+    {
+      "v": "7.6",
+      "date": "2026-10-28",
+      "items": {
+        "ar": [
+          "قياس فايدة الأداة: تحت أي تحليل في «حلّل رسالة عميل» تلات زراير — «اتحلّت» و«ما اتحلّتش» و«اتصعّدت». كل تحليل بيتعدّ مرة واحدة، وبيتسجّل نوع الحالة والنتيجة والمصدر (نص، صورة، ملف إيميل) وهل ظهرت حالة شبيهة — من غير أي نص من رسالة العميل ولا أسماء ولا أرقام أجهزة.",
+          "«تقرير الاستخدام» في الأساسيات: بالشهر — عدد التحليلات، ونسبة اللي اتحلّت من غير تصعيد، ونسبة التصعيد، وأكتر أنواع الحالات، وكام جه من ملف إيميل. «صدّر التقرير» بيطلّع ملف صغير، و«اجمع تقارير الفريق» بيقرا ملفات الفريق كلها مرة واحدة ويطلّع أرقام الفرع، و«انسخ الملخص» للإيميل أو العرض."
+        ],
+        "en": [
+          "Measuring the tool: under every analysis in Analyse a customer message there are three buttons — Resolved, Not resolved, Escalated. Each analysis is counted once, recording the case kind, the outcome, the source (text, image, email file) and whether a similar case was shown — with no customer message text, names or device numbers.",
+          "A Usage report in Basics: per month — analyses, the share resolved without escalation, the share escalated, the most common case kinds, and how many came from an email file. Export the report as a small file; Combine team reports reads every team file at once and gives the branch figures; Copy the summary for an email or a deck."
+        ]
+      }
+    },
     {
       "v": "7.5",
       "date": "2026-10-28",
@@ -2881,6 +2895,23 @@ const DOCS = {
     }
   ],
   "sections": [
+    {
+      "t": {
+        "ar": "تقرير الاستخدام",
+        "en": "Usage report"
+      },
+      "since": "7.6",
+      "b": {
+        "ar": [
+          "بعد ما تخلّص أي حالة في «حلّل رسالة عميل»، دوس واحد من التلاتة تحت: «اتحلّت» أو «ما اتحلّتش» أو «اتصعّدت». ده اللي بيبني أرقام الفرع — من غير ما أي كلمة من رسالة العميل تتحفظ.",
+          "آخر كل شهر: من «الأساسيات» ← «تقرير الاستخدام» ← «صدّر التقرير»، وابعت الملف لمسؤول الأداة. هو بيدوس «اجمع تقارير الفريق» ويختار ملفات الكل مرة واحدة، فيطلع تقرير الفرع."
+        ],
+        "en": [
+          "When you finish any case in Analyse a customer message, press one of the three buttons below it: Resolved, Not resolved or Escalated. That builds the branch figures — without keeping a single word of the customer message.",
+          "At month end: Basics → Usage report → Export the report, and send the file to the maintainer. They press Combine team reports and pick everyone's files at once to get the branch report."
+        ]
+      }
+    },
     {
       "t": {
         "ar": "إيميل Outlook والحالات الشبيهة",
@@ -5588,8 +5619,8 @@ function renderFaq(){
   $('faq').innerHTML = FAQ.map(f=>`<div class="card">
     <h3>${esc(dual(f.t))} ${f.v?`<span class="tagv">${t('متأكد من الكولكشن','verified')}</span>`:`<span class="tagu">${t('يحتاج تأكيد','needs confirmation')}</span>`}</h3>
     ${dual(f.h).replace(/\{base\}/g, baseUrl())}
-  </div>`).join('') + renderGlossary() + renderLearned() + renderErrors() + renderAdder();
-  wireAdder();
+  </div>`).join('') + renderGlossary() + renderLearned() + renderErrors() + renderAdder() + renderUsage();
+  wireAdder(); wireUsage();
 }
 
 /* ---------------- browse ---------------- */
@@ -11943,7 +11974,7 @@ function ocrAttach(textId, boxId, fileId, after, mode){
   const ta = $(textId); if(!ta) return;
   const run = async file => {
     if(!file || !/^image\//.test(file.type || '')){ toast(t('ده مش ملف صورة','That is not an image file')); return; }
-    if(mode === 'case') AI.lastImage = file;   /* v7.0: الصورة نفسها بتتبعت لـ Claude لو فيه مفتاح */
+    if(mode === 'case'){ AI.lastImage = file; CASE_SRC = 'image'; }   /* v7.0: الصورة لـ Claude لو فيه مفتاح · v7.6: مصدر التحليل */
     const thumb = URL.createObjectURL(file);
     ocrBox(boxId, `<div class="note">${esc(t('بنجهّز','Preparing'))}</div>`, thumb);
     try{
@@ -13509,7 +13540,7 @@ async function mailIngest(file){
   const n = (m.atts || []).length;
   box.innerHTML = `<div class="note sig"><b>${t('اتقرا الإيميل','Email read')}</b>${m.subject ? ' — ' + esc(m.subject) : ''}<br>
     ${t(`النص بالحرف من الإيميل نفسه. المرفقات: ${n}`, `Text taken verbatim from the email. Attachments: ${n}`)}${read.length ? ' — ' + t('اتقرت الصور: ','images read: ') + read.map(esc).join('، ') : ''}${n && !read.length ? ' — ' + t('مفيش صورة كبيرة تتقري (اللوجوهات بتتساب)','no large image to read (logos are skipped)') : ''}</div>`;
-  renderCase(text);
+  CASE_SRC = 'mail'; renderCase(text);
 }
 
 /* ============ حالات شبيهة اتحلّت قبل كده — محلي ============
@@ -13557,8 +13588,20 @@ function caseKeep(text, title){
 /* بعد كل تحليل: الحالات الشبيهة فوق، وشريط الحفظ تحت */
 function caseAfter(text){
   const out = $('caseOut'); if(!out || !out.innerHTML) return;
-  ['caseSim', 'caseKeepBar'].forEach(id => { const x = $(id); if(x) x.remove(); });
+  ['caseSim', 'caseKeepBar', 'caseFbBar'].forEach(id => { const x = $(id); if(x) x.remove(); });
   const sim = caseSimilar(text);
+  /* v7.6: التحليل بيتعدّ مرة، وزراير النتيجة تحت */
+  if(String(text || '').trim().length > 8){
+    statsAnalysed(text, sim.length > 0); CASE_SRC = 'text';
+    const day = new Date().toISOString().slice(0, 10), h = _hash(text), cur = (statsLoad().find(e => e.e === 'case' && e.h === h && e.d === day) || {}).o;
+    const b = (o, l) => `<button class="btn ${cur === o ? 'sig' : 'ghost'}" data-fb="${o}" style="padding:4px 12px; font-size:12.5px">${l}</button>`;
+    out.insertAdjacentHTML('beforeend', `<div class="row" id="caseFbBar" style="margin-top:12px; align-items:center; gap:8px; border-top:1px solid var(--line); padding-top:10px">
+      <span style="font-size:13px; color:var(--ink-2)">${t('الحالة دي:','This case:')}</span>
+      ${b('ok', t('اتحلّت','Resolved'))}${b('no', t('ما اتحلّتش','Not resolved'))}${b('esc', t('اتصعّدت','Escalated'))}
+      <span style="font-size:12px; color:var(--muted)">${t('للتقرير الشهري — من غير أي نص من الرسالة.','For the monthly report — no message text is kept.')}</span></div>`);
+    out.querySelectorAll('[data-fb]').forEach(btn => btn.onclick = ()=>{ statsOutcome(text, btn.dataset.fb);
+      out.querySelectorAll('[data-fb]').forEach(x => { x.className = 'btn ' + (x === btn ? 'sig' : 'ghost'); }); toast(t('اتسجّلت','Recorded')); });
+  }
   if(sim.length){
     out.insertAdjacentHTML('afterbegin', `<div class="panel" id="caseSim" style="margin-bottom:12px; border-inline-start:4px solid var(--signal)"><div class="sec" style="border-top:0">
       <h3>${t('حالة شبيهة اتحلّت قبل كده','A similar case was resolved before')}</h3>
@@ -13577,6 +13620,108 @@ function caseAfter(text){
       <span style="font-size:12px; color:var(--muted); align-self:center">${t('بعد ما الرد ينفع مع العميل. بيتحفظ الرد وبصمة تقنية للحالة بس — مش نص الرسالة.','Once the reply worked with the customer. Only the reply and a technical fingerprint are kept — not the message text.')}</span></div>`);
     $('caseKeep').onclick = ()=>{ const r = caseKeep(text, title); toast(r === 'dup' ? t('متحفوظة قبل كده','Already saved') : r === 'ok' ? t('اتحفظت — صدّرها من الأساسيات عشان توصل للكل','Saved — export from Basics so everyone gets it') : t('مفيش رد يتحفظ','No reply to save')); if(r !== 'empty') $('caseKeep').disabled = true; };
   }
+}
+
+/* ============ قياس فايدة الأداة — من غير أي بيانات عملاء ============ */
+const STATS_KEY = 'afaqy.stats.v1';
+let CASE_SRC = 'text';          /* text | image | mail — بيتحدد قبل التحليل */
+function statsLoad(){ try{ const a = JSON.parse(localStorage.getItem(STATS_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(_){ return []; } }
+function statsSave(a){ try{ localStorage.setItem(STATS_KEY, JSON.stringify(a.slice(-3000))); }catch(_){} }
+/* بصمة رقمية للنص — بتعدّ التحليل مرة واحدة، ومفيش طريقة ترجّع النص منها */
+function _hash(s){ let h = 5381; s = String(s || ''); for(let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+/* نوع الحالة: معرّف ثابت بس */
+function caseKind(text){
+  try{
+    const a = analyzeCase(text);
+    if(a.reqCase) return 'integration_request';
+    if(a.fieldsCase) return 'platform_fields';
+    if(a.reportCase) return 'report';
+    const m = caseMatch(a);
+    if(m && m.h.score >= CASE_SURE) return 'rule:' + m.r.id;
+    return 'unknown';
+  }catch(_){ return 'unknown'; }
+}
+function caseKindLabel(k){
+  const L = {integration_request:['طلب إنتجريشن','Integration request'], platform_fields:['حقول من المنصة','Platform fields'], report:['تقارير','Reports'], unknown:['القواعد ما عرفتهاش','Not recognised by the rules']};
+  if(L[k]) return t(L[k][0], L[k][1]);
+  if(/^rule:/.test(k)){ const r = (typeof CASE_RULES !== 'undefined' ? CASE_RULES : []).find(x => x.id === k.slice(5)); if(r) return dual(r.name); }
+  return k;
+}
+/* تحليل جديد: مرة لكل نص في اليوم */
+function statsAnalysed(text, sim){
+  const day = new Date().toISOString().slice(0, 10), h = _hash(text), a = statsLoad();
+  if(a.some(e => e.e === 'case' && e.h === h && e.d === day)) return h;
+  a.push({e:'case', h, d:day, at:new Date().toISOString(), k:caseKind(text), src:CASE_SRC, sim:!!sim});
+  statsSave(a); return h;
+}
+/* النتيجة: آخر اختيار للحالة هو اللي بيتحسب */
+function statsOutcome(text, o){
+  const day = new Date().toISOString().slice(0, 10), h = _hash(text), a = statsLoad();
+  let c = a.find(e => e.e === 'case' && e.h === h && e.d === day);
+  if(!c){ c = {e:'case', h, d:day, at:new Date().toISOString(), k:caseKind(text), src:CASE_SRC, sim:false}; a.push(c); }
+  c.o = o; c.ot = new Date().toISOString(); statsSave(a);
+}
+/* التقرير: من أحداث (بتوع الجهاز ده أو ملفات الفريق) */
+function statsReport(events, month){
+  const ev = (events || []).filter(e => e && e.e === 'case' && (!month || String(e.d || '').slice(0, 7) === month));
+  const n = ev.length, by = o => ev.filter(e => e.o === o).length;
+  const ok = by('ok'), no = by('no'), esc = by('esc'), rated = ok + no + esc;
+  const kinds = {}; ev.forEach(e => { const k = kinds[e.k] = kinds[e.k] || {n:0, ok:0, no:0, esc:0}; k.n++; if(e.o) k[e.o]++; });
+  const src = {text:0, image:0, mail:0}; ev.forEach(e => { src[e.src] = (src[e.src] || 0) + 1; });
+  return { n, ok, no, esc, rated, okPct: rated ? Math.round(ok / rated * 100) : null, escPct: rated ? Math.round(esc / rated * 100) : null,
+           sim: ev.filter(e => e.sim).length, src, kinds: Object.keys(kinds).map(k => Object.assign({k}, kinds[k])).sort((x, y) => y.n - x.n),
+           engineers: [...new Set(ev.map(e => e.who).filter(Boolean))].length };
+}
+function statsMonths(events){ return [...new Set((events || []).filter(e => e.e === 'case').map(e => String(e.d || '').slice(0, 7)))].filter(Boolean).sort().reverse(); }
+let USAGE_VIEW = { month:null, team:null };   /* team: أحداث مجمّعة من ملفات الفريق */
+function renderUsage(){
+  const own = statsLoad(), all = USAGE_VIEW.team || own, months = statsMonths(all);
+  const m = USAGE_VIEW.month && months.includes(USAGE_VIEW.month) ? USAGE_VIEW.month : (months[0] || new Date().toISOString().slice(0, 7));
+  const r = statsReport(all, m), pct = v => v == null ? '—' : v + '%';
+  const tile = (v, l) => `<div style="flex:1 1 120px; padding:10px; border:1px solid var(--line); border-radius:var(--r); text-align:center"><div style="font-size:22px; font-weight:700">${v}</div><div style="font-size:12px; color:var(--muted)">${l}</div></div>`;
+  return `<div class="card" style="grid-column:1/-1" id="usageCard">
+    <h3>${t('تقرير الاستخدام','Usage report')} ${USAGE_VIEW.team ? `<span class="pill" style="background:var(--signal-soft); color:var(--signal-deep)">${t('الفريق كله','whole team')} · ${r.engineers || USAGE_VIEW.teamFiles} ${t('ملف','files')}</span>` : `<span class="pill">${t('الجهاز ده','this device')}</span>`}</h3>
+    <p style="font-size:13px; color:var(--ink-2)">${t('بيتعدّ كل تحليل في «حلّل رسالة عميل» والنتيجة اللي الموظف اختارها. مفيش نص من رسائل العملاء ولا أسماء ولا أرقام أجهزة.','Counts each analysis in Analyse a customer message and the outcome the engineer chose. No customer message text, names or device numbers are kept.')}</p>
+    <div class="row" style="margin-bottom:8px"><label style="font-size:13px">${t('الشهر','Month')} <select id="usMonth">${(months.length ? months : [m]).map(x => `<option ${x===m?'selected':''}>${x}</option>`).join('')}</select></label></div>
+    <div class="row" style="gap:8px; flex-wrap:wrap">
+      ${tile(r.n, t('تحليل','analyses'))}${tile(pct(r.okPct), t('اتحلّت من غير تصعيد','resolved without escalation'))}${tile(pct(r.escPct), t('اتصعّدت','escalated'))}${tile(r.rated + '/' + r.n, t('اتقيّمت','rated'))}${tile(r.src.mail || 0, t('من ملف إيميل','from an email file'))}${tile(r.sim, t('ظهرت لها حالة شبيهة','had a similar case shown'))}
+    </div>
+    ${r.kinds.length ? `<table class="kv" style="font-size:13px; margin-top:10px"><tr><td><b>${t('نوع الحالة','Case kind')}</b></td><td><b>${t('العدد','Count')}</b></td><td><b>${t('اتحلّت','Resolved')}</b></td><td><b>${t('ما اتحلّتش','Not resolved')}</b></td><td><b>${t('اتصعّدت','Escalated')}</b></td></tr>
+      ${r.kinds.slice(0, 12).map(k => `<tr><td>${esc(caseKindLabel(k.k))}</td><td>${k.n}</td><td>${k.ok}</td><td>${k.no}</td><td>${k.esc}</td></tr>`).join('')}</table>` : `<div class="note" style="margin-top:10px">${t('لسه مفيش تحليلات في الشهر ده.','No analyses yet this month.')}</div>`}
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="usExp">${t('صدّر التقرير','Export the report')}</button>
+      <button class="btn ghost" id="usCopy">${t('انسخ الملخص','Copy the summary')}</button>
+      <label class="btn ghost" style="cursor:pointer">${t('اجمع تقارير الفريق','Combine team reports')}<input type="file" id="usTeam" accept="application/json" multiple hidden></label>
+      ${USAGE_VIEW.team ? `<button class="btn ghost" id="usOwn">${t('ارجع لأرقام الجهاز ده','Back to this device')}</button>` : ''}
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:6px">${t('كل موظف يصدّر تقريره آخر الشهر ويبعته لمسؤول الأداة، وهو يجمعهم هنا مرة واحدة.','Each engineer exports at month end and sends it to the maintainer, who combines them here in one go.')}</div>
+  </div>`;
+}
+function statsSummary(r, m, team){
+  return [`AFAQY API Helper — ${team ? 'team' : 'device'} usage ${m}`,
+    `Analyses: ${r.n} · rated: ${r.rated} · resolved without escalation: ${r.okPct == null ? '—' : r.okPct + '%'} · escalated: ${r.escPct == null ? '—' : r.escPct + '%'}`,
+    `From an email file: ${r.src.mail || 0} · from an image: ${r.src.image || 0} · similar case shown: ${r.sim}`]
+    .concat(r.kinds.slice(0, 8).map(k => `- ${caseKindLabel(k.k)}: ${k.n} (resolved ${k.ok}, not ${k.no}, escalated ${k.esc})`)).join('\n');
+}
+function wireUsage(){
+  const card = $('usageCard'); if(!card) return;
+  const own = statsLoad(), all = USAGE_VIEW.team || own, months = statsMonths(all);
+  const m = () => $('usMonth').value || months[0] || new Date().toISOString().slice(0, 7);
+  $('usMonth').onchange = ()=>{ USAGE_VIEW.month = $('usMonth').value; renderFaq(); };
+  $('usExp').onclick = ()=>{
+    const ev = statsLoad().filter(e => String(e.d || '').slice(0, 7) === m());
+    const who = _hash(String(Math.random()) + Date.now()).slice(0, 6);
+    const blob = new Blob([JSON.stringify({kind:'afaqy-usage', v:1, month:m(), device:(localStorage.getItem('afaqy.dev.id') || (()=>{ try{ localStorage.setItem('afaqy.dev.id', who); }catch(_){} return who; })()), events:ev}, null, 1)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'afaqy-usage-' + m() + '.json'; a.click();
+  };
+  $('usCopy').onclick = ()=>copy(statsSummary(statsReport(all, m()), m(), !!USAGE_VIEW.team), t('الملخص اتنسخ','Summary copied'));
+  $('usTeam').onchange = async ev => {
+    const files = [...(ev.target.files || [])], events = []; let okF = 0;
+    for(const f of files){ try{ const j = JSON.parse(await f.text()); if(j && j.kind === 'afaqy-usage' && Array.isArray(j.events)){ okF++; j.events.forEach(e => { if(e && e.e === 'case') events.push(Object.assign({}, e, {who: String(j.device || f.name)})); }); } }catch(_){} }
+    if(!okF){ toast(t('مفيش ملف تقرير صالح','No valid report file')); return; }
+    USAGE_VIEW.team = events; USAGE_VIEW.teamFiles = okF; USAGE_VIEW.month = null; renderFaq(); toast(t(`اتجمع ${okF} ملف`, `${okF} files combined`));
+  };
+  const o = $('usOwn'); if(o) o.onclick = ()=>{ USAGE_VIEW.team = null; USAGE_VIEW.month = null; renderFaq(); };
 }
 
 function renderCase(text){
