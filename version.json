@@ -1,16 +1,16 @@
 {
-  "version": "7.4",
-  "date": "2026-10-27",
+  "version": "7.5",
+  "date": "2026-10-28",
   "notes": {
     "ar": [
-      "إيميل Outlook من غير لقطة شاشة: اسحب الإيميل من Outlook للديسكتوب (.msg) أو احفظه .eml، وارميه في «حلّل رسالة عميل» أو ارفعه بزرار «أو ارفع الإيميل». الموضوع والمرسل والنص بيتقروا بالحرف من غير OCR، وأي صورة مرفقة كبيرة (لقطة بوستمان أو كارت المنصة) بتتقرا بالقارئ المحلي وتتضاف للتذكرة. اللوجوهات الصغيرة بتتساب. شغّال من غير نت.",
-      "حالات شبيهة اتحلّت قبل كده: تحت أي رد جاهز «احفظ الحالة دي للفريق» — بيتحفظ الرد وبصمة تقنية للحالة (مسارات، أكواد أخطاء، كلمات من قاموس التوثيق) من غير نص رسالة العميل، فمفيش أسماء توصل للتصدير. ولما رسالة جديدة تشبه حالة محفوظة، «حالة شبيهة اتحلّت قبل كده» بتظهر فوق بالرد اللي نفع وزرار نسخه. كله في المتصفح.",
-      "طبقة Claude ما بقتش بتزحم الشاشة: الإعدادات مقفولة، وزراير Claude مستخبية من غير مفتاح، واقتراح «القواعد ما عرفتش» بيوجّه للريكوستات والتصعيد والحفظ."
+      "من صفوت: آخر موقع للعربية بييجي من /units/lists نفسه في last_update (lat و lng ووقت آخر سيجنال)، و/units/locations هو نقط التراك اللي بتترسم خلال فترة زمنية — شغّال بس مش في التوثيق الرسمي. اتضافت معلومة ثابتة للفريق بالكلام ده.",
+      "سبب احتفاظ الأداة بـ /units/locations اتصلّح: كان بيقول «آخر موقع لعربية» وده غلط — دلوقتي «نقط التراك خلال فترة».",
+      "رد الـ IMEI: الخطوة التانية (/units/signals) بقت بتقول صراحة إنها للفترة بس — لو العميل عايز آخر موقع، الخطوة الأولى كفاية. وفي ردود العملاء الموثّق للفترة هو /units/signals."
     ],
     "en": [
-      "Outlook email without a screenshot: drag the email from Outlook to the desktop (.msg) or save it as .eml, then drop it on Analyse a customer message or use the \"or upload the email\" button. The subject, sender and text are read verbatim without OCR, and any large image attachment (a Postman screenshot or the platform panel) goes through the local reader and is added to the ticket. Small logos are skipped. Works offline.",
-      "Similar cases resolved before: under any ready reply, \"Save this case for the team\" keeps the reply and a technical fingerprint of the case (paths, error codes, words from the documentation vocabulary) without the customer message text, so no names reach the export. When a new message resembles a saved case, \"A similar case was resolved before\" appears on top with the reply that worked and a copy button. All in the browser.",
-      "The Claude layer no longer crowds the screen: settings stay closed, the Claude buttons are hidden without a key, and the \"rules did not recognise this\" hint points to the Requests tab, escalation and saving instead."
+      "From Safwat: the last location of a vehicle comes from /units/lists itself, in last_update (lat, lng and the time of the last signal), and /units/locations returns the track points drawn over a period — it works but is not in the official documentation. A permanent team entry now says so.",
+      "The reason the tool keeps /units/locations was corrected: it said \"last location of a vehicle\", which was wrong — it now says \"track points over a period\".",
+      "IMEI reply: the second step (/units/signals) now states it is only for a period — if the customer needs the last location, step 1 is enough. In customer replies the documented request for a period is /units/signals."
     ]
   }
 }
