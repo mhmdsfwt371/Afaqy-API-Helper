@@ -1,15 +1,17 @@
 {
-  "version": "7.7",
-  "date": "2026-11-04",
+  "version": "7.8",
+  "date": "2026-11-06",
   "author": "Mohamed Safwat",
   "notes": {
     "ar": [
-      "إثبات التأليف: سطر ثابت تحت كل الصفحات «تصميم وتطوير: محمد صفوت»، واسم المؤلف في بيانات الصفحة وملف النسخة وسجل التغييرات وغلاف الدليل المطبوع والـ README، وقسم «عن الأداة» في الدليل. البناء بيوقف لو الاسم اختفى من أي واحد فيهم.",
-      "من النسخة دي، كل نشر على GitHub باسم محمد صفوت ومربوط بحسابه، وكل نسخة ليها تاج فيه بصمة SHA-256 للأداة المنشورة."
+      "سجل التأليف: ملف AUTHORS.md بيوثّق المؤلف وأول نشر (٤ أغسطس ٢٠٢٦، النسخة 1.4)، وملف .mailmap بيربط الكوميتات القديمة المنشورة باسم «Afaqy Support Tool» بمحمد صفوت — من غير ما سجل الريبو يتعدّل، فبصمات الكوميتات وتواريخها فاضلة زي ما هي.",
+      "كل نسخة قديمة ليها تاج على الكوميت الأصلي بتاعها بتاريخ نشرها الحقيقي.",
+      "تاريخ النسخة 7.7 اتصلّح لتاريخ نشرها الفعلي (٦ نوفمبر ٢٠٢٦)."
     ],
     "en": [
-      "Authorship evidence: a permanent line under every page, \"Designed & developed by Mohamed Safwat\", and the author named in the page metadata, the version file, the changelog, the printed guide cover and the README, plus an About section in the guide. The build stops if the name disappears from any of them.",
-      "From this version on, every publish to GitHub is authored by Mohamed Safwat and linked to his account, and each version gets a tag carrying the SHA-256 fingerprint of the published tool."
+      "Authorship record: AUTHORS.md documents the author and the first publish (4 August 2026, v1.4), and .mailmap maps the older commits published as \"Afaqy Support Tool\" to Mohamed Safwat — without rewriting the repository history, so every commit hash and date stays as published.",
+      "Every earlier version now has a tag on its original commit, at its real publish date.",
+      "The date of v7.7 was corrected to its actual publish date (6 November 2026)."
     ]
   }
 }
