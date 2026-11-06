@@ -1,14 +1,15 @@
 {
-  "version": "7.6",
-  "date": "2026-10-28",
+  "version": "7.7",
+  "date": "2026-11-04",
+  "author": "Mohamed Safwat",
   "notes": {
     "ar": [
-      "قياس فايدة الأداة: تحت أي تحليل في «حلّل رسالة عميل» تلات زراير — «اتحلّت» و«ما اتحلّتش» و«اتصعّدت». كل تحليل بيتعدّ مرة واحدة، وبيتسجّل نوع الحالة والنتيجة والمصدر (نص، صورة، ملف إيميل) وهل ظهرت حالة شبيهة — من غير أي نص من رسالة العميل ولا أسماء ولا أرقام أجهزة.",
-      "«تقرير الاستخدام» في الأساسيات: بالشهر — عدد التحليلات، ونسبة اللي اتحلّت من غير تصعيد، ونسبة التصعيد، وأكتر أنواع الحالات، وكام جه من ملف إيميل. «صدّر التقرير» بيطلّع ملف صغير، و«اجمع تقارير الفريق» بيقرا ملفات الفريق كلها مرة واحدة ويطلّع أرقام الفرع، و«انسخ الملخص» للإيميل أو العرض."
+      "إثبات التأليف: سطر ثابت تحت كل الصفحات «تصميم وتطوير: محمد صفوت»، واسم المؤلف في بيانات الصفحة وملف النسخة وسجل التغييرات وغلاف الدليل المطبوع والـ README، وقسم «عن الأداة» في الدليل. البناء بيوقف لو الاسم اختفى من أي واحد فيهم.",
+      "من النسخة دي، كل نشر على GitHub باسم محمد صفوت ومربوط بحسابه، وكل نسخة ليها تاج فيه بصمة SHA-256 للأداة المنشورة."
     ],
     "en": [
-      "Measuring the tool: under every analysis in Analyse a customer message there are three buttons — Resolved, Not resolved, Escalated. Each analysis is counted once, recording the case kind, the outcome, the source (text, image, email file) and whether a similar case was shown — with no customer message text, names or device numbers.",
-      "A Usage report in Basics: per month — analyses, the share resolved without escalation, the share escalated, the most common case kinds, and how many came from an email file. Export the report as a small file; Combine team reports reads every team file at once and gives the branch figures; Copy the summary for an email or a deck."
+      "Authorship evidence: a permanent line under every page, \"Designed & developed by Mohamed Safwat\", and the author named in the page metadata, the version file, the changelog, the printed guide cover and the README, plus an About section in the guide. The build stops if the name disappears from any of them.",
+      "From this version on, every publish to GitHub is authored by Mohamed Safwat and linked to his account, and each version gets a tag carrying the SHA-256 fingerprint of the published tool."
     ]
   }
 }

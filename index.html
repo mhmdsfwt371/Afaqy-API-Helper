@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Mohamed Safwat (محمد صفوت)">
+<meta name="description" content="AFAQY Integration Helper — designed and developed by Mohamed Safwat for the AFAQY Jeddah integration-support team.">
 <title>مساعد الإنتجريشن — دعم أفاقي</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#101A24">
@@ -540,6 +542,12 @@ textarea.ar{direction:rtl; text-align:right; font-family:var(--ar); font-size:14
 
 </main>
 
+<footer id="credit" style="text-align:center; padding:18px 12px 26px; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line); margin-top:24px">
+  <span data-ar="تصميم وتطوير: محمد صفوت" data-en="Designed &amp; developed by Mohamed Safwat">تصميم وتطوير: محمد صفوت</span>
+  <span aria-hidden="true"> · </span>
+  <span data-ar="أداة داخلية لفريق دعم الإنتجريشن — أفاقي جدة · منذ أغسطس 2026" data-en="Internal tool for the AFAQY Jeddah integration-support team · since August 2026">أداة داخلية لفريق دعم الإنتجريشن — أفاقي جدة · منذ أغسطس 2026</span>
+</footer>
+
 <div id="printArea"></div>
 <div class="mask" id="mask" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
   <div class="mh">
@@ -756,9 +764,23 @@ function setLang(l){
 }
 
 const DOCS = {
-  "version": "7.6",
-  "date": "2026-10-28",
+  "version": "7.7",
+  "date": "2026-11-04",
   "history": [
+    {
+      "v": "7.7",
+      "date": "2026-11-04",
+      "items": {
+        "ar": [
+          "إثبات التأليف: سطر ثابت تحت كل الصفحات «تصميم وتطوير: محمد صفوت»، واسم المؤلف في بيانات الصفحة وملف النسخة وسجل التغييرات وغلاف الدليل المطبوع والـ README، وقسم «عن الأداة» في الدليل. البناء بيوقف لو الاسم اختفى من أي واحد فيهم.",
+          "من النسخة دي، كل نشر على GitHub باسم محمد صفوت ومربوط بحسابه، وكل نسخة ليها تاج فيه بصمة SHA-256 للأداة المنشورة."
+        ],
+        "en": [
+          "Authorship evidence: a permanent line under every page, \"Designed & developed by Mohamed Safwat\", and the author named in the page metadata, the version file, the changelog, the printed guide cover and the README, plus an About section in the guide. The build stops if the name disappears from any of them.",
+          "From this version on, every publish to GitHub is authored by Mohamed Safwat and linked to his account, and each version gets a tag carrying the SHA-256 fingerprint of the published tool."
+        ]
+      }
+    },
     {
       "v": "7.6",
       "date": "2026-10-28",
@@ -2895,6 +2917,25 @@ const DOCS = {
     }
   ],
   "sections": [
+    {
+      "t": {
+        "ar": "عن الأداة",
+        "en": "About the tool"
+      },
+      "since": "7.7",
+      "b": {
+        "ar": [
+          "تصميم وتطوير: **محمد صفوت** — مدير تقني المنطقة الغربية، أفاقي جدة.",
+          "أداة داخلية لفريق دعم الإنتجريشن في أفاقي جدة. أول نشر: ٤ أغسطس ٢٠٢٦ على github.com/mhmdsfwt371/Afaqy-API-Helper، وكل نسخة من وقتها متسجّلة في سجل النسخ هنا وفي سجل الريبو.",
+          "التوثيق الرسمي اللي جوه الأداة ومعرفة التذاكر بتوع أفاقي."
+        ],
+        "en": [
+          "Designed and developed by **Mohamed Safwat** — Western Technical Manager, AFAQY Jeddah.",
+          "An internal tool for the AFAQY Jeddah integration-support team. First published 4 August 2026 at github.com/mhmdsfwt371/Afaqy-API-Helper; every version since is recorded in the version history here and in the repository history.",
+          "The official documentation and the ticket knowledge inside the tool belong to AFAQY."
+        ]
+      }
+    },
     {
       "t": {
         "ar": "تقرير الاستخدام",
